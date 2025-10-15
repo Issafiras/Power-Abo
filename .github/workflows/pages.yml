@@ -32,12 +32,6 @@ jobs:
     - name: Checkout kode
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
     - name: Valider HTML struktur
       run: |
         echo "🔍 Validerer HTML filer..."
