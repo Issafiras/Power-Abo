@@ -4,9 +4,11 @@ let appState = {
   provider: 'telenor',
   periodMonths: 6,
   household: {
-    lines: [] // { label, planType, monthlyPrice }
+    size: 1, // Antal personer i husstanden
+    currentMonthlyPrice: 0, // Hvad de betaler nu for mobil
+    lines: [] // Legacy: bruges ikke i ny version
   },
-  streams: {} // { serviceId: count }
+  streams: {} // { serviceId: true/false }
 }
 
 export function getState() {
@@ -28,6 +30,8 @@ export function reset() {
     provider: 'telenor',
     periodMonths: 6,
     household: {
+      size: 1,
+      currentMonthlyPrice: 0,
       lines: []
     },
     streams: {}

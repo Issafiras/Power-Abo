@@ -1,7 +1,7 @@
 // ui.js - UI rendering og interaktion
 
 import { getState, setState, reset, toShareLink } from './state.js'
-import { calculateAll } from './calc.js'
+import { findBestSolution } from './calc.js'
 import { STREAMING_SERVICES } from './streams.js'
 
 let currentStep = 1
@@ -48,93 +48,57 @@ function renderCurrentStep() {
 
 function renderStep1(container) {
   const state = getState()
-  const lines = state.household.lines || []
+  const householdSize = state.household.size || 1
+  const currentMonthlyPrice = state.household.currentMonthlyPrice || 0
   
   container.innerHTML = `
     <div class="step-panel">
-      <h2>Trin 1: Udbyder & Mobillinjer</h2>
-      <p class="muted">Vælg udbyder og tilføj mobillinjer for at beregne samlerabat</p>
+      <h2>Trin 1: Nuværende situation</h2>
+      <p class="muted">Fortæl os om jeres nuværende mobilsituation</p>
       
-      <div class="provider-selector">
-        <label for="provider-select">Vælg teleselskab:</label>
-        <select id="provider-select" onchange="window.changeProvider(this.value)">
-          <option value="telenor" ${state.provider === 'telenor' ? 'selected' : ''}>Telenor</option>
-          <option value="telmore" ${state.provider === 'telmore' ? 'selected' : ''}>Telmore</option>
-          <option value="cbb" ${state.provider === 'cbb' ? 'selected' : ''}>CBB</option>
-        </select>
+      <div class="input-group">
+        <label for="household-size">
+          <strong>Hvor mange personer er i husstanden?</strong>
+          <span class="muted">Inkl. børn der skal have mobil</span>
+        </label>
+        <input 
+          type="number" 
+          id="household-size" 
+          min="1" 
+          max="10" 
+          value="${householdSize}"
+          onchange="window.updateHouseholdSize(this.value)"
+          placeholder="F.eks. 4"
+        />
       </div>
       
-      <div id="lines-list" class="lines-list">
-        ${lines.map((line, idx) => `
-          <div class="line-row" data-idx="${idx}">
-            <div class="line-info">
-              <strong>${line.label}</strong>
-              <span class="muted">${line.planType}</span>
-            </div>
-            <div class="line-price">${line.monthlyPrice} kr/md</div>
-            <button class="btn-icon" onclick="window.removeLine(${idx})" aria-label="Fjern linje">×</button>
-          </div>
-        `).join('')}
+      <div class="input-group">
+        <label for="current-price">
+          <strong>Hvad betaler I i alt for mobil i dag?</strong>
+          <span class="muted">Samlet månedlig pris for alle abonnementer</span>
+        </label>
+        <div class="price-input">
+          <input 
+            type="number" 
+            id="current-price" 
+            min="0" 
+            step="10"
+            value="${currentMonthlyPrice}"
+            onchange="window.updateCurrentPrice(this.value)"
+            placeholder="F.eks. 1200"
+          />
+          <span class="price-suffix">kr/md</span>
+        </div>
       </div>
       
-      <div class="add-line-form">
-        <input type="text" id="line-label" placeholder="F.eks. Mor, Far, Barn 1..." />
-        <select id="line-plan">
-          <option value="">Vælg abonnement</option>
-          <option value="basic:199">Basic (10 GB) - 199 kr/md</option>
-          <option value="standard:299">Standard (50 GB) - 299 kr/md</option>
-          <option value="premium:399">Premium (Fri data) - 399 kr/md</option>
-        </select>
-        <button class="btn primary" onclick="window.addLine()">Tilføj linje</button>
-      </div>
-      
-      <div class="info-box" id="provider-info">
-        <strong>💡 Tips:</strong> Minimum 2 linjer giver samlerabat
+      <div class="info-box">
+        <strong>💡 Tips:</strong> 
+        ${householdSize > 1 
+          ? `Med ${householdSize} personer kan I få en god samlerabat!`
+          : 'Jo flere personer, desto større samlerabat kan I opnå'
+        }
       </div>
     </div>
-  `
-  
-  updateProviderInfo()
-}
-
-function updateProviderInfo() {
-  const state = getState()
-  const infoBox = document.getElementById('provider-info')
-  
-  if (!infoBox) return
-  
-  const rabatter = {
-    telenor: [
-      '2 linjer: 100 kr/md rabat (600 kr/6 mdr)',
-      '3 linjer: 150 kr/md rabat (900 kr/6 mdr)',
-      '4+ linjer: 200 kr/md rabat (1200 kr/6 mdr)'
-    ],
-    telmore: [
-      '2 linjer: 80 kr/md rabat (480 kr/6 mdr)',
-      '3 linjer: 130 kr/md rabat (780 kr/6 mdr)',
-      '4+ linjer: 180 kr/md rabat (1080 kr/6 mdr)'
-    ],
-    cbb: [
-      '2 linjer: 70 kr/md rabat (420 kr/6 mdr)',
-      '3 linjer: 120 kr/md rabat (720 kr/6 mdr)',
-      '4+ linjer: 160 kr/md rabat (960 kr/6 mdr)'
-    ]
-  }
-  
-  const providerNames = {
-    telenor: 'Telenor',
-    telmore: 'Telmore',
-    cbb: 'CBB'
-  }
-  
-  const info = rabatter[state.provider] || []
-  const name = providerNames[state.provider] || state.provider
-  
-  infoBox.innerHTML = `
-    <strong>💡 ${name} samlerabat:</strong>
-    <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
-      ${info.map(r => `<li>${r}</li>`).join('')}
-    </ul>
   `
 }
 
@@ -145,26 +109,26 @@ function renderStep2(container) {
   container.innerHTML = `
     <div class="step-panel">
       <h2>Trin 2: Streaming-tjenester</h2>
-      <p class="muted">Vælg hvilke tjenester husstanden abonnerer på</p>
+      <p class="muted">Hvilke streaming-tjenester har I i dag?</p>
       
       <div class="streaming-grid">
         ${STREAMING_SERVICES.map(service => {
-          const count = streams[service.id] || 0
+          const selected = streams[service.id] || false
           return `
-            <div class="stream-chip ${count > 0 ? 'selected' : ''}" 
+            <div class="stream-chip ${selected ? 'selected' : ''}" 
                  data-service="${service.id}"
-                 onclick="window.toggleStream('${service.id}')">
+                 onclick="window.toggleStreamSimple('${service.id}')">
               <div class="stream-icon" style="background: ${service.color}">${service.icon}</div>
               <div class="stream-label">${service.label}</div>
               <div class="stream-price">${service.monthlyPrice} kr/md</div>
-              ${count > 0 ? `<div class="stream-count">${count}×</div>` : ''}
+              ${selected ? '<div class="stream-badge">✓</div>' : ''}
             </div>
           `
         }).join('')}
       </div>
       
       <div class="info-box">
-        <strong>💡 Tips:</strong> Klik flere gange for at tilføje flere abonnementer af samme tjeneste
+        <strong>💡 Tips:</strong> Vælg alle de tjenester I har i dag - vi finder den bedste løsning
       </div>
     </div>
   `
@@ -172,68 +136,118 @@ function renderStep2(container) {
 
 function renderStep3(container) {
   const state = getState()
-  const result = calculateAll(state)
-  const { summary, meetsMinSavings, suggestions, providerBenefits, streamsData } = result
+  const result = findBestSolution(state)
+  
+  if (!result) {
+    container.innerHTML = `
+      <div class="step-panel">
+        <h2>Trin 3: Jeres løsning</h2>
+        <div class="info-box">
+          <strong>⚠️ Mangler information</strong>
+          <p>Gå tilbage og udfyld antal personer og nuværende pris.</p>
+        </div>
+      </div>
+    `
+    return
+  }
+  
+  const { current, recommended, savings, provider } = result
+  const isSaving = savings.total6m > 0
   
   container.innerHTML = `
     <div class="step-panel" id="result-panel">
-      <h2>Resultat: 6-måneders oversigt</h2>
+      <h2>Jeres løsning: ${provider.name}</h2>
+      <p class="muted">Baseret på ${state.household.size} personer</p>
       
-      <div class="result-card ${meetsMinSavings ? 'success' : 'warning'}">
-        <div class="result-header">
-          <h3>Total omkostning (6 måneder)</h3>
-          <div class="result-total">${summary.total6m.toLocaleString('da-DK')} kr</div>
-        </div>
-        
-        <div class="result-breakdown">
-          <div class="result-row">
-            <span>Mobil (før rabat):</span>
-            <span>${result.baseTotal6m.toLocaleString('da-DK')} kr</span>
-          </div>
-          
-          ${providerBenefits.totalDiscount6m > 0 ? `
-            <div class="result-row discount">
-              <span>${providerBenefits.providerName || state.provider} samlerabat (${providerBenefits.tier}):</span>
-              <span>-${providerBenefits.totalDiscount6m.toLocaleString('da-DK')} kr</span>
+      <!-- Sammenligning: Nu vs. Vores løsning -->
+      <div class="comparison-container">
+        <div class="comparison-card current">
+          <h3>I dag</h3>
+          <div class="comparison-price">${current.monthly.toLocaleString('da-DK')} kr/md</div>
+          <div class="comparison-breakdown">
+            <div class="comparison-row">
+              <span>Mobil:</span>
+              <span>${state.household.currentMonthlyPrice || 0} kr/md</span>
             </div>
-          ` : ''}
-          
-          <div class="result-row">
-            <span>Mobil (efter rabat):</span>
-            <span>${result.totalAfterDiscount6m.toLocaleString('da-DK')} kr</span>
-          </div>
-          
-          ${streamsData.total6m > 0 ? `
-            <div class="result-row">
-              <span>Streaming (${streamsData.selected.length} tjenester):</span>
-              <span>${streamsData.total6m.toLocaleString('da-DK')} kr</span>
+            <div class="comparison-row">
+              <span>Streaming:</span>
+              <span>${current.streamingMonthly} kr/md</span>
             </div>
-          ` : ''}
-        </div>
-        
-        <div class="result-savings ${meetsMinSavings ? 'good' : 'bad'}">
-          <strong>Total besparelse (6 mdr):</strong>
-          <span class="savings-amount">${summary.totalSavings6m.toLocaleString('da-DK')} kr</span>
-          ${meetsMinSavings 
-            ? '<span class="badge success">✓ Minimum 500 kr opnået</span>'
-            : '<span class="badge warning">⚠ Minimum 500 kr ikke nået</span>'
-          }
-        </div>
-        
-        ${!meetsMinSavings && suggestions.length > 0 ? `
-          <div class="suggestions">
-            <strong>Forslag til forbedring:</strong>
-            <ul>
-              ${suggestions.map(s => `<li>${s}</li>`).join('')}
-            </ul>
           </div>
-        ` : ''}
+          <div class="comparison-total">
+            <strong>Total (6 mdr):</strong>
+            <span>${current.total6m.toLocaleString('da-DK')} kr</span>
+          </div>
+        </div>
+        
+        <div class="comparison-arrow ${isSaving ? 'saving' : ''}">
+          ${isSaving ? '→' : '='}
+        </div>
+        
+        <div class="comparison-card recommended ${isSaving ? 'highlight' : ''}">
+          <h3>Vores løsning</h3>
+          <div class="comparison-price">${recommended.monthly.toLocaleString('da-DK')} kr/md</div>
+          <div class="comparison-breakdown">
+            <div class="comparison-row">
+              <span>Mobil (${state.household.size} linjer):</span>
+              <span>${recommended.mobileBeforeDiscount} kr/md</span>
+            </div>
+            <div class="comparison-row discount">
+              <span>${provider.name} samlerabat:</span>
+              <span>-${recommended.discount} kr/md</span>
+            </div>
+            <div class="comparison-row">
+              <span>Mobil (efter rabat):</span>
+              <span>${recommended.mobileAfterDiscount} kr/md</span>
+            </div>
+            <div class="comparison-row">
+              <span>Streaming:</span>
+              <span>${recommended.streamingMonthly} kr/md</span>
+            </div>
+          </div>
+          <div class="comparison-total">
+            <strong>Total (6 mdr):</strong>
+            <span>${recommended.total6m.toLocaleString('da-DK')} kr</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Besparelse -->
+      <div class="savings-card ${isSaving ? 'positive' : 'neutral'}">
+        ${isSaving ? `
+          <div class="savings-header">
+            <span class="savings-icon">🎉</span>
+            <h3>I sparer ${savings.monthly.toLocaleString('da-DK')} kr/md</h3>
+          </div>
+          <div class="savings-total">
+            <strong>Total besparelse over 6 måneder:</strong>
+            <span class="savings-amount">${savings.total6m.toLocaleString('da-DK')} kr</span>
+          </div>
+          <div class="badge success">✓ Minimum 500 kr opnået</div>
+        ` : `
+          <div class="savings-header">
+            <h3>Samme pris med vores løsning</h3>
+          </div>
+          <p class="muted">I får samme pris, men med vores service og support!</p>
+        `}
+      </div>
+      
+      <!-- Løsningsdetaljer -->
+      <div class="solution-details">
+        <h3>Løsningen indeholder:</h3>
+        <ul class="solution-list">
+          <li><strong>${state.household.size} mobilabonnementer</strong> (${recommended.planType})</li>
+          <li><strong>${provider.name} samlerabat:</strong> ${recommended.discount} kr/md</li>
+          ${recommended.selectedStreams.length > 0 ? `
+            <li><strong>Streaming-tjenester:</strong> ${recommended.selectedStreams.map(s => s.label).join(', ')}</li>
+          ` : ''}
+        </ul>
       </div>
       
       <div class="result-actions">
-        <button class="btn" onclick="window.printResult()">🖨️ Print</button>
+        <button class="btn primary" onclick="window.printResult()">🖨️ Print tilbud</button>
         <button class="btn" onclick="window.shareResult()">📤 Del</button>
-        <button class="btn" onclick="window.resetApp()">🔄 Ny beregning</button>
+        <button class="btn" onclick="window.resetApp()">🔄 Ny kunde</button>
       </div>
     </div>
   `
@@ -282,56 +296,25 @@ function setupEventListeners() {
 }
 
 // Global funktioner til at manipulere state (kaldes fra onclick i HTML)
-window.changeProvider = function(provider) {
-  setState({ provider })
+window.updateHouseholdSize = function(size) {
+  const numSize = parseInt(size, 10)
+  if (numSize < 1) return
+  
+  setState({ household: { ...getState().household, size: numSize } })
   render()
 }
 
-window.addLine = function() {
-  const labelInput = document.getElementById('line-label')
-  const planSelect = document.getElementById('line-plan')
-  
-  const label = labelInput.value.trim()
-  const planValue = planSelect.value
-  
-  if (!label || !planValue) {
-    alert('Udfyld både navn og abonnement')
-    return
-  }
-  
-  const [planType, price] = planValue.split(':')
-  const state = getState()
-  const lines = [...state.household.lines, {
-    label,
-    planType: planType.charAt(0).toUpperCase() + planType.slice(1),
-    monthlyPrice: parseInt(price, 10)
-  }]
-  
-  setState({ household: { lines } })
-  
-  labelInput.value = ''
-  planSelect.value = ''
-  
-  render()
+window.updateCurrentPrice = function(price) {
+  const numPrice = parseInt(price, 10) || 0
+  setState({ household: { ...getState().household, currentMonthlyPrice: numPrice } })
 }
 
-window.removeLine = function(idx) {
-  const state = getState()
-  const lines = state.household.lines.filter((_, i) => i !== idx)
-  setState({ household: { lines } })
-  render()
-}
-
-window.toggleStream = function(serviceId) {
+window.toggleStreamSimple = function(serviceId) {
   const state = getState()
   const streams = { ...state.streams }
   
-  streams[serviceId] = (streams[serviceId] || 0) + 1
-  
-  // Max 5 af samme tjeneste
-  if (streams[serviceId] > 5) {
-    streams[serviceId] = 0
-  }
+  // Toggle on/off
+  streams[serviceId] = !streams[serviceId]
   
   setState({ streams })
   render()
