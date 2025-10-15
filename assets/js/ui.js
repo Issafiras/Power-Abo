@@ -52,8 +52,17 @@ function renderStep1(container) {
   
   container.innerHTML = `
     <div class="step-panel">
-      <h2>Trin 1: Mobillinjer</h2>
-      <p class="muted">Tilføj mobillinjer til husstanden for at beregne Telenor samlerabat</p>
+      <h2>Trin 1: Udbyder & Mobillinjer</h2>
+      <p class="muted">Vælg udbyder og tilføj mobillinjer for at beregne samlerabat</p>
+      
+      <div class="provider-selector">
+        <label for="provider-select">Vælg teleselskab:</label>
+        <select id="provider-select" onchange="window.changeProvider(this.value)">
+          <option value="telenor" ${state.provider === 'telenor' ? 'selected' : ''}>Telenor</option>
+          <option value="telmore" ${state.provider === 'telmore' ? 'selected' : ''}>Telmore</option>
+          <option value="cbb" ${state.provider === 'cbb' ? 'selected' : ''}>CBB</option>
+        </select>
+      </div>
       
       <div id="lines-list" class="lines-list">
         ${lines.map((line, idx) => `
@@ -79,10 +88,53 @@ function renderStep1(container) {
         <button class="btn primary" onclick="window.addLine()">Tilføj linje</button>
       </div>
       
-      <div class="info-box">
-        <strong>💡 Tips:</strong> Minimum 2 linjer giver Telenor samlerabat
+      <div class="info-box" id="provider-info">
+        <strong>💡 Tips:</strong> Minimum 2 linjer giver samlerabat
       </div>
     </div>
+  `
+  
+  updateProviderInfo()
+}
+
+function updateProviderInfo() {
+  const state = getState()
+  const infoBox = document.getElementById('provider-info')
+  
+  if (!infoBox) return
+  
+  const rabatter = {
+    telenor: [
+      '2 linjer: 100 kr/md rabat (600 kr/6 mdr)',
+      '3 linjer: 150 kr/md rabat (900 kr/6 mdr)',
+      '4+ linjer: 200 kr/md rabat (1200 kr/6 mdr)'
+    ],
+    telmore: [
+      '2 linjer: 80 kr/md rabat (480 kr/6 mdr)',
+      '3 linjer: 130 kr/md rabat (780 kr/6 mdr)',
+      '4+ linjer: 180 kr/md rabat (1080 kr/6 mdr)'
+    ],
+    cbb: [
+      '2 linjer: 70 kr/md rabat (420 kr/6 mdr)',
+      '3 linjer: 120 kr/md rabat (720 kr/6 mdr)',
+      '4+ linjer: 160 kr/md rabat (960 kr/6 mdr)'
+    ]
+  }
+  
+  const providerNames = {
+    telenor: 'Telenor',
+    telmore: 'Telmore',
+    cbb: 'CBB'
+  }
+  
+  const info = rabatter[state.provider] || []
+  const name = providerNames[state.provider] || state.provider
+  
+  infoBox.innerHTML = `
+    <strong>💡 ${name} samlerabat:</strong>
+    <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+      ${info.map(r => `<li>${r}</li>`).join('')}
+    </ul>
   `
 }
 
@@ -141,7 +193,7 @@ function renderStep3(container) {
           
           ${providerBenefits.totalDiscount6m > 0 ? `
             <div class="result-row discount">
-              <span>Telenor samlerabat (${providerBenefits.tier}):</span>
+              <span>${providerBenefits.providerName || state.provider} samlerabat (${providerBenefits.tier}):</span>
               <span>-${providerBenefits.totalDiscount6m.toLocaleString('da-DK')} kr</span>
             </div>
           ` : ''}
@@ -230,6 +282,11 @@ function setupEventListeners() {
 }
 
 // Global funktioner til at manipulere state (kaldes fra onclick i HTML)
+window.changeProvider = function(provider) {
+  setState({ provider })
+  render()
+}
+
 window.addLine = function() {
   const labelInput = document.getElementById('line-label')
   const planSelect = document.getElementById('line-plan')

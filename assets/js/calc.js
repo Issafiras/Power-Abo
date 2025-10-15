@@ -45,7 +45,8 @@ export function calculateAll(state) {
     }
     
     if (monthlyDiscount === 0) {
-      suggestions.push('Telenor samlerabat kræver mindst 2 linjer')
+      const providerName = providerBenefits.providerName || state.provider
+      suggestions.push(`${providerName} samlerabat kræver mindst 2 linjer`)
     }
   }
   
