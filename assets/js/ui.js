@@ -4,6 +4,8 @@ import { getState, setState, reset, toShareLink } from './state.js'
 import { findBestSolution, getSmartRecommendations } from './calc.js'
 import { STREAMING_SERVICES } from './streams.js'
 import { PLANS } from './plans.js'
+import { generateComparisonChart, generateMonthlyTrendChart, generateSavingsBreakdown } from './charts.js'
+import { findTopSolutions, compareProviders } from './compare.js'
 
 let currentStep = 1
 
@@ -334,6 +336,108 @@ function renderStep3(container) {
         </ul>
       </div>
       
+      <!-- Kontant rabat -->
+      <div class="cash-rebate-section">
+        <div class="section-header">
+          <h3>💰 Kontant rabat ved skifte (valgfrit)</h3>
+          <button class="btn-toggle ${state.cashRebate > 0 ? 'active' : ''}" onclick="window.toggleRebateInput()">
+            ${state.cashRebate > 0 ? 'Skjul' : 'Tilføj rabat'}
+          </button>
+        </div>
+        
+        <div id="rebate-input" class="rebate-input" style="display: ${state.cashRebate > 0 ? 'block' : 'none'}">
+          <div class="input-group">
+            <label for="cash-rebate">
+              <strong>Engangsbeløb ved skifte</strong>
+              <span class="muted">Dette beløb trækkes fra den samlede 6-måneders pris</span>
+            </label>
+            <div class="price-input">
+              <input 
+                type="number" 
+                id="cash-rebate" 
+                min="0" 
+                step="50"
+                value="${state.cashRebate || 0}"
+                onchange="window.updateCashRebate(this.value)"
+                placeholder="F.eks. 500"
+              />
+              <span class="price-suffix">kr</span>
+            </div>
+          </div>
+          
+          ${state.cashRebate > 0 ? `
+            <div class="rebate-impact">
+              <div class="rebate-row">
+                <span>Total før rabat:</span>
+                <span>${recommended.total6m.toLocaleString('da-DK')} kr</span>
+              </div>
+              <div class="rebate-row discount">
+                <span>Kontant rabat:</span>
+                <span>-${state.cashRebate.toLocaleString('da-DK')} kr</span>
+              </div>
+              <div class="rebate-row total">
+                <span><strong>Total efter rabat:</strong></span>
+                <span><strong>${(recommended.total6m - state.cashRebate).toLocaleString('da-DK')} kr</strong></span>
+              </div>
+              <div class="rebate-row savings">
+                <span><strong>Total besparelse:</strong></span>
+                <span class="savings-highlight"><strong>${(savings.total6m + state.cashRebate).toLocaleString('da-DK')} kr</strong></span>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+      
+      <!-- Visualiseringer og sammenligning -->
+      <div class="advanced-actions">
+        <button class="btn ${state.showCharts ? 'active' : ''}" onclick="window.toggleCharts()">
+          📊 ${state.showCharts ? 'Skjul' : 'Vis'} grafer
+        </button>
+        <button class="btn ${state.showComparison ? 'active' : ''}" onclick="window.toggleComparison()">
+          🔍 ${state.showComparison ? 'Skjul' : 'Sammenlign'} udbydere
+        </button>
+      </div>
+      
+      ${state.showCharts ? `
+        <div class="charts-section">
+          <h3>📊 Visualiseringer</h3>
+          
+          <div class="chart-grid">
+            <div class="chart-card">
+              <h4>Sammenligning (6 måneder)</h4>
+              ${generateComparisonChart(current.total6m, recommended.total6m, savings.total6m)}
+            </div>
+            
+            <div class="chart-card">
+              <h4>Månedlig trend</h4>
+              ${generateMonthlyTrendChart(current.monthly, recommended.monthly)}
+            </div>
+          </div>
+          
+          ${result.hasStreamingIncluded && current.streamingMonthly > 0 ? `
+            <div class="chart-card">
+              <h4>Besparelse fordeling</h4>
+              ${generateSavingsBreakdown(
+                savings.monthly, 
+                result.hasStreamingIncluded ? current.streamingMonthly : 0,
+                state.cashRebate / 6
+              )}
+            </div>
+          ` : ''}
+        </div>
+      ` : ''}
+      
+      ${state.showComparison ? `
+        <div class="comparison-section">
+          <h3>🔍 Sammenlign alle udbydere</h3>
+          <p class="muted">Se hvordan Telenor, Telmore og CBB står i forhold til hinanden</p>
+          
+          <div id="provider-comparison" class="provider-comparison-grid">
+            ${renderProviderComparison(state)}
+          </div>
+        </div>
+      ` : ''}
+      
       <div class="result-actions">
         <button class="btn primary" onclick="window.printResult()">🖨️ Print tilbud</button>
         <button class="btn" onclick="window.shareResult()">📤 Del</button>
@@ -341,6 +445,55 @@ function renderStep3(container) {
       </div>
     </div>
   `
+}
+
+function renderProviderComparison(state) {
+  const selectedStreams = STREAMING_SERVICES.filter(s => state.streams[s.id])
+  const comparison = compareProviders(state.household.size, state.household.currentMonthlyPrice, selectedStreams)
+  
+  return comparison.map(prov => `
+    <div class="provider-card ${prov.rank === 1 ? 'winner' : ''}" style="border-color: ${prov.color}">
+      ${prov.rank === 1 ? '<div class="winner-badge">🏆 BEDST</div>' : ''}
+      ${prov.rank === 2 ? '<div class="rank-badge">🥈 #2</div>' : ''}
+      ${prov.rank === 3 ? '<div class="rank-badge">🥉 #3</div>' : ''}
+      
+      <div class="provider-header" style="background: linear-gradient(135deg, ${prov.color}, rgba(255,255,255,0.1))">
+        <h4>${prov.provider}</h4>
+      </div>
+      
+      <div class="provider-body">
+        <div class="provider-plan">
+          <strong>${prov.solution.plan?.name || 'Familie-pakke'}</strong>
+          ${prov.solution.plan?.introPrice ? `
+            <div class="intro-price">Intro: ${prov.solution.plan.introPrice} kr/md</div>
+          ` : ''}
+        </div>
+        
+        <div class="provider-price">
+          ${prov.solution.totalMonthly.toLocaleString('da-DK')} kr/md
+        </div>
+        
+        <div class="provider-savings ${prov.solution.savingsMonthly > 0 ? 'positive' : 'negative'}">
+          ${prov.solution.savingsMonthly > 0 ? '↓' : '↑'} 
+          ${Math.abs(prov.solution.savingsMonthly).toLocaleString('da-DK')} kr/md
+        </div>
+        
+        <div class="provider-total">
+          <strong>6 mdr:</strong> ${prov.solution.total6m.toLocaleString('da-DK')} kr
+        </div>
+        
+        <div class="provider-features">
+          ${prov.solution.hasStreaming ? '<span class="feature-badge">📺 Streaming inkl.</span>' : ''}
+          ${prov.solution.type === 'family' ? '<span class="feature-badge">👨‍👩‍👧‍👦 Familie</span>' : ''}
+          ${prov.solution.plan?.cbbMix ? '<span class="feature-badge">🎬 CBB MIX</span>' : ''}
+        </div>
+        
+        <div class="provider-earnings">
+          <span class="muted">Indtjening:</span> ${prov.solution.earnings.toLocaleString('da-DK')} kr
+        </div>
+      </div>
+    </div>
+  `).join('')
 }
 
 function updateNavButtons() {
@@ -432,6 +585,32 @@ window.resetApp = function() {
     currentStep = 1
     render()
   }
+}
+
+window.toggleRebateInput = function() {
+  const state = getState()
+  if (state.cashRebate > 0) {
+    setState({ cashRebate: 0 })
+  }
+  render()
+}
+
+window.updateCashRebate = function(value) {
+  const rebate = parseInt(value, 10) || 0
+  setState({ cashRebate: rebate })
+  render()
+}
+
+window.toggleCharts = function() {
+  const state = getState()
+  setState({ showCharts: !state.showCharts })
+  render()
+}
+
+window.toggleComparison = function() {
+  const state = getState()
+  setState({ showComparison: !state.showComparison })
+  render()
 }
 
 export function getCurrentStep() {

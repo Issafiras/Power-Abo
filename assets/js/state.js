@@ -8,7 +8,10 @@ let appState = {
     currentMonthlyPrice: 0, // Hvad de betaler nu for mobil
     lines: [] // Legacy: bruges ikke i ny version
   },
-  streams: {} // { serviceId: true/false }
+  streams: {}, // { serviceId: true/false }
+  cashRebate: 0, // Kontant rabat ved skifte (engangsbeløb)
+  showComparison: false, // Vis sammenligning af alle udbydere
+  showCharts: false // Vis grafer og visualiseringer
 }
 
 export function getState() {
@@ -34,7 +37,10 @@ export function reset() {
       currentMonthlyPrice: 0,
       lines: []
     },
-    streams: {}
+    streams: {},
+    cashRebate: 0,
+    showComparison: false,
+    showCharts: false
   }
 }
 
