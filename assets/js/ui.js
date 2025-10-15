@@ -3,6 +3,7 @@
 import { getState, setState, reset, toShareLink } from './state.js'
 import { findBestSolution } from './calc.js'
 import { STREAMING_SERVICES } from './streams.js'
+import { PLANS } from './plans.js'
 
 let currentStep = 1
 
@@ -167,11 +168,11 @@ function renderStep3(container) {
           <div class="comparison-breakdown">
             <div class="comparison-row">
               <span>Mobil:</span>
-              <span>${state.household.currentMonthlyPrice || 0} kr/md</span>
+              <span>${current.mobileMonthly.toLocaleString('da-DK')} kr/md</span>
             </div>
             <div class="comparison-row">
               <span>Streaming:</span>
-              <span>${current.streamingMonthly} kr/md</span>
+              <span>${current.streamingMonthly.toLocaleString('da-DK')} kr/md</span>
             </div>
           </div>
           <div class="comparison-total">
@@ -185,25 +186,41 @@ function renderStep3(container) {
         </div>
         
         <div class="comparison-card recommended ${isSaving ? 'highlight' : ''}">
-          <h3>Vores løsning</h3>
+          <h3>Vores løsning - ${provider.name}</h3>
           <div class="comparison-price">${recommended.monthly.toLocaleString('da-DK')} kr/md</div>
           <div class="comparison-breakdown">
-            <div class="comparison-row">
-              <span>Mobil (${state.household.size} linjer):</span>
-              <span>${recommended.mobileBeforeDiscount} kr/md</span>
-            </div>
-            <div class="comparison-row discount">
-              <span>${provider.name} samlerabat:</span>
-              <span>-${recommended.discount} kr/md</span>
-            </div>
-            <div class="comparison-row">
-              <span>Mobil (efter rabat):</span>
-              <span>${recommended.mobileAfterDiscount} kr/md</span>
-            </div>
-            <div class="comparison-row">
-              <span>Streaming:</span>
-              <span>${recommended.streamingMonthly} kr/md</span>
-            </div>
+            ${recommended.details.isFamilyPackage ? `
+              <div class="comparison-row">
+                <span>1× ${recommended.details.streamingPlan.brand} ${recommended.details.streamingPlan.name}:</span>
+                <span>${recommended.details.streamingPlan.price} kr/md</span>
+              </div>
+              <div class="comparison-row">
+                <span>${state.household.size - 1}× ${recommended.details.nonStreamingPlan.brand} ${recommended.details.nonStreamingPlan.name}:</span>
+                <span>${recommended.details.nonStreamingPlan.price * (state.household.size - 1)} kr/md</span>
+              </div>
+              ${recommended.details.familyDiscount > 0 ? `
+                <div class="comparison-row discount">
+                  <span>Telenor familiepris rabat:</span>
+                  <span>-${recommended.details.familyDiscount} kr/md</span>
+                </div>
+              ` : ''}
+            ` : `
+              <div class="comparison-row">
+                <span>${state.household.size}× ${recommended.details.plan.brand} ${recommended.details.plan.name}:</span>
+                <span>${recommended.mobileBeforeDiscount.toLocaleString('da-DK')} kr/md</span>
+              </div>
+            `}
+            ${result.hasStreamingIncluded ? `
+              <div class="comparison-row" style="color: var(--good);">
+                <span>Streaming inkluderet ✓</span>
+                <span>0 kr/md</span>
+              </div>
+            ` : recommended.streamingMonthly > 0 ? `
+              <div class="comparison-row">
+                <span>Streaming (ikke inkl.):</span>
+                <span>${recommended.streamingMonthly.toLocaleString('da-DK')} kr/md</span>
+              </div>
+            ` : ''}
           </div>
           <div class="comparison-total">
             <strong>Total (6 mdr):</strong>
@@ -223,23 +240,49 @@ function renderStep3(container) {
             <strong>Total besparelse over 6 måneder:</strong>
             <span class="savings-amount">${savings.total6m.toLocaleString('da-DK')} kr</span>
           </div>
-          <div class="badge success">✓ Minimum 500 kr opnået</div>
+          ${result.meetsMinSavings 
+            ? '<div class="badge success">✓ Minimum 500 kr opnået</div>'
+            : '<div class="badge warning">⚠ Under 500 kr minimum</div>'
+          }
         ` : `
           <div class="savings-header">
             <h3>Samme pris med vores løsning</h3>
           </div>
           <p class="muted">I får samme pris, men med vores service og support!</p>
         `}
+        ${result.hasStreamingIncluded && current.streamingMonthly > 0 ? `
+          <div style="margin-top: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: var(--radius); border: 1px solid var(--good);">
+            <strong style="color: var(--good);">💰 Bonus besparelse:</strong>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">
+              Streaming er inkluderet! I sparer yderligere ${current.streamingMonthly.toLocaleString('da-DK')} kr/md 
+              (${(current.streamingMonthly * 6).toLocaleString('da-DK')} kr over 6 mdr)
+            </p>
+          </div>
+        ` : ''}
       </div>
       
       <!-- Løsningsdetaljer -->
       <div class="solution-details">
         <h3>Løsningen indeholder:</h3>
         <ul class="solution-list">
-          <li><strong>${state.household.size} mobilabonnementer</strong> (${recommended.planType})</li>
-          <li><strong>${provider.name} samlerabat:</strong> ${recommended.discount} kr/md</li>
-          ${recommended.selectedStreams.length > 0 ? `
-            <li><strong>Streaming-tjenester:</strong> ${recommended.selectedStreams.map(s => s.label).join(', ')}</li>
+          ${recommended.details.isFamilyPackage ? `
+            <li><strong>Smart familiepakke for ${state.household.size} personer</strong></li>
+            <li>1× ${recommended.details.streamingPlan.brand} ${recommended.details.streamingPlan.name} (med streaming)</li>
+            <li>${state.household.size - 1}× ${recommended.details.nonStreamingPlan.brand} ${recommended.details.nonStreamingPlan.name}</li>
+            ${recommended.details.isTelenorFamily ? `
+              <li><strong>Telenor familiepris:</strong> ${recommended.details.familyDiscount} kr/md rabat</li>
+            ` : ''}
+          ` : `
+            <li><strong>${state.household.size}× ${recommended.details.plan.brand} ${recommended.details.plan.name}</strong></li>
+            ${recommended.details.plan.introPrice ? `
+              <li><strong>Startpris:</strong> ${recommended.details.plan.introPrice} kr/md i ${recommended.details.plan.introMonths} måneder</li>
+            ` : ''}
+            <li><strong>Features:</strong> ${recommended.details.plan.features.join(', ')}</li>
+          `}
+          ${result.hasStreamingIncluded ? `
+            <li style="color: var(--good);"><strong>✓ Streaming inkluderet!</strong> Sparer ${current.streamingMonthly.toLocaleString('da-DK')} kr/md</li>
+          ` : recommended.selectedStreams.length > 0 ? `
+            <li><strong>Streaming-tjenester (ikke inkl.):</strong> ${recommended.selectedStreams.map(s => s.label).join(', ')}</li>
           ` : ''}
         </ul>
       </div>

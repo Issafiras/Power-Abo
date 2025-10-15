@@ -2,17 +2,9 @@
 
 import { computeProviderBenefits, computeBaseMonthlyCost, PROVIDERS } from './providers.js'
 import { computeStreamsTotal, STREAMING_SERVICES } from './streams.js'
+import { PLANS, getStreamingPlans, getNonStreamingPlans } from './plans.js'
 
 const MIN_SAVINGS = 500 // Minimum besparelse over 6 måneder
-
-// Standardpriser for abonnementer baseret på husstandsstørrelse
-const PLAN_PRICING = {
-  1: { price: 299, type: 'Standard (50 GB)' },
-  2: { price: 299, type: 'Standard (50 GB)' },
-  3: { price: 299, type: 'Standard (50 GB)' },
-  4: { price: 299, type: 'Standard (50 GB)' },
-  default: { price: 299, type: 'Standard (50 GB)' }
-}
 
 // Find den bedste løsning for kunden baseret på deres nuværende situation
 export function findBestSolution(state) {
@@ -25,72 +17,224 @@ export function findBestSolution(state) {
   // Beregn nuværende situation
   const selectedStreams = STREAMING_SERVICES.filter(s => streams[s.id])
   const currentStreamingMonthly = selectedStreams.reduce((sum, s) => sum + s.monthlyPrice, 0)
-  const currentMonthly = household.currentMonthlyPrice + currentStreamingMonthly
-  const currentTotal6m = currentMonthly * periodMonths
+  const currentMonthly = household.currentMonthlyPrice
+  const currentTotal = currentMonthly + currentStreamingMonthly
+  const currentTotal6m = currentTotal * periodMonths
   
-  // Find bedste udbyder (den med højest rabat)
-  const providers = ['telenor', 'telmore', 'cbb']
-  let bestProvider = null
-  let bestSavings = -Infinity
+  // Find optimal løsning
+  const optimalSolution = findOptimalSolution(
+    household.size,
+    currentMonthly,
+    currentStreamingMonthly,
+    selectedStreams.length
+  )
   
-  for (const providerId of providers) {
-    const tempState = {
-      ...state,
-      provider: providerId,
-      household: {
-        ...household,
-        lines: Array(household.size).fill({ monthlyPrice: 299 })
-      }
-    }
-    
-    const benefits = computeProviderBenefits(tempState)
-    const savings = benefits.monthlyDiscount
-    
-    if (savings > bestSavings) {
-      bestSavings = savings
-      bestProvider = {
-        id: providerId,
-        name: benefits.providerName,
-        discount: savings,
-        tier: benefits.tier
-      }
-    }
+  if (!optimalSolution) {
+    return null
   }
   
-  // Beregn vores anbefalede løsning
-  const plan = PLAN_PRICING[household.size] || PLAN_PRICING.default
-  const mobileBeforeDiscount = plan.price * household.size
-  const mobileAfterDiscount = mobileBeforeDiscount - bestProvider.discount
-  const recommendedMonthly = mobileAfterDiscount + currentStreamingMonthly
-  const recommendedTotal6m = recommendedMonthly * periodMonths
+  // Beregn totaler med intro-priser
+  let our6m = 0
+  if (optimalSolution.isFamilyPackage) {
+    // Familie-pakke: 1 streaming + resten non-streaming
+    our6m += calculate6MonthCost(optimalSolution.streamingPlan, 1)
+    our6m += calculate6MonthCost(optimalSolution.nonStreamingPlan, household.size - 1)
+    
+    // Træk familierabat fra
+    if (optimalSolution.familyDiscount) {
+      our6m -= optimalSolution.familyDiscount * periodMonths
+    }
+  } else {
+    // Enkelt plan for alle
+    our6m = calculate6MonthCost(optimalSolution.plan, household.size)
+  }
+  
+  const ourMonthly = our6m / periodMonths
+  
+  // Tilføj streaming hvis ikke inkluderet
+  const hasStreamingIncluded = optimalSolution.plan?.features?.some(f => f.includes('Streaming')) ||
+                                optimalSolution.streamingPlan?.features?.some(f => f.includes('Streaming'))
+  
+  const ourStreamingMonthly = hasStreamingIncluded ? 0 : currentStreamingMonthly
+  const ourTotalMonthly = ourMonthly + ourStreamingMonthly
+  const ourTotal6m = our6m + (ourStreamingMonthly * periodMonths)
   
   // Beregn besparelse
-  const savingsMonthly = currentMonthly - recommendedMonthly
-  const savingsTotal6m = currentTotal6m - recommendedTotal6m
+  const savingsMonthly = currentTotal - ourTotalMonthly
+  const savingsTotal6m = currentTotal6m - ourTotal6m
   
   return {
     current: {
-      monthly: currentMonthly,
+      monthly: currentTotal,
+      mobileMonthly: currentMonthly,
       streamingMonthly: currentStreamingMonthly,
       total6m: currentTotal6m
     },
     recommended: {
-      monthly: recommendedMonthly,
-      mobileBeforeDiscount,
-      mobileAfterDiscount,
-      streamingMonthly: currentStreamingMonthly,
-      total6m: recommendedTotal6m,
-      discount: bestProvider.discount,
-      planType: plan.type,
-      selectedStreams
+      monthly: ourTotalMonthly,
+      mobileBeforeDiscount: optimalSolution.basePrice,
+      mobileAfterDiscount: optimalSolution.finalPrice,
+      streamingMonthly: ourStreamingMonthly,
+      total6m: ourTotal6m,
+      discount: optimalSolution.discount || 0,
+      planType: optimalSolution.name || optimalSolution.plan?.name,
+      selectedStreams,
+      plans: optimalSolution.isFamilyPackage ? 
+        [optimalSolution.streamingPlan, optimalSolution.nonStreamingPlan] : 
+        [optimalSolution.plan],
+      details: optimalSolution
     },
     savings: {
       monthly: savingsMonthly,
       total6m: savingsTotal6m
     },
-    provider: bestProvider,
-    meetsMinSavings: savingsTotal6m >= MIN_SAVINGS
+    provider: {
+      id: optimalSolution.brand?.toLowerCase() || 'telenor',
+      name: optimalSolution.brand || 'Telenor'
+    },
+    meetsMinSavings: savingsTotal6m >= MIN_SAVINGS,
+    hasStreamingIncluded
   }
+}
+
+// Beregn 6-måneders omkostning med intro-priser
+function calculate6MonthCost(plan, quantity) {
+  if (!plan) return 0
+  
+  if (plan.introPrice && plan.introMonths) {
+    const introTotal = plan.introPrice * plan.introMonths * quantity
+    const remainingMonths = Math.max(0, 6 - plan.introMonths)
+    const normalTotal = plan.price * remainingMonths * quantity
+    return introTotal + normalTotal
+  }
+  
+  return plan.price * 6 * quantity
+}
+
+// Find den optimale løsning baseret på antal personer og nuværende situation
+function findOptimalSolution(familySize, currentMobile, currentStreaming, streamingCount) {
+  let bestSolution = null
+  let bestScore = -Infinity
+  
+  // Strategi 1: Telenor familie (1 streaming + resten standard)
+  const telenorStreaming = PLANS.filter(p => 
+    p.brand === 'Telenor' && 
+    p.features.some(f => f.includes('Streaming'))
+  )
+  const telenorNonStreaming = PLANS.filter(p => 
+    p.brand === 'Telenor' && 
+    !p.features.some(f => f.includes('Streaming'))
+  )
+  
+  if (telenorStreaming.length > 0 && telenorNonStreaming.length > 0 && familySize >= 2) {
+    const streamPlan = telenorStreaming.sort((a, b) => (b.earnings || 0) - (a.earnings || 0))[0]
+    const nonStreamPlan = telenorNonStreaming.sort((a, b) => 
+      ((b.earnings || 0) / b.price) - ((a.earnings || 0) / a.price)
+    )[0]
+    
+    const additionalPeople = familySize - 1
+    const baseCost = streamPlan.price + (nonStreamPlan.price * additionalPeople)
+    const familyDiscount = additionalPeople * 50 // Telenor familiepris
+    const finalCost = baseCost - familyDiscount
+    const totalEarnings = (streamPlan.earnings || 0) + (nonStreamPlan.earnings || 0) * additionalPeople
+    
+    const totalCurrentCost = currentMobile + currentStreaming
+    const savings = totalCurrentCost - finalCost
+    const score = calculateScore(savings, totalEarnings, true, true)
+    
+    if (score > bestScore) {
+      bestScore = score
+      bestSolution = {
+        isFamilyPackage: true,
+        brand: 'Telenor',
+        name: `Familiepakke ${familySize} personer`,
+        streamingPlan: streamPlan,
+        nonStreamingPlan: nonStreamPlan,
+        familySize,
+        basePrice: baseCost,
+        discount: familyDiscount,
+        finalPrice: finalCost,
+        earnings: totalEarnings,
+        familyDiscount,
+        isTelenorFamily: true
+      }
+    }
+  }
+  
+  // Strategi 2: Telmore/CBB streaming-pakker
+  const streamingPlans = getStreamingPlans()
+  for (const plan of streamingPlans) {
+    const totalCost = plan.price * familySize
+    const totalEarnings = (plan.earnings || 0) * familySize
+    const totalCurrentCost = currentMobile + currentStreaming
+    const savings = totalCurrentCost - totalCost
+    const score = calculateScore(savings, totalEarnings, false, true)
+    
+    if (score > bestScore) {
+      bestScore = score
+      bestSolution = {
+        isFamilyPackage: false,
+        plan,
+        brand: plan.brand,
+        name: plan.name,
+        basePrice: totalCost,
+        finalPrice: totalCost,
+        earnings: totalEarnings
+      }
+    }
+  }
+  
+  // Strategi 3: Billigste non-streaming hvis kunden ikke har streaming
+  if (streamingCount === 0) {
+    const nonStreamingPlans = getNonStreamingPlans()
+    for (const plan of nonStreamingPlans) {
+      const totalCost = plan.price * familySize
+      const totalEarnings = (plan.earnings || 0) * familySize
+      const savings = currentMobile - totalCost
+      const score = calculateScore(savings, totalEarnings, false, false)
+      
+      if (score > bestScore) {
+        bestScore = score
+        bestSolution = {
+          isFamilyPackage: false,
+          plan,
+          brand: plan.brand,
+          name: plan.name,
+          basePrice: totalCost,
+          finalPrice: totalCost,
+          earnings: totalEarnings
+        }
+      }
+    }
+  }
+  
+  return bestSolution
+}
+
+// Scorer løsninger baseret på besparelse + indtjening
+function calculateScore(savings, earnings, isFamilyPackage, hasStreaming) {
+  let score = earnings // Start med indtjening
+  
+  // Bonus for besparelse
+  if (savings > 0) {
+    score += savings * 2 // Besparelse tæller dobbelt
+  } else if (savings >= -100) {
+    score += savings * 0.5 // Mindre straf for lille merpris
+  } else {
+    return -Infinity // Afvis for dyre løsninger
+  }
+  
+  // Bonus for familiepakker
+  if (isFamilyPackage) {
+    score += 200
+  }
+  
+  // Bonus for streaming-inklusion
+  if (hasStreaming) {
+    score += 300
+  }
+  
+  return score
 }
 
 // Legacy funktion - bruges ikke længere

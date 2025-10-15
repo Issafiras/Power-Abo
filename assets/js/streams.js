@@ -1,61 +1,68 @@
-// streams.js - Streaming tjenester med priser og ikoner
+// streams.js - Streaming tjenester med priser og ikoner (fra v9.0)
 
 export const STREAMING_SERVICES = [
   {
     id: 'netflix',
     label: 'Netflix',
-    monthlyPrice: 119,
+    monthlyPrice: 139,
     icon: '🎬',
     color: '#e50914'
   },
   {
+    id: 'viaplay',
+    label: 'Viaplay',
+    monthlyPrice: 149,
+    icon: '🎯',
+    color: '#00d4aa'
+  },
+  {
     id: 'hbo',
     label: 'HBO Max',
-    monthlyPrice: 79,
+    monthlyPrice: 119,
     icon: '🎭',
-    color: '#7c3aed'
+    color: '#673ab7'
   },
   {
     id: 'tv2play',
     label: 'TV2 Play',
-    monthlyPrice: 89,
+    monthlyPrice: 99,
     icon: '📺',
-    color: '#0ea5e9'
+    color: '#ff6b35'
   },
   {
-    id: 'viaplay',
-    label: 'Viaplay',
-    monthlyPrice: 109,
-    icon: '🎯',
-    color: '#10b981'
+    id: 'saxo',
+    label: 'Saxo',
+    monthlyPrice: 79,
+    icon: '📖',
+    color: '#c41e3a'
   },
   {
     id: 'disney',
     label: 'Disney+',
-    monthlyPrice: 89,
+    monthlyPrice: 129,
     icon: '✨',
-    color: '#3b82f6'
+    color: '#0066cc'
   },
   {
     id: 'skyshowtime',
     label: 'SkyShowtime',
-    monthlyPrice: 69,
+    monthlyPrice: 89,
     icon: '⭐',
-    color: '#8b5cf6'
+    color: '#6b46c1'
   },
   {
     id: 'prime',
     label: 'Prime Video',
-    monthlyPrice: 69,
+    monthlyPrice: 59,
     icon: '🎥',
-    color: '#14b8a6'
+    color: '#0f7ae5'
   },
   {
     id: 'musik',
-    label: 'Musik (Spotify/etc)',
-    monthlyPrice: 99,
+    label: 'Musik tjeneste',
+    monthlyPrice: 109,
     icon: '🎵',
-    color: '#22c55e'
+    color: '#1e40af'
   }
 ]
 
