@@ -1,17 +1,52 @@
 # POWER | 6-måneders familieløsning
 
-En moderne, statisk webapp til beregning af familiens samlede mobil- og streaming-løsning med Telenor samlerabat over 6 måneder.
+En moderne, intelligent webapp der automatisk finder den bedste mobil- og streaming-løsning til familier. Med support for **Telenor**, **Telmore** og **CBB** (inkl. CBB MIX).
 
 ## ✨ Features
 
-- **6-måneders perspektiv** – Se den samlede omkostning over et halvt år
-- **Telenor samlerabat** – Automatisk beregning af rabatter baseret på antal linjer
-- **Streaming-vælger** – Vælg mellem 8 populære tjenester med visuel feedback
-- **500 kr minimum besparelse** – Automatisk validering og forslag til forbedring
-- **Dark/Light mode** – Elegant tema-skifte med CSS-variabler
-- **Tastaturgenveje** – Hurtig navigation med 1/2/3, R, S, P
-- **Print-venlig** – Pæn A4-output til præsentation
-- **Del-funktion** – Generér delbart link med URL-parametre
+### 🎯 Smart Løsningsfinder
+- **AI-lignende algoritme** – Finder automatisk den optimale løsning
+- **3 teleselskaber** – Telenor, Telmore og CBB med 30+ abonnementer
+- **Familie-optimering** – Smart mix af streaming + standard pakker
+- **Intelligent scoring** – Balance mellem kundebesparelse og indtjening
+
+### 🎬 CBB MIX Integration
+- **6 CBB MIX pakker** – Mobil + streaming fra 74 kr/md
+- **2-3 streaming-tjenester** – Netflix, Viaplay, HBO Max, Disney+, Deezer, Mofibo m.fl.
+- **Kampagnepriser** – Auto-beregning af intro-priser over 6 måneder
+- **Høj prioritet** – Anbefales automatisk når kunde har streaming
+
+### 📊 Avancerede Visualiseringer
+- **Bar chart** – Sammenligning (Nu vs. Vores vs. Besparelse)
+- **Trend chart** – Månedlig udvikling med dual-line graf
+- **Pie chart** – Besparelsesfordeling (mobil/streaming/rabat)
+- **Toggle-funktion** – Vis/skjul efter behov
+
+### 💰 Kontant Rabat
+- **Engangsbeløb** – Tilføj kontant rabat ved skifte (f.eks. 500-1000 kr)
+- **Live-beregning** – Opdaterer automatisk total besparelse
+- **Detaljeret breakdown** – Før/efter rabat + total besparelse
+- **Smart UI** – Skjul når ikke i brug
+
+### 🔍 Sammenlign Udbydere
+- **Side-om-side** – Alle 3 udbydere sammenlignet
+- **Auto-ranking** – 🏆 Bedste, 🥈 #2, 🥉 #3
+- **Detaljeret info** – Pris, besparelse, indtjening, features
+- **Visual highlighting** – Winner får grøn border + glow
+
+### 🧠 Intelligente Anbefalinger
+- **Smart recommendations** – Vises øverst på resultat
+- **Prioriteret** – High/Medium/Low baseret på relevans
+- **Kontekstuel** – Tilpasset kundens situation
+- **Actionable** – Viser konkrete besparelser
+
+### 🎨 UI/UX Excellence
+- **Dark/Light mode** – Tema-toggle med localStorage
+- **Animationer** – Shimmer, pulse, bounce, fade, slide
+- **Tastaturgenveje** – 1/2/3, R, S, P, piltaster, ?
+- **Print-optimeret** – A4-venlig output
+- **Del-funktion** – URL-parametre
+- **Fully responsive** – Desktop + mobile
 
 ## 🚀 Lokal kørsel
 
