@@ -6553,10 +6553,16 @@
 
     // Start Guide functionality
     function startSlideFlow() {
-      qs('#slideFlow').style.display = 'flex';
-      setTimeout(() => {
-        qs('#slideFlow').classList.add('open');
-      }, 10);
+      const slideFlow = qs('#slideFlow');
+      if (slideFlow) {
+        slideFlow.style.display = 'flex';
+        setTimeout(() => {
+          slideFlow.classList.add('open');
+        }, 10);
+      } else {
+        console.warn('SlideFlow element not found - opening guide instead');
+        openGuide();
+      }
     }
 
     // New Guide Functions
