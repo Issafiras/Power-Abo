@@ -32,6 +32,11 @@ jobs:
     - name: Checkout kode
       uses: actions/checkout@v4
       
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+      
     - name: Valider HTML struktur
       run: |
         echo "🔍 Validerer HTML filer..."
@@ -199,10 +204,10 @@ jobs:
       uses: actions/configure-pages@v4
       
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v2
       with:
         path: './build'
         
     - name: Deploy til GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v3
