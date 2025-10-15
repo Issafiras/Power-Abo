@@ -1,0 +1,214 @@
+name: Deploy POWER Calculator to GitHub Pages
+
+on:
+  # Trigger på push til main branch
+  push:
+    branches: [ "main" ]
+  
+  # Tillad manuel trigger
+  workflow_dispatch:
+
+# Tillad kun en deployment ad gangen
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# Set permissions for GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Deploy kun på main branch
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout kode
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Valider HTML struktur
+      run: |
+        echo "🔍 Validerer HTML filer..."
+        
+        # Tjek at v10.0 index.html eksisterer
+        if [ ! -f "power-calculator-v10.0/index.html" ]; then
+          echo "❌ v10.0 index.html ikke fundet"
+          exit 1
+        fi
+        
+        # Tjek at CSS fil eksisterer
+        if [ ! -f "power-calculator-v10.0/css/styles.css" ]; then
+          echo "❌ v10.0 CSS fil ikke fundet"
+          exit 1
+        fi
+        
+        # Tjek at JS filer eksisterer
+        if [ ! -f "power-calculator-v10.0/js/main.js" ]; then
+          echo "❌ v10.0 main.js ikke fundet"
+          exit 1
+        fi
+        
+        echo "✅ Alle v10.0 filer fundet"
+        
+    - name: Valider database filer
+      run: |
+        echo "🔍 Validerer database filer..."
+        
+        # Tjek JSON database filer
+        if [ ! -f "power-calculator-v10.0/database/plans.json" ]; then
+          echo "❌ plans.json ikke fundet"
+          exit 1
+        fi
+        
+        if [ ! -f "power-calculator-v10.0/database/streaming.json" ]; then
+          echo "❌ streaming.json ikke fundet"
+          exit 1
+        fi
+        
+        # Valider JSON syntaks
+        python3 -m json.tool power-calculator-v10.0/database/plans.json > /dev/null
+        python3 -m json.tool power-calculator-v10.0/database/streaming.json > /dev/null
+        
+        echo "✅ Database filer valideret"
+        
+    - name: Build og optimer v10.0
+      run: |
+        echo "🏗️ Bygger og optimerer v10.0..."
+        
+        # Opret build mappe
+        mkdir -p build/power-calculator-v10.0
+        
+        # Kopier v10.0 filer til build
+        cp -r power-calculator-v10.0/* build/power-calculator-v10.0/
+        
+        # Kopier andre versioner for sammenligning
+        cp power-calculator-v9.3.html build/
+        cp power-calculator-v9.2.html build/
+        cp power-calculator-v9.1.html build/
+        cp power-calculator-v9.0.html build/
+        
+        # Opret index.html der peger på v10.0 som default
+        cat > build/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="da">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>POWER | 6-måneders familieløsning (mobil)</title>
+          <meta name="description" content="Butiksværktøj til at præsentere en 6-måneders samlet mobil-løsning for enkeltkunder eller familier. Inkluderer Telenor samlerabat, streaming-vælger og automatisk justering for minimum 500 kr besparelse." />
+          <style>
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              margin: 0; padding: 40px; background: #0a0f1c; color: #f8fafc;
+              display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            }
+            .container { max-width: 800px; text-align: center; }
+            .logo { font-size: 48px; margin-bottom: 20px; }
+            h1 { color: #ff6b1a; margin-bottom: 20px; }
+            .version-grid { 
+              display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+              gap: 20px; margin: 40px 0; 
+            }
+            .version-card { 
+              background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+              border-radius: 12px; padding: 24px; transition: all 0.3s ease;
+            }
+            .version-card:hover { 
+              background: rgba(255,255,255,0.08); 
+              transform: translateY(-2px);
+            }
+            .version-card.recommended { border-color: #ff6b1a; background: rgba(255,107,26,0.1); }
+            .version-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+            .version-desc { color: #94a3b8; margin-bottom: 16px; }
+            .version-link { 
+              display: inline-block; padding: 12px 24px; background: #ff6b1a; 
+              color: white; text-decoration: none; border-radius: 8px; font-weight: 600;
+              transition: all 0.3s ease;
+            }
+            .version-link:hover { background: #e55a2b; transform: translateY(-1px); }
+            .version-link.secondary { background: rgba(255,255,255,0.1); }
+            .version-link.secondary:hover { background: rgba(255,255,255,0.2); }
+            .badge { 
+              display: inline-block; padding: 4px 8px; background: #22c55e; 
+              color: white; border-radius: 12px; font-size: 12px; font-weight: 600;
+              margin-left: 8px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logo">⚡</div>
+            <h1>POWER | 6-måneders familieløsning</h1>
+            <p style="color: #94a3b8; font-size: 18px; margin-bottom: 40px;">
+              Professionelt butiksværktøj til at præsentere besparelser på mobil og streaming
+            </p>
+            
+            <div class="version-grid">
+              <div class="version-card recommended">
+                <div class="version-title">v10.0 <span class="badge">Anbefalet</span></div>
+                <div class="version-desc">Moderne modulær struktur med separeret HTML, CSS og JavaScript. Bedre vedligeholdelse og performance.</div>
+                <a href="power-calculator-v10.0/" class="version-link">Åbn v10.0</a>
+              </div>
+              
+              <div class="version-card">
+                <div class="version-title">v9.3</div>
+                <div class="version-desc">Seneste single-file version med alle funktioner. Virker direkte fra filsystem.</div>
+                <a href="power-calculator-v9.3.html" class="version-link secondary">Åbn v9.3</a>
+              </div>
+              
+              <div class="version-card">
+                <div class="version-title">v9.2</div>
+                <div class="version-desc">Med Start Guide + CBB Mix funktioner. Tidligere GitHub Pages version.</div>
+                <a href="power-calculator-v9.2.html" class="version-link secondary">Åbn v9.2</a>
+              </div>
+              
+              <div class="version-card">
+                <div class="version-title">v9.1</div>
+                <div class="version-desc">Med CBB Mix streaming pakker og forbedrede beregninger.</div>
+                <a href="power-calculator-v9.1.html" class="version-link secondary">Åbn v9.1</a>
+              </div>
+              
+              <div class="version-card">
+                <div class="version-title">v9.0</div>
+                <div class="version-desc">Med Start Guide funktioner og interaktiv kundeguide.</div>
+                <a href="power-calculator-v9.0.html" class="version-link secondary">Åbn v9.0</a>
+              </div>
+            </div>
+            
+            <div style="margin-top: 40px; padding: 20px; background: rgba(255,107,26,0.1); border-radius: 12px; border: 1px solid rgba(255,107,26,0.2);">
+              <h3 style="color: #ff6b1a; margin-bottom: 12px;">💡 Tip</h3>
+              <p style="color: #94a3b8; margin: 0;">
+                v10.0 kræver moderne browser med ES6 modul support. 
+                For bedste oplevelse anbefales Chrome 80+, Firefox 75+, Safari 13+ eller Edge 80+.
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+        EOF
+        
+        echo "✅ Build færdig"
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './build'
+        
+    - name: Deploy til GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
