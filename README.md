@@ -1,270 +1,177 @@
-# POWER Abo Beregner
+# POWER | 6-måneders familieløsning
 
-Et professionelt butiksværktøj til POWER medarbejdere til at præsentere 6-måneders familieløsninger for mobil og streaming tjenester.
+En moderne, statisk webapp til beregning af familiens samlede mobil- og streaming-løsning med Telenor samlerabat over 6 måneder.
 
-## 📋 Oversigt
+## ✨ Features
 
-Dette værktøj hjælper POWER medarbejdere med at:
-- Beregne kundens nuværende udgifter
-- Vise besparelser med POWER's 6-måneders familieløsning
-- Inkludere streaming tjenester og CBB Mix funktioner
-- Automatisk justere til minimum 500 kr besparelse
-- Præsentere løsningen professionelt
+- **6-måneders perspektiv** – Se den samlede omkostning over et halvt år
+- **Telenor samlerabat** – Automatisk beregning af rabatter baseret på antal linjer
+- **Streaming-vælger** – Vælg mellem 8 populære tjenester med visuel feedback
+- **500 kr minimum besparelse** – Automatisk validering og forslag til forbedring
+- **Dark/Light mode** – Elegant tema-skifte med CSS-variabler
+- **Tastaturgenveje** – Hurtig navigation med 1/2/3, R, S, P
+- **Print-venlig** – Pæn A4-output til præsentation
+- **Del-funktion** – Generér delbart link med URL-parametre
 
-## 🚀 Hurtig start
+## 🚀 Lokal kørsel
 
-### Version 10.0 (Anbefalet - Moderne struktur)
-```bash
-# Åbn v10.0 i browser
-open power-calculator-v10.0/index.html
-```
+Projektet er rent statisk og kræver ingen build-process. Du kan køre det på flere måder:
 
-### Tidligere versioner
-- **v9.3**: Seneste single-file version
-- **v9.2**: Med Start Guide + CBB Mix
-- **v9.1**: Med CBB Mix funktioner
-- **v9.0**: Med Start Guide funktioner
-
-## 📁 Projekt struktur
-
-```
-Power abo beregner/
-├── power-calculator-v10.0/     # 🆕 Moderne modulær version
-│   ├── index.html              # Hoved HTML fil
-│   ├── css/styles.css          # Alle styles
-│   ├── js/                     # JavaScript moduler
-│   │   ├── main.js            # Initialisering
-│   │   ├── app.js             # App logik
-│   │   ├── database.js        # Database håndtering
-│   │   └── ui.js              # UI events
-│   ├── database/              # JSON data filer
-│   └── README.md              # v10.0 dokumentation
-├── power-calculator-v9.3.html # Seneste single-file version
-├── power-calculator-v9.2.html # Med Start Guide + CBB Mix
-├── power-calculator-v9.1.html # Med CBB Mix funktioner
-├── power-calculator-v9.0.html # Med Start Guide funktioner
-├── index.html                 # GitHub Pages entry point (v9.2)
-└── README.md                  # Denne fil
-```
-
-## 🎯 Funktioner
-
-### Kernerfunktioner
-- ✅ **Kundens udgifter**: Indtast nuværende mobilregning og streaming
-- ✅ **Abonnements valg**: Telenor, Telmore og CBB pakker
-- ✅ **Besparelses beregning**: 6-måneders sammenligning
-- ✅ **Auto-justering**: Sikrer minimum 500 kr besparelse
-- ✅ **Streaming tjenester**: Netflix, Viaplay, HBO Max, osv.
-- ✅ **CBB Mix**: Fleksibel streaming pakke
-
-### Avancerede funktioner
-- 🚀 **Start Guide**: Interaktiv kundeguide
-- 📊 **Præsentationsvisning**: Professionel fremvisning
-- 🎨 **Tema support**: Lys/mørk mode
-- ⌨️ **Keyboard shortcuts**: Hurtige genveje
-- 📱 **Responsivt design**: Fungerer på alle enheder
-- 💾 **Lokal storage**: Husker indstillinger
-
-## 🎮 Brug af værktøjet
-
-### 1. Indtast kundens udgifter
-- **Månedlig mobilregning**: Hvor meget betaler kunden nu?
-- **Streaming tjenester**: Hvilke tjenester bruger kunden?
-
-### 2. Vælg POWER løsning
-- **Abonnements type**: Telenor, Telmore eller CBB
-- **Data mængde**: Baseret på kundens behov
-- **Streaming pakke**: CBB Mix eller individuelle tjenester
-
-### 3. Se besparelsen
-- **6-måneders sammenligning**: Kunde vs. POWER løsning
-- **Automatisk justering**: Sikrer minimum 500 kr besparelse
-- **Rabat muligheder**: Tilpas efter behov
-
-### 4. Præsenter løsningen
-- **Start Guide**: Interaktiv demonstration
-- **Præsentationsvisning**: Professionel fremvisning
-- **Eksport muligheder**: Print eller del resultater
-
-## ⌨️ Keyboard shortcuts
-
-| Genvej | Funktion |
-|--------|----------|
-| `Ctrl/Cmd + K` | Vis alle genveje |
-| `Escape` | Luk alle modaler |
-| `Ctrl/Cmd + R` | Nulstil kalkulator |
-| `Ctrl/Cmd + Shift + G` | Start Guide |
-| `Ctrl/Cmd + Shift + P` | Præsentationsvisning |
-
-## 🎨 Temaer
-
-### Mørk tema (Standard)
-- Professionelt udseende
-- Orange POWER branding
-- Optimeret til skærmpræsentation
-
-### Lys tema
-- Ren og moderne
-- Perfekt til print
-- Høj kontrast
-
-**Skift tema**: Klik på 🌙/☀️ ikonet i header
-
-## 📊 Database struktur
-
-### Plans (Abonnements)
-```json
-{
-  "plans": [
-    {
-      "id": "ten-70",
-      "brand": "Telenor",
-      "name": "70 GB",
-      "dataGB": 70,
-      "price": 199,
-      "earnings": 900,
-      "features": ["5G", "eSIM", "EU Roaming", "Familie"]
-    }
-  ]
-}
-```
-
-### Streaming Services
-```json
-{
-  "services": [
-    {
-      "id": "netflix",
-      "name": "Netflix",
-      "price": 139,
-      "icon": "<div class='streaming-logo netflix'>N</div>"
-    }
-  ]
-}
-```
-
-## 🔧 Tekniske detaljer
-
-### Version 10.0 (Moderne)
-- **HTML5**: Semantisk markup
-- **CSS3**: Custom properties, Grid, Flexbox
-- **ES6+**: Moduler, async/await, destructuring
-- **JSON**: Database filer
-- **Service Worker**: Offline support (planlagt)
-
-### Browser support
-- Chrome 80+
-- Firefox 75+
-- Safari 13+
-- Edge 80+
-
-## 🚀 Deployment
-
-### GitHub Pages (Automatisk)
-- **URL**: [https://issafiras.github.io/Power-Abo/](https://issafiras.github.io/Power-Abo/)
-- **Branch**: `main`
-- **Build**: GitHub Actions automatisk deployment
-- **Default**: v10.0 (moderne modulær version)
-- **Alternativer**: v9.3, v9.2, v9.1, v9.0 tilgængelige
-
-### GitHub Actions Workflow
-```yaml
-# Automatisk deployment på push til main
-# Validerer filer, bygger optimeret version
-# Deployer til GitHub Pages med version selector
-```
-
-**Se [DEPLOYMENT.md](DEPLOYMENT.md) for detaljerede instruktioner**
-
-### Lokal udvikling
-
-**⚠️ Vigtigt**: v10.0 kræver en HTTP server pga. ES6 moduler og CORS politikker.
+### 1. Python HTTP Server (anbefalet)
 
 ```bash
-# Start lokal server (Python 3)
-cd power-calculator-v10.0
-python3 -m http.server 8080
-
-# Eller med Python 2
-python -m SimpleHTTPServer 8080
-
-# Eller med Node.js
-npx serve power-calculator-v10.0
-
-# Åbn browser
-open http://localhost:8080
+cd "/Users/issafiras/Desktop/Power abo beregner"
+python3 -m http.server 5173
 ```
 
-**CORS problem løsning:**
-- ❌ `file://` protokollen virker ikke med ES6 moduler
-- ✅ Brug altid HTTP server for v10.0
-- ✅ v9.x versioner virker direkte fra filsystem
+Åbn derefter [http://localhost:5173](http://localhost:5173) i browseren.
 
-## 📈 Version historie
+### 2. VSCode Live Server
 
-### v10.0 (Seneste)
-- 🆕 Modulær struktur (HTML/CSS/JS separeret)
-- 🆕 ES6 moduler
-- 🆕 Bedre vedligeholdelse
-- ✅ Samme funktionalitet som v9.3
+1. Installer "Live Server" extension i VSCode
+2. Højreklik på `index.html`
+3. Vælg "Open with Live Server"
 
-### v9.3
-- ✅ CBB Mix funktioner
-- ✅ Start Guide integration
-- ✅ Alle streaming tjenester
-- ✅ Auto-justering til 500 kr besparelse
+### 3. Andre web-servere
 
-### v9.2
-- ✅ Kombineret Start Guide + CBB Mix
-- ✅ GitHub Pages deployment
-- ✅ Forbedret UI/UX
+```bash
+# Node.js http-server
+npx http-server -p 5173
 
-### v9.1
-- ✅ CBB Mix streaming pakker
-- ✅ Forbedret beregninger
-- ✅ Nye streaming tjenester
+# PHP
+php -S localhost:5173
+```
 
-### v9.0
-- ✅ Start Guide funktioner
-- ✅ Interaktiv kundeguide
-- ✅ Step-by-step process
+## 📦 Deployment til GitHub Pages
+
+Projektet er klar til GitHub Pages med GitHub Actions:
+
+### 1. Aktivér GitHub Pages
+
+1. Gå til repository Settings
+2. Find "Pages" i sidemenuen
+3. Under "Source", vælg **GitHub Actions**
+
+### 2. Push til main branch
+
+```bash
+git add .
+git commit -m "feat: initial deployment"
+git push origin main
+```
+
+### 3. Tjek deployment
+
+- Gå til "Actions" tab i dit repository
+- Se workflow-kørslen "Deploy to GitHub Pages"
+- Når den er færdig, findes dit site på: `https://[username].github.io/[repo-name]/`
+
+## 📁 Projektstruktur
+
+```
+/
+├── index.html              # Hovedside
+├── assets/
+│   ├── css/
+│   │   └── styles.css      # Styling med CSS-variabler
+│   ├── js/
+│   │   ├── main.js         # App initialisering & hotkeys
+│   │   ├── state.js        # State management
+│   │   ├── calc.js         # Beregningsmotor
+│   │   ├── providers.js    # Telenor samlerabat-logik
+│   │   ├── streams.js      # Streaming-tjenester data
+│   │   └── ui.js           # UI rendering
+│   └── img/                # Ikoner/assets (optional)
+├── .github/
+│   └── workflows/
+│       └── gh-pages.yml    # GitHub Actions deployment
+└── README.md               # Denne fil
+```
+
+## ⌨️ Tastaturgenveje
+
+| Tast | Funktion |
+|------|----------|
+| `1`, `2`, `3` | Spring til trin 1, 2 eller 3 |
+| `←`, `→` | Naviger mellem trin |
+| `R` | Reset/Nulstil |
+| `S` | Gem/Del resultat (kopiér link) |
+| `P` | Print resultat |
+| `?` | Vis genveje |
+| `ESC` | Luk modal |
+
+## 🎨 Konfiguration
+
+### Priser og tjenester
+
+Rediger `/assets/js/streams.js` for at tilføje eller ændre streaming-tjenester:
+
+```javascript
+export const STREAMING_SERVICES = [
+  {
+    id: 'netflix',
+    label: 'Netflix',
+    monthlyPrice: 119,
+    icon: '🎬',
+    color: '#e50914'
+  },
+  // ...
+]
+```
+
+### Telenor samlerabat
+
+Rediger `/assets/js/providers.js` for at justere rabat-tiers:
+
+```javascript
+const TELENOR_DISCOUNT_TIERS = [
+  { minLines: 4, monthlyDiscount: 200, label: '4+ linjer' },
+  { minLines: 3, monthlyDiscount: 150, label: '3 linjer' },
+  { minLines: 2, monthlyDiscount: 100, label: '2 linjer' }
+]
+```
+
+### Minimum besparelse
+
+Rediger `/assets/js/calc.js` for at ændre kravet:
+
+```javascript
+const MIN_SAVINGS = 500 // Ændr til ønsket beløb
+```
+
+## 🛠️ Teknisk stack
+
+- **Ingen bundler** – Ren HTML/CSS/ES-modules
+- **Ingen frameworks** – Vanilla JavaScript
+- **Ingen eksterne dependencies** – Alt er self-contained
+- **Moderne CSS** – CSS-variabler, Grid, Flexbox
+- **ES Modules** – Modulær JavaScript-struktur
+- **GitHub Actions** – Automatisk deployment
+
+## 📝 Licens
+
+Dette projekt er udviklet til intern brug hos POWER.
 
 ## 🤝 Bidrag
 
-### Rapporter bugs
-1. Åbn en issue på GitHub
-2. Beskriv problemet detaljeret
-3. Inkluder browser og version
-4. Vedhæft skærmbilleder hvis relevant
+For at bidrage til projektet:
 
-### Foreslå forbedringer
-1. Åbn en issue med "enhancement" label
-2. Beskriv forbedringen
-3. Forklar fordelene
-4. Inkluder mockups hvis muligt
+1. Fork repository
+2. Opret en feature branch (`git checkout -b feature/ny-feature`)
+3. Commit dine ændringer (`git commit -m 'feat: tilføj ny feature'`)
+4. Push til branch (`git push origin feature/ny-feature`)
+5. Åbn en Pull Request
 
-## 📞 Support
+## 🐛 Fejlrapportering
 
-### For POWER medarbejdere
-- **Internt support**: Kontakt IT afdelingen
-- **Training**: Se POWER's interne dokumentation
-- **Feedback**: Rapporter via interne kanaler
-
-### Tekniske problemer
-- **Browser issues**: Prøv at opdatere browser
-- **Performance**: Ryd browser cache
-- **Offline**: Sørg for internet forbindelse
-
-## 📄 Licens
-
-Dette værktøj er udviklet til POWER's interne brug. Alle rettigheder forbeholdes.
-
-## 🙏 Tak
-
-Tak til alle POWER medarbejdere der har bidraget med feedback og forbedringer til dette værktøj.
+Rapportér fejl ved at oprette et issue i repository med:
+- Beskrivelse af problemet
+- Trin til at reproducere
+- Forventet vs. faktisk adfærd
+- Browser og OS information
 
 ---
 
-**Udviklet med ❤️ for POWER medarbejdere**
+**Version:** 10.0 (Modulær rebuild)  
+**Sidste opdatering:** Oktober 2025
 
-*Sidst opdateret: December 2024*
