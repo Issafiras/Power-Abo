@@ -36,18 +36,7 @@ function renderStepIndicator() {
   `
 }
 
-function renderCurrentStep() {
-  const container = document.getElementById('step-content')
-  if (!container) return
-  
-  if (currentStep === 1) {
-    renderStep1(container)
-  } else if (currentStep === 2) {
-    renderStep2(container)
-  } else if (currentStep === 3) {
-    renderStep3(container)
-  }
-}
+// renderCurrentStep fjernet - bruger renderSinglePage
 
 function renderSinglePage(container) {
   const state = getState()
