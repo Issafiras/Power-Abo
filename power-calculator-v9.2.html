@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>POWER | 6-måneders familieløsning (mobil) – v9.2</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>POWER | 6-måneders familieløsning (mobil) – v9.2 (Fixed)</title>
   <meta name="description" content="Butiksværktøj til at præsentere en 6-måneders samlet mobil-løsning for enkeltkunder eller familier. Inkluderer Telenor samlerabat, streaming-vælger og automatisk justering for minimum 500 kr besparelse." />
   <style>
     :root{ 
@@ -3352,6 +3355,235 @@
       a{color:black}
       footer{color:#333}
     }
+
+    /* SlideFlow Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+    }
+
+    .slide-flow-modal {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-2xl);
+    }
+
+    .slide-flow-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .slide-flow-header h2 {
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      transition: var(--transition);
+    }
+
+    .close-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .slide-flow-content {
+      min-height: 300px;
+    }
+
+    .slide-flow-navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--bg-tertiary);
+    }
+
+    /* Slide Styles */
+    .slide {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .close-slide {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 1002;
+    }
+
+    .slide-progress {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .progress-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      transition: var(--transition);
+    }
+
+    .progress-dot.active {
+      background: var(--brand);
+    }
+
+    .progress-dot.completed {
+      background: var(--good);
+    }
+
+    .slide-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .welcome-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .slide-header h2 {
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-header p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .slide-content {
+      max-width: 500px;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .family-size-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+
+    .family-option {
+      background: var(--bg-secondary);
+      border: 2px solid var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .family-option:hover {
+      border-color: var(--brand);
+      background: var(--brand-subtle);
+    }
+
+    .family-option.selected {
+      border-color: var(--brand);
+      background: var(--brand-subtle);
+    }
+
+    .option-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .option-text strong {
+      display: block;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .option-text span {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .slide-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn-slide {
+      padding: 0.75rem 2rem;
+      border-radius: var(--radius-lg);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-slide.secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+
+    .btn-slide.secondary:hover {
+      background: var(--bg-quaternary);
+    }
+
+    .btn-slide.primary {
+      background: var(--brand);
+      color: white;
+    }
+
+    .btn-slide.primary:hover {
+      background: var(--brand-dark);
+    }
+
+    .btn-slide:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -3412,6 +3644,65 @@
     </div>
   </header>
 
+    <!-- Slide 1: Familie størrelse -->
+    <div class="slide" id="slide1" style="display: none;">
+      <button class="close-slide" onclick="closeSlideFlow()">✕</button>
+      <div class="slide-progress">
+        <div class="progress-dot active"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+      </div>
+      <div class="slide-header">
+        <div class="welcome-icon">👨‍👩‍👧‍👦</div>
+        <h2>Hvor mange skal have telefon?</h2>
+        <p>Vælg antal personer i familien</p>
+      </div>
+      <div class="slide-content">
+        <div class="family-size-selector">
+          <div class="family-option" data-size="1" onclick="selectFamilySize(1)">
+            <div class="option-icon">👤</div>
+            <div class="option-text">
+              <strong>1 person</strong>
+              <span>Enkeltperson</span>
+            </div>
+          </div>
+          <div class="family-option" data-size="2" onclick="selectFamilySize(2)">
+            <div class="option-icon">👫</div>
+            <div class="option-text">
+              <strong>2 personer</strong>
+              <span>Par</span>
+            </div>
+          </div>
+          <div class="family-option" data-size="3" onclick="selectFamilySize(3)">
+            <div class="option-icon">👨‍👩‍👦</div>
+            <div class="option-text">
+              <strong>3 personer</strong>
+              <span>Lille familie</span>
+            </div>
+          </div>
+          <div class="family-option" data-size="4" onclick="selectFamilySize(4)">
+            <div class="option-icon">👨‍👩‍👧‍👦</div>
+            <div class="option-text">
+              <strong>4 personer</strong>
+              <span>Stor familie</span>
+            </div>
+          </div>
+          <div class="family-option" data-size="5" onclick="selectFamilySize(5)">
+            <div class="option-icon">👨‍👩‍👧‍👧‍👦</div>
+            <div class="option-text">
+              <strong>5+ personer</strong>
+              <span>Meget stor familie</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-actions">
+        <button class="btn-slide secondary" onclick="closeSlideFlow()">Annuller</button>
+        <button class="btn-slide primary" onclick="nextSlide(2)" id="slide1Next" disabled>Næste</button>
+      </div>
+    </div>
 
     <!-- Slide 2: Kundeudgifter -->
     <div class="slide" id="slide2" style="display: none;">
@@ -3853,6 +4144,25 @@
     <button class="advanced-feature-btn analytics" id="analyticsBtn" title="📈 Analytics & Historik">📈</button>
   </div>
 
+  <!-- SlideFlow Modal -->
+  <div id="slideFlow" class="modal-overlay" style="display: none;">
+    <div class="modal-content slide-flow-modal">
+      <div class="slide-flow-container">
+        <div class="slide-flow-header">
+          <h2>Smart Kundeguide</h2>
+          <button class="close-btn" onclick="closeSlideFlow()">&times;</button>
+        </div>
+        <div class="slide-flow-content">
+          <!-- Slide content will be dynamically inserted here -->
+        </div>
+        <div class="slide-flow-navigation">
+          <button class="btn secondary" id="prevSlide" onclick="previousSlide()" style="display: none;">Forrige</button>
+          <button class="btn primary" id="nextSlide" onclick="nextSlide()">Næste</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
           <span class="watermark">© <span id="copyrightYear"></span> Issa Firas. Alle rettigheder forbeholdes.</span>
       <span class="watermark">Udviklet til POWER butik – kun til internt brug.</span>
@@ -4158,6 +4468,18 @@
         // Tab navigation enhancement
         if (e.key === 'Tab') {
           document.body.classList.add('keyboard-navigation');
+        }
+        
+        // ESC key to close SlideFlow
+        if (e.key === 'Escape') {
+          // Check if any slide is visible
+          for (let i = 1; i <= 5; i++) {
+            const slide = qs(`#slide${i}`);
+            if (slide && slide.style.display !== 'none') {
+              closeSlideFlow();
+              break;
+            }
+          }
         }
       });
       
@@ -6553,15 +6875,19 @@
 
     // Start Guide functionality
     function startSlideFlow() {
-      const slideFlow = qs('#slideFlow');
-      if (slideFlow) {
-        slideFlow.style.display = 'flex';
-        setTimeout(() => {
-          slideFlow.classList.add('open');
-        }, 10);
+      console.log('=== startSlideFlow() called ===');
+      console.log('Document ready state:', document.readyState);
+      console.log('DOM elements count:', document.querySelectorAll('*').length);
+      
+      // Show slide1 instead of the modal
+      const slide1 = qs('#slide1');
+      console.log('slide1 element found:', slide1);
+      if (slide1) {
+        console.log('slide1 exists, calling showSlide(1)');
+        showSlide(1);
       } else {
-        console.warn('SlideFlow element not found - opening guide instead');
-        openGuide();
+        console.error('slide1 element not found!');
+        console.log('All slides:', qsa('[id^="slide"]'));
       }
     }
 
@@ -6641,14 +6967,43 @@
       }
     }
 
-    function closeSlideFlow() { /* no-op */ }
+    function closeSlideFlow() {
+      // Hide all slides
+      for (let i = 1; i <= 5; i++) {
+        const slide = qs(`#slide${i}`);
+        if (slide) {
+          slide.style.display = 'none';
+        }
+      }
+      
+      // Reset slideFlow data
+      slideFlowData = {
+        familySize: 0,
+        currentMobileTotal: 0,
+        currentStreamingServices: new Set(),
+        existingPartners: new Set(),
+        selectedSolution: null,
+        switchRebate: 0
+      };
+    }
 
     function showSlide(slideNumber) {
       console.log('=== showSlide() called ===', 'Slide:', slideNumber);
       for (let i = 1; i <= 5; i++) {
-        qs(`#slide${i}`).style.display = 'none';
+        const slide = qs(`#slide${i}`);
+        if (slide) {
+          slide.style.display = 'none';
+        } else {
+          console.warn(`Slide ${i} not found`);
+        }
       }
-      qs(`#slide${slideNumber}`).style.display = 'block';
+      const targetSlide = qs(`#slide${slideNumber}`);
+      if (targetSlide) {
+        targetSlide.style.display = 'flex';
+        console.log(`Showing slide ${slideNumber}`);
+      } else {
+        console.error(`Target slide ${slideNumber} not found!`);
+      }
       updateProgressDots(slideNumber);
       
       // Handle slide-specific setup
@@ -6762,6 +7117,23 @@
       saveCurrentSlideData(slideNumber - 1);
       
       showSlide(slideNumber);
+    }
+
+    function previousSlide() {
+      const currentSlide = getCurrentSlide();
+      if (currentSlide > 1) {
+        showSlide(currentSlide - 1);
+      }
+    }
+
+    function getCurrentSlide() {
+      for (let i = 1; i <= 5; i++) {
+        const slide = qs(`#slide${i}`);
+        if (slide && slide.style.display !== 'none') {
+          return i;
+        }
+      }
+      return 1;
     }
 
     function validateCurrentSlide(slideNumber) {
