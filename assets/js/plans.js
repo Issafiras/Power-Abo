@@ -217,7 +217,7 @@ export const PLANS = [
     roamingGB: 94
   },
   
-  // CBB pakker
+  // CBB pakker (Standard)
   {
     id: 'cbb-60',
     brand: 'CBB',
@@ -281,6 +281,104 @@ export const PLANS = [
     features: ['5G', 'EU Roaming'],
     color: '#a78bfa',
     roamingGB: 40
+  },
+  
+  // CBB MIX pakker (Mobil + Streaming)
+  {
+    id: 'cbb-mix-100-2',
+    brand: 'CBB',
+    name: '100 GB + 2 streaming',
+    dataGB: 100,
+    unlimited: false,
+    price: 99,
+    earnings: 900,
+    features: ['5G', '30 GB EU-data', 'CBB MIX', '2 streaming-tjenester'],
+    color: '#a78bfa',
+    introPrice: 74,
+    introMonths: 6,
+    streamingCount: 2,
+    roamingGB: 30,
+    cbbMix: true
+  },
+  {
+    id: 'cbb-mix-200-2',
+    brand: 'CBB',
+    name: '200 GB + 2 streaming',
+    dataGB: 200,
+    unlimited: false,
+    price: 119,
+    earnings: 1000,
+    features: ['5G', '30 GB EU-data', 'CBB MIX', '2 streaming-tjenester'],
+    color: '#a78bfa',
+    introPrice: 89,
+    introMonths: 6,
+    streamingCount: 2,
+    roamingGB: 30,
+    cbbMix: true
+  },
+  {
+    id: 'cbb-mix-unl-2',
+    brand: 'CBB',
+    name: 'Fri data + 2 streaming',
+    dataGB: Infinity,
+    unlimited: true,
+    price: 149,
+    earnings: 1200,
+    features: ['5G', '30 GB EU-data', 'CBB MIX', '2 streaming-tjenester', 'Fri data'],
+    color: '#a78bfa',
+    introPrice: 111,
+    introMonths: 6,
+    streamingCount: 2,
+    roamingGB: 30,
+    cbbMix: true
+  },
+  {
+    id: 'cbb-mix-100-3',
+    brand: 'CBB',
+    name: '100 GB + 3 streaming',
+    dataGB: 100,
+    unlimited: false,
+    price: 149,
+    earnings: 1100,
+    features: ['5G', '30 GB EU-data', 'CBB MIX', '3 streaming-tjenester'],
+    color: '#a78bfa',
+    introPrice: 99,
+    introMonths: 6,
+    streamingCount: 3,
+    roamingGB: 30,
+    cbbMix: true
+  },
+  {
+    id: 'cbb-mix-200-3',
+    brand: 'CBB',
+    name: '200 GB + 3 streaming',
+    dataGB: 200,
+    unlimited: false,
+    price: 169,
+    earnings: 1200,
+    features: ['5G', '30 GB EU-data', 'CBB MIX', '3 streaming-tjenester'],
+    color: '#a78bfa',
+    introPrice: 119,
+    introMonths: 6,
+    streamingCount: 3,
+    roamingGB: 30,
+    cbbMix: true
+  },
+  {
+    id: 'cbb-mix-unl-3',
+    brand: 'CBB',
+    name: 'Fri data + 3 streaming',
+    dataGB: Infinity,
+    unlimited: true,
+    price: 199,
+    earnings: 1400,
+    features: ['5G', '30 GB EU-data', 'CBB MIX', '3 streaming-tjenester', 'Fri data'],
+    color: '#a78bfa',
+    introPrice: 149,
+    introMonths: 6,
+    streamingCount: 3,
+    roamingGB: 30,
+    cbbMix: true
   }
 ]
 

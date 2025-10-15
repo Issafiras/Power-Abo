@@ -254,10 +254,22 @@ main {
   min-width: 150px;
 }
 
+/* Streaming Summary */
+.streaming-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--bg-glass);
+  border: var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+}
+
 /* Streaming Grid (Step 2) */
 .streaming-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -265,48 +277,106 @@ main {
 .stream-chip {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 1.25rem;
+  align-items: flex-start;
+  padding: 1rem;
   background: var(--bg-glass);
   border: 2px solid transparent;
   border-radius: var(--radius);
   cursor: pointer;
   transition: var(--transition);
   position: relative;
+  overflow: hidden;
+}
+
+.stream-chip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.stream-chip:hover::before {
+  left: 100%;
 }
 
 .stream-chip:hover {
   background: var(--bg-glass-hover);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: var(--shadow);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .stream-chip.selected {
   border-color: var(--brand);
   background: rgba(255, 107, 26, 0.15);
+  box-shadow: 0 0 20px var(--brand-glow);
+}
+
+.stream-chip.selected::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--brand);
+  border-radius: var(--radius);
+  animation: borderPulse 2s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 .stream-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.stream-info {
+  width: 100%;
 }
 
 .stream-label {
   font-weight: 600;
-  font-size: 0.875rem;
-  text-align: center;
+  font-size: 0.9rem;
   margin-bottom: 0.25rem;
 }
 
-.stream-price {
-  font-size: 0.75rem;
+.stream-desc {
+  font-size: 0.7rem;
   color: var(--muted);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.stream-price {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.cbb-mix-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .stream-count {
@@ -529,6 +599,19 @@ select:focus {
   padding: 1rem;
   border-radius: var(--radius-sm);
   margin-top: 1.5rem;
+  transition: var(--transition);
+}
+
+.info-box.success {
+  background: rgba(16, 185, 129, 0.15);
+  border-left-color: var(--good);
+  animation: successPulse 0.5s ease-out;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 /* Badge */
@@ -920,6 +1003,69 @@ kbd {
   justify-content: center;
   font-size: 0.875rem;
   font-weight: 700;
+}
+
+/* Smart Recommendations */
+.smart-recs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.smart-rec {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-glass);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  transition: var(--transition);
+  animation: slideInLeft 0.4s ease-out;
+}
+
+.smart-rec:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.rec-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.rec-content {
+  flex: 1;
+}
+
+.rec-content strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.rec-content p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.rec-savings {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--good);
+  flex-shrink: 0;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Responsive */

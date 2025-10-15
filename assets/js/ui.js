@@ -1,7 +1,7 @@
 // ui.js - UI rendering og interaktion
 
 import { getState, setState, reset, toShareLink } from './state.js'
-import { findBestSolution } from './calc.js'
+import { findBestSolution, getSmartRecommendations } from './calc.js'
 import { STREAMING_SERVICES } from './streams.js'
 import { PLANS } from './plans.js'
 
@@ -106,11 +106,21 @@ function renderStep1(container) {
 function renderStep2(container) {
   const state = getState()
   const streams = state.streams || {}
+  const selectedCount = Object.values(streams).filter(Boolean).length
   
   container.innerHTML = `
     <div class="step-panel">
       <h2>Trin 2: Streaming-tjenester</h2>
       <p class="muted">Hvilke streaming-tjenester har I i dag?</p>
+      
+      ${selectedCount > 0 ? `
+        <div class="streaming-summary">
+          <strong>${selectedCount} ${selectedCount === 1 ? 'tjeneste' : 'tjenester'} valgt</strong>
+          ${selectedCount >= 2 ? `
+            <span class="badge success">✓ Berettiget til CBB MIX</span>
+          ` : ''}
+        </div>
+      ` : ''}
       
       <div class="streaming-grid">
         ${STREAMING_SERVICES.map(service => {
@@ -120,16 +130,24 @@ function renderStep2(container) {
                  data-service="${service.id}"
                  onclick="window.toggleStreamSimple('${service.id}')">
               <div class="stream-icon" style="background: ${service.color}">${service.icon}</div>
-              <div class="stream-label">${service.label}</div>
-              <div class="stream-price">${service.monthlyPrice} kr/md</div>
+              <div class="stream-info">
+                <div class="stream-label">${service.label}</div>
+                <div class="stream-desc">${service.description}</div>
+                <div class="stream-price">${service.monthlyPrice} kr/md</div>
+              </div>
               ${selected ? '<div class="stream-badge">✓</div>' : ''}
+              ${service.cbbMix ? '<div class="cbb-mix-badge">CBB MIX</div>' : ''}
             </div>
           `
         }).join('')}
       </div>
       
-      <div class="info-box">
-        <strong>💡 Tips:</strong> Vælg alle de tjenester I har i dag - vi finder den bedste løsning
+      <div class="info-box ${selectedCount >= 2 ? 'success' : ''}">
+        <strong>${selectedCount >= 2 ? '🎉' : '💡'} ${selectedCount >= 2 ? 'Perfekt!' : 'Tips:'}</strong> 
+        ${selectedCount >= 2 
+          ? `Med ${selectedCount} tjenester kan I få CBB MIX med alt inkluderet!`
+          : 'Vælg alle de tjenester I har - vi finder den bedste løsning med streaming inkluderet'
+        }
       </div>
     </div>
   `
@@ -138,6 +156,7 @@ function renderStep2(container) {
 function renderStep3(container) {
   const state = getState()
   const result = findBestSolution(state)
+  const smartRecs = getSmartRecommendations(state)
   
   if (!result) {
     container.innerHTML = `
@@ -154,11 +173,30 @@ function renderStep3(container) {
   
   const { current, recommended, savings, provider } = result
   const isSaving = savings.total6m > 0
+  const isCbbMix = recommended.details.isCbbMix || recommended.details.plan?.cbbMix
   
   container.innerHTML = `
     <div class="step-panel" id="result-panel">
-      <h2>Jeres løsning: ${provider.name}</h2>
-      <p class="muted">Baseret på ${state.household.size} personer</p>
+      ${smartRecs.length > 0 ? `
+        <div class="smart-recs">
+          ${smartRecs.slice(0, 2).map(rec => `
+            <div class="smart-rec" style="border-color: ${rec.color};">
+              <span class="rec-icon">${rec.icon}</span>
+              <div class="rec-content">
+                <strong>${rec.title}</strong>
+                <p class="muted">${rec.description}</p>
+              </div>
+              ${rec.savings ? `<div class="rec-savings">${rec.savings}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+      
+      <h2>
+        ${isCbbMix ? '🎬 CBB MIX Løsning' : `Jeres løsning: ${provider.name}`}
+        ${isCbbMix ? '<span class="badge" style="background: var(--good); color: white; margin-left: 1rem;">STREAMING INKL.</span>' : ''}
+      </h2>
+      <p class="muted">Optimal løsning for ${state.household.size} ${state.household.size === 1 ? 'person' : 'personer'}</p>
       
       <!-- Sammenligning: Nu vs. Vores løsning -->
       <div class="comparison-container">
@@ -275,9 +313,18 @@ function renderStep3(container) {
           ` : `
             <li><strong>${state.household.size}× ${recommended.details.plan.brand} ${recommended.details.plan.name}</strong></li>
             ${recommended.details.plan.introPrice ? `
-              <li><strong>Startpris:</strong> ${recommended.details.plan.introPrice} kr/md i ${recommended.details.plan.introMonths} måneder</li>
+              <li><strong>Kampagnepris:</strong> ${recommended.details.plan.introPrice} kr/md de første ${recommended.details.plan.introMonths} måneder, derefter ${recommended.details.plan.price} kr/md</li>
             ` : ''}
-            <li><strong>Features:</strong> ${recommended.details.plan.features.join(', ')}</li>
+            ${recommended.details.plan.cbbMix ? `
+              <li style="color: var(--good);"><strong>🎬 CBB MIX:</strong> ${recommended.details.plan.streamingCount} streaming-tjenester inkluderet!</li>
+            ` : ''}
+            ${recommended.details.plan.streamingCount ? `
+              <li><strong>Streaming:</strong> Vælg ${recommended.details.plan.streamingCount} fra: Netflix, Viaplay, HBO Max, TV2 Play, Disney+, Deezer, Mofibo m.fl.</li>
+            ` : ''}
+            <li><strong>Features:</strong> ${recommended.details.plan.features.filter(f => !f.includes('streaming')).join(', ')}</li>
+            ${recommended.details.plan.roamingGB ? `
+              <li><strong>EU Roaming:</strong> ${recommended.details.plan.roamingGB} GB i 55+ lande</li>
+            ` : ''}
           `}
           ${result.hasStreamingIncluded ? `
             <li style="color: var(--good);"><strong>✓ Streaming inkluderet!</strong> Sparer ${current.streamingMonthly.toLocaleString('da-DK')} kr/md</li>

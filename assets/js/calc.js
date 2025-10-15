@@ -161,9 +161,41 @@ function findOptimalSolution(familySize, currentMobile, currentStreaming, stream
     }
   }
   
-  // Strategi 2: Telmore/CBB streaming-pakker
-  const streamingPlans = getStreamingPlans()
-  for (const plan of streamingPlans) {
+  // Strategi 2: CBB MIX pakker (høj prioritet hvis kunde har streaming)
+  const cbbMixPlans = PLANS.filter(p => p.cbbMix && p.streamingCount >= 2)
+  for (const plan of cbbMixPlans) {
+    const totalCost = plan.price * familySize
+    const totalEarnings = (plan.earnings || 0) * familySize
+    const totalCurrentCost = currentMobile + currentStreaming
+    const savings = totalCurrentCost - totalCost
+    
+    // Ekstra bonus for CBB MIX hvis kunden har streaming
+    let mixScore = calculateScore(savings, totalEarnings, false, true)
+    if (streamingCount >= 2) {
+      mixScore += 400 // Stor bonus for CBB MIX når kunde har streaming
+    }
+    
+    if (mixScore > bestScore) {
+      bestScore = mixScore
+      bestSolution = {
+        isFamilyPackage: false,
+        plan,
+        brand: plan.brand,
+        name: plan.name,
+        basePrice: totalCost,
+        finalPrice: totalCost,
+        earnings: totalEarnings,
+        isCbbMix: true
+      }
+    }
+  }
+  
+  // Strategi 3: Telmore streaming-pakker
+  const telmoreStreamingPlans = PLANS.filter(p => 
+    p.brand === 'Telmore' && 
+    p.features.some(f => f.includes('Streaming'))
+  )
+  for (const plan of telmoreStreamingPlans) {
     const totalCost = plan.price * familySize
     const totalEarnings = (plan.earnings || 0) * familySize
     const totalCurrentCost = currentMobile + currentStreaming
@@ -184,7 +216,7 @@ function findOptimalSolution(familySize, currentMobile, currentStreaming, stream
     }
   }
   
-  // Strategi 3: Billigste non-streaming hvis kunden ikke har streaming
+  // Strategi 4: Billigste non-streaming hvis kunden ikke har streaming
   if (streamingCount === 0) {
     const nonStreamingPlans = getNonStreamingPlans()
     for (const plan of nonStreamingPlans) {
@@ -209,6 +241,76 @@ function findOptimalSolution(familySize, currentMobile, currentStreaming, stream
   }
   
   return bestSolution
+}
+
+// Intelligente anbefalinger baseret på kundens situation
+export function getSmartRecommendations(state) {
+  const { household, streams } = state
+  const selectedStreams = STREAMING_SERVICES.filter(s => streams[s.id])
+  const streamingCount = selectedStreams.length
+  
+  const recommendations = []
+  
+  // Anbefaling 1: CBB MIX hvis kunde har 2+ streaming-tjenester
+  if (streamingCount >= 2) {
+    const cbbMixSavings = selectedStreams.reduce((sum, s) => sum + s.monthlyPrice, 0)
+    recommendations.push({
+      type: 'cbb-mix',
+      priority: 'high',
+      title: 'CBB MIX - Spar på streaming!',
+      description: `Du har ${streamingCount} streaming-tjenester. Med CBB MIX får du dem inkluderet!`,
+      savings: `${cbbMixSavings} kr/md`,
+      icon: '🎬',
+      color: '#a78bfa'
+    })
+  }
+  
+  // Anbefaling 2: Telenor familie hvis 2+ personer
+  if (household.size >= 2) {
+    const familyDiscount = (household.size - 1) * 50
+    recommendations.push({
+      type: 'telenor-family',
+      priority: 'high',
+      title: 'Telenor Familiepris',
+      description: `Med ${household.size} personer får I ${familyDiscount} kr/md rabat!`,
+      savings: `${familyDiscount} kr/md`,
+      icon: '👨‍👩‍👧‍👦',
+      color: '#38bdf8'
+    })
+  }
+  
+  // Anbefaling 3: Telmore Play hvis mange streaming-tjenester
+  if (streamingCount >= 3 && streamingCount <= 5) {
+    recommendations.push({
+      type: 'telmore-play',
+      priority: 'medium',
+      title: `Telmore Play ${streamingCount} tjenester`,
+      description: `Perfekt match - få ${streamingCount} streaming-tjenester inkluderet!`,
+      icon: '📺',
+      color: '#ff8b4a'
+    })
+  }
+  
+  // Anbefaling 4: Budget-løsning
+  const cheapestPlan = PLANS
+    .filter(p => !p.cbbMix && !p.features.some(f => f.includes('Streaming')))
+    .sort((a, b) => a.price - b.price)[0]
+  
+  if (cheapestPlan && streamingCount === 0) {
+    recommendations.push({
+      type: 'budget',
+      priority: 'low',
+      title: 'Budget-løsning',
+      description: `Billigste: ${cheapestPlan.brand} ${cheapestPlan.name} - ${cheapestPlan.price} kr/md`,
+      icon: '💰',
+      color: '#22c55e'
+    })
+  }
+  
+  return recommendations.sort((a, b) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 }
+    return priorityOrder[b.priority] - priorityOrder[a.priority]
+  })
 }
 
 // Scorer løsninger baseret på besparelse + indtjening
