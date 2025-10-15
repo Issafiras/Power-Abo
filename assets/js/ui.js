@@ -7,7 +7,7 @@ import { PLANS } from './plans.js'
 import { generateComparisonChart, generateMonthlyTrendChart, generateSavingsBreakdown } from './charts.js'
 import { findTopSolutions, compareProviders } from './compare.js'
 
-let currentStep = 1
+// currentStep fjernet - bruger single-page layout
 
 export function init() {
   setupEventListeners()
@@ -379,55 +379,7 @@ function renderSinglePage(container) {
   `
 }
 
-function renderStep2(container) {
-  const state = getState()
-  const streams = state.streams || {}
-  const selectedCount = Object.values(streams).filter(Boolean).length
-  
-  container.innerHTML = `
-    <div class="step-panel">
-      <h2>Trin 2: Streaming-tjenester</h2>
-      <p class="muted">Hvilke streaming-tjenester har I i dag?</p>
-      
-      ${selectedCount > 0 ? `
-        <div class="streaming-summary">
-          <strong>${selectedCount} ${selectedCount === 1 ? 'tjeneste' : 'tjenester'} valgt</strong>
-          ${selectedCount >= 2 ? `
-            <span class="badge success">✓ Berettiget til CBB MIX</span>
-          ` : ''}
-        </div>
-      ` : ''}
-      
-      <div class="streaming-grid">
-        ${STREAMING_SERVICES.map(service => {
-          const selected = streams[service.id] || false
-          return `
-            <div class="stream-chip ${selected ? 'selected' : ''}" 
-                 data-service="${service.id}"
-                 onclick="window.toggleStreamSimple('${service.id}')">
-              <div class="stream-icon" style="background: ${service.color}">${service.icon}</div>
-              <div class="stream-info">
-                <div class="stream-label">${service.label}</div>
-                <div class="stream-desc">${service.description}</div>
-                <div class="stream-price">${service.monthlyPrice} kr/md</div>
-              </div>
-              ${selected ? '<div class="stream-badge">✓</div>' : ''}
-              ${service.cbbMix ? '<div class="cbb-mix-badge">CBB MIX</div>' : ''}
-            </div>
-          `
-        }).join('')}
-      </div>
-      
-      <div class="info-box ${selectedCount >= 2 ? 'success' : ''}">
-        <strong>${selectedCount >= 2 ? '🎉' : '💡'} ${selectedCount >= 2 ? 'Perfekt!' : 'Tips:'}</strong> 
-        ${selectedCount >= 2 
-          ? `Med ${selectedCount} tjenester kan I få CBB MIX med alt inkluderet!`
-          : 'Vælg alle de tjenester I har - vi finder den bedste løsning med streaming inkluderet'
-        }
-      </div>
-    </div>
-  `
-}
+// renderStep2 fjernet - integreret i renderSinglePage
 
 function renderStep3(container) {
   const state = getState()
