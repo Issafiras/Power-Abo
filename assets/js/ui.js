@@ -20,21 +20,13 @@ export function setStep(step) {
 }
 
 export function render() {
-  renderStepIndicator()
-  renderCurrentStep()
-  updateNavButtons()
+  const appContent = document.getElementById('app-content')
+  if (!appContent) return
+
+  renderSinglePage(appContent)
 }
 
-function renderStepIndicator() {
-  const container = document.getElementById('step-indicator')
-  if (!container) return
-  
-  container.innerHTML = `
-    <div class="step ${currentStep === 1 ? 'active' : ''}">1. Mobil</div>
-    <div class="step ${currentStep === 2 ? 'active' : ''}">2. Streaming</div>
-    <div class="step ${currentStep === 3 ? 'active' : ''}">3. Resultat</div>
-  `
-}
+// renderStepIndicator fjernet - bruger single-page layout
 
 // renderCurrentStep fjernet - bruger renderSinglePage
 
