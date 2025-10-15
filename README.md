@@ -148,6 +148,19 @@ const MIN_SAVINGS = 500 // Ændr til ønsket beløb
 - **ES Modules** – Modulær JavaScript-struktur
 - **GitHub Actions** – Automatisk deployment
 
+## 📚 Dokumentation
+
+Fuld wiki-dokumentation findes i [`docs/wiki/`](docs/wiki/Home.md):
+
+- 🚀 [Quick Start Guide](docs/wiki/Quick-Start.md)
+- 📖 [Brugerguide](docs/wiki/Brugerguide.md)
+- 🏗️ [Arkitektur](docs/wiki/Arkitektur.md)
+- ⚙️ [Konfiguration](docs/wiki/Konfiguration.md)
+- ⌨️ [Tastaturgenveje](docs/wiki/Tastaturgenveje.md)
+- 🚀 [GitHub Pages Setup](docs/wiki/GitHub-Pages-Setup.md)
+- ❓ [FAQ](docs/wiki/FAQ.md)
+- 📝 [Changelog](docs/wiki/Changelog.md)
+
 ## 📝 Licens
 
 Dette projekt er udviklet til intern brug hos POWER.
