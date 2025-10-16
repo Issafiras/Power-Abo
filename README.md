@@ -287,7 +287,7 @@ Rediger `/src/data/streamingServices.js`:
   id: 'unique-id',
   name: 'Tjeneste navn',
   price: 99,
-  logo: '/Power-Abo/logos/service.png',
+  logo: '/logos/service.png',
   bgColor: '#000000',
   category: 'streaming',
   cbbMixOnly: false // true for CBB MIX eksklusive tjenester

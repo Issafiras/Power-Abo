@@ -3,7 +3,7 @@
  * Viser en enkelt mobilplan med features og pris
  */
 
-import { useState } from 'react';
+import React from 'react';
 import { formatCurrency } from '../utils/calculations';
 import CBBMixSelector from './CBBMixSelector';
 

@@ -87,7 +87,7 @@ export function validatePlan(plan) {
   if (!plan || typeof plan !== 'object') return false;
 
   const requiredFields = ['id', 'provider', 'name', 'price'];
-  return requiredFields.every(field => plan.hasOwnProperty(field));
+  return requiredFields.every(field => Object.prototype.hasOwnProperty.call(plan, field));
 }
 
 /**

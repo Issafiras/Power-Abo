@@ -3,13 +3,12 @@
  * Sammenligner kundens situation med vores tilbud
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   formatCurrency,
   calculateCustomerTotal,
   calculateOurOfferTotal,
   calculateSavings,
-  checkStreamingCoverage,
   checkStreamingCoverageWithCBBMix,
   checkCBBMixCompatibility,
   autoAdjustCashDiscount
@@ -58,7 +57,7 @@ export default function ComparisonPanel({
         onCashDiscountChange(neededDiscount);
       }
     }
-  }, [autoAdjust, cashDiscountLocked, customerTotals.sixMonth, ourOfferWithoutDiscount.sixMonth, cartItems.length]);
+  }, [autoAdjust, cashDiscountLocked, customerTotals.sixMonth, ourOfferWithoutDiscount.sixMonth, cartItems.length, cashDiscount, onCashDiscountChange]);
 
   // Vores tilbud med kontant rabat
   const ourOfferTotals = calculateOurOfferTotal(
