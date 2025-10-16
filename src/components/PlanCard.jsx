@@ -20,74 +20,122 @@ export default function PlanCard({
 
   return (
     <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''}`}>
-      {/* Provider badge */}
-      <div className="plan-header" style={{ borderColor: brandColor }}>
-        <div className="plan-provider" style={{ color: brandColor }}>
-          {plan.provider.toUpperCase()}
+      {plan.provider === 'cbb' ? (
+        // CBB specifik struktur
+        <div className="refined-product-card__main-card">
+          <div className="refined-product-card__main-card--product-content-area">
+            {/* 5G badge */}
+            <div className="connection-type-label">
+              <div className="connection-type-label__content">
+                <svg viewBox="0 0 20 15" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.7452 6.7506C16.336 7.3414 16.8474 8.058 17.2371 8.8199C17.4257 9.1886 17.2797 9.6405 16.9109 9.8291C16.5421 10.0177 16.0903 9.8717 15.9017 9.5029C15.5813 8.8766 15.1611 8.2878 14.6845 7.8112C12.1219 5.24857 7.96699 5.24857 5.40433 7.8112C4.90651 8.309 4.5021 8.8688 4.19074 9.4844C4.00378 9.854 3.55259 10.0021 3.18297 9.8151C2.81335 9.6281 2.66527 9.1769 2.85223 8.8073C3.23503 8.0505 3.73307 7.3612 4.34367 6.7506C7.49211 3.60212 12.5967 3.60212 15.7452 6.7506ZM13.6433 9.8194C14.0909 10.267 14.4592 10.8167 14.7154 11.4016C14.8817 11.781 14.7089 12.2233 14.3295 12.3895C13.9501 12.5558 13.5078 12.383 13.3416 12.0036C13.1585 11.5858 12.8948 11.1922 12.5827 10.8801C11.1799 9.4773 8.9056 9.4773 7.5029 10.8801C7.19239 11.1906 6.94028 11.5688 6.7557 11.9906C6.58966 12.3701 6.14743 12.5431 5.76795 12.3771C5.38847 12.211 5.21545 11.7688 5.3815 11.3893C5.63895 10.8009 5.99533 10.2663 6.44224 9.8194C8.4308 7.8309 11.6548 7.8309 13.6433 9.8194ZM18.4483 4.27868C18.9574 4.78773 19.438 5.3693 19.8565 5.97556C20.0917 6.3165 20.0061 6.7836 19.6652 7.0188C19.3243 7.2541 18.8572 7.1685 18.6219 6.8276C18.2539 6.2944 17.8311 5.78273 17.3877 5.33934C13.3076 1.25928 6.69255 1.25928 2.6125 5.33934C2.19062 5.76121 1.77221 6.2728 1.39047 6.8231C1.15437 7.1634 0.68707 7.2479 0.34673 7.0118C0.00639987 6.7757 -0.0781001 6.3084 0.15801 5.9681C0.58817 5.34803 1.06258 4.76794 1.55184 4.27868C6.21768 -0.387163 13.7825 -0.387163 18.4483 4.27868ZM11.0609 12.4391C11.6467 13.0249 11.6467 13.9748 11.0609 14.5607C10.475 15.1465 9.5252 15.1465 8.9393 14.5607C8.3534 13.9748 8.3534 13.0249 8.9393 12.4391C9.5252 11.8532 10.475 11.8532 11.0609 12.4391Z"></path>
+                </svg>
+                <p>5G</p>
+              </div>
+            </div>
+            
+            {/* FRI tale */}
+            <div className="product-content product-content__speak">
+              <div className="current-product-content">
+                <p className="current-product-content__value">FRI</p>
+                <p className="current-product-content__label">tale</p>
+              </div>
+            </div>
+            
+            {/* Data */}
+            <div className="product-content product-content__data">
+              <div className="current-product-content">
+                <p className="current-product-content__value">{plan.name.split(' ')[0]}</p>
+                <p className="current-product-content__label">GB</p>
+              </div>
+            </div>
+            
+            {/* EU-data */}
+            <div className="product-content product-content__roaming-data">
+              <div className="current-product-content">
+                <p className="current-product-content__value">+ 30 GB EU-data</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Pris */}
+          <div className="refined-product-card__main-card--price-area">
+            <div className="current-price-line">
+              <p className="current-price-line__price">{plan.price}</p>
+              <p className="current-price-line__label"> kr./md.</p>
+            </div>
+          </div>
         </div>
-        {plan.familyDiscount && (
-          <div className="badge badge-telenor bounce-in">👨‍👩‍👧‍👦 Familie</div>
-        )}
-        {plan.provider === 'cbb' && (
-          <div className="cbb-5g-badge">5G</div>
-        )}
-      </div>
+      ) : (
+        // Eksisterende struktur for andre providers
+        <>
+          {/* Provider badge */}
+          <div className="plan-header" style={{ borderColor: brandColor }}>
+            <div className="plan-provider" style={{ color: brandColor }}>
+              {plan.provider.toUpperCase()}
+            </div>
+            {plan.familyDiscount && (
+              <div className="badge badge-telenor bounce-in">👨‍👩‍👧‍👦 Familie</div>
+            )}
+          </div>
 
-      {/* Plan navn og data */}
-      <div className="plan-title">
-        <h3 style={{ color: brandColor }}>{plan.name}</h3>
-        <div className="plan-data">{plan.data}</div>
-      </div>
+          {/* Plan navn og data */}
+          <div className="plan-title">
+            <h3 style={{ color: brandColor }}>{plan.name}</h3>
+            <div className="plan-data">{plan.data}</div>
+          </div>
 
-      {/* Pris */}
-      <div className="plan-pricing">
-        {hasIntroPrice ? (
-          <>
-            <div className="price-intro">
-              <span className="price-amount" style={{ color: brandColor }}>
-                {formatCurrency(plan.introPrice)}
+          {/* Pris */}
+          <div className="plan-pricing">
+            {hasIntroPrice ? (
+              <>
+                <div className="price-intro">
+                  <span className="price-amount" style={{ color: brandColor }}>
+                    {formatCurrency(plan.introPrice)}
+                  </span>
+                  <span className="price-period">/md</span>
+                </div>
+                <div className="price-detail text-muted">
+                  i {plan.introMonths} {plan.introMonths === 1 ? 'måned' : 'måneder'}, 
+                  derefter {formatCurrency(plan.price)}/md
+                </div>
+              </>
+            ) : (
+              <div className="price-normal">
+                <span className="price-amount" style={{ color: brandColor }}>
+                  {formatCurrency(plan.price)}
+                </span>
+                <span className="price-period">/md</span>
+              </div>
+            )}
+            
+            {plan.familyDiscount && (
+              <div className="price-family text-sm text-muted">
+                Samlerabat: -50 kr/md pr. ekstra linje
+              </div>
+            )}
+          </div>
+
+          {/* Features */}
+          <div className="plan-features">
+            {plan.features.map((feature, index) => (
+              <span key={index} className="badge badge-info">
+                {feature}
               </span>
-              <span className="price-period">/md</span>
-            </div>
-            <div className="price-detail text-muted">
-              i {plan.introMonths} {plan.introMonths === 1 ? 'måned' : 'måneder'}, 
-              derefter {formatCurrency(plan.price)}/md
-            </div>
-          </>
-        ) : (
-          <div className="price-normal">
-            <span className="price-amount" style={{ color: brandColor }}>
-              {formatCurrency(plan.price)}
-            </span>
-            <span className="price-period">/md</span>
+            ))}
           </div>
-        )}
-        
-        {plan.familyDiscount && (
-          <div className="price-family text-sm text-muted">
-            Samlerabat: -50 kr/md pr. ekstra linje
-          </div>
-        )}
-      </div>
 
-      {/* Features */}
-      <div className="plan-features">
-        {plan.features.map((feature, index) => (
-          <span key={index} className="badge badge-info">
-            {feature}
-          </span>
-        ))}
-      </div>
-
-      {/* Streaming (hvis inkluderet) */}
-      {plan.streaming && plan.streaming.length > 0 && (
-        <div className="plan-streaming">
-          <div className="streaming-label">📺 Inkluderer:</div>
-          <div className="streaming-count badge badge-success">
-            {plan.streamingCount || plan.streaming.length} streaming-tjeneste
-            {(plan.streamingCount || plan.streaming.length) !== 1 ? 'r' : ''}
-          </div>
-        </div>
+          {/* Streaming (hvis inkluderet) */}
+          {plan.streaming && plan.streaming.length > 0 && (
+            <div className="plan-streaming">
+              <div className="streaming-label">📺 Inkluderer:</div>
+              <div className="streaming-count badge badge-success">
+                {plan.streamingCount || plan.streaming.length} streaming-tjeneste
+                {(plan.streamingCount || plan.streaming.length) !== 1 ? 'r' : ''}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* CBB MIX Section */}
@@ -269,83 +317,129 @@ export default function PlanCard({
           font-size: var(--font-sm);
         }
 
-        /* CBB Card Styling */
+        /* CBB Card Styling - Præcis som rigtige CBB kort */
         .cbb-card {
           background: linear-gradient(135deg, #FFE4B5, #FFD700);
           border: 2px solid #DAA520;
           color: #8B4513;
+          font-family: 'Arial', sans-serif;
         }
 
-        .cbb-card .plan-header {
-          background: rgba(255, 255, 255, 0.9);
-          border-radius: var(--radius-md) var(--radius-md) 0 0;
-          padding: var(--spacing-sm) var(--spacing-md);
-          border-bottom: 2px solid #DAA520;
-        }
-
-        .cbb-card .plan-provider {
-          color: #8B4513;
-          font-weight: var(--font-bold);
-          font-size: var(--font-sm);
-        }
-
-        .cbb-5g-badge {
-          background: #DC143C;
-          color: white;
-          padding: 4px 8px;
+        .refined-product-card__main-card {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          background: linear-gradient(135deg, #FFE4B5, #FFD700);
           border-radius: 12px;
-          font-size: var(--font-xs);
-          font-weight: var(--font-bold);
+          overflow: hidden;
+        }
+
+        .refined-product-card__main-card--product-content-area {
+          flex: 1;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .connection-type-label {
+          align-self: flex-end;
+          margin-bottom: 8px;
+        }
+
+        .connection-type-label__content {
           display: flex;
           align-items: center;
+          gap: 6px;
+          background: #DC143C;
+          color: white;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+
+        .connection-type-label__content svg {
+          width: 16px;
+          height: 12px;
+          fill: white;
+        }
+
+        .connection-type-label__content p {
+          margin: 0;
+          font-size: 12px;
+          font-weight: bold;
+        }
+
+        .product-content {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .current-product-content {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .current-product-content__value {
+          font-size: 32px;
+          font-weight: 900;
+          color: #8B4513;
+          margin: 0;
+          line-height: 1;
+        }
+
+        .current-product-content__label {
+          font-size: 14px;
+          font-weight: 600;
+          color: #8B4513;
+          margin: 0;
+          margin-top: 2px;
+        }
+
+        .product-content__speak .current-product-content__value {
+          font-size: 24px;
+        }
+
+        .product-content__data .current-product-content__value {
+          font-size: 48px;
+          font-weight: 900;
+        }
+
+        .product-content__roaming-data .current-product-content__value {
+          font-size: 14px;
+          font-weight: 600;
+          color: #8B4513;
+        }
+
+        .refined-product-card__main-card--price-area {
+          background: white;
+          padding: 16px;
+          border-top: 1px solid #DAA520;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .current-price-line {
+          display: flex;
+          align-items: baseline;
           gap: 4px;
         }
 
-        .cbb-5g-badge::before {
-          content: "📶";
-          font-size: 10px;
-        }
-
-        .cbb-card .plan-title h3 {
+        .current-price-line__price {
+          font-size: 24px;
+          font-weight: 900;
           color: #8B4513;
-          font-size: var(--font-3xl);
-          font-weight: var(--font-extrabold);
           margin: 0;
         }
 
-        .cbb-card .plan-data {
+        .current-price-line__label {
+          font-size: 14px;
+          font-weight: 600;
           color: #8B4513;
-          font-size: var(--font-sm);
-          font-weight: var(--font-medium);
-        }
-
-        .cbb-card .plan-pricing {
-          background: white;
-          border-radius: var(--radius-md);
-          padding: var(--spacing-md);
-          margin: var(--spacing-sm) 0;
-          border: 1px solid #DAA520;
-        }
-
-        .cbb-card .price-amount {
-          color: #8B4513;
-          font-size: var(--font-2xl);
-          font-weight: var(--font-extrabold);
-        }
-
-        .cbb-card .price-period {
-          color: #8B4513;
-          font-size: var(--font-sm);
-        }
-
-        .cbb-card .plan-features {
-          margin: var(--spacing-sm) 0;
-        }
-
-        .cbb-card .badge {
-          background: rgba(139, 69, 19, 0.1);
-          color: #8B4513;
-          border: 1px solid rgba(139, 69, 19, 0.3);
+          margin: 0;
         }
 
         .cbb-card .plan-add-btn {
@@ -353,6 +447,7 @@ export default function PlanCard({
           color: white;
           border: none;
           box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+          margin-top: 12px;
         }
 
         .cbb-card .plan-add-btn:hover {
