@@ -10,14 +10,14 @@ export default function PlanCard({ plan, onAddToCart }) {
   const brandColor = plan.color || 'var(--color-orange)';
 
   return (
-    <div className="plan-card glass-card">
+    <div className="plan-card glass-card scale-in">
       {/* Provider badge */}
       <div className="plan-header" style={{ borderColor: brandColor }}>
         <div className="plan-provider" style={{ color: brandColor }}>
           {plan.provider.toUpperCase()}
         </div>
         {plan.familyDiscount && (
-          <div className="badge badge-telenor">👨‍👩‍👧‍👦 Familie</div>
+          <div className="badge badge-telenor bounce-in">👨‍👩‍👧‍👦 Familie</div>
         )}
       </div>
 
@@ -105,11 +105,17 @@ export default function PlanCard({ plan, onAddToCart }) {
           flex-direction: column;
           padding: var(--spacing-lg);
           gap: var(--spacing-md);
-          transition: all var(--transition-base);
+          transition: all var(--transition-smooth);
+          cursor: pointer;
         }
 
         .plan-card:hover {
-          transform: translateY(-4px);
+          transform: translateY(-6px) scale(1.02);
+          z-index: 10;
+        }
+
+        .plan-card:active {
+          transform: translateY(-2px) scale(0.99);
         }
 
         .plan-header {
@@ -198,6 +204,12 @@ export default function PlanCard({ plan, onAddToCart }) {
           padding: var(--spacing-sm);
           background: var(--glass-bg);
           border-radius: var(--radius-md);
+          transition: all var(--transition-fast);
+        }
+
+        .plan-earnings:hover {
+          background: rgba(16, 185, 129, 0.1);
+          transform: scale(1.02);
         }
 
         .earnings-label {
@@ -213,6 +225,12 @@ export default function PlanCard({ plan, onAddToCart }) {
           margin-top: auto;
           width: 100%;
           justify-content: space-between;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .plan-add-btn:hover {
+          animation: pulseGlow 1s ease-in-out infinite;
         }
 
         @media (max-width: 900px) {

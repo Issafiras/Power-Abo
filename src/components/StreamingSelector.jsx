@@ -22,7 +22,7 @@ export default function StreamingSelector({
   };
 
   return (
-    <div className="streaming-selector glass-card">
+    <div className="streaming-selector glass-card-no-hover fade-in-up">
       <div className="section-header">
         <h2>📊 Kundens Nuværende Situation</h2>
         <p className="text-secondary">
@@ -54,21 +54,22 @@ export default function StreamingSelector({
 
       {/* Streaming grid */}
       <div className="streaming-grid">
-        {streamingServices.map(service => {
+        {streamingServices.map((service, index) => {
           const isSelected = selectedStreaming.includes(service.id);
           
           return (
             <button
               key={service.id}
               onClick={() => onStreamingToggle(service.id)}
-              className={`streaming-card glass-card ${isSelected ? 'selected' : ''}`}
+              className={`streaming-card glass-card stagger-item ${isSelected ? 'selected' : ''}`}
+              style={{ animationDelay: `${index * 50}ms` }}
               aria-pressed={isSelected}
             >
               <div className="streaming-icon">{service.logo}</div>
               <div className="streaming-name">{service.name}</div>
               <div className="streaming-price">{formatCurrency(service.price)}/md</div>
               {isSelected && (
-                <div className="streaming-checkmark">✓</div>
+                <div className="streaming-checkmark bounce-in">✓</div>
               )}
             </button>
           );
@@ -154,19 +155,29 @@ export default function StreamingSelector({
           padding: var(--spacing-lg);
           text-align: center;
           cursor: pointer;
-          transition: all var(--transition-base);
+          transition: all var(--transition-smooth);
           border: 2px solid transparent;
         }
 
         .streaming-card:hover {
-          transform: translateY(-2px);
+          transform: translateY(-4px) scale(1.03);
           border-color: var(--color-orange);
+          box-shadow: var(--shadow-lg), 0 0 20px rgba(255, 107, 26, 0.2);
+        }
+
+        .streaming-card:active {
+          transform: translateY(-2px) scale(0.98);
         }
 
         .streaming-card.selected {
           border-color: var(--color-orange);
-          background: rgba(255, 107, 26, 0.1);
-          box-shadow: var(--glow-orange);
+          background: rgba(255, 107, 26, 0.15);
+          box-shadow: var(--glow-orange), 0 0 30px rgba(255, 107, 26, 0.3);
+          transform: scale(1.02);
+        }
+
+        .streaming-card.selected:hover {
+          transform: translateY(-4px) scale(1.05);
         }
 
         .streaming-icon {
@@ -199,7 +210,8 @@ export default function StreamingSelector({
           align-items: center;
           justify-content: center;
           font-weight: var(--font-bold);
-          box-shadow: var(--glow-green);
+          box-shadow: var(--glow-green), 0 0 15px rgba(16, 185, 129, 0.5);
+          animation: bounceIn var(--duration-slow) var(--ease-out-back), pulse 2s ease-in-out infinite;
         }
 
         .totals-summary {

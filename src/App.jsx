@@ -236,7 +236,7 @@ function App() {
       <main className="main-content">
         <div className="container">
           {/* Top section: Customer situation */}
-          <section className="section">
+          <section className="section fade-in-up">
             <StreamingSelector
               selectedStreaming={selectedStreaming}
               onStreamingToggle={handleStreamingToggle}
@@ -246,7 +246,7 @@ function App() {
           </section>
 
           {/* Middle section: Cart & Comparison */}
-          <section className="section">
+          <section className="section fade-in-up" style={{ animationDelay: '100ms' }}>
             <div className="grid grid-cols-2">
               <Cart
                 cartItems={cartItems}
@@ -269,7 +269,7 @@ function App() {
           </section>
 
           {/* Bottom section: Plans */}
-          <section className="section">
+          <section className="section fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="plans-section glass-card">
               <div className="section-header">
                 <h2>📱 Vælg Mobilabonnementer</h2>
@@ -288,12 +288,13 @@ function App() {
               {/* Plans grid */}
               {filteredPlans.length > 0 ? (
                 <div className="plans-grid grid grid-cols-3">
-                  {filteredPlans.map(plan => (
-                    <PlanCard
-                      key={plan.id}
-                      plan={plan}
-                      onAddToCart={handleAddToCart}
-                    />
+                  {filteredPlans.map((plan, index) => (
+                    <div key={plan.id} className="stagger-item" style={{ animationDelay: `${index * 50}ms` }}>
+                      <PlanCard
+                        plan={plan}
+                        onAddToCart={handleAddToCart}
+                      />
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -342,6 +343,11 @@ function App() {
 
         .plans-section {
           padding: var(--spacing-2xl);
+          transition: all var(--transition-smooth);
+        }
+
+        .plans-section:hover {
+          border-color: rgba(255, 255, 255, 0.15);
         }
 
         .section-header {
@@ -350,10 +356,23 @@ function App() {
 
         .section-header h2 {
           margin-bottom: var(--spacing-sm);
+          animation: fadeInDown var(--duration-normal) var(--ease-in-out-cubic);
+        }
+
+        .section-header p {
+          animation: fadeIn var(--duration-slow) var(--ease-in-out-cubic);
         }
 
         .plans-grid {
           margin-top: var(--spacing-xl);
+        }
+
+        .plans-grid .stagger-item {
+          height: 100%;
+        }
+
+        .plans-grid .stagger-item > * {
+          height: 100%;
         }
 
         @media (max-width: 900px) {

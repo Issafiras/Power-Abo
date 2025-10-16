@@ -8,14 +8,14 @@ import { formatCurrency, calculateSixMonthPrice } from '../utils/calculations';
 export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
   if (cartItems.length === 0) {
     return (
-      <div className="cart glass-card">
+      <div className="cart glass-card-no-hover fade-in-up">
         <div className="section-header">
           <h2>🛒 Kurv</h2>
           <p className="text-secondary">Tilføj planer for at se beregninger</p>
         </div>
         
-        <div className="empty-state">
-          <div className="empty-state-icon">🛒</div>
+        <div className="empty-state scale-in">
+          <div className="empty-state-icon pulse">🛒</div>
           <p className="text-lg font-semibold">Kurven er tom</p>
           <p className="text-secondary">
             Vælg mobilplaner fra listen nedenfor
@@ -56,10 +56,10 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
   );
 
   return (
-    <div className="cart glass-card">
+    <div className="cart glass-card-no-hover fade-in-up">
       <div className="section-header">
         <h2>🛒 Kurv</h2>
-        <div className="cart-count badge badge-primary">
+        <div className="cart-count badge badge-primary pulse">
           {cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
           {' '}linje{cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 'r' : ''}
         </div>
@@ -67,12 +67,16 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
 
       {/* Cart items */}
       <div className="cart-items">
-        {cartItems.map((item) => {
+        {cartItems.map((item, index) => {
           const sixMonthPrice = calculateSixMonthPrice(item.plan, item.quantity);
           const hasIntro = item.plan.introPrice && item.plan.introMonths;
           
           return (
-            <div key={item.plan.id} className="cart-item">
+            <div 
+              key={item.plan.id} 
+              className="cart-item fade-in-up" 
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               {/* Plan info */}
               <div className="cart-item-header">
                 <div className="cart-item-provider" style={{ color: item.plan.color }}>
@@ -171,9 +175,9 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
       <div className="divider"></div>
 
       {/* Total earnings */}
-      <div className="cart-total-earnings">
+      <div className="cart-total-earnings scale-in">
         <span className="earnings-label">💰 Total indtjening:</span>
-        <span className="earnings-value text-success font-extrabold text-2xl">
+        <span className="earnings-value text-success font-extrabold text-2xl pulse-glow">
           {formatCurrency(totalEarnings)}
         </span>
       </div>
@@ -205,12 +209,32 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
           background: var(--glass-bg);
           border-radius: var(--radius-lg);
           border: 1px solid var(--glass-border);
-          transition: all var(--transition-base);
+          transition: all var(--transition-smooth);
+          position: relative;
+        }
+
+        .cart-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05));
+          opacity: 0;
+          transition: opacity var(--transition-base);
+          border-radius: var(--radius-lg);
+          pointer-events: none;
         }
 
         .cart-item:hover {
-          border-color: rgba(255, 255, 255, 0.2);
-          box-shadow: var(--shadow-md);
+          border-color: rgba(255, 255, 255, 0.3);
+          box-shadow: var(--shadow-xl), 0 0 20px rgba(255, 107, 26, 0.1);
+          transform: translateX(4px);
+        }
+
+        .cart-item:hover::before {
+          opacity: 1;
         }
 
         .cart-item-header {

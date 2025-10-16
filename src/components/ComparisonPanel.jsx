@@ -68,14 +68,14 @@ export default function ComparisonPanel({
 
   if (cartItems.length === 0) {
     return (
-      <div className="comparison-panel glass-card">
+      <div className="comparison-panel glass-card-no-hover fade-in-up">
         <div className="section-header">
           <h2>📊 Sammenligning</h2>
           <p className="text-secondary">Tilføj planer for at se sammenligning</p>
         </div>
         
-        <div className="empty-state">
-          <div className="empty-state-icon">📊</div>
+        <div className="empty-state scale-in">
+          <div className="empty-state-icon pulse">📊</div>
           <p className="text-secondary">
             Ingen data at sammenligne endnu
           </p>
@@ -106,7 +106,7 @@ export default function ComparisonPanel({
   }
 
   return (
-    <div className="comparison-panel glass-card">
+    <div className="comparison-panel glass-card-no-hover fade-in-up">
       <div className="section-header">
         <h2>📊 Sammenligning</h2>
         <p className="text-secondary">6-måneders analyse</p>
@@ -190,7 +190,7 @@ export default function ComparisonPanel({
       {/* Sammenligning grid */}
       <div className="comparison-grid">
         {/* Kunde kolonne */}
-        <div className="comparison-column customer">
+        <div className="comparison-column customer slide-in-left">
           <div className="column-header">
             <h3>👤 Kunden</h3>
           </div>
@@ -219,13 +219,13 @@ export default function ComparisonPanel({
         </div>
 
         {/* VS */}
-        <div className="comparison-vs">
-          <div className="vs-icon">⚡</div>
+        <div className="comparison-vs scale-in">
+          <div className="vs-icon pulse">⚡</div>
           <div className="vs-text">VS</div>
         </div>
 
         {/* Vores tilbud kolonne */}
-        <div className="comparison-column offer">
+        <div className="comparison-column offer slide-in-right">
           <div className="column-header">
             <h3>💼 Vores Tilbud</h3>
           </div>
@@ -269,11 +269,11 @@ export default function ComparisonPanel({
       <div className="divider"></div>
 
       {/* Besparelse */}
-      <div className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'}`}>
+      <div className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'} bounce-in`}>
         <div className="savings-label">
           {isPositiveSavings ? '✅ Besparelse' : '⚠️ Mersalg'}
         </div>
-        <div className="savings-amount">
+        <div className={`savings-amount ${isPositiveSavings ? 'pulse-glow' : ''}`}>
           {isPositiveSavings ? '' : '-'}
           {formatCurrency(Math.abs(savings))}
         </div>
@@ -372,6 +372,13 @@ export default function ComparisonPanel({
           border-radius: var(--radius-lg);
           border: 2px solid var(--glass-border);
           overflow: hidden;
+          transition: all var(--transition-smooth);
+        }
+
+        .comparison-column:hover {
+          border-color: rgba(255, 255, 255, 0.3);
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-xl), 0 0 20px rgba(255, 107, 26, 0.1);
         }
 
         .column-header {
@@ -451,17 +458,31 @@ export default function ComparisonPanel({
           text-align: center;
           position: relative;
           overflow: hidden;
+          transition: all var(--transition-smooth);
+        }
+
+        .savings-banner:hover {
+          transform: scale(1.02);
         }
 
         .savings-banner.positive {
           background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
           border: 3px solid var(--color-success);
-          box-shadow: var(--glow-green);
+          box-shadow: var(--glow-green), 0 10px 40px rgba(16, 185, 129, 0.3);
+        }
+
+        .savings-banner.positive:hover {
+          box-shadow: var(--glow-green), 0 20px 60px rgba(16, 185, 129, 0.4);
         }
 
         .savings-banner.negative {
           background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
           border: 3px solid var(--color-danger);
+          box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+
+        .savings-banner.negative:hover {
+          box-shadow: 0 0 40px rgba(239, 68, 68, 0.4);
         }
 
         .savings-label {

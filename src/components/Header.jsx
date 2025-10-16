@@ -45,13 +45,13 @@ export default function Header({
   };
 
   return (
-    <header className="header">
+    <header className="header fade-in-down">
       <div className="container">
         <div className="header-content">
           {/* Logo og titel */}
           <div className="header-logo">
-            <h1 className="text-gradient">⚡ Power Calculator</h1>
-            <p className="text-sm text-muted">Mobilabonnement & Streaming Beregner</p>
+            <h1 className="text-gradient bounce-in">⚡ Power Calculator</h1>
+            <p className="text-sm text-muted fade-in">Mobilabonnement & Streaming Beregner</p>
           </div>
 
           {/* Kontroller */}
@@ -131,6 +131,31 @@ export default function Header({
           position: sticky;
           top: 0;
           z-index: var(--z-sticky);
+          transition: all var(--transition-smooth);
+        }
+
+        .header::before {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, 
+            var(--color-orange), 
+            var(--color-telenor),
+            var(--color-cbb),
+            var(--color-orange)
+          );
+          background-size: 200% 100%;
+          animation: gradientFlow 3s ease infinite;
+          opacity: 0.6;
+        }
+
+        @keyframes gradientFlow {
+          0% { background-position: 0% 0%; }
+          50% { background-position: 100% 0%; }
+          100% { background-position: 0% 0%; }
         }
 
         .header-content {
@@ -177,7 +202,7 @@ export default function Header({
           max-width: 500px;
           width: 100%;
           padding: var(--spacing-2xl);
-          animation: slideInUp var(--transition-base);
+          animation: scaleIn var(--duration-normal) var(--ease-out-back);
         }
 
         .modal-content h3 {

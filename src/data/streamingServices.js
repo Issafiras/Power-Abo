@@ -7,63 +7,63 @@ export const streamingServices = [
   {
     id: 'netflix',
     name: 'Netflix',
-    price: 79,
+    price: 129, // Standard plan
     logo: '🎬',
     category: 'streaming'
   },
   {
     id: 'viaplay',
     name: 'Viaplay',
-    price: 349,
+    price: 149, // Standard plan
     logo: '📺',
     category: 'streaming'
   },
   {
     id: 'hbo-max',
-    name: 'HBO Max',
-    price: 79,
+    name: 'Max',
+    price: 129, // Standard plan
     logo: '🎭',
     category: 'streaming'
   },
   {
     id: 'tv2-play',
-    name: 'TV2 Play',
-    price: 119,
+    name: 'TV2 Play Basis',
+    price: 99, // Basis plan
     logo: '📡',
     category: 'streaming'
   },
   {
     id: 'saxo',
     name: 'Saxo',
-    price: 129,
+    price: 79, // 20 timers plan
     logo: '📚',
     category: 'streaming'
   },
   {
     id: 'disney-plus',
     name: 'Disney+',
-    price: 89,
+    price: 149, // Standard plan
     logo: '🏰',
     category: 'streaming'
   },
   {
     id: 'skyshowtime',
     name: 'SkyShowtime',
-    price: 69,
+    price: 89, // Standard plan
     logo: '🌟',
     category: 'streaming'
   },
   {
     id: 'prime-video',
     name: 'Prime Video',
-    price: 69,
+    price: 59, // Standalone plan
     logo: '📹',
     category: 'streaming'
   },
   {
     id: 'musik',
     name: 'Musik (Spotify/Apple Music)',
-    price: 119,
+    price: 119, // Individual plan
     logo: '🎵',
     category: 'musik'
   }
