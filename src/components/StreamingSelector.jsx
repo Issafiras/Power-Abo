@@ -62,10 +62,19 @@ export default function StreamingSelector({
               key={service.id}
               onClick={() => onStreamingToggle(service.id)}
               className={`streaming-card glass-card stagger-item ${isSelected ? 'selected' : ''}`}
-              style={{ animationDelay: `${index * 50}ms` }}
+              style={{ 
+                animationDelay: `${index * 50}ms`,
+                '--brand-color': service.color || 'var(--color-orange)',
+                '--brand-bg': service.bgColor || 'var(--glass-bg)'
+              }}
               aria-pressed={isSelected}
             >
-              <div className="streaming-icon">{service.logo}</div>
+              <div className="streaming-icon" style={{ 
+                background: service.bgColor,
+                color: service.color
+              }}>
+                {service.logo}
+              </div>
               <div className="streaming-name">{service.name}</div>
               <div className="streaming-price">{formatCurrency(service.price)}/md</div>
               {isSelected && (
@@ -182,7 +191,23 @@ export default function StreamingSelector({
 
         .streaming-icon {
           font-size: var(--font-4xl);
-          margin-bottom: var(--spacing-sm);
+          font-weight: var(--font-extrabold);
+          margin-bottom: var(--spacing-md);
+          width: 80px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-md);
+          transition: all var(--transition-smooth);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .streaming-card:hover .streaming-icon {
+          transform: scale(1.1);
+          box-shadow: var(--shadow-xl);
         }
 
         .streaming-name {
@@ -264,6 +289,8 @@ export default function StreamingSelector({
 
           .streaming-icon {
             font-size: var(--font-3xl);
+            width: 60px;
+            height: 60px;
           }
         }
       `}</style>
