@@ -19,7 +19,7 @@ export default function PlanCard({
   const brandColor = plan.color || 'var(--color-orange)';
 
   return (
-    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''}`}>
+    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' ? 'telenor-card' : ''}`}>
       {plan.provider === 'cbb' ? (
         // CBB specifik struktur
         <div className="refined-product-card__main-card">
@@ -63,6 +63,47 @@ export default function PlanCard({
             <div className="current-price-line">
               <p className="current-price-line__price">{plan.price}</p>
               <p className="current-price-line__label"> kr./md.</p>
+            </div>
+          </div>
+        </div>
+      ) : plan.provider === 'telenor' ? (
+        // Telenor specifik struktur
+        <div className="subscription-card color-telenor-dark-blue">
+          {/* Badge */}
+          <div className="subscription__badge-block">
+            <div className="subscription__badge text-size--16 badge--hot-pink color-white">
+              Flest vælger
+            </div>
+          </div>
+          
+          {/* Card wrapper */}
+          <div className="subscription-card__wrapper background-white">
+            {/* Image/Title area */}
+            <div className="subscription-card__img">
+              <div className="subscription-card__title full-width color-white">
+                <div className="col-auto text--left color-telenor-light-blue">
+                  <h3 className="heading heading--medium">{plan.name.split(' ')[0]} GB</h3>
+                </div>
+                <div className="col-auto text--right">
+                  <div className="subscription-card__price text-bold text-italic">
+                    {plan.price},- <span className="currency-label">/md</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Features list */}
+            <div className="subscription-features">
+              <ul className="list--reset">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="subscription-card__list-item">
+                    <span className="col-auto">
+                      <span className="color-telenor-blue icon icon-world icon--medium"></span>
+                    </span>
+                    <span className="col-stretch">{feature}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
@@ -450,18 +491,165 @@ export default function PlanCard({
           margin-top: 12px;
         }
 
-        .cbb-card .plan-add-btn:hover {
-          background: linear-gradient(135deg, #A0522D, #8B4513);
-          box-shadow: 0 6px 16px rgba(139, 69, 19, 0.4);
-        }
+         .cbb-card .plan-add-btn:hover {
+           background: linear-gradient(135deg, #A0522D, #8B4513);
+           box-shadow: 0 6px 16px rgba(139, 69, 19, 0.4);
+         }
 
-        @media (max-width: 900px) {
+         /* Telenor Card Styling - Præcis som rigtige Telenor kort */
+         .telenor-card {
+           background: #ffffff;
+           border: 2px solid #000F3C;
+           color: #000F3C;
+           font-family: 'Arial', sans-serif;
+           position: relative;
+           overflow: hidden;
+         }
+
+         .subscription-card {
+           display: flex;
+           flex-direction: column;
+           height: 100%;
+           position: relative;
+         }
+
+         .subscription__badge-block {
+           position: absolute;
+           top: 0;
+           left: 0;
+           z-index: 10;
+           padding: 8px;
+         }
+
+         .subscription__badge {
+           background: #FF1493;
+           color: white;
+           padding: 4px 12px;
+           border-radius: 4px;
+           font-size: 12px;
+           font-weight: bold;
+           text-transform: uppercase;
+         }
+
+         .subscription-card__wrapper {
+           flex: 1;
+           display: flex;
+           flex-direction: column;
+           background: white;
+           border-radius: 8px;
+           overflow: hidden;
+         }
+
+         .subscription-card__img {
+           background: linear-gradient(135deg, #000F3C, #1e3a8a);
+           color: white;
+           padding: 20px;
+           position: relative;
+           min-height: 120px;
+         }
+
+         .subscription-card__title {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-top: 20px;
+         }
+
+         .color-telenor-light-blue {
+           color: #60a5fa;
+         }
+
+         .heading--medium {
+           font-size: 24px;
+           font-weight: bold;
+           margin: 0;
+         }
+
+         .subscription-card__price {
+           font-size: 20px;
+           font-weight: bold;
+           color: white;
+         }
+
+         .currency-label {
+           font-size: 14px;
+           font-weight: normal;
+         }
+
+         .subscription-features {
+           padding: 16px;
+           flex: 1;
+         }
+
+         .list--reset {
+           list-style: none;
+           padding: 0;
+           margin: 0;
+         }
+
+         .subscription-card__list-item {
+           display: flex;
+           align-items: center;
+           gap: 12px;
+           margin-bottom: 8px;
+           font-size: 14px;
+         }
+
+         .color-telenor-blue {
+           color: #3b82f6;
+         }
+
+         .icon {
+           width: 16px;
+           height: 16px;
+           display: inline-block;
+         }
+
+         .icon-world::before {
+           content: "🌍";
+         }
+
+         .icon-heart::before {
+           content: "❤️";
+         }
+
+         .icon-coverage::before {
+           content: "📶";
+         }
+
+         .telenor-card .plan-add-btn {
+           background: linear-gradient(135deg, #000F3C, #1e3a8a);
+           color: white;
+           border: none;
+           box-shadow: 0 4px 12px rgba(0, 15, 60, 0.3);
+           margin-top: 12px;
+         }
+
+         .telenor-card .plan-add-btn:hover {
+           background: linear-gradient(135deg, #1e3a8a, #000F3C);
+           box-shadow: 0 6px 16px rgba(0, 15, 60, 0.4);
+         }
+
+         @media (max-width: 900px) {
           .plan-card {
             padding: var(--spacing-md);
           }
 
           .price-amount {
             font-size: var(--font-2xl);
+          }
+
+          .subscription-card__img {
+            min-height: 100px;
+            padding: 16px;
+          }
+
+          .heading--medium {
+            font-size: 20px;
+          }
+
+          .subscription-card__price {
+            font-size: 18px;
           }
         }
       `}</style>
