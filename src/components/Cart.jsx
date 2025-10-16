@@ -271,10 +271,11 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
         }
 
         .cart-item-provider .provider-logo {
-          height: 20px;
+          height: 28px;
           width: auto;
-          max-width: 100px;
+          max-width: 120px;
           object-fit: contain;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
         }
 
         .btn-remove {

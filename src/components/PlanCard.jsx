@@ -151,16 +151,17 @@ export default function PlanCard({ plan, onAddToCart }) {
         }
 
         .provider-logo {
-          height: 24px;
+          height: 36px;
           width: auto;
-          max-width: 120px;
+          max-width: 160px;
           object-fit: contain;
           transition: all var(--transition-smooth);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         .plan-card:hover .provider-logo {
-          transform: scale(1.05);
-          filter: brightness(1.1);
+          transform: scale(1.08);
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) brightness(1.15);
         }
 
         .plan-title h3 {

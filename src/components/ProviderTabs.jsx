@@ -28,6 +28,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
             onClick={() => onProviderChange(provider.id)}
             className={`tab ${activeProvider === provider.id ? 'tab-active' : ''}`}
             aria-pressed={activeProvider === provider.id}
+            title={provider.name}
           >
             {provider.logo ? (
               <img 
@@ -36,9 +37,11 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
                 className="tab-logo"
               />
             ) : (
-              <span className="tab-icon">{provider.icon}</span>
+              <>
+                <span className="tab-icon">{provider.icon}</span>
+                <span className="tab-name">{provider.name}</span>
+              </>
             )}
-            <span className="tab-name">{provider.name}</span>
           </button>
         ))}
       </div>
@@ -74,20 +77,22 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         }
 
         .tab-logo {
-          height: 20px;
+          height: 32px;
           width: auto;
-          max-width: 80px;
+          max-width: 140px;
           object-fit: contain;
           transition: all var(--transition-smooth);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .tab:hover .tab-logo {
-          transform: scale(1.1);
-          filter: brightness(1.2);
+          transform: scale(1.15);
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) brightness(1.15);
         }
 
         .tab-active .tab-logo {
-          filter: brightness(1.3);
+          height: 36px;
+          filter: drop-shadow(0 4px 12px rgba(255, 107, 26, 0.6)) brightness(1.2);
         }
 
         .tab-name {

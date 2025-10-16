@@ -320,29 +320,33 @@
 /* Tabs */
 .tabs {
   display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
   background: var(--glass-bg);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   backdrop-filter: blur(var(--blur-md));
   overflow-x: auto;
   position: relative;
+  box-shadow: var(--shadow-lg);
 }
 
 .tab {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
   font-size: var(--font-sm);
   font-weight: var(--font-semibold);
   color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all var(--transition-smooth);
   white-space: nowrap;
-  min-height: 44px;
+  min-height: 60px;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tab::before {
@@ -358,9 +362,11 @@
 }
 
 .tab:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   color: var(--text-primary);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-lg);
 }
 
 .tab:hover::before {
@@ -368,15 +374,16 @@
 }
 
 .tab-active {
-  background: var(--color-orange);
+  background: linear-gradient(135deg, var(--color-orange), var(--color-orange-dark));
   color: white;
-  box-shadow: var(--glow-orange);
-  transform: scale(1.05);
+  box-shadow: var(--glow-orange), 0 8px 24px rgba(255, 107, 26, 0.4);
+  transform: scale(1.08);
+  border-color: var(--color-orange-light);
 }
 
 .tab-active::before {
   width: 100%;
-  background: white;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Divider */

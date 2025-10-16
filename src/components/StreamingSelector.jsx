@@ -202,21 +202,21 @@ export default function StreamingSelector({
           font-size: var(--font-4xl);
           font-weight: var(--font-extrabold);
           margin-bottom: var(--spacing-md);
-          width: 80px;
-          height: 80px;
+          width: 100px;
+          height: 100px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-md);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
           transition: all var(--transition-smooth);
           margin-left: auto;
           margin-right: auto;
         }
 
         .streaming-card:hover .streaming-icon {
-          transform: scale(1.1);
-          box-shadow: var(--shadow-xl);
+          transform: scale(1.08);
+          box-shadow: var(--shadow-2xl), 0 0 30px rgba(255, 107, 26, 0.3);
         }
 
         /* Logo billede styles */
@@ -224,12 +224,18 @@ export default function StreamingSelector({
           width: 100%;
           height: 100%;
           object-fit: contain;
-          padding: 8px;
+          padding: 12px;
           transition: all var(--transition-smooth);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         .streaming-card:hover .streaming-logo-img {
           transform: scale(1.05);
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .streaming-card.selected .streaming-logo-img {
+          filter: drop-shadow(0 4px 12px rgba(255, 107, 26, 0.5));
         }
 
         /* Musik - Note symbol (fallback for services uden billede) */
