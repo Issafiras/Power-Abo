@@ -120,7 +120,7 @@ export function saveShowCashDiscount(show) {
 }
 
 export function loadShowCashDiscount() {
-  return getItem(STORAGE_KEYS.SHOW_CASH_DISCOUNT, true);
+  return getItem(STORAGE_KEYS.SHOW_CASH_DISCOUNT, false);
 }
 
 // Tema funktioner
