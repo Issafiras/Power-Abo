@@ -73,7 +73,9 @@ export default function StreamingSelector({
                 background: service.bgColor,
                 color: service.color
               }}>
-                {service.logo}
+                <span className={`logo-${service.id}`}>
+                  {service.logoText}
+                </span>
               </div>
               <div className="streaming-name">{service.name}</div>
               <div className="streaming-price">{formatCurrency(service.price)}/md</div>
@@ -210,6 +212,71 @@ export default function StreamingSelector({
           box-shadow: var(--shadow-xl);
         }
 
+        /* Brand-specifikke logo styles */
+        .logo-netflix {
+          font-size: 3.5rem;
+          font-weight: 900;
+          font-family: 'Arial Black', sans-serif;
+          letter-spacing: -2px;
+        }
+
+        .logo-viaplay {
+          font-size: 3rem;
+        }
+
+        .logo-hbo-max {
+          font-size: 1.8rem;
+          font-weight: 900;
+          font-family: 'Arial Black', sans-serif;
+          letter-spacing: 2px;
+        }
+
+        .logo-tv2-play {
+          font-size: 3rem;
+          font-weight: 900;
+          font-family: 'Arial Black', sans-serif;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: #E30613;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .logo-saxo {
+          font-size: 1.6rem;
+          font-weight: 900;
+          font-family: Arial, sans-serif;
+          text-transform: lowercase;
+          letter-spacing: -1px;
+        }
+
+        .logo-disney-plus {
+          font-size: 1.4rem;
+          font-weight: 700;
+          font-family: 'Arial', sans-serif;
+          letter-spacing: 1px;
+        }
+
+        .logo-skyshowtime {
+          font-size: 1.5rem;
+          font-weight: 900;
+          font-family: 'Arial Black', sans-serif;
+          letter-spacing: 1px;
+        }
+
+        .logo-prime-video {
+          font-size: 1.8rem;
+          font-weight: 700;
+          font-family: 'Arial', sans-serif;
+          text-transform: lowercase;
+        }
+
+        .logo-musik {
+          font-size: 3rem;
+        }
+
         .streaming-name {
           font-weight: var(--font-semibold);
           margin-bottom: var(--spacing-xs);
@@ -291,6 +358,44 @@ export default function StreamingSelector({
             font-size: var(--font-3xl);
             width: 60px;
             height: 60px;
+          }
+
+          .logo-netflix {
+            font-size: 2.5rem;
+          }
+
+          .logo-hbo-max {
+            font-size: 1.3rem;
+          }
+
+          .logo-tv2-play {
+            font-size: 2rem;
+            width: 40px;
+            height: 40px;
+          }
+
+          .logo-saxo {
+            font-size: 1.2rem;
+          }
+
+          .logo-disney-plus {
+            font-size: 1rem;
+          }
+
+          .logo-skyshowtime {
+            font-size: 1.1rem;
+          }
+
+          .logo-prime-video {
+            font-size: 1.3rem;
+          }
+
+          .logo-viaplay {
+            font-size: 2rem;
+          }
+
+          .logo-musik {
+            font-size: 2rem;
           }
         }
       `}</style>
