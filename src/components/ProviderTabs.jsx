@@ -6,9 +6,9 @@
 export default function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery }) {
   const providers = [
     { id: 'all', name: 'Alle', icon: '📱' },
-    { id: 'telmore', name: 'Telmore', icon: '🟠' },
-    { id: 'telenor', name: 'Telenor', icon: '🔵' },
-    { id: 'cbb', name: 'CBB', icon: '🟣' }
+    { id: 'telmore', name: 'Telmore', icon: '🟠', logo: '/logos/Telmore-logo.png' },
+    { id: 'telenor', name: 'Telenor', icon: '🔵', logo: '/logos/Telenor.png' },
+    { id: 'cbb', name: 'CBB', icon: '🟣', logo: '/logos/CBB_Mobil_800x400.png' }
   ];
 
   return (
@@ -22,7 +22,15 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
             className={`tab ${activeProvider === provider.id ? 'tab-active' : ''}`}
             aria-pressed={activeProvider === provider.id}
           >
-            <span className="tab-icon">{provider.icon}</span>
+            {provider.logo ? (
+              <img 
+                src={provider.logo} 
+                alt={provider.name}
+                className="tab-logo"
+              />
+            ) : (
+              <span className="tab-icon">{provider.icon}</span>
+            )}
             <span className="tab-name">{provider.name}</span>
           </button>
         ))}
@@ -56,6 +64,13 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
 
         .tab-icon {
           font-size: var(--font-lg);
+        }
+
+        .tab-logo {
+          width: 24px;
+          height: 24px;
+          object-fit: contain;
+          border-radius: 4px;
         }
 
         .tab-name {

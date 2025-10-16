@@ -125,7 +125,15 @@ export default function PlanCard({
           {/* Provider badge */}
           <div className="plan-header" style={{ borderColor: brandColor }}>
             <div className="plan-provider" style={{ color: brandColor }}>
-              {plan.provider.toUpperCase()}
+              {plan.logo ? (
+                <img 
+                  src={plan.logo} 
+                  alt={plan.provider}
+                  className="provider-logo"
+                />
+              ) : (
+                plan.provider.toUpperCase()
+              )}
             </div>
             {plan.familyDiscount && (
               <div className="badge badge-telenor bounce-in">👨‍👩‍👧‍👦 Familie</div>
@@ -260,6 +268,16 @@ export default function PlanCard({
           font-size: var(--font-xs);
           font-weight: var(--font-bold);
           letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+        }
+
+        .provider-logo {
+          width: 20px;
+          height: 20px;
+          object-fit: contain;
+          border-radius: 3px;
         }
 
         .plan-title h3 {
