@@ -3,12 +3,19 @@
  * Filtrerer planer baseret på valgt provider
  */
 
+// Provider logo mapping
+const providerLogos = {
+  telenor: '/Power-Abo/logos/Telenor.png',
+  telmore: '/Power-Abo/logos/Telmore.png',
+  cbb: '/Power-Abo/logos/CBB.png'
+};
+
 export default function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery }) {
   const providers = [
     { id: 'all', name: 'Alle', icon: '📱' },
-    { id: 'telmore', name: 'Telmore', icon: '🟠' },
-    { id: 'telenor', name: 'Telenor', icon: '🔵' },
-    { id: 'cbb', name: 'CBB', icon: '🟣' }
+    { id: 'telmore', name: 'Telmore', logo: providerLogos.telmore },
+    { id: 'telenor', name: 'Telenor', logo: providerLogos.telenor },
+    { id: 'cbb', name: 'CBB', logo: providerLogos.cbb }
   ];
 
   return (
@@ -22,7 +29,15 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
             className={`tab ${activeProvider === provider.id ? 'tab-active' : ''}`}
             aria-pressed={activeProvider === provider.id}
           >
-            <span className="tab-icon">{provider.icon}</span>
+            {provider.logo ? (
+              <img 
+                src={provider.logo} 
+                alt={provider.name}
+                className="tab-logo"
+              />
+            ) : (
+              <span className="tab-icon">{provider.icon}</span>
+            )}
             <span className="tab-name">{provider.name}</span>
           </button>
         ))}
@@ -56,6 +71,23 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
 
         .tab-icon {
           font-size: var(--font-lg);
+        }
+
+        .tab-logo {
+          height: 20px;
+          width: auto;
+          max-width: 80px;
+          object-fit: contain;
+          transition: all var(--transition-smooth);
+        }
+
+        .tab:hover .tab-logo {
+          transform: scale(1.1);
+          filter: brightness(1.2);
+        }
+
+        .tab-active .tab-logo {
+          filter: brightness(1.3);
         }
 
         .tab-name {

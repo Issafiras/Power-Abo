@@ -5,16 +5,32 @@
 
 import { formatCurrency } from '../utils/calculations';
 
+// Provider logo mapping
+const providerLogos = {
+  telenor: '/Power-Abo/logos/Telenor.png',
+  telmore: '/Power-Abo/logos/Telmore.png',
+  cbb: '/Power-Abo/logos/CBB.png'
+};
+
 export default function PlanCard({ plan, onAddToCart }) {
   const hasIntroPrice = plan.introPrice && plan.introMonths;
   const brandColor = plan.color || 'var(--color-orange)';
+  const providerLogo = providerLogos[plan.provider.toLowerCase()];
 
   return (
     <div className="plan-card glass-card scale-in">
       {/* Provider badge */}
       <div className="plan-header" style={{ borderColor: brandColor }}>
-        <div className="plan-provider" style={{ color: brandColor }}>
-          {plan.provider.toUpperCase()}
+        <div className="plan-provider">
+          {providerLogo ? (
+            <img 
+              src={providerLogo} 
+              alt={plan.provider}
+              className="provider-logo"
+            />
+          ) : (
+            <span style={{ color: brandColor }}>{plan.provider.toUpperCase()}</span>
+          )}
         </div>
         {plan.familyDiscount && (
           <div className="badge badge-telenor bounce-in">👨‍👩‍👧‍👦 Familie</div>
@@ -130,6 +146,21 @@ export default function PlanCard({ plan, onAddToCart }) {
           font-size: var(--font-xs);
           font-weight: var(--font-bold);
           letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+        }
+
+        .provider-logo {
+          height: 24px;
+          width: auto;
+          max-width: 120px;
+          object-fit: contain;
+          transition: all var(--transition-smooth);
+        }
+
+        .plan-card:hover .provider-logo {
+          transform: scale(1.05);
+          filter: brightness(1.1);
         }
 
         .plan-title h3 {
