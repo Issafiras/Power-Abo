@@ -136,11 +136,24 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
                     </span>
                   </div>
                 )}
+
+                {/* CBB Mix pricing */}
+                {item.cbbMixEnabled && item.cbbMixCount && (
+                  <div className="cbb-mix-pricing">
+                    <div className="price-line cbb-mix-line">
+                      <span className="price-label">🎬 CBB MIX ({item.cbbMixCount} tjenester):</span>
+                      <span className="price-value">
+                        {formatCurrency((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * item.quantity)}/md
+                      </span>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="price-line total">
                   <span className="price-label font-semibold">6 måneder:</span>
                   <span className="price-value font-bold">
-                    {formatCurrency(sixMonthPrice)}
+                    {formatCurrency(sixMonthPrice + (item.cbbMixEnabled && item.cbbMixCount ? 
+                      ((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * 6 * item.quantity) : 0))}
                   </span>
                 </div>
 
@@ -315,6 +328,23 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
 
         .price-value {
           font-size: var(--font-base);
+        }
+
+        .cbb-mix-pricing {
+          margin-top: var(--spacing-xs);
+          padding: var(--spacing-xs) 0;
+        }
+
+        .cbb-mix-line {
+          background: rgba(168, 85, 247, 0.1);
+          padding: var(--spacing-xs) var(--spacing-sm);
+          border-radius: var(--radius-sm);
+          border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .cbb-mix-line .price-label {
+          color: var(--color-purple);
+          font-weight: var(--font-semibold);
         }
 
         .cart-item-features {

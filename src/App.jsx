@@ -42,7 +42,7 @@ function App() {
   const [cashDiscountLocked, setCashDiscountLocked] = useState(false);
   const [autoAdjust, setAutoAdjust] = useState(false);
   const [theme, setTheme] = useState('dark');
-  const [showCashDiscount, setShowCashDiscount] = useState(true);
+  const [showCashDiscount, setShowCashDiscount] = useState(false);
   const [activeProvider, setActiveProvider] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showPresentation, setShowPresentation] = useState(false);
@@ -132,8 +132,14 @@ function App() {
       ));
       showToast(`${plan.name} opdateret i kurven`);
     } else {
-      // Tilføj ny
-      setCartItems([...cartItems, { plan, quantity: 1 }]);
+      // Tilføj ny med CBB Mix data hvis tilgængelig
+      const newItem = { 
+        plan, 
+        quantity: 1,
+        cbbMixEnabled: plan.cbbMixAvailable ? (cbbMixEnabled[plan.id] || false) : false,
+        cbbMixCount: plan.cbbMixAvailable ? (cbbMixCount[plan.id] || 2) : 0
+      };
+      setCartItems([...cartItems, newItem]);
       showToast(`${plan.name} tilføjet til kurven`);
     }
   };

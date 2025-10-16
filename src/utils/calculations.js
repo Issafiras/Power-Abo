@@ -159,9 +159,17 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
     return { monthly: 0, sixMonth: 0, telenorDiscount: 0 };
   }
 
-  // Beregn 6-måneders total for alle planer
+  // Beregn 6-måneders total for alle planer (inkl. CBB Mix)
   const plansSixMonth = cartItems.reduce((total, item) => {
-    return total + calculateSixMonthPrice(item.plan, item.quantity);
+    let itemTotal = calculateSixMonthPrice(item.plan, item.quantity);
+    
+    // Tilføj CBB Mix pris hvis aktiv
+    if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount) {
+      const mixPrice = calculateCBBMixPrice(item.plan, item.cbbMixCount);
+      itemTotal += mixPrice * 6 * item.quantity; // 6 måneder
+    }
+    
+    return total + itemTotal;
   }, 0);
 
   // Beregn Telenor familie-rabat

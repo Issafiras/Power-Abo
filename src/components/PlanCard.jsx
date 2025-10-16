@@ -510,9 +510,9 @@ export default function PlanCard({
 
          /* Telenor Card Styling - Præcis som rigtige Telenor kort */
          .telenor-card {
-           background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+           background: linear-gradient(135deg, #1e293b, #334155);
            border: 2px solid #000F3C;
-           color: #000F3C;
+           color: #ffffff;
            font-family: 'Arial', sans-serif;
            position: relative;
            overflow: hidden;
@@ -547,7 +547,7 @@ export default function PlanCard({
            flex: 1;
            display: flex;
            flex-direction: column;
-           background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+           background: linear-gradient(135deg, #1e293b, #334155);
            border-radius: 8px;
            overflow: hidden;
          }
@@ -626,6 +626,7 @@ export default function PlanCard({
            gap: 12px;
            margin-bottom: 8px;
            font-size: 14px;
+           color: #ffffff;
          }
 
          .color-telenor-blue {
