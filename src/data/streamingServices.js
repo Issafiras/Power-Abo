@@ -48,7 +48,7 @@ export const streamingServices = [
     id: 'disney-plus',
     name: 'Disney+',
     price: 149, // Standard plan
-    logo: '/logos/DisneyPlus.png',
+    logo: '/logos/Disney+.png',
     bgColor: 'linear-gradient(180deg, #0072D2 0%, #00BCD4 100%)', // Disney gradient
     category: 'streaming'
   },
@@ -101,7 +101,7 @@ export const streamingServices = [
     id: 'nordisk-film-plus',
     name: 'Nordisk Film+',
     price: 89, // CBB MIX pris
-    logo: '/logos/nordisk-film.png',
+    logo: '/logos/nordisk film.png',
     bgColor: '#2C3E50', // Nordisk Film mørkeblå
     category: 'streaming',
     cbbMixOnly: true
