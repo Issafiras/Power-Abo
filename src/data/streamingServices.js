@@ -83,7 +83,7 @@ export const streamingServices = [
     id: 'podimo',
     name: 'Podimo Premium',
     price: 79, // CBB MIX pris
-    logo: '/Power-Abo/logos/Podimo.png',
+    logo: '/Power-Abo/logos/podimo.png',
     bgColor: '#FF6B35', // Podimo orange
     category: 'podcast',
     cbbMixOnly: true // Kun tilgængelig via CBB MIX
@@ -92,7 +92,7 @@ export const streamingServices = [
     id: 'mofibo',
     name: 'Mofibo (20 timer)',
     price: 89, // CBB MIX pris
-    logo: '/Power-Abo/logos/Mofibo.png',
+    logo: '/Power-Abo/logos/mofibo.png',
     bgColor: '#1A1A1A', // Mofibo sort
     category: 'audiobook',
     cbbMixOnly: true
