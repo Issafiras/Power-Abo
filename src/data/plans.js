@@ -204,13 +204,13 @@ export const plans = [
     streaming: [],
     cbbMixAvailable: true, // CBB MIX tilgængelig
     cbbMixPricing: {
-      2: 160,  // 2 tjenester = 160 kr/md
-      3: 210,  // 3 tjenester = 210 kr/md
-      4: 260,  // 4 tjenester = 260 kr/md
-      5: 310,  // 5 tjenester = 310 kr/md
-      6: 360,  // 6 tjenester = 360 kr/md
-      7: 410,  // 7 tjenester = 410 kr/md
-      8: 460   // 8 tjenester = 460 kr/md
+      2: 320,  // 2 tjenester = 160 kr/md per tjeneste = 320 kr/md
+      3: 480,  // 3 tjenester = 160 kr/md per tjeneste = 480 kr/md
+      4: 640,  // 4 tjenester = 160 kr/md per tjeneste = 640 kr/md
+      5: 800,  // 5 tjenester = 160 kr/md per tjeneste = 800 kr/md
+      6: 960,  // 6 tjenester = 160 kr/md per tjeneste = 960 kr/md
+      7: 1120, // 7 tjenester = 160 kr/md per tjeneste = 1120 kr/md
+      8: 1280  // 8 tjenester = 160 kr/md per tjeneste = 1280 kr/md
     }
   },
   {
@@ -225,13 +225,13 @@ export const plans = [
     streaming: [],
     cbbMixAvailable: true,
     cbbMixPricing: {
-      2: 160,  // 2 tjenester = 160 kr/md
-      3: 210,  // 3 tjenester = 210 kr/md
-      4: 260,  // 4 tjenester = 260 kr/md
-      5: 310,  // 5 tjenester = 310 kr/md
-      6: 360,  // 6 tjenester = 360 kr/md
-      7: 410,  // 7 tjenester = 410 kr/md
-      8: 460   // 8 tjenester = 460 kr/md
+      2: 320,  // 2 tjenester = 160 kr/md per tjeneste = 320 kr/md
+      3: 480,  // 3 tjenester = 160 kr/md per tjeneste = 480 kr/md
+      4: 640,  // 4 tjenester = 160 kr/md per tjeneste = 640 kr/md
+      5: 800,  // 5 tjenester = 160 kr/md per tjeneste = 800 kr/md
+      6: 960,  // 6 tjenester = 160 kr/md per tjeneste = 960 kr/md
+      7: 1120, // 7 tjenester = 160 kr/md per tjeneste = 1120 kr/md
+      8: 1280  // 8 tjenester = 160 kr/md per tjeneste = 1280 kr/md
     }
   },
   {
@@ -246,13 +246,13 @@ export const plans = [
     streaming: [],
     cbbMixAvailable: true,
     cbbMixPricing: {
-      2: 160,  // 2 tjenester = 160 kr/md
-      3: 210,  // 3 tjenester = 210 kr/md
-      4: 260,  // 4 tjenester = 260 kr/md
-      5: 310,  // 5 tjenester = 310 kr/md
-      6: 360,  // 6 tjenester = 360 kr/md
-      7: 410,  // 7 tjenester = 410 kr/md
-      8: 460   // 8 tjenester = 460 kr/md
+      2: 320,  // 2 tjenester = 160 kr/md per tjeneste = 320 kr/md
+      3: 480,  // 3 tjenester = 160 kr/md per tjeneste = 480 kr/md
+      4: 640,  // 4 tjenester = 160 kr/md per tjeneste = 640 kr/md
+      5: 800,  // 5 tjenester = 160 kr/md per tjeneste = 800 kr/md
+      6: 960,  // 6 tjenester = 160 kr/md per tjeneste = 960 kr/md
+      7: 1120, // 7 tjenester = 160 kr/md per tjeneste = 1120 kr/md
+      8: 1280  // 8 tjenester = 160 kr/md per tjeneste = 1280 kr/md
     }
   },
   {
@@ -267,27 +267,24 @@ export const plans = [
     streaming: [],
     cbbMixAvailable: true,
     cbbMixPricing: {
-      2: 160,  // 2 tjenester = 160 kr/md
-      3: 210,  // 3 tjenester = 210 kr/md
-      4: 260,  // 4 tjenester = 260 kr/md
-      5: 310,  // 5 tjenester = 310 kr/md
-      6: 360,  // 6 tjenester = 360 kr/md
-      7: 410,  // 7 tjenester = 410 kr/md
-      8: 460   // 8 tjenester = 460 kr/md
+      2: 320,  // 2 tjenester = 160 kr/md per tjeneste = 320 kr/md
+      3: 480,  // 3 tjenester = 160 kr/md per tjeneste = 480 kr/md
+      4: 640,  // 4 tjenester = 160 kr/md per tjeneste = 640 kr/md
+      5: 800,  // 5 tjenester = 160 kr/md per tjeneste = 800 kr/md
+      6: 960,  // 6 tjenester = 160 kr/md per tjeneste = 960 kr/md
+      7: 1120, // 7 tjenester = 160 kr/md per tjeneste = 1120 kr/md
+      8: 1280  // 8 tjenester = 160 kr/md per tjeneste = 1280 kr/md
     }
   }
 ];
 
 /**
  * Hent planer baseret på provider
- * @param {string} provider - Provider navn ('telenor', 'telmore', 'cbb', 'cbb-mix', eller 'all')
+ * @param {string} provider - Provider navn ('telenor', 'telmore', 'cbb', eller 'all')
  * @returns {Array} Filtrerede planer
  */
 export function getPlansByProvider(provider) {
   if (provider === 'all') return plans;
-  if (provider === 'cbb-mix') {
-    return plans.filter(plan => plan.cbbMixAvailable);
-  }
   return plans.filter(plan => plan.provider === provider);
 }
 

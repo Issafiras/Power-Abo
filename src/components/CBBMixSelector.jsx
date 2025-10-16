@@ -26,7 +26,7 @@ export default function CBBMixSelector({
       <div className="mix-header">
         <h4 className="mix-title">🎬 Vælg antal CBB MIX tjenester</h4>
         <p className="mix-description">
-          Vælg mellem 2-8 streaming-tjenester til din CBB MIX pakke
+          Vælg mellem 2-8 streaming-tjenester til din CBB MIX pakke (160 kr/md per tjeneste)
         </p>
       </div>
       
