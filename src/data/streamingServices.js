@@ -8,8 +8,7 @@ export const streamingServices = [
     id: 'netflix',
     name: 'Netflix',
     price: 129, // Standard plan
-    logoText: 'N',
-    color: '#E50914', // Netflix rød
+    logo: '/logos/Netflix.png',
     bgColor: '#000000', // Netflix sort
     category: 'streaming'
   },
@@ -17,20 +16,15 @@ export const streamingServices = [
     id: 'viaplay',
     name: 'Viaplay',
     price: 149, // Standard plan
-    logoText: 'viaplay',
-    logoIcon: '▶',
-    color: '#FFFFFF', // Hvid
+    logo: '/logos/Viaplay.png',
     bgColor: '#1F2833', // Viaplay mørk
-    circleColor: 'linear-gradient(135deg, #E91E63, #D81B60)', // Pink cirkel
     category: 'streaming'
   },
   {
     id: 'hbo-max',
     name: 'Max',
     price: 129, // Standard plan
-    logoTop: 'HBO',
-    logoBottom: 'max',
-    color: '#FFFFFF', // Max hvid
+    logo: '/logos/MAX.png',
     bgColor: '#001E3C', // Max mørkeblå
     category: 'streaming'
   },
@@ -38,18 +32,15 @@ export const streamingServices = [
     id: 'tv2-play',
     name: 'TV2 Play Basis',
     price: 99, // Basis plan
-    logoText: 'V2',
-    color: '#FFFFFF', // Hvid
+    logo: '/logos/TV2.png',
     bgColor: '#00162E', // TV2 mørkeblå
-    circleColor: '#E30613', // TV2 rød cirkel
     category: 'streaming'
   },
   {
     id: 'saxo',
     name: 'Saxo',
     price: 79, // 20 timers plan
-    logoText: 'saxo',
-    color: '#FFFFFF', // Saxo hvid
+    logo: '/logos/Saxo.png',
     bgColor: '#E30613', // Saxo rød
     category: 'streaming'
   },
@@ -57,8 +48,7 @@ export const streamingServices = [
     id: 'disney-plus',
     name: 'Disney+',
     price: 149, // Standard plan
-    logoText: 'Disney+',
-    color: '#FFFFFF', // Disney hvid
+    logo: '/logos/Disney+.png',
     bgColor: 'linear-gradient(180deg, #0072D2 0%, #00BCD4 100%)', // Disney gradient
     category: 'streaming'
   },
@@ -66,9 +56,7 @@ export const streamingServices = [
     id: 'skyshowtime',
     name: 'SkyShowtime',
     price: 89, // Standard plan
-    logoText: 'sky',
-    logoCircle: 'SHO',
-    color: '#FFFFFF', // Sky hvid
+    logo: '/logos/SkyshowTime.png',
     bgColor: '#7B2D8E', // Sky lilla
     category: 'streaming'
   },
@@ -76,10 +64,7 @@ export const streamingServices = [
     id: 'prime-video',
     name: 'Prime Video',
     price: 59, // Standalone plan
-    logoTop: 'prime',
-    logoBottom: 'video',
-    hasSmile: true,
-    color: '#FFFFFF', // Prime hvid
+    logo: '/logos/Prime.png',
     bgColor: '#00A8E1', // Prime blå
     category: 'streaming'
   },

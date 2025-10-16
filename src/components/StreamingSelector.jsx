@@ -70,73 +70,18 @@ export default function StreamingSelector({
               aria-pressed={isSelected}
             >
               <div className="streaming-icon" style={{ 
-                background: service.bgColor,
-                color: service.color
+                background: service.bgColor
               }}>
-                {/* Netflix - Bare N */}
-                {service.id === 'netflix' && (
-                  <span className="logo-netflix">{service.logoText}</span>
-                )}
-                
-                {/* Viaplay - Cirkel med play + tekst */}
-                {service.id === 'viaplay' && (
-                  <div className="logo-viaplay">
-                    <div className="viaplay-circle" style={{ background: service.circleColor }}>
-                      {service.logoIcon}
-                    </div>
-                    <div className="viaplay-text">{service.logoText}</div>
-                  </div>
-                )}
-                
-                {/* HBO Max - HBO stor + max lille */}
-                {service.id === 'hbo-max' && (
-                  <div className="logo-hbo-max">
-                    <div className="hbo-text">{service.logoTop}</div>
-                    <div className="max-text">{service.logoBottom}</div>
-                  </div>
-                )}
-                
-                {/* TV2 - V2 i rød cirkel */}
-                {service.id === 'tv2-play' && (
-                  <div className="logo-tv2-play">
-                    <div className="tv2-circle" style={{ background: service.circleColor }}>
-                      {service.logoText}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Saxo - saxo tekst */}
-                {service.id === 'saxo' && (
-                  <span className="logo-saxo">{service.logoText}</span>
-                )}
-                
-                {/* Disney+ - Disney+ med bue */}
-                {service.id === 'disney-plus' && (
-                  <span className="logo-disney-plus">{service.logoText}</span>
-                )}
-                
-                {/* SkyShowtime - sky + SHO i cirkel */}
-                {service.id === 'skyshowtime' && (
-                  <div className="logo-skyshowtime">
-                    <div className="sky-main">
-                      <span className="sky-text">{service.logoText}</span>
-                      <span className="sho-circle">{service.logoCircle}</span>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Prime Video - prime/video med smile */}
-                {service.id === 'prime-video' && (
-                  <div className="logo-prime-video">
-                    <div className="prime-text">{service.logoTop}</div>
-                    <div className="video-text">{service.logoBottom}</div>
-                    {service.hasSmile && <div className="prime-smile">⌣</div>}
-                  </div>
-                )}
-                
-                {/* Musik - Note symbol */}
-                {service.id === 'musik' && (
-                  <span className="logo-musik">{service.logoText}</span>
+                {service.logo ? (
+                  <img 
+                    src={service.logo} 
+                    alt={service.name}
+                    className="streaming-logo-img"
+                  />
+                ) : (
+                  <span className="logo-musik" style={{ color: service.color }}>
+                    {service.logoText}
+                  </span>
                 )}
               </div>
               <div className="streaming-name">{service.name}</div>
@@ -274,156 +219,20 @@ export default function StreamingSelector({
           box-shadow: var(--shadow-xl);
         }
 
-        /* Brand-specifikke logo styles */
-        
-        /* Netflix - Rød N */
-        .logo-netflix {
-          font-size: 4rem;
-          font-weight: 900;
-          font-family: 'Arial Black', sans-serif;
-        }
-
-        /* Viaplay - Cirkel + tekst */
-        .logo-viaplay {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .viaplay-circle {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.4rem;
-        }
-
-        .viaplay-text {
-          font-size: 1.1rem;
-          font-weight: 600;
-          text-transform: lowercase;
-        }
-
-        /* HBO Max - To linjer */
-        .logo-hbo-max {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          line-height: 1;
-        }
-
-        .hbo-text {
-          font-size: 2.2rem;
-          font-weight: 900;
-          font-family: 'Arial Black', sans-serif;
-          letter-spacing: 2px;
-        }
-
-        .max-text {
-          font-size: 1.8rem;
-          font-weight: 300;
-          font-family: Arial, sans-serif;
-          letter-spacing: 1px;
-          margin-top: -4px;
-        }
-
-        /* TV2 - V2 i rød cirkel */
-        .logo-tv2-play {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .tv2-circle {
-          width: 56px;
-          height: 56px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
-          font-weight: 900;
-          font-family: 'Arial Black', sans-serif;
-        }
-
-        /* Saxo - saxo tekst */
-        .logo-saxo {
-          font-size: 2rem;
-          font-weight: 900;
-          font-family: Arial, sans-serif;
-          text-transform: lowercase;
-          letter-spacing: -1px;
-        }
-
-        /* Disney+ */
-        .logo-disney-plus {
-          font-size: 1.6rem;
-          font-weight: 700;
-          font-family: 'Arial', sans-serif;
-        }
-
-        /* SkyShowtime - sky + SHO */
-        .logo-skyshowtime {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .sky-main {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .sky-text {
-          font-size: 1.6rem;
-          font-weight: 900;
-          font-family: 'Arial Black', sans-serif;
-          text-transform: lowercase;
-        }
-
-        .sho-circle {
-          font-size: 0.9rem;
-          font-weight: 900;
-          padding: 4px 6px;
-          border: 2px solid white;
-          border-radius: 50%;
-          font-family: 'Arial Black', sans-serif;
-        }
-
-        /* Prime Video - prime/video + smile */
-        .logo-prime-video {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          line-height: 1;
-        }
-
-        .prime-text {
-          font-size: 1.4rem;
-          font-weight: 700;
-          font-family: Arial, sans-serif;
-          text-transform: lowercase;
-        }
-
-        .video-text {
-          font-size: 1.4rem;
-          font-weight: 700;
-          font-family: Arial, sans-serif;
-          text-transform: lowercase;
-        }
-
-        .prime-smile {
-          font-size: 1.8rem;
-          margin-top: -4px;
+        /* Logo billede styles */
+        .streaming-logo-img {
           width: 100%;
-          text-align: right;
+          height: 100%;
+          object-fit: contain;
+          padding: 8px;
+          transition: all var(--transition-smooth);
         }
 
-        /* Musik */
+        .streaming-card:hover .streaming-logo-img {
+          transform: scale(1.05);
+        }
+
+        /* Musik - Note symbol (fallback for services uden billede) */
         .logo-musik {
           font-size: 3rem;
         }
@@ -506,64 +315,8 @@ export default function StreamingSelector({
           }
 
           .streaming-icon {
-            font-size: var(--font-3xl);
             width: 60px;
             height: 60px;
-          }
-
-          /* Mobile responsive logo sizes */
-          .logo-netflix {
-            font-size: 2.5rem;
-          }
-
-          .viaplay-circle {
-            width: 30px;
-            height: 30px;
-            font-size: 1rem;
-          }
-
-          .viaplay-text {
-            font-size: 0.8rem;
-          }
-
-          .hbo-text {
-            font-size: 1.5rem;
-          }
-
-          .max-text {
-            font-size: 1.2rem;
-          }
-
-          .tv2-circle {
-            width: 40px;
-            height: 40px;
-            font-size: 1.5rem;
-          }
-
-          .logo-saxo {
-            font-size: 1.4rem;
-          }
-
-          .logo-disney-plus {
-            font-size: 1.1rem;
-          }
-
-          .sky-text {
-            font-size: 1.2rem;
-          }
-
-          .sho-circle {
-            font-size: 0.7rem;
-            padding: 3px 4px;
-          }
-
-          .prime-text,
-          .video-text {
-            font-size: 1rem;
-          }
-
-          .prime-smile {
-            font-size: 1.4rem;
           }
 
           .logo-musik {
