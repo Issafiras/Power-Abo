@@ -98,61 +98,15 @@ export const streamingServices = [
     cbbMixOnly: true
   },
   {
-    id: 'deezer',
-    name: 'Deezer Premium',
-    price: 99, // CBB MIX pris
-    logo: '/Power-Abo/logos/Deezer.png',
-    bgColor: '#FF0000', // Deezer rød
-    category: 'musik',
-    cbbMixOnly: true
-  },
-  {
     id: 'nordisk-film-plus',
     name: 'Nordisk Film+',
     price: 89, // CBB MIX pris
-    logo: '/Power-Abo/logos/NordiskFilm.png',
+    logo: '/Power-Abo/logos/nordisk film.png',
     bgColor: '#2C3E50', // Nordisk Film mørkeblå
     category: 'streaming',
     cbbMixOnly: true
   },
 
-  // CBB MIX SPECIFIKKE VARIANTER
-  {
-    id: 'netflix-standard-cbb',
-    name: 'Netflix Standard (CBB MIX)',
-    price: 129, // CBB MIX pris
-    logo: '/Power-Abo/logos/Netflix.png',
-    bgColor: '#000000',
-    category: 'streaming',
-    cbbMixVariant: true // CBB MIX variant
-  },
-  {
-    id: 'tv2-play-basis-cbb',
-    name: 'TV2 Play Basis Partner (CBB MIX)',
-    price: 99, // CBB MIX pris
-    logo: '/Power-Abo/logos/TV2.png',
-    bgColor: '#00162E',
-    category: 'streaming',
-    cbbMixVariant: true
-  },
-  {
-    id: 'viaplay-film-serier-cbb',
-    name: 'Viaplay Film & Serier (CBB MIX)',
-    price: 149, // CBB MIX pris
-    logo: '/Power-Abo/logos/Viaplay.png',
-    bgColor: '#1F2833',
-    category: 'streaming',
-    cbbMixVariant: true
-  },
-  {
-    id: 'hbo-max-standard-cbb',
-    name: 'HBO Max Standard (CBB MIX)',
-    price: 129, // CBB MIX pris
-    logo: '/Power-Abo/logos/MAX.png',
-    bgColor: '#001E3C',
-    category: 'streaming',
-    cbbMixVariant: true
-  }
 ];
 
 /**
