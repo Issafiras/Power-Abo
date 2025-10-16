@@ -48,7 +48,7 @@ export const streamingServices = [
     id: 'disney-plus',
     name: 'Disney+',
     price: 149, // Standard plan
-    logo: '/logos/Disney+.png',
+    logo: '/logos/DisneyPlus.png',
     bgColor: 'linear-gradient(180deg, #0072D2 0%, #00BCD4 100%)', // Disney gradient
     category: 'streaming'
   },
@@ -56,7 +56,7 @@ export const streamingServices = [
     id: 'skyshowtime',
     name: 'SkyShowtime',
     price: 89, // Standard plan
-    logo: '/logos/SkyshowTime.png',
+    logo: '/logos/SkyShowtime.png',
     bgColor: '#7B2D8E', // Sky lilla
     category: 'streaming'
   },

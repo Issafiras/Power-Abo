@@ -6,7 +6,7 @@
 export default function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery }) {
   const providers = [
     { id: 'all', name: 'Alle', icon: '📱' },
-    { id: 'telmore', name: 'Telmore', icon: '🟠', logo: '/logos/Telmore-logo.png' },
+    { id: 'telmore', name: 'Telmore', icon: '🟠', logo: '/logos/Telmore.png' },
     { id: 'telenor', name: 'Telenor', icon: '🔵', logo: '/logos/Telenor.png' },
     { id: 'cbb', name: 'CBB', icon: '🟣', logo: '/logos/CBB_Mobil_800x400.png' }
   ];

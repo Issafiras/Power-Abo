@@ -62,7 +62,7 @@ export const plans = [
   {
     id: 'telmore-30gb',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: '30 GB',
     data: '30 GB',
     price: 129,
@@ -74,7 +74,7 @@ export const plans = [
   {
     id: 'telmore-70gb',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: '70 GB',
     data: '70 GB',
     price: 149,
@@ -88,7 +88,7 @@ export const plans = [
   {
     id: 'telmore-60gb',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: '60 GB',
     data: '60 GB',
     price: 169,
@@ -100,7 +100,7 @@ export const plans = [
   {
     id: 'telmore-100gb-hbo',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: '100 GB + HBO Max',
     data: '100 GB',
     price: 219,
@@ -114,7 +114,7 @@ export const plans = [
   {
     id: 'telmore-unlimited-basic',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: 'Fri Data',
     data: 'Fri Data',
     price: 229,
@@ -126,7 +126,7 @@ export const plans = [
   {
     id: 'telmore-100gb-2streaming',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: '100 GB + 2 Streaming',
     data: '100 GB',
     price: 299,
@@ -141,7 +141,7 @@ export const plans = [
   {
     id: 'telmore-unlimited-3streaming',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: 'Fri Data + 3 Streaming',
     data: 'Fri Data',
     price: 399,
@@ -156,7 +156,7 @@ export const plans = [
   {
     id: 'telmore-unlimited-4streaming',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: 'Fri Data + 4 Streaming',
     data: 'Fri Data',
     price: 449,
@@ -169,7 +169,7 @@ export const plans = [
   {
     id: 'telmore-unlimited-5streaming',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: 'Fri Data + 5 Streaming',
     data: 'Fri Data',
     price: 499,
@@ -182,7 +182,7 @@ export const plans = [
   {
     id: 'telmore-premium',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: 'Premium (8 Streaming)',
     data: 'Fri Data',
     price: 559,
@@ -195,7 +195,7 @@ export const plans = [
   {
     id: 'telmore-ultimate',
     provider: 'telmore',
-    logo: '/logos/Telmore-logo.png',
+    logo: '/logos/Telmore.png',
     name: 'Ultimate (9 Streaming)',
     data: 'Fri Data',
     price: 599,
