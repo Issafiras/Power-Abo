@@ -168,6 +168,7 @@ export default function ComparisonPanel({
                 <span className="status-text">
                   {streamingCoverage.included.length} tjeneste
                   {streamingCoverage.included.length !== 1 ? 'r' : ''} inkluderet
+                  {cartItems.some(item => item.plan.streamingCount > 0) && ' (mix)'}
                 </span>
               </div>
             )}

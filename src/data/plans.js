@@ -125,7 +125,7 @@ export const plans = [
     earnings: 1000,
     features: ['5G', 'EU Roaming', '2 Streaming', 'Intro-pris'],
     color: '#ff6b1a',
-    streaming: ['hbo-max', 'netflix'],
+    streaming: [],
     streamingCount: 2
   },
   {
@@ -139,7 +139,7 @@ export const plans = [
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '3 Streaming', 'Intro-pris'],
     color: '#ff6b1a',
-    streaming: ['hbo-max', 'netflix', 'disney-plus'],
+    streaming: [],
     streamingCount: 3
   },
   {
@@ -151,7 +151,7 @@ export const plans = [
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '4 Streaming'],
     color: '#ff6b1a',
-    streaming: ['hbo-max', 'netflix', 'disney-plus', 'viaplay'],
+    streaming: [],
     streamingCount: 4
   },
   {
@@ -163,7 +163,7 @@ export const plans = [
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '5 Streaming'],
     color: '#ff6b1a',
-    streaming: ['hbo-max', 'netflix', 'disney-plus', 'viaplay', 'tv2-play'],
+    streaming: [],
     streamingCount: 5
   },
   {
@@ -175,7 +175,7 @@ export const plans = [
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '8 Streaming'],
     color: '#ff6b1a',
-    streaming: ['hbo-max', 'netflix', 'disney-plus', 'viaplay', 'tv2-play', 'skyshowtime', 'prime-video', 'saxo'],
+    streaming: [],
     streamingCount: 8
   },
   {
@@ -187,7 +187,7 @@ export const plans = [
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '9 Streaming'],
     color: '#ff6b1a',
-    streaming: ['hbo-max', 'netflix', 'disney-plus', 'viaplay', 'tv2-play', 'skyshowtime', 'prime-video', 'saxo', 'musik'],
+    streaming: [],
     streamingCount: 9
   },
 

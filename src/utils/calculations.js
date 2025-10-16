@@ -85,9 +85,17 @@ export function checkStreamingCoverage(cartItems, selectedStreaming) {
 
   // Hent alle inkluderede streaming-tjenester fra planer
   const includedStreaming = new Set();
+  let totalStreamingSlots = 0;
+  
   cartItems.forEach(item => {
     if (item.plan.streaming && item.plan.streaming.length > 0) {
+      // Hvis planen har specifikke streaming-tjenester
       item.plan.streaming.forEach(service => includedStreaming.add(service));
+    }
+    
+    // Hvis planen har streamingCount (mix-system)
+    if (item.plan.streamingCount && item.plan.streamingCount > 0) {
+      totalStreamingSlots += item.plan.streamingCount * item.quantity;
     }
   });
 
@@ -95,17 +103,32 @@ export function checkStreamingCoverage(cartItems, selectedStreaming) {
   console.log('🔍 Debug checkStreamingCoverage:');
   console.log('Selected streaming:', selectedStreaming);
   console.log('Included streaming from plans:', Array.from(includedStreaming));
+  console.log('Total streaming slots available:', totalStreamingSlots);
   console.log('Cart items:', cartItems.map(item => ({ 
     name: item.plan.name, 
-    streaming: item.plan.streaming 
+    streaming: item.plan.streaming,
+    streamingCount: item.plan.streamingCount,
+    quantity: item.quantity
   })));
 
-  // Split valgte streaming i inkluderet og ikke-inkluderet
+  // Hvis der er streaming slots tilgængelige (mix-system)
+  if (totalStreamingSlots > 0) {
+    // Tag de første N streaming-tjenester (hvor N = totalStreamingSlots)
+    const included = selectedStreaming.slice(0, totalStreamingSlots);
+    const notIncluded = selectedStreaming.slice(totalStreamingSlots);
+    
+    console.log('Mix system - Included:', included);
+    console.log('Mix system - Not included:', notIncluded);
+    
+    return { included, notIncluded };
+  }
+
+  // Ellers brug den gamle logik (specifikke streaming-tjenester)
   const included = selectedStreaming.filter(id => includedStreaming.has(id));
   const notIncluded = selectedStreaming.filter(id => !includedStreaming.has(id));
 
-  console.log('Included:', included);
-  console.log('Not included:', notIncluded);
+  console.log('Specific streaming - Included:', included);
+  console.log('Specific streaming - Not included:', notIncluded);
 
   return { included, notIncluded };
 }
