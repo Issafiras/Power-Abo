@@ -1,96 +1,102 @@
 <!DOCTYPE html>
-<html lang="da" data-theme="dark">
+<html lang="da">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>POWER | 6-måneders familieløsning</title>
-  <meta name="description" content="Find den bedste mobil- og streaming-løsning til din familie. Automatisk sammenligning og sikring af minimum 500 kr besparelse over 6 måneder." />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="alternate icon" href="favicon.ico" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Mobilabonnement og streaming beregner - Sammenlign priser og besparelser" />
+  <meta name="theme-color" content="#ff6b1a" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  
+  <title>Power Calculator - Mobilabonnement Beregner</title>
+  
+  <style>
+    /* Loading screen */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #0a0f1c, #374151);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+    
+    #loading-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loading-logo {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .loading-text {
+      color: #f9fafb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff6b1a, #ff8847);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #ff6b1a;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-top: 2rem;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="header-content">
-      <h1>POWER <span class="muted">| Familieløsning</span></h1>
-      <div class="header-actions">
-        <button id="theme-toggle" class="btn-icon" aria-label="Skift tema">🌙</button>
-        <button id="shortcuts-btn" class="btn-icon" aria-label="Vis genveje" title="Tryk ? for genveje">⌨️</button>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="container">
-      <div id="step-indicator" class="step-indicator"></div>
-      <div id="step-content" class="step-content"></div>
-      
-      <div class="nav-buttons">
-        <button id="btn-prev" class="btn">← Tilbage</button>
-        <button id="btn-next" class="btn primary">Næste →</button>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    <div class="footer-content">
-      <p class="muted">
-        <strong>Tastaturgenveje:</strong> 
-        1/2/3 (trin) · R (reset) · S (del) · P (print) · ← → (naviger)
-      </p>
-      <p class="muted">
-        6-måneders perspektiv · Minimum 500 kr besparelse · Telenor samlerabat
-      </p>
-    </div>
-  </footer>
-
-  <!-- Shortcuts modal -->
-  <div id="shortcuts-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <h3>Tastaturgenveje</h3>
-      <div class="shortcuts-list">
-        <div class="shortcut-row">
-          <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>
-          <span>Spring til trin 1, 2 eller 3</span>
-        </div>
-        <div class="shortcut-row">
-          <kbd>←</kbd>, <kbd>→</kbd>
-          <span>Naviger mellem trin</span>
-        </div>
-        <div class="shortcut-row">
-          <kbd>R</kbd>
-          <span>Reset/Nulstil</span>
-        </div>
-        <div class="shortcut-row">
-          <kbd>S</kbd>
-          <span>Gem/Del resultat (kopiér link)</span>
-        </div>
-        <div class="shortcut-row">
-          <kbd>P</kbd>
-          <span>Print resultat</span>
-        </div>
-      </div>
-      <button class="btn" onclick="document.getElementById('shortcuts-modal').style.display='none'">Luk</button>
-    </div>
+  <!-- Loading screen -->
+  <div id="loading-screen">
+    <div class="loading-logo">⚡</div>
+    <div class="loading-text">Power Calculator</div>
+    <div class="loading-spinner"></div>
   </div>
-
-  <script type="module" src="assets/js/main.js"></script>
+  
+  <!-- React app root -->
+  <div id="root"></div>
+  
+  <script type="module" src="/src/main.jsx"></script>
   
   <script>
-    // Vis shortcuts modal
-    document.getElementById('shortcuts-btn')?.addEventListener('click', () => {
-      document.getElementById('shortcuts-modal').style.display = 'flex'
-    })
-    
-    // Luk modal ved ESC
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        document.getElementById('shortcuts-modal').style.display = 'none'
-      }
-      if (e.key === '?') {
-        document.getElementById('shortcuts-modal').style.display = 'flex'
-      }
-    })
+    // Fjern loading screen når React er klar
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.classList.add('fade-out');
+          setTimeout(() => {
+            loadingScreen.remove();
+          }, 500);
+        }
+      }, 500);
+    });
   </script>
 </body>
 </html>

@@ -1,225 +1,305 @@
-# POWER | 6-måneders familieløsning
+# ⚡ Power Calculator
 
-En moderne, intelligent webapp der automatisk finder den bedste mobil- og streaming-løsning til familier. Med support for **Telenor**, **Telmore** og **CBB** (inkl. CBB MIX).
+En moderne webapplikation til beregning og sammenligning af mobilabonnementer og streaming-tjenester.
 
-## ✨ Features
+## 🎯 Features
 
-### 🎯 Smart Løsningsfinder
-- **AI-lignende algoritme** – Finder automatisk den optimale løsning
-- **3 teleselskaber** – Telenor, Telmore og CBB med 30+ abonnementer
-- **Familie-optimering** – Smart mix af streaming + standard pakker
-- **Intelligent scoring** – Balance mellem kundebesparelse og indtjening
+### Kundefunktionalitet
+- ✅ **Streaming Selector**: Multi-select grid med alle populære streaming-tjenester
+- ✅ **Mobiludgifter Input**: Indtast kundens nuværende mobiludgifter
+- ✅ **Provider Filtering**: Filtrer planer fra Telmore, Telenor eller CBB
+- ✅ **Smart Søgning**: Søg efter planer baseret på data, features eller pris
+- ✅ **Dynamisk Kurv**: Tilføj planer med quantity controls
+- ✅ **Live Beregninger**: Realtids beregning af totaler og besparelser
 
-### 🎬 CBB MIX Integration
-- **6 CBB MIX pakker** – Mobil + streaming fra 74 kr/md
-- **2-3 streaming-tjenester** – Netflix, Viaplay, HBO Max, Disney+, Deezer, Mofibo m.fl.
-- **Kampagnepriser** – Auto-beregning af intro-priser over 6 måneder
-- **Høj prioritet** – Anbefales automatisk når kunde har streaming
+### Avancerede Features
+- 💰 **Kontant Rabat**: Justerbar kontant rabat med låsefunktion
+- 🔄 **Auto-adjust**: Automatisk justering for minimum 500 kr besparelse
+- 📊 **Præsentationsvisning**: Fullscreen view med animeret besparelse
+- 🎨 **Dark/Light Mode**: Tema-toggle mellem mørk og lys tilstand
+- ⌨️ **Keyboard Shortcuts**: Genveje til hurtigere navigation
+- 💾 **Data Persistens**: Automatisk lagring i localStorage
+- 📱 **Responsivt Design**: Fungerer perfekt på mobil, tablet og desktop
 
-### 📊 Avancerede Visualiseringer
-- **Bar chart** – Sammenligning (Nu vs. Vores vs. Besparelse)
-- **Trend chart** – Månedlig udvikling med dual-line graf
-- **Pie chart** – Besparelsesfordeling (mobil/streaming/rabat)
-- **Toggle-funktion** – Vis/skjul efter behov
+### Beregninger
+- ✅ **Intro-pris håndtering**: Korrekt beregning af intro-perioder
+- ✅ **Telenor Familie-rabat**: Automatisk -50 kr/md pr. ekstra linje
+- ✅ **Streaming Coverage**: Checker hvilke tjenester er inkluderet
+- ✅ **6-måneders analyse**: Viser total besparelse over 6 måneder
+- ✅ **Indtjening**: Tracker total indtjening fra valgte planer
 
-### 💰 Kontant Rabat
-- **Engangsbeløb** – Tilføj kontant rabat ved skifte (f.eks. 500-1000 kr)
-- **Live-beregning** – Opdaterer automatisk total besparelse
-- **Detaljeret breakdown** – Før/efter rabat + total besparelse
-- **Smart UI** – Skjul når ikke i brug
+## 🚀 Installation
 
-### 🔍 Sammenlign Udbydere
-- **Side-om-side** – Alle 3 udbydere sammenlignet
-- **Auto-ranking** – 🏆 Bedste, 🥈 #2, 🥉 #3
-- **Detaljeret info** – Pris, besparelse, indtjening, features
-- **Visual highlighting** – Winner får grøn border + glow
+### Forudsætninger
+- Node.js 18.x eller nyere
+- npm eller yarn
 
-### 🧠 Intelligente Anbefalinger
-- **Smart recommendations** – Vises øverst på resultat
-- **Prioriteret** – High/Medium/Low baseret på relevans
-- **Kontekstuel** – Tilpasset kundens situation
-- **Actionable** – Viser konkrete besparelser
+### Setup
 
-### 🎨 UI/UX Excellence
-- **Dark/Light mode** – Tema-toggle med localStorage
-- **Animationer** – Shimmer, pulse, bounce, fade, slide
-- **Tastaturgenveje** – 1/2/3, R, S, P, piltaster, ?
-- **Print-optimeret** – A4-venlig output
-- **Del-funktion** – URL-parametre
-- **Fully responsive** – Desktop + mobile
+1. **Naviger til projekt-mappen:**
+   ```bash
+   cd power-calculator-app
+   ```
 
-## 🚀 Lokal kørsel
+2. **Installer dependencies:**
+   ```bash
+   npm install
+   ```
 
-Projektet er rent statisk og kræver ingen build-process. Du kan køre det på flere måder:
+3. **Start development server:**
+   ```bash
+   npm run dev
+   ```
 
-### 1. Python HTTP Server (anbefalet)
+4. **Åbn browser:**
+   - Applikationen åbner automatisk på `http://localhost:3000`
 
+## 📦 Build til Production
+
+### Byg projektet:
 ```bash
-cd "/Users/issafiras/Desktop/Power abo beregner"
-python3 -m http.server 5173
+npm run build
 ```
 
-Åbn derefter [http://localhost:5173](http://localhost:5173) i browseren.
+Build-filerne genereres i `/dist` mappen.
 
-### 2. VSCode Live Server
-
-1. Installer "Live Server" extension i VSCode
-2. Højreklik på `index.html`
-3. Vælg "Open with Live Server"
-
-### 3. Andre web-servere
-
+### Preview production build:
 ```bash
-# Node.js http-server
-npx http-server -p 5173
-
-# PHP
-php -S localhost:5173
+npm run preview
 ```
 
-## 📦 Deployment til GitHub Pages
+## 🌐 Deployment
 
-Projektet er klar til GitHub Pages med GitHub Actions:
+### Vercel (Anbefalet)
+1. Installer Vercel CLI: `npm i -g vercel`
+2. Kør: `vercel`
+3. Følg instruktionerne
 
-### 1. Aktivér GitHub Pages
+### Netlify
+1. Byg projektet: `npm run build`
+2. Drag & drop `/dist` mappen til Netlify
 
-1. Gå til repository Settings
-2. Find "Pages" i sidemenuen
-3. Under "Source", vælg **GitHub Actions**
-
-### 2. Push til main branch
-
+### GitHub Pages
 ```bash
-git add .
-git commit -m "feat: initial deployment"
-git push origin main
+# I vite.config.js, tilføj:
+# base: '/repository-name/'
+
+npm run build
+# Deploy /dist mappen til gh-pages branch
 ```
 
-### 3. Tjek deployment
-
-- Gå til "Actions" tab i dit repository
-- Se workflow-kørslen "Deploy to GitHub Pages"
-- Når den er færdig, findes dit site på: `https://[username].github.io/[repo-name]/`
-
-## 📁 Projektstruktur
+## 📁 Projekt Struktur
 
 ```
-/
-├── index.html              # Hovedside
-├── assets/
-│   ├── css/
-│   │   └── styles.css      # Styling med CSS-variabler
-│   ├── js/
-│   │   ├── main.js         # App initialisering & hotkeys
-│   │   ├── state.js        # State management
-│   │   ├── calc.js         # Beregningsmotor
-│   │   ├── providers.js    # Telenor samlerabat-logik
-│   │   ├── streams.js      # Streaming-tjenester data
-│   │   └── ui.js           # UI rendering
-│   └── img/                # Ikoner/assets (optional)
-├── .github/
-│   └── workflows/
-│       └── gh-pages.yml    # GitHub Actions deployment
-└── README.md               # Denne fil
+power-calculator-app/
+├── public/
+│   ├── index.html          # HTML template
+│   └── favicon.ico         # Favicon
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx              # Header med kontroller
+│   │   ├── ProviderTabs.jsx        # Provider filter tabs
+│   │   ├── PlanCard.jsx            # Plan kort
+│   │   ├── StreamingSelector.jsx   # Streaming valg
+│   │   ├── Cart.jsx                # Kurv
+│   │   ├── ComparisonPanel.jsx     # Sammenligning
+│   │   └── PresentationView.jsx    # Præsentation
+│   ├── data/
+│   │   ├── plans.js                # Mobilabonnementer
+│   │   └── streamingServices.js    # Streaming-tjenester
+│   ├── styles/
+│   │   ├── variables.css           # CSS variabler
+│   │   ├── components.css          # Komponent styles
+│   │   └── main.css                # Global styles
+│   ├── utils/
+│   │   ├── calculations.js         # Beregningslogik
+│   │   ├── storage.js              # LocalStorage
+│   │   └── validators.js           # Validering
+│   ├── App.jsx                     # Hovedkomponent
+│   └── main.jsx                    # Entry point
+├── package.json
+├── vite.config.js
+└── README.md
 ```
 
-## ⌨️ Tastaturgenveje
+## ⌨️ Keyboard Shortcuts
 
-| Tast | Funktion |
-|------|----------|
-| `1`, `2`, `3` | Spring til trin 1, 2 eller 3 |
-| `←`, `→` | Naviger mellem trin |
-| `R` | Reset/Nulstil |
-| `S` | Gem/Del resultat (kopiér link) |
-| `P` | Print resultat |
-| `?` | Vis genveje |
-| `ESC` | Luk modal |
+- **Ctrl + R**: Nulstil alt
+- **Ctrl + P**: Åbn/luk præsentation
+- **Ctrl + T**: Skift tema (dark/light)
+- **Escape**: Luk præsentation
 
-## 🎨 Konfiguration
+## 🎨 Design System
 
-### Priser og tjenester
+### Farver
+- **Brand Orange**: `#ff6b1a`
+- **Telenor Blå**: `#38bdf8`
+- **CBB Lilla**: `#a855f7`
+- **Success**: `#10b981`
+- **Danger**: `#ef4444`
 
-Rediger `/assets/js/streams.js` for at tilføje eller ændre streaming-tjenester:
+### Spacing
+- **xs**: 0.25rem (4px)
+- **sm**: 0.5rem (8px)
+- **md**: 1rem (16px)
+- **lg**: 1.5rem (24px)
+- **xl**: 2rem (32px)
+- **2xl**: 3rem (48px)
+- **3xl**: 4rem (64px)
 
+### Breakpoints
+- **Mobile**: < 900px
+- **Tablet**: 900px - 1600px
+- **Desktop**: > 1600px
+
+## 📊 Mobilabonnementer Database
+
+### Telenor
+- 20 GB: 149 kr/md (indtjening: 700 kr)
+- 70 GB: 199 kr/md (indtjening: 900 kr)
+- 120 GB: 239 kr/md (indtjening: 1200 kr)
+- Fri Data: 289 kr/md (indtjening: 1300 kr)
+- **Familiepris**: -50 kr/md pr. ekstra linje
+
+### Telmore
+- 30 GB: 129 kr/md (indtjening: 400 kr)
+- 70 GB: 149 kr/md, intro 74 kr første 3 mdr (indtjening: 700 kr)
+- 60 GB: 169 kr/md (indtjening: 700 kr)
+- 100 GB + HBO Max: 219 kr/md, intro 99 kr (indtjening: 700 kr)
+- Fri Data: 229 kr/md (indtjening: 700 kr)
+- 100 GB + 2 streaming: 299 kr/md, intro 99 kr (indtjening: 1000 kr)
+- Fri Data + 3 streaming: 399 kr/md, intro 99 kr (indtjening: 1100 kr)
+- Fri Data + 4 streaming: 449 kr/md (indtjening: 1100 kr)
+- Fri Data + 5 streaming: 499 kr/md (indtjening: 1100 kr)
+- Premium (8 streaming): 559 kr/md (indtjening: 1100 kr)
+- Ultimate (9 streaming): 599 kr/md (indtjening: 1100 kr)
+
+### CBB
+- 60 GB: 109 kr/md (indtjening: 300 kr)
+- 200 GB: 129 kr/md (indtjening: 500 kr)
+- 500 GB: 149 kr/md (indtjening: 800 kr)
+- 100 GB World-data: 199 kr/md (indtjening: 800 kr)
+
+## 📺 Streaming-tjenester
+
+- Netflix: 79 kr/md
+- Viaplay: 349 kr/md
+- HBO Max: 79 kr/md
+- TV2 Play: 119 kr/md
+- Saxo: 129 kr/md
+- Disney+: 89 kr/md
+- SkyShowtime: 69 kr/md
+- Prime Video: 69 kr/md
+- Musik (Spotify/Apple Music): 119 kr/md
+
+## 🧮 Beregningslogik
+
+### 6-måneders pris
 ```javascript
-export const STREAMING_SERVICES = [
-  {
-    id: 'netflix',
-    label: 'Netflix',
-    monthlyPrice: 119,
-    icon: '🎬',
-    color: '#e50914'
-  },
-  // ...
-]
+// Med intro-pris:
+(introPrice × introMonths × qty) + (normalPrice × (6 - introMonths) × qty)
+
+// Uden intro-pris:
+normalPrice × 6 × qty
 ```
 
-### Telenor samlerabat
-
-Rediger `/assets/js/providers.js` for at justere rabat-tiers:
-
+### Telenor Familie-rabat
 ```javascript
-const TELENOR_DISCOUNT_TIERS = [
-  { minLines: 4, monthlyDiscount: 200, label: '4+ linjer' },
-  { minLines: 3, monthlyDiscount: 150, label: '3 linjer' },
-  { minLines: 2, monthlyDiscount: 100, label: '2 linjer' }
-]
+// Rabat pr. måned:
+(antal_linjer - 1) × 50 kr
+
+// 6-måneders rabat:
+månedlig_rabat × 6
 ```
 
-### Minimum besparelse
-
-Rediger `/assets/js/calc.js` for at ændre kravet:
-
+### Besparelse
 ```javascript
-const MIN_SAVINGS = 500 // Ændr til ønsket beløb
+Kunde 6-md total - Vores 6-md total = Besparelse
 ```
 
-## 🛠️ Teknisk stack
+## 🔧 Teknologi Stack
 
-- **Ingen bundler** – Ren HTML/CSS/ES-modules
-- **Ingen frameworks** – Vanilla JavaScript
-- **Ingen eksterne dependencies** – Alt er self-contained
-- **Moderne CSS** – CSS-variabler, Grid, Flexbox
-- **ES Modules** – Modulær JavaScript-struktur
-- **GitHub Actions** – Automatisk deployment
+- **React 18.x**: UI framework
+- **Vite**: Build tool og dev server
+- **CSS3**: Styling med custom properties
+- **LocalStorage API**: Data persistens
+- **Modern JavaScript (ES2022+)**: Ingen legacy code
 
-## 📚 Dokumentation
+## 🎯 Browser Support
 
-Fuld wiki-dokumentation findes i [`docs/wiki/`](docs/wiki/Home.md):
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+- Mobile browsers (iOS Safari, Chrome Mobile)
 
-- 🚀 [Quick Start Guide](docs/wiki/Quick-Start.md)
-- 📖 [Brugerguide](docs/wiki/Brugerguide.md)
-- 🏗️ [Arkitektur](docs/wiki/Arkitektur.md)
-- ⚙️ [Konfiguration](docs/wiki/Konfiguration.md)
-- ⌨️ [Tastaturgenveje](docs/wiki/Tastaturgenveje.md)
-- 🚀 [GitHub Pages Setup](docs/wiki/GitHub-Pages-Setup.md)
-- ❓ [FAQ](docs/wiki/FAQ.md)
-- 📝 [Changelog](docs/wiki/Changelog.md)
+## 📝 Development Notes
 
-## 📝 Licens
+### Tilføj nye planer
+Rediger `/src/data/plans.js`:
+```javascript
+{
+  id: 'unique-id',
+  provider: 'telmore|telenor|cbb',
+  name: 'Plan navn',
+  data: '100 GB',
+  price: 299,
+  introPrice: 99,        // Valgfri
+  introMonths: 3,        // Valgfri
+  earnings: 1000,
+  features: ['5G', 'EU Roaming'],
+  familyDiscount: true,  // Kun Telenor
+  color: '#ff6b1a',
+  streaming: ['netflix', 'hbo-max'],
+  streamingCount: 2      // Hvis streaming inkluderet
+}
+```
 
-Dette projekt er udviklet til intern brug hos POWER.
+### Tilføj nye streaming-tjenester
+Rediger `/src/data/streamingServices.js`:
+```javascript
+{
+  id: 'unique-id',
+  name: 'Tjeneste navn',
+  price: 99,
+  logo: '🎬',
+  category: 'streaming'
+}
+```
 
-## 🤝 Bidrag
+### Styling
+Alle CSS-variabler er defineret i `/src/styles/variables.css`. Rediger her for at ændre farver, spacing, etc.
 
-For at bidrage til projektet:
+## 🐛 Troubleshooting
 
-1. Fork repository
-2. Opret en feature branch (`git checkout -b feature/ny-feature`)
-3. Commit dine ændringer (`git commit -m 'feat: tilføj ny feature'`)
-4. Push til branch (`git push origin feature/ny-feature`)
-5. Åbn en Pull Request
+### Applikationen starter ikke
+```bash
+# Slet node_modules og reinstaller
+rm -rf node_modules
+npm install
+npm run dev
+```
 
-## 🐛 Fejlrapportering
+### Data gemmes ikke
+- Check at browser understøtter localStorage
+- Se browser console for fejlmeddelelser
+- Prøv at rydde browser cache
 
-Rapportér fejl ved at oprette et issue i repository med:
-- Beskrivelse af problemet
-- Trin til at reproducere
-- Forventet vs. faktisk adfærd
-- Browser og OS information
+### Styling ser forkert ud
+- Hard refresh: Ctrl+Shift+R (Windows) eller Cmd+Shift+R (Mac)
+- Ryd browser cache
+- Check at alle CSS-filer er importeret korrekt
+
+## 📄 License
+
+Dette projekt er udviklet til intern brug.
+
+## 👨‍💻 Udviklet af
+
+Power Calculator v1.0 - 2025
 
 ---
 
-**Version:** 10.0 (Modulær rebuild)  
-**Sidste opdatering:** Oktober 2025
+**God fornøjelse med Power Calculator!** ⚡
+
+For spørgsmål eller support, se dokumentationen eller kontakt udvikleren.
 
