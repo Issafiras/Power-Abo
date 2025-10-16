@@ -91,9 +91,21 @@ export function checkStreamingCoverage(cartItems, selectedStreaming) {
     }
   });
 
+  // Debug log
+  console.log('🔍 Debug checkStreamingCoverage:');
+  console.log('Selected streaming:', selectedStreaming);
+  console.log('Included streaming from plans:', Array.from(includedStreaming));
+  console.log('Cart items:', cartItems.map(item => ({ 
+    name: item.plan.name, 
+    streaming: item.plan.streaming 
+  })));
+
   // Split valgte streaming i inkluderet og ikke-inkluderet
   const included = selectedStreaming.filter(id => includedStreaming.has(id));
   const notIncluded = selectedStreaming.filter(id => !includedStreaming.has(id));
+
+  console.log('Included:', included);
+  console.log('Not included:', notIncluded);
 
   return { included, notIncluded };
 }
