@@ -193,13 +193,13 @@ export const plans = [
 
   // CBB PLANER
   {
-    id: 'cbb-60gb',
+    id: 'cbb-30gb',
     provider: 'cbb',
-    name: '60 GB',
-    data: '60 GB',
+    name: '30 GB',
+    data: '30 GB + 30 GB EU-data',
     price: 109,
     earnings: 300,
-    features: ['4G', 'EU Roaming', 'CBB MIX'],
+    features: ['5G', 'FRI tale', 'EU Roaming', 'CBB MIX'],
     color: '#a855f7',
     streaming: [],
     cbbMixAvailable: true, // CBB MIX tilgængelig
@@ -214,13 +214,13 @@ export const plans = [
     }
   },
   {
-    id: 'cbb-200gb',
+    id: 'cbb-50gb',
     provider: 'cbb',
-    name: '200 GB',
-    data: '200 GB',
-    price: 129,
-    earnings: 500,
-    features: ['4G', 'EU Roaming', 'CBB MIX'],
+    name: '50 GB',
+    data: '50 GB + 30 GB EU-data',
+    price: 119,
+    earnings: 400,
+    features: ['5G', 'FRI tale', 'EU Roaming', 'CBB MIX'],
     color: '#a855f7',
     streaming: [],
     cbbMixAvailable: true,
@@ -235,34 +235,13 @@ export const plans = [
     }
   },
   {
-    id: 'cbb-500gb',
+    id: 'cbb-fri-data',
     provider: 'cbb',
-    name: '500 GB',
-    data: '500 GB',
-    price: 149,
-    earnings: 800,
-    features: ['4G', 'EU Roaming', 'CBB MIX'],
-    color: '#a855f7',
-    streaming: [],
-    cbbMixAvailable: true,
-    cbbMixPricing: {
-      2: 160,  // 2 tjenester = 160 kr/md
-      3: 210,  // 3 tjenester = 210 kr/md
-      4: 260,  // 4 tjenester = 260 kr/md
-      5: 310,  // 5 tjenester = 310 kr/md
-      6: 360,  // 6 tjenester = 360 kr/md
-      7: 410,  // 7 tjenester = 410 kr/md
-      8: 460   // 8 tjenester = 460 kr/md
-    }
-  },
-  {
-    id: 'cbb-100gb-world',
-    provider: 'cbb',
-    name: '100 GB World-data',
-    data: '100 GB',
-    price: 199,
-    earnings: 800,
-    features: ['4G', 'World Roaming', 'Global', 'CBB MIX'],
+    name: 'FRI Data',
+    data: 'FRI data + 40 GB EU-data',
+    price: 209,
+    earnings: 600,
+    features: ['5G', 'FRI tale', 'EU Roaming', 'Ubegrænset', 'CBB MIX'],
     color: '#a855f7',
     streaming: [],
     cbbMixAvailable: true,
