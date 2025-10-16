@@ -47,6 +47,10 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showPresentation, setShowPresentation] = useState(false);
   const [toast, setToast] = useState(null);
+  
+  // CBB MIX state
+  const [cbbMixEnabled, setCbbMixEnabled] = useState({});
+  const [cbbMixCount, setCbbMixCount] = useState({});
 
   // Load fra localStorage ved mount
   useEffect(() => {
@@ -184,6 +188,28 @@ function App() {
     }
   };
 
+  // CBB MIX handlers
+  const handleCBBMixToggle = (planId, enabled) => {
+    setCbbMixEnabled(prev => ({
+      ...prev,
+      [planId]: enabled
+    }));
+    
+    if (!enabled) {
+      setCbbMixCount(prev => ({
+        ...prev,
+        [planId]: 2 // Reset to default
+      }));
+    }
+  };
+
+  const handleCBBMixCountChange = (planId, count) => {
+    setCbbMixCount(prev => ({
+      ...prev,
+      [planId]: count
+    }));
+  };
+
   // Reset handler
   const handleReset = () => {
     resetAll();
@@ -195,6 +221,8 @@ function App() {
     setAutoAdjust(false);
     setActiveProvider('all');
     setSearchQuery('');
+    setCbbMixEnabled({});
+    setCbbMixCount({});
     showToast('Alt nulstillet', 'success');
   };
 
@@ -278,6 +306,10 @@ function App() {
                       <PlanCard
                         plan={plan}
                         onAddToCart={handleAddToCart}
+                        onCBBMixToggle={handleCBBMixToggle}
+                        onCBBMixCountChange={handleCBBMixCountChange}
+                        cbbMixEnabled={cbbMixEnabled[plan.id] || false}
+                        cbbMixCount={cbbMixCount[plan.id] || 2}
                       />
                     </div>
                   ))}

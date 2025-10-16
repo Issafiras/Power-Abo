@@ -239,3 +239,124 @@ export function formatNumber(num) {
   return new Intl.NumberFormat('da-DK').format(num);
 }
 
+/**
+ * Beregn CBB MIX pris for en plan
+ * @param {Object} plan - Plan objekt
+ * @param {number} mixCount - Antal CBB MIX tjenester (2-8)
+ * @returns {number} CBB MIX pris
+ */
+export function calculateCBBMixPrice(plan, mixCount) {
+  if (!plan.cbbMixAvailable || !mixCount) return 0;
+  return plan.cbbMixPricing[mixCount] || 0;
+}
+
+/**
+ * Beregn plan med CBB MIX
+ * @param {Object} plan - Plan objekt
+ * @param {number} quantity - Antal linjer
+ * @param {number} mixCount - Antal CBB MIX tjenester
+ * @returns {number} Total 6-måneders pris inkl. CBB MIX
+ */
+export function calculatePlanWithCBBMix(plan, quantity = 1, mixCount = 0) {
+  const basePrice = calculateSixMonthPrice(plan, quantity);
+  const mixPrice = calculateCBBMixPrice(plan, mixCount) * 6; // 6 måneder
+  return basePrice + mixPrice;
+}
+
+/**
+ * Check CBB MIX kompatibilitet
+ * @param {Array} cartItems - Array af kurv-items
+ * @returns {Object} { compatible: boolean, message: string }
+ */
+export function checkCBBMixCompatibility(cartItems) {
+  const hasCBBPlan = cartItems.some(item => item.plan.provider === 'cbb');
+  const hasCBBMixPlan = cartItems.some(item => item.plan.cbbMixAvailable && item.cbbMixEnabled);
+  
+  if (hasCBBMixPlan && !hasCBBPlan) {
+    return {
+      compatible: false,
+      message: 'CBB MIX kræver et CBB abonnement (min. 99 kr/md)'
+    };
+  }
+  
+  return { compatible: true };
+}
+
+/**
+ * Beregn CBB MIX streaming coverage
+ * @param {Array} cartItems - Array af kurv-items
+ * @param {Array} selectedStreaming - Array af valgte streaming-ID'er
+ * @returns {Object} { included: Array, notIncluded: Array, cbbMixSlots: number }
+ */
+export function checkCBBMixStreamingCoverage(cartItems, selectedStreaming) {
+  if (!selectedStreaming || selectedStreaming.length === 0) {
+    return { included: [], notIncluded: [], cbbMixSlots: 0 };
+  }
+
+  let totalCBBMixSlots = 0;
+  
+  cartItems.forEach(item => {
+    if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount > 0) {
+      totalCBBMixSlots += item.cbbMixCount * item.quantity;
+    }
+  });
+
+  // Hvis der er CBB MIX slots tilgængelige
+  if (totalCBBMixSlots > 0) {
+    const included = selectedStreaming.slice(0, totalCBBMixSlots);
+    const notIncluded = selectedStreaming.slice(totalCBBMixSlots);
+    
+    return { included, notIncluded, cbbMixSlots: totalCBBMixSlots };
+  }
+
+  return { included: [], notIncluded: selectedStreaming, cbbMixSlots: 0 };
+}
+
+/**
+ * Opdateret streaming coverage check med CBB MIX support
+ * @param {Array} cartItems - Array af kurv-items
+ * @param {Array} selectedStreaming - Array af valgte streaming-ID'er
+ * @returns {Object} { included: Array, notIncluded: Array }
+ */
+export function checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming) {
+  if (!selectedStreaming || selectedStreaming.length === 0) {
+    return { included: [], notIncluded: [] };
+  }
+
+  // Hent alle inkluderede streaming-tjenester fra planer
+  const includedStreaming = new Set();
+  let totalStreamingSlots = 0;
+  
+  cartItems.forEach(item => {
+    if (item.plan.streaming && item.plan.streaming.length > 0) {
+      // Hvis planen har specifikke streaming-tjenester
+      item.plan.streaming.forEach(service => includedStreaming.add(service));
+    }
+    
+    // Hvis planen har streamingCount (mix-system)
+    if (item.plan.streamingCount && item.plan.streamingCount > 0) {
+      totalStreamingSlots += item.plan.streamingCount * item.quantity;
+    }
+
+    // CBB MIX slots
+    if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount > 0) {
+      totalStreamingSlots += item.cbbMixCount * item.quantity;
+    }
+  });
+
+  // Hvis der er streaming slots tilgængelige (mix-system)
+  if (totalStreamingSlots > 0) {
+    // Tag de første N streaming-tjenester (hvor N = totalStreamingSlots)
+    const included = selectedStreaming.slice(0, totalStreamingSlots);
+    const notIncluded = selectedStreaming.slice(totalStreamingSlots);
+    
+    return { included, notIncluded };
+  }
+
+  // Ellers brug den gamle logik (specifikke streaming-tjenester)
+  const included = selectedStreaming.filter(id => includedStreaming.has(id));
+  const notIncluded = selectedStreaming.filter(id => !includedStreaming.has(id));
+
+  return { included, notIncluded };
+}
+

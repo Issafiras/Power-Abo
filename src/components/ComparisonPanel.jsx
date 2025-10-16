@@ -10,6 +10,8 @@ import {
   calculateOurOfferTotal,
   calculateSavings,
   checkStreamingCoverage,
+  checkStreamingCoverageWithCBBMix,
+  checkCBBMixCompatibility,
   autoAdjustCashDiscount
 } from '../utils/calculations';
 import { getStreamingTotal } from '../data/streamingServices';
@@ -26,9 +28,12 @@ export default function ComparisonPanel({
   onAutoAdjustChange,
   showCashDiscount
 }) {
-  // Beregn streaming coverage
-  const streamingCoverage = checkStreamingCoverage(cartItems, selectedStreaming);
+  // Beregn streaming coverage med CBB MIX support
+  const streamingCoverage = checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming);
   const notIncludedStreamingCost = getStreamingTotal(streamingCoverage.notIncluded);
+  
+  // Check CBB MIX kompatibilitet
+  const cbbMixCompatibility = checkCBBMixCompatibility(cartItems);
 
   // Kunde totaler
   const streamingCost = getStreamingTotal(selectedStreaming);
@@ -184,6 +189,20 @@ export default function ComparisonPanel({
             )}
           </div>
 
+          <div className="divider"></div>
+        </>
+      )}
+
+      {/* CBB MIX advarsel */}
+      {!cbbMixCompatibility.compatible && (
+        <>
+          <div className="cbb-mix-warning">
+            <div className="warning-icon">⚠️</div>
+            <div className="warning-content">
+              <h4>CBB MIX Advarsel</h4>
+              <p>{cbbMixCompatibility.message}</p>
+            </div>
+          </div>
           <div className="divider"></div>
         </>
       )}
@@ -510,6 +529,34 @@ export default function ComparisonPanel({
         .savings-subtitle {
           font-size: var(--font-base);
           color: var(--text-secondary);
+        }
+
+        .cbb-mix-warning {
+          display: flex;
+          align-items: flex-start;
+          gap: var(--spacing-md);
+          padding: var(--spacing-md);
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: var(--radius-md);
+          margin: var(--spacing-md) 0;
+        }
+
+        .warning-icon {
+          font-size: var(--font-2xl);
+          flex-shrink: 0;
+        }
+
+        .warning-content h4 {
+          margin: 0 0 var(--spacing-xs) 0;
+          color: var(--color-danger);
+          font-size: var(--font-lg);
+        }
+
+        .warning-content p {
+          margin: 0;
+          color: var(--text-secondary);
+          font-size: var(--font-sm);
         }
 
         @media (max-width: 900px) {

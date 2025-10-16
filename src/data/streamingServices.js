@@ -76,6 +76,82 @@ export const streamingServices = [
     color: '#1DB954', // Spotify grøn
     bgColor: '#191414', // Spotify sort
     category: 'musik'
+  },
+
+  // CBB MIX UNIKKE TJENESTER
+  {
+    id: 'podimo',
+    name: 'Podimo Premium',
+    price: 79, // CBB MIX pris
+    logo: '/Power-Abo/logos/Podimo.png',
+    bgColor: '#FF6B35', // Podimo orange
+    category: 'podcast',
+    cbbMixOnly: true // Kun tilgængelig via CBB MIX
+  },
+  {
+    id: 'mofibo',
+    name: 'Mofibo (20 timer)',
+    price: 89, // CBB MIX pris
+    logo: '/Power-Abo/logos/Mofibo.png',
+    bgColor: '#1A1A1A', // Mofibo sort
+    category: 'audiobook',
+    cbbMixOnly: true
+  },
+  {
+    id: 'deezer',
+    name: 'Deezer Premium',
+    price: 99, // CBB MIX pris
+    logo: '/Power-Abo/logos/Deezer.png',
+    bgColor: '#FF0000', // Deezer rød
+    category: 'musik',
+    cbbMixOnly: true
+  },
+  {
+    id: 'nordisk-film-plus',
+    name: 'Nordisk Film+',
+    price: 89, // CBB MIX pris
+    logo: '/Power-Abo/logos/NordiskFilm.png',
+    bgColor: '#2C3E50', // Nordisk Film mørkeblå
+    category: 'streaming',
+    cbbMixOnly: true
+  },
+
+  // CBB MIX SPECIFIKKE VARIANTER
+  {
+    id: 'netflix-standard-cbb',
+    name: 'Netflix Standard (CBB MIX)',
+    price: 129, // CBB MIX pris
+    logo: '/Power-Abo/logos/Netflix.png',
+    bgColor: '#000000',
+    category: 'streaming',
+    cbbMixVariant: true // CBB MIX variant
+  },
+  {
+    id: 'tv2-play-basis-cbb',
+    name: 'TV2 Play Basis Partner (CBB MIX)',
+    price: 99, // CBB MIX pris
+    logo: '/Power-Abo/logos/TV2.png',
+    bgColor: '#00162E',
+    category: 'streaming',
+    cbbMixVariant: true
+  },
+  {
+    id: 'viaplay-film-serier-cbb',
+    name: 'Viaplay Film & Serier (CBB MIX)',
+    price: 149, // CBB MIX pris
+    logo: '/Power-Abo/logos/Viaplay.png',
+    bgColor: '#1F2833',
+    category: 'streaming',
+    cbbMixVariant: true
+  },
+  {
+    id: 'hbo-max-standard-cbb',
+    name: 'HBO Max Standard (CBB MIX)',
+    price: 129, // CBB MIX pris
+    logo: '/Power-Abo/logos/MAX.png',
+    bgColor: '#001E3C',
+    category: 'streaming',
+    cbbMixVariant: true
   }
 ];
 
@@ -99,5 +175,43 @@ export function getStreamingTotal(selectedIds) {
  */
 export function getServiceById(id) {
   return streamingServices.find(service => service.id === id) || null;
+}
+
+/**
+ * Hent CBB MIX specifikke tjenester
+ * @returns {Array} CBB MIX tjenester
+ */
+export function getCBBMixServices() {
+  return streamingServices.filter(service => 
+    service.cbbMixOnly || service.cbbMixVariant
+  );
+}
+
+/**
+ * Hent tjenester baseret på kategori
+ * @param {string} category - Kategori ('streaming', 'musik', 'podcast', 'audiobook')
+ * @returns {Array} Filtrerede tjenester
+ */
+export function getStreamingServicesByCategory(category) {
+  return streamingServices.filter(service => service.category === category);
+}
+
+/**
+ * Hent CBB MIX priser for antal tjenester
+ * @param {number} count - Antal tjenester (2-8)
+ * @returns {number} CBB MIX pris
+ */
+export function getCBBMixPrice(count) {
+  const cbbMixPricing = {
+    2: 160,  // 2 tjenester = 160 kr/md
+    3: 210,  // 3 tjenester = 210 kr/md
+    4: 260,  // 4 tjenester = 260 kr/md
+    5: 310,  // 5 tjenester = 310 kr/md
+    6: 360,  // 6 tjenester = 360 kr/md
+    7: 410,  // 7 tjenester = 410 kr/md
+    8: 460   // 8 tjenester = 460 kr/md
+  };
+  
+  return cbbMixPricing[count] || 0;
 }
 

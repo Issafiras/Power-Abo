@@ -8,7 +8,8 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
     { id: 'all', name: 'Alle', icon: '📱' },
     { id: 'telmore', name: 'Telmore', icon: '🟠' },
     { id: 'telenor', name: 'Telenor', icon: '🔵' },
-    { id: 'cbb', name: 'CBB', icon: '🟣' }
+    { id: 'cbb', name: 'CBB', icon: '🟣' },
+    { id: 'cbb-mix', name: 'CBB MIX', icon: '🎬' }
   ];
 
   return (

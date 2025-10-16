@@ -3,9 +3,18 @@
  * Viser en enkelt mobilplan med features og pris
  */
 
+import { useState } from 'react';
 import { formatCurrency } from '../utils/calculations';
+import CBBMixSelector from './CBBMixSelector';
 
-export default function PlanCard({ plan, onAddToCart }) {
+export default function PlanCard({ 
+  plan, 
+  onAddToCart, 
+  onCBBMixToggle, 
+  onCBBMixCountChange,
+  cbbMixEnabled = false,
+  cbbMixCount = 2
+}) {
   const hasIntroPrice = plan.introPrice && plan.introMonths;
   const brandColor = plan.color || 'var(--color-orange)';
 
@@ -75,6 +84,31 @@ export default function PlanCard({ plan, onAddToCart }) {
             {plan.streamingCount || plan.streaming.length} streaming-tjeneste
             {(plan.streamingCount || plan.streaming.length) !== 1 ? 'r' : ''}
           </div>
+        </div>
+      )}
+
+      {/* CBB MIX Section */}
+      {plan.cbbMixAvailable && (
+        <div className="cbb-mix-section">
+          <div className="mix-toggle">
+            <label className="mix-toggle-label">
+              <input 
+                type="checkbox" 
+                checked={cbbMixEnabled}
+                onChange={(e) => onCBBMixToggle && onCBBMixToggle(plan.id, e.target.checked)}
+                className="mix-checkbox"
+              />
+              <span className="mix-toggle-text">🎬 Tilføj CBB MIX</span>
+            </label>
+          </div>
+          
+          {cbbMixEnabled && (
+            <CBBMixSelector
+              selectedCount={cbbMixCount}
+              onCountChange={(count) => onCBBMixCountChange && onCBBMixCountChange(plan.id, count)}
+              cbbMixPricing={plan.cbbMixPricing}
+            />
+          )}
         </div>
       )}
 
@@ -199,6 +233,37 @@ export default function PlanCard({ plan, onAddToCart }) {
 
         .plan-add-btn:hover {
           animation: pulseGlow 1s ease-in-out infinite;
+        }
+
+        .cbb-mix-section {
+          margin: var(--spacing-sm) 0;
+          padding: var(--spacing-sm);
+          background: rgba(168, 85, 247, 0.1);
+          border-radius: var(--radius-md);
+          border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .mix-toggle {
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .mix-toggle-label {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          cursor: pointer;
+          font-weight: var(--font-semibold);
+          color: var(--color-purple);
+        }
+
+        .mix-checkbox {
+          width: 18px;
+          height: 18px;
+          accent-color: var(--color-purple);
+        }
+
+        .mix-toggle-text {
+          font-size: var(--font-sm);
         }
 
         @media (max-width: 900px) {

@@ -199,9 +199,19 @@ export const plans = [
     data: '60 GB',
     price: 109,
     earnings: 300,
-    features: ['4G', 'EU Roaming'],
+    features: ['4G', 'EU Roaming', 'CBB MIX'],
     color: '#a855f7',
-    streaming: []
+    streaming: [],
+    cbbMixAvailable: true, // CBB MIX tilgængelig
+    cbbMixPricing: {
+      2: 160,  // 2 tjenester = 160 kr/md
+      3: 210,  // 3 tjenester = 210 kr/md
+      4: 260,  // 4 tjenester = 260 kr/md
+      5: 310,  // 5 tjenester = 310 kr/md
+      6: 360,  // 6 tjenester = 360 kr/md
+      7: 410,  // 7 tjenester = 410 kr/md
+      8: 460   // 8 tjenester = 460 kr/md
+    }
   },
   {
     id: 'cbb-200gb',
@@ -210,9 +220,19 @@ export const plans = [
     data: '200 GB',
     price: 129,
     earnings: 500,
-    features: ['4G', 'EU Roaming'],
+    features: ['4G', 'EU Roaming', 'CBB MIX'],
     color: '#a855f7',
-    streaming: []
+    streaming: [],
+    cbbMixAvailable: true,
+    cbbMixPricing: {
+      2: 160,  // 2 tjenester = 160 kr/md
+      3: 210,  // 3 tjenester = 210 kr/md
+      4: 260,  // 4 tjenester = 260 kr/md
+      5: 310,  // 5 tjenester = 310 kr/md
+      6: 360,  // 6 tjenester = 360 kr/md
+      7: 410,  // 7 tjenester = 410 kr/md
+      8: 460   // 8 tjenester = 460 kr/md
+    }
   },
   {
     id: 'cbb-500gb',
@@ -221,9 +241,19 @@ export const plans = [
     data: '500 GB',
     price: 149,
     earnings: 800,
-    features: ['4G', 'EU Roaming'],
+    features: ['4G', 'EU Roaming', 'CBB MIX'],
     color: '#a855f7',
-    streaming: []
+    streaming: [],
+    cbbMixAvailable: true,
+    cbbMixPricing: {
+      2: 160,  // 2 tjenester = 160 kr/md
+      3: 210,  // 3 tjenester = 210 kr/md
+      4: 260,  // 4 tjenester = 260 kr/md
+      5: 310,  // 5 tjenester = 310 kr/md
+      6: 360,  // 6 tjenester = 360 kr/md
+      7: 410,  // 7 tjenester = 410 kr/md
+      8: 460   // 8 tjenester = 460 kr/md
+    }
   },
   {
     id: 'cbb-100gb-world',
@@ -232,19 +262,32 @@ export const plans = [
     data: '100 GB',
     price: 199,
     earnings: 800,
-    features: ['4G', 'World Roaming', 'Global'],
+    features: ['4G', 'World Roaming', 'Global', 'CBB MIX'],
     color: '#a855f7',
-    streaming: []
+    streaming: [],
+    cbbMixAvailable: true,
+    cbbMixPricing: {
+      2: 160,  // 2 tjenester = 160 kr/md
+      3: 210,  // 3 tjenester = 210 kr/md
+      4: 260,  // 4 tjenester = 260 kr/md
+      5: 310,  // 5 tjenester = 310 kr/md
+      6: 360,  // 6 tjenester = 360 kr/md
+      7: 410,  // 7 tjenester = 410 kr/md
+      8: 460   // 8 tjenester = 460 kr/md
+    }
   }
 ];
 
 /**
  * Hent planer baseret på provider
- * @param {string} provider - Provider navn ('telenor', 'telmore', 'cbb', eller 'all')
+ * @param {string} provider - Provider navn ('telenor', 'telmore', 'cbb', 'cbb-mix', eller 'all')
  * @returns {Array} Filtrerede planer
  */
 export function getPlansByProvider(provider) {
   if (provider === 'all') return plans;
+  if (provider === 'cbb-mix') {
+    return plans.filter(plan => plan.cbbMixAvailable);
+  }
   return plans.filter(plan => plan.provider === provider);
 }
 

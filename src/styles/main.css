@@ -5,6 +5,7 @@
 
 @import './variables.css';
 @import './components.css';
+@import './cbb-mix.css';
 
 /* Reset og base styles */
 *,
