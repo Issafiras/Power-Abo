@@ -122,19 +122,19 @@ export default function StreamingSelector({
 
       <style jsx>{`
         .streaming-selector {
-          padding: var(--spacing-2xl);
+          padding: var(--spacing-lg);
         }
 
         .section-header {
-          margin-bottom: var(--spacing-xl);
+          margin-bottom: var(--spacing-lg);
         }
 
         .section-header h2 {
-          margin-bottom: var(--spacing-sm);
+          margin-bottom: var(--spacing-xs);
         }
 
         .mobile-cost-input {
-          margin-bottom: var(--spacing-lg);
+          margin-bottom: var(--spacing-md);
         }
 
         .input-label {
@@ -164,59 +164,58 @@ export default function StreamingSelector({
 
         .streaming-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-          gap: var(--spacing-md);
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+          gap: var(--spacing-sm);
         }
 
         .streaming-card {
           position: relative;
-          padding: var(--spacing-lg);
+          padding: var(--spacing-md);
           text-align: center;
           cursor: pointer;
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);
           border: 2px solid transparent;
         }
 
         .streaming-card:hover {
-          transform: translateY(-4px) scale(1.03);
+          transform: translateY(-2px);
           border-color: var(--color-orange);
-          box-shadow: var(--shadow-lg), 0 0 20px rgba(255, 107, 26, 0.2);
+          box-shadow: var(--shadow-md);
         }
 
         .streaming-card:active {
-          transform: translateY(-2px) scale(0.98);
+          transform: translateY(0);
         }
 
         .streaming-card.selected {
           border-color: var(--color-orange);
-          background: rgba(255, 107, 26, 0.15);
-          box-shadow: var(--glow-orange), 0 0 30px rgba(255, 107, 26, 0.3);
-          transform: scale(1.02);
+          background: rgba(255, 107, 26, 0.1);
+          box-shadow: var(--glow-orange);
         }
 
         .streaming-card.selected:hover {
-          transform: translateY(-4px) scale(1.05);
+          transform: translateY(-2px);
         }
 
         .streaming-icon {
-          font-size: var(--font-4xl);
+          font-size: var(--font-2xl);
           font-weight: var(--font-extrabold);
-          margin-bottom: var(--spacing-md);
-          width: 100px;
-          height: 100px;
+          margin-bottom: var(--spacing-sm);
+          width: 60px;
+          height: 60px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: var(--radius-xl);
-          box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-md);
           transition: all var(--transition-smooth);
           margin-left: auto;
           margin-right: auto;
         }
 
         .streaming-card:hover .streaming-icon {
-          transform: scale(1.08);
-          box-shadow: var(--shadow-2xl), 0 0 30px rgba(255, 107, 26, 0.3);
+          transform: scale(1.05);
+          box-shadow: var(--shadow-lg);
         }
 
         /* Logo billede styles */
@@ -224,18 +223,16 @@ export default function StreamingSelector({
           width: 100%;
           height: 100%;
           object-fit: contain;
-          padding: 12px;
+          padding: 6px;
           transition: all var(--transition-smooth);
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         .streaming-card:hover .streaming-logo-img {
-          transform: scale(1.05);
-          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+          transform: scale(1.03);
         }
 
         .streaming-card.selected .streaming-logo-img {
-          filter: drop-shadow(0 4px 12px rgba(255, 107, 26, 0.5));
+          filter: brightness(1.1);
         }
 
         /* Musik - Note symbol (fallback for services uden billede) */

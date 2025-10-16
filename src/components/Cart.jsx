@@ -184,14 +184,14 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
 
       <style jsx>{`
         .cart {
-          padding: var(--spacing-2xl);
+          padding: var(--spacing-lg);
         }
 
         .section-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: var(--spacing-xl);
+          margin-bottom: var(--spacing-lg);
         }
 
         .section-header h2 {
@@ -201,15 +201,15 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
         .cart-items {
           display: flex;
           flex-direction: column;
-          gap: var(--spacing-lg);
+          gap: var(--spacing-md);
         }
 
         .cart-item {
-          padding: var(--spacing-lg);
+          padding: var(--spacing-md);
           background: var(--glass-bg);
-          border-radius: var(--radius-lg);
+          border-radius: var(--radius-md);
           border: 1px solid var(--glass-border);
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);
           position: relative;
         }
 

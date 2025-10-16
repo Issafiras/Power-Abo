@@ -338,11 +338,11 @@ function App() {
 
         .main-content {
           flex: 1;
-          padding: var(--spacing-2xl) 0;
+          padding: var(--spacing-lg) 0;
         }
 
         .plans-section {
-          padding: var(--spacing-2xl);
+          padding: var(--spacing-lg);
           transition: all var(--transition-smooth);
         }
 
@@ -351,7 +351,7 @@ function App() {
         }
 
         .section-header {
-          margin-bottom: var(--spacing-xl);
+          margin-bottom: var(--spacing-lg);
         }
 
         .section-header h2 {
@@ -364,7 +364,7 @@ function App() {
         }
 
         .plans-grid {
-          margin-top: var(--spacing-xl);
+          margin-top: var(--spacing-md);
         }
 
         .plans-grid .stagger-item {

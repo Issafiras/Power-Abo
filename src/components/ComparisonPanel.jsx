@@ -284,11 +284,11 @@ export default function ComparisonPanel({
 
       <style jsx>{`
         .comparison-panel {
-          padding: var(--spacing-2xl);
+          padding: var(--spacing-lg);
         }
 
         .section-header {
-          margin-bottom: var(--spacing-xl);
+          margin-bottom: var(--spacing-lg);
         }
 
         .section-header h2 {

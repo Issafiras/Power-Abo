@@ -103,19 +103,19 @@ export default function PlanCard({ plan, onAddToCart }) {
         .plan-card {
           display: flex;
           flex-direction: column;
-          padding: var(--spacing-lg);
-          gap: var(--spacing-md);
-          transition: all var(--transition-smooth);
+          padding: var(--spacing-md);
+          gap: var(--spacing-sm);
+          transition: all var(--transition-base);
           cursor: pointer;
         }
 
         .plan-card:hover {
-          transform: translateY(-6px) scale(1.02);
+          transform: translateY(-3px);
           z-index: 10;
         }
 
         .plan-card:active {
-          transform: translateY(-2px) scale(0.99);
+          transform: translateY(-1px);
         }
 
         .plan-header {
