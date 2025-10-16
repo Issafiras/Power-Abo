@@ -38,7 +38,7 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [selectedStreaming, setSelectedStreaming] = useState([]);
   const [customerMobileCost, setCustomerMobileCost] = useState(0);
-  const [cashDiscount, setCashDiscount] = useState(0);
+  const [cashDiscount, setCashDiscount] = useState(null);
   const [cashDiscountLocked, setCashDiscountLocked] = useState(false);
   const [autoAdjust, setAutoAdjust] = useState(false);
   const [theme, setTheme] = useState('dark');
@@ -190,7 +190,7 @@ function App() {
     setCartItems([]);
     setSelectedStreaming([]);
     setCustomerMobileCost(0);
-    setCashDiscount(0);
+    setCashDiscount(null);
     setCashDiscountLocked(false);
     setAutoAdjust(false);
     setActiveProvider('all');

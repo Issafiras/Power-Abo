@@ -49,7 +49,7 @@ export default function ComparisonPanel({
         ourOfferWithoutDiscount.sixMonth,
         500
       );
-      if (neededDiscount !== cashDiscount) {
+      if (neededDiscount !== (cashDiscount || 0)) {
         onCashDiscountChange(neededDiscount);
       }
     }
@@ -146,7 +146,7 @@ export default function ComparisonPanel({
               className="input cash-discount-input"
               placeholder="0"
               value={cashDiscount || ''}
-              onChange={(e) => onCashDiscountChange(parseFloat(e.target.value) || 0)}
+              onChange={(e) => onCashDiscountChange(parseFloat(e.target.value) || null)}
               disabled={cashDiscountLocked}
               min="0"
               step="100"

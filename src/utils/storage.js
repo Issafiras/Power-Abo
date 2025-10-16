@@ -96,7 +96,7 @@ export function saveCashDiscount(amount) {
 }
 
 export function loadCashDiscount() {
-  return getItem(STORAGE_KEYS.CASH_DISCOUNT, 0);
+  return getItem(STORAGE_KEYS.CASH_DISCOUNT, null);
 }
 
 export function saveCashDiscountLocked(locked) {
@@ -158,7 +158,7 @@ export function importState(state) {
   if (state.cart) saveCart(state.cart);
   if (state.streaming) saveSelectedStreaming(state.streaming);
   if (typeof state.mobileCost === 'number') saveCustomerMobileCost(state.mobileCost);
-  if (typeof state.cashDiscount === 'number') saveCashDiscount(state.cashDiscount);
+  if (typeof state.cashDiscount === 'number' || state.cashDiscount === null) saveCashDiscount(state.cashDiscount);
   if (typeof state.cashDiscountLocked === 'boolean') saveCashDiscountLocked(state.cashDiscountLocked);
   if (typeof state.autoAdjust === 'boolean') saveAutoAdjust(state.autoAdjust);
   if (state.theme) saveTheme(state.theme);

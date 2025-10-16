@@ -9,22 +9,27 @@
  * @returns {Object} { valid: boolean, error: string|null, value: number }
  */
 export function validatePrice(value) {
+  // Hvis null eller undefined, returner null (kontant rabat slået fra)
+  if (value === null || value === undefined || value === '') {
+    return { valid: true, error: null, value: null };
+  }
+
   // Konvertér til nummer
   const num = typeof value === 'string' ? parseFloat(value) : value;
 
   // Check om det er et gyldigt nummer
   if (isNaN(num)) {
-    return { valid: false, error: 'Indtast venligst et gyldigt tal', value: 0 };
+    return { valid: false, error: 'Indtast venligst et gyldigt tal', value: null };
   }
 
   // Check om det er negativt
   if (num < 0) {
-    return { valid: false, error: 'Prisen kan ikke være negativ', value: 0 };
+    return { valid: false, error: 'Prisen kan ikke være negativ', value: null };
   }
 
   // Check om det er for stort
   if (num > 10000) {
-    return { valid: false, error: 'Prisen virker usædvanlig høj', value: 0 };
+    return { valid: false, error: 'Prisen virker usædvanlig høj', value: null };
   }
 
   return { valid: true, error: null, value: num };

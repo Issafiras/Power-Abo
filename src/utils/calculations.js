@@ -177,7 +177,7 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
   // Total før kontant rabat
   const beforeCashDiscount = afterFamilyDiscount + streamingSixMonth;
 
-  // Træk kontant rabat
+  // Træk kontant rabat (kun hvis aktiv)
   const sixMonth = beforeCashDiscount - (cashDiscount || 0);
 
   return {
