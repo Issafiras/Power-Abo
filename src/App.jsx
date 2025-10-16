@@ -245,8 +245,57 @@ function App() {
             />
           </section>
 
-          {/* Middle section: Cart & Comparison */}
+          {/* Middle section: Provider selection & Plans */}
           <section className="section fade-in-up" style={{ animationDelay: '100ms' }}>
+            <div className="plans-section glass-card">
+              <div className="section-header">
+                <h2>📱 Vælg Mobilabonnementer</h2>
+                <p className="text-secondary">
+                  Vælg først operatør, derefter de planer der passer bedst til kunden
+                </p>
+              </div>
+
+              <ProviderTabs
+                activeProvider={activeProvider}
+                onProviderChange={setActiveProvider}
+                searchQuery={searchQuery}
+                onSearch={setSearchQuery}
+              />
+
+              {/* Plans grid */}
+              {activeProvider === 'all' ? (
+                <div className="empty-state">
+                  <div className="empty-state-icon pulse">👆</div>
+                  <p className="text-lg font-semibold">Vælg en operatør</p>
+                  <p className="text-secondary">
+                    Vælg Telmore, Telenor eller CBB for at se tilgængelige abonnementer
+                  </p>
+                </div>
+              ) : filteredPlans.length > 0 ? (
+                <div className="plans-grid grid grid-cols-3">
+                  {filteredPlans.map((plan, index) => (
+                    <div key={plan.id} className="stagger-item" style={{ animationDelay: `${index * 50}ms` }}>
+                      <PlanCard
+                        plan={plan}
+                        onAddToCart={handleAddToCart}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon">🔍</div>
+                  <p className="text-lg font-semibold">Ingen planer fundet</p>
+                  <p className="text-secondary">
+                    Prøv at ændre søgeord
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Bottom section: Cart & Comparison */}
+          <section className="section fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="grid grid-cols-2">
               <Cart
                 cartItems={cartItems}
@@ -265,47 +314,6 @@ function App() {
                 onAutoAdjustChange={setAutoAdjust}
                 showCashDiscount={showCashDiscount}
               />
-            </div>
-          </section>
-
-          {/* Bottom section: Plans */}
-          <section className="section fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="plans-section glass-card">
-              <div className="section-header">
-                <h2>📱 Vælg Mobilabonnementer</h2>
-                <p className="text-secondary">
-                  Vælg de planer der passer bedst til kunden
-                </p>
-              </div>
-
-              <ProviderTabs
-                activeProvider={activeProvider}
-                onProviderChange={setActiveProvider}
-                searchQuery={searchQuery}
-                onSearch={setSearchQuery}
-              />
-
-              {/* Plans grid */}
-              {filteredPlans.length > 0 ? (
-                <div className="plans-grid grid grid-cols-3">
-                  {filteredPlans.map((plan, index) => (
-                    <div key={plan.id} className="stagger-item" style={{ animationDelay: `${index * 50}ms` }}>
-                      <PlanCard
-                        plan={plan}
-                        onAddToCart={handleAddToCart}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-state-icon">🔍</div>
-                  <p className="text-lg font-semibold">Ingen planer fundet</p>
-                  <p className="text-secondary">
-                    Prøv at ændre filter eller søgeord
-                  </p>
-                </div>
-              )}
             </div>
           </section>
         </div>

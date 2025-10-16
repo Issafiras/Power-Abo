@@ -78,14 +78,6 @@ export default function PlanCard({ plan, onAddToCart }) {
         </div>
       )}
 
-      {/* Indtjening badge */}
-      <div className="plan-earnings">
-        <span className="earnings-label">💰 Indtjening:</span>
-        <span className="earnings-amount text-success font-bold">
-          {formatCurrency(plan.earnings)}
-        </span>
-      </div>
-
       {/* Add to cart knap */}
       <button
         onClick={() => onAddToCart(plan)}
@@ -195,30 +187,6 @@ export default function PlanCard({ plan, onAddToCart }) {
         .streaming-label {
           font-size: var(--font-sm);
           font-weight: var(--font-semibold);
-        }
-
-        .plan-earnings {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: var(--spacing-sm);
-          background: var(--glass-bg);
-          border-radius: var(--radius-md);
-          transition: all var(--transition-fast);
-        }
-
-        .plan-earnings:hover {
-          background: rgba(16, 185, 129, 0.1);
-          transform: scale(1.02);
-        }
-
-        .earnings-label {
-          font-size: var(--font-sm);
-          color: var(--text-secondary);
-        }
-
-        .earnings-amount {
-          font-size: var(--font-lg);
         }
 
         .plan-add-btn {

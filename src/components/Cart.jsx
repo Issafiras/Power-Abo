@@ -50,11 +50,6 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
     );
   }
 
-  // Beregn totaler
-  const totalEarnings = cartItems.reduce((sum, item) => 
-    sum + (item.plan.earnings * item.quantity), 0
-  );
-
   return (
     <div className="cart glass-card-no-hover fade-in-up">
       <div className="section-header">
@@ -149,12 +144,6 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
                   </span>
                 </div>
 
-                <div className="price-line earnings">
-                  <span className="price-label">Indtjening:</span>
-                  <span className="price-value text-success font-bold">
-                    {formatCurrency(item.plan.earnings * item.quantity)}
-                  </span>
-                </div>
               </div>
 
               {/* Features */}
@@ -172,15 +161,6 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
         })}
       </div>
 
-      <div className="divider"></div>
-
-      {/* Total earnings */}
-      <div className="cart-total-earnings scale-in">
-        <span className="earnings-label">💰 Total indtjening:</span>
-        <span className="earnings-value text-success font-extrabold text-2xl pulse-glow">
-          {formatCurrency(totalEarnings)}
-        </span>
-      </div>
 
       <style jsx>{`
         .cart {
@@ -341,21 +321,6 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
           display: flex;
           flex-wrap: wrap;
           gap: var(--spacing-xs);
-        }
-
-        .cart-total-earnings {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: var(--spacing-lg);
-          background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
-          border-radius: var(--radius-lg);
-          border: 2px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .earnings-label {
-          font-size: var(--font-lg);
-          font-weight: var(--font-semibold);
         }
 
         @media (max-width: 900px) {
