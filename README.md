@@ -6,6 +6,7 @@ En moderne webapplikation til beregning og sammenligning af mobilabonnementer og
 
 ### Kundefunktionalitet
 - ✅ **Streaming Selector**: Multi-select grid med alle populære streaming-tjenester
+- ✅ **CBB MIX Selector**: Dedikeret interface til CBB MIX streaming-pakker
 - ✅ **Mobiludgifter Input**: Indtast kundens nuværende mobiludgifter
 - ✅ **Provider Filtering**: Filtrer planer fra Telmore, Telenor eller CBB
 - ✅ **Smart Søgning**: Søg efter planer baseret på data, features eller pris
@@ -101,6 +102,7 @@ power-calculator-app/
 │   │   ├── ProviderTabs.jsx        # Provider filter tabs
 │   │   ├── PlanCard.jsx            # Plan kort
 │   │   ├── StreamingSelector.jsx   # Streaming valg
+│   │   ├── CBBMixSelector.jsx      # CBB MIX streaming-pakker
 │   │   ├── Cart.jsx                # Kurv
 │   │   ├── ComparisonPanel.jsx     # Sammenligning
 │   │   └── PresentationView.jsx    # Præsentation
@@ -180,17 +182,41 @@ power-calculator-app/
 - 500 GB: 149 kr/md (indtjening: 800 kr)
 - 100 GB World-data: 199 kr/md (indtjening: 800 kr)
 
+### CBB MIX (Streaming pakker)
+- **CBB MIX 2**: 2 streaming-tjenester for 160 kr/md
+- **CBB MIX 3**: 3 streaming-tjenester for 210 kr/md
+- **CBB MIX 4**: 4 streaming-tjenester for 260 kr/md
+- **CBB MIX 5**: 5 streaming-tjenester for 310 kr/md
+- **CBB MIX 6**: 6 streaming-tjenester for 360 kr/md
+- **CBB MIX 7**: 7 streaming-tjenester for 410 kr/md
+- **CBB MIX 8**: 8 streaming-tjenester for 460 kr/md
+
 ## 📺 Streaming-tjenester
 
-- Netflix: 79 kr/md
-- Viaplay: 349 kr/md
-- HBO Max: 79 kr/md
-- TV2 Play: 119 kr/md
-- Saxo: 129 kr/md
-- Disney+: 89 kr/md
-- SkyShowtime: 69 kr/md
-- Prime Video: 69 kr/md
-- Musik (Spotify/Apple Music): 119 kr/md
+### Standard tjenester
+- Netflix: 129 kr/md (Standard plan)
+- Viaplay: 149 kr/md (Standard plan)
+- Max (HBO Max): 129 kr/md (Standard plan)
+- TV2 Play Basis: 99 kr/md (Basis plan)
+- Saxo: 79 kr/md (20 timers plan)
+- Disney+: 149 kr/md (Standard plan)
+- SkyShowtime: 89 kr/md (Standard plan)
+- Prime Video: 59 kr/md (Standalone plan)
+- Musik (Spotify/Apple Music): 119 kr/md (Individual plan)
+
+### CBB MIX eksklusive tjenester
+- **Podimo Premium**: 79 kr/md (kun via CBB MIX)
+- **Mofibo**: 89 kr/md (20 timer, kun via CBB MIX)
+- **Nordisk Film+**: 89 kr/md (kun via CBB MIX)
+
+### CBB MIX priser
+- 2 tjenester: 160 kr/md
+- 3 tjenester: 210 kr/md
+- 4 tjenester: 260 kr/md
+- 5 tjenester: 310 kr/md
+- 6 tjenester: 360 kr/md
+- 7 tjenester: 410 kr/md
+- 8 tjenester: 460 kr/md
 
 ## 🧮 Beregningslogik
 
@@ -261,10 +287,15 @@ Rediger `/src/data/streamingServices.js`:
   id: 'unique-id',
   name: 'Tjeneste navn',
   price: 99,
-  logo: '🎬',
-  category: 'streaming'
+  logo: '/Power-Abo/logos/service.png',
+  bgColor: '#000000',
+  category: 'streaming',
+  cbbMixOnly: false // true for CBB MIX eksklusive tjenester
 }
 ```
+
+### CBB MIX funktionalitet
+CBB MIX tjenester kan kun tilgås via CBB MIX pakker. Tilføj `cbbMixOnly: true` for eksklusive tjenester som Podimo, Mofibo og Nordisk Film+.
 
 ### Styling
 Alle CSS-variabler er defineret i `/src/styles/variables.css`. Rediger her for at ændre farver, spacing, etc.
