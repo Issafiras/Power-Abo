@@ -19,7 +19,7 @@ export default function PlanCard({
   const brandColor = plan.color || 'var(--color-orange)';
 
   return (
-    <div className="plan-card glass-card scale-in">
+    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''}`}>
       {/* Provider badge */}
       <div className="plan-header" style={{ borderColor: brandColor }}>
         <div className="plan-provider" style={{ color: brandColor }}>
@@ -27,6 +27,9 @@ export default function PlanCard({
         </div>
         {plan.familyDiscount && (
           <div className="badge badge-telenor bounce-in">👨‍👩‍👧‍👦 Familie</div>
+        )}
+        {plan.provider === 'cbb' && (
+          <div className="cbb-5g-badge">5G</div>
         )}
       </div>
 
@@ -264,6 +267,97 @@ export default function PlanCard({
 
         .mix-toggle-text {
           font-size: var(--font-sm);
+        }
+
+        /* CBB Card Styling */
+        .cbb-card {
+          background: linear-gradient(135deg, #FFE4B5, #FFD700);
+          border: 2px solid #DAA520;
+          color: #8B4513;
+        }
+
+        .cbb-card .plan-header {
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: var(--radius-md) var(--radius-md) 0 0;
+          padding: var(--spacing-sm) var(--spacing-md);
+          border-bottom: 2px solid #DAA520;
+        }
+
+        .cbb-card .plan-provider {
+          color: #8B4513;
+          font-weight: var(--font-bold);
+          font-size: var(--font-sm);
+        }
+
+        .cbb-5g-badge {
+          background: #DC143C;
+          color: white;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: var(--font-xs);
+          font-weight: var(--font-bold);
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .cbb-5g-badge::before {
+          content: "📶";
+          font-size: 10px;
+        }
+
+        .cbb-card .plan-title h3 {
+          color: #8B4513;
+          font-size: var(--font-3xl);
+          font-weight: var(--font-extrabold);
+          margin: 0;
+        }
+
+        .cbb-card .plan-data {
+          color: #8B4513;
+          font-size: var(--font-sm);
+          font-weight: var(--font-medium);
+        }
+
+        .cbb-card .plan-pricing {
+          background: white;
+          border-radius: var(--radius-md);
+          padding: var(--spacing-md);
+          margin: var(--spacing-sm) 0;
+          border: 1px solid #DAA520;
+        }
+
+        .cbb-card .price-amount {
+          color: #8B4513;
+          font-size: var(--font-2xl);
+          font-weight: var(--font-extrabold);
+        }
+
+        .cbb-card .price-period {
+          color: #8B4513;
+          font-size: var(--font-sm);
+        }
+
+        .cbb-card .plan-features {
+          margin: var(--spacing-sm) 0;
+        }
+
+        .cbb-card .badge {
+          background: rgba(139, 69, 19, 0.1);
+          color: #8B4513;
+          border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .cbb-card .plan-add-btn {
+          background: linear-gradient(135deg, #8B4513, #A0522D);
+          color: white;
+          border: none;
+          box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+        }
+
+        .cbb-card .plan-add-btn:hover {
+          background: linear-gradient(135deg, #A0522D, #8B4513);
+          box-shadow: 0 6px 16px rgba(139, 69, 19, 0.4);
         }
 
         @media (max-width: 900px) {
