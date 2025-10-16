@@ -96,26 +96,50 @@ export default function PresentationView({
         {/* Comparison summary */}
         <div className="comparison-summary">
           <div className="summary-column">
-            <div className="summary-label">Kundens Situation</div>
+            <div className="summary-label">👤 Kundens Situation</div>
             <div className="summary-amount">{formatCurrency(customerTotals.sixMonth)}</div>
             <div className="summary-details">
-              <div>Mobil: {formatCurrency(customerMobileCost || 0)}/md</div>
-              <div>Streaming: {formatCurrency(streamingCost)}/md</div>
+              <div className="detail-row">
+                <span className="detail-label">Mobil:</span>
+                <span className="detail-value">{formatCurrency(customerMobileCost || 0)}/md</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Streaming:</span>
+                <span className="detail-value">{formatCurrency(streamingCost)}/md</span>
+              </div>
+              <div className="detail-row total">
+                <span className="detail-label">Total/md:</span>
+                <span className="detail-value">{formatCurrency(customerTotals.monthly)}</span>
+              </div>
             </div>
           </div>
 
-          <div className="summary-divider">→</div>
+          <div className="summary-divider">⚡</div>
 
           <div className="summary-column">
-            <div className="summary-label">Vores Tilbud</div>
+            <div className="summary-label">💼 Vores Tilbud</div>
             <div className="summary-amount">{formatCurrency(ourOfferTotals.sixMonth)}</div>
             <div className="summary-details">
-              <div>{cartItems.length} plan(er)</div>
+              <div className="detail-row">
+                <span className="detail-label">Planer:</span>
+                <span className="detail-value">{formatCurrency(ourOfferTotals.monthly - (notIncludedStreamingCost || 0))}/md</span>
+              </div>
               {ourOfferTotals.telenorDiscount > 0 && (
-                <div className="text-success">
-                  Inkl. -{formatCurrency(ourOfferTotals.telenorDiscount)}/md rabat
+                <div className="detail-row discount">
+                  <span className="detail-label">Telenor rabat:</span>
+                  <span className="detail-value text-success">-{formatCurrency(ourOfferTotals.telenorDiscount)}/md</span>
                 </div>
               )}
+              {notIncludedStreamingCost > 0 && (
+                <div className="detail-row">
+                  <span className="detail-label">Streaming tillæg:</span>
+                  <span className="detail-value">{formatCurrency(notIncludedStreamingCost)}/md</span>
+                </div>
+              )}
+              <div className="detail-row total">
+                <span className="detail-label">Total/md:</span>
+                <span className="detail-value">{formatCurrency(ourOfferTotals.monthly)}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -134,7 +158,7 @@ export default function PresentationView({
                   <div className="plan-qty">
                     {item.quantity} linje{item.quantity !== 1 ? 'r' : ''}
                   </div>
-                  {item.plan.streaming && item.plan.streaming.length > 0 && (
+                  {(item.plan.streamingCount > 0 || (item.plan.streaming && item.plan.streaming.length > 0)) && (
                     <div className="plan-streaming-badge">
                       📺 {item.plan.streamingCount || item.plan.streaming.length} streaming
                     </div>
@@ -148,17 +172,48 @@ export default function PresentationView({
         {/* Streaming coverage */}
         {selectedStreaming.length > 0 && (
           <div className="streaming-summary">
-            <h3>Streaming</h3>
+            <h3>📺 Streaming Oversigt</h3>
+            <div className="streaming-coverage-header">
+              <div className="coverage-stats">
+                <div className="stat-item">
+                  <span className="stat-number">{streamingCoverage.included.length}</span>
+                  <span className="stat-label">Inkluderet</span>
+                </div>
+                {streamingCoverage.notIncluded.length > 0 && (
+                  <div className="stat-item">
+                    <span className="stat-number">{streamingCoverage.notIncluded.length}</span>
+                    <span className="stat-label">Tillæg</span>
+                  </div>
+                )}
+                <div className="stat-item total">
+                  <span className="stat-number">{selectedStreaming.length}</span>
+                  <span className="stat-label">Total</span>
+                </div>
+              </div>
+            </div>
             <div className="streaming-items">
               {streamingCoverage.included.length > 0 && (
                 <div className="streaming-group">
-                  <div className="streaming-group-label">✓ Inkluderet:</div>
+                  <div className="streaming-group-label">
+                    ✅ Inkluderet i abonnement ({streamingCoverage.included.length} tjenester)
+                  </div>
                   <div className="streaming-tags">
                     {streamingCoverage.included.map(id => {
                       const service = getServiceById(id);
                       return service ? (
                         <span key={id} className="streaming-tag included">
-                          {service.logo} {service.name}
+                          <img 
+                            src={service.logo} 
+                            alt={service.name}
+                            className="streaming-logo"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'inline';
+                            }}
+                          />
+                          <span style={{ display: 'none' }}>{service.name.charAt(0)}</span>
+                          {service.name}
+                          <span className="streaming-price">({formatCurrency(service.price)}/md)</span>
                         </span>
                       ) : null;
                     })}
@@ -167,13 +222,26 @@ export default function PresentationView({
               )}
               {streamingCoverage.notIncluded.length > 0 && (
                 <div className="streaming-group">
-                  <div className="streaming-group-label">+ Tillæg:</div>
+                  <div className="streaming-group-label">
+                    ➕ Tillæg til abonnement ({streamingCoverage.notIncluded.length} tjenester)
+                  </div>
                   <div className="streaming-tags">
                     {streamingCoverage.notIncluded.map(id => {
                       const service = getServiceById(id);
                       return service ? (
                         <span key={id} className="streaming-tag">
-                          {service.logo} {service.name}
+                          <img 
+                            src={service.logo} 
+                            alt={service.name}
+                            className="streaming-logo"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'inline';
+                            }}
+                          />
+                          <span style={{ display: 'none' }}>{service.name.charAt(0)}</span>
+                          {service.name}
+                          <span className="streaming-price">({formatCurrency(service.price)}/md)</span>
                         </span>
                       ) : null;
                     })}
@@ -351,6 +419,37 @@ export default function PresentationView({
           gap: var(--spacing-xs);
         }
 
+        .detail-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--spacing-xs) 0;
+        }
+
+        .detail-row.total {
+          border-top: 1px solid var(--glass-border);
+          margin-top: var(--spacing-xs);
+          padding-top: var(--spacing-sm);
+          font-weight: var(--font-semibold);
+        }
+
+        .detail-row.discount {
+          color: var(--color-success);
+        }
+
+        .detail-label {
+          font-size: var(--font-sm);
+        }
+
+        .detail-value {
+          font-weight: var(--font-semibold);
+          color: var(--color-orange);
+        }
+
+        .detail-value.text-success {
+          color: var(--color-success);
+        }
+
         .summary-divider {
           display: flex;
           align-items: center;
@@ -444,6 +543,66 @@ export default function PresentationView({
         .streaming-tag.included {
           background: rgba(16, 185, 129, 0.2);
           border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .streaming-logo {
+          width: 20px;
+          height: 20px;
+          margin-right: var(--spacing-xs);
+          vertical-align: middle;
+          object-fit: contain;
+          border-radius: var(--radius-sm);
+        }
+
+        .streaming-price {
+          font-size: var(--font-xs);
+          opacity: 0.8;
+          margin-left: var(--spacing-xs);
+        }
+
+        .streaming-coverage-header {
+          margin-bottom: var(--spacing-lg);
+          text-align: center;
+        }
+
+        .coverage-stats {
+          display: flex;
+          justify-content: center;
+          gap: var(--spacing-xl);
+          margin-bottom: var(--spacing-lg);
+        }
+
+        .stat-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: var(--spacing-md);
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--glass-border);
+          min-width: 80px;
+        }
+
+        .stat-item.total {
+          background: rgba(255, 107, 26, 0.1);
+          border-color: rgba(255, 107, 26, 0.3);
+        }
+
+        .stat-number {
+          font-size: var(--font-2xl);
+          font-weight: var(--font-extrabold);
+          color: var(--color-orange);
+          line-height: 1;
+        }
+
+        .stat-item.total .stat-number {
+          color: var(--color-orange);
+        }
+
+        .stat-label {
+          font-size: var(--font-sm);
+          color: var(--text-secondary);
+          margin-top: var(--spacing-xs);
         }
 
         .presentation-footer {
