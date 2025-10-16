@@ -92,6 +92,18 @@ export default function PlanCard({
               </div>
             </div>
             
+            {/* Samlerabat info */}
+            {plan.familyDiscount && (
+              <div className="telenor-family-discount">
+                <div className="family-discount-badge">
+                  👨‍👩‍👧‍👦 Familie samlerabat
+                </div>
+                <div className="family-discount-info">
+                  -50 kr/md pr. ekstra linje
+                </div>
+              </div>
+            )}
+            
             {/* Features list */}
             <div className="subscription-features">
               <ul className="list--reset">
@@ -548,6 +560,27 @@ export default function PlanCard({
            min-height: 120px;
          }
 
+         .telenor-family-discount {
+           background: rgba(255, 255, 255, 0.1);
+           padding: 12px 16px;
+           border-radius: 8px;
+           margin-top: 12px;
+           border: 1px solid rgba(255, 255, 255, 0.2);
+         }
+
+         .family-discount-badge {
+           color: #60a5fa;
+           font-size: 14px;
+           font-weight: bold;
+           margin-bottom: 4px;
+         }
+
+         .family-discount-info {
+           color: white;
+           font-size: 12px;
+           opacity: 0.9;
+         }
+
          .subscription-card__title {
            display: flex;
            justify-content: space-between;
@@ -650,6 +683,19 @@ export default function PlanCard({
 
           .subscription-card__price {
             font-size: 18px;
+          }
+
+          .telenor-family-discount {
+            padding: 8px 12px;
+            margin-top: 8px;
+          }
+
+          .family-discount-badge {
+            font-size: 12px;
+          }
+
+          .family-discount-info {
+            font-size: 11px;
           }
         }
       `}</style>
