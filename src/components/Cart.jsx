@@ -5,13 +5,6 @@
 
 import { formatCurrency, calculateSixMonthPrice } from '../utils/calculations';
 
-// Provider logo mapping
-const providerLogos = {
-  telenor: '/Power-Abo/logos/Telenor.png',
-  telmore: '/Power-Abo/logos/Telmore.png',
-  cbb: '/Power-Abo/logos/CBB.png'
-};
-
 export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
   if (cartItems.length === 0) {
     return (
@@ -77,7 +70,6 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
         {cartItems.map((item, index) => {
           const sixMonthPrice = calculateSixMonthPrice(item.plan, item.quantity);
           const hasIntro = item.plan.introPrice && item.plan.introMonths;
-          const providerLogo = providerLogos[item.plan.provider.toLowerCase()];
           
           return (
             <div 
@@ -87,18 +79,8 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
             >
               {/* Plan info */}
               <div className="cart-item-header">
-                <div className="cart-item-provider">
-                  {providerLogo ? (
-                    <img 
-                      src={providerLogo} 
-                      alt={item.plan.provider}
-                      className="provider-logo"
-                    />
-                  ) : (
-                    <span style={{ color: item.plan.color }}>
-                      {item.plan.provider.toUpperCase()}
-                    </span>
-                  )}
+                <div className="cart-item-provider" style={{ color: item.plan.color }}>
+                  {item.plan.provider.toUpperCase()}
                 </div>
                 <button
                   onClick={() => onRemove(item.plan.id)}
@@ -266,16 +248,6 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
           font-size: var(--font-xs);
           font-weight: var(--font-bold);
           letter-spacing: 0.05em;
-          display: flex;
-          align-items: center;
-        }
-
-        .cart-item-provider .provider-logo {
-          height: 28px;
-          width: auto;
-          max-width: 120px;
-          object-fit: contain;
-          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
         }
 
         .btn-remove {
