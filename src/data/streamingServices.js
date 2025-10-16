@@ -101,7 +101,7 @@ export const streamingServices = [
     id: 'nordisk-film-plus',
     name: 'Nordisk Film+',
     price: 89, // CBB MIX pris
-    logo: '/logos/nordisk film.png',
+    logo: '/logos/nordisk-film-fixed.png',
     bgColor: '#2C3E50', // Nordisk Film mørkeblå
     category: 'streaming',
     cbbMixOnly: true
