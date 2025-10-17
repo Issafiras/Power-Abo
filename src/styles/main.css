@@ -9,6 +9,7 @@
 @import './cbb-mix.css';
 @import './animations.css';
 @import './utilities.css';
+@import './compact.css';
 
 /* Reset og base styles */
 *,
@@ -118,22 +119,22 @@ a:hover {
   color: var(--color-orange-light);
 }
 
-/* Layout */
+/* Compact Layout - Optimized for density */
 .container {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  padding: 0 var(--spacing-md);
 }
 
 .section {
-  padding: var(--spacing-2xl) 0;
+  padding: var(--spacing-lg) 0;
 }
 
-/* Grid system */
+/* Compact Grid system */
 .grid {
   display: grid;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .grid-cols-1 {

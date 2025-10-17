@@ -63,21 +63,21 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Enhanced Buttons */
+/* Compact Enhanced Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  font-size: var(--font-base);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-sm);
   font-weight: var(--font-semibold);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   transition: all var(--transition-smooth);
   white-space: nowrap;
-  min-height: 44px; /* Touch target */
+  min-height: 36px; /* Compact touch target */
   position: relative;
   overflow: hidden;
   will-change: transform;
@@ -308,23 +308,23 @@
   box-shadow: 0 0 40px rgba(168, 85, 247, 0.6), 0 10px 30px rgba(168, 85, 247, 0.3);
 }
 
-/* Button Size Variants */
+/* Compact Button Size Variants */
 .btn-sm {
-  padding: var(--spacing-xs) var(--spacing-md);
-  font-size: var(--font-sm);
-  min-height: 36px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-xs);
+  min-height: 28px;
 }
 
 .btn-lg {
-  padding: var(--spacing-md) var(--spacing-xl);
-  font-size: var(--font-lg);
-  min-height: 52px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-base);
+  min-height: 40px;
 }
 
 .btn-xl {
-  padding: var(--spacing-lg) var(--spacing-2xl);
-  font-size: var(--font-xl);
-  min-height: 60px;
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: var(--font-lg);
+  min-height: 48px;
 }
 
 /* Button States */
@@ -361,14 +361,14 @@
   transform: rotate(10deg) scale(1.1);
 }
 
-/* Badge/Chip */
+/* Compact Badge/Chip */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-xs);
+  padding: 2px var(--spacing-xs);
+  font-size: 10px;
   font-weight: var(--font-semibold);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   white-space: nowrap;
   transition: all var(--transition-fast);
 }
@@ -421,19 +421,19 @@
   border-color: rgba(59, 130, 246, 0.5);
 }
 
-/* Input fields */
+/* Compact Input fields */
 .input {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-base);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-sm);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
   transition: all var(--transition-smooth);
   -webkit-backdrop-filter: blur(var(--blur-md));
   backdrop-filter: blur(var(--blur-md));
-  min-height: 44px;
+  min-height: 32px;
 }
 
 .input:hover {
