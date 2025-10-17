@@ -6,9 +6,9 @@
 export default function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery }) {
   const providers = [
     { id: 'all', name: 'Alle', icon: '📱' },
-    { id: 'telmore', name: 'Telmore', icon: '🟠', logo: '/logos/Telmore-logo.png' },
-    { id: 'telenor', name: 'Telenor', icon: '🔵', logo: '/logos/Telenor.png' },
-    { id: 'cbb', name: 'CBB', icon: '🟣', logo: '/logos/CBB_Mobil_800x400.png' }
+    { id: 'telmore', name: 'Telmore', icon: '🟠', logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png' },
+    { id: 'telenor', name: 'Telenor', icon: '🔵', logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png' },
+    { id: 'cbb', name: 'CBB', icon: '🟣', logo: 'https://issafiras.github.io/Power-Abo/logos/CBB_Mobil_800x400.png' }
   ];
 
   return (
