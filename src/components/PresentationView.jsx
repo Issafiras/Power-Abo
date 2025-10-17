@@ -147,7 +147,7 @@ export default function PresentationView({
         {/* Selected plans */}
         {cartItems.length > 0 && (
           <div className="plans-summary">
-            <h3>Valgte Planer</h3>
+            <h3>Valgte Abonnementer</h3>
             <div className="plans-grid">
               {cartItems.map(item => (
                 <div key={item.plan.id} className="plan-summary-card">

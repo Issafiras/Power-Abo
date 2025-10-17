@@ -235,7 +235,7 @@ export default function PlanCard({
           boxShadow: `0 0 20px ${brandColor}40`
         }}
       >
-        <span className="btn-text">Læg i kurv</span>
+        <span className="btn-text">Tilføj til kurv</span>
         <span className="cart-icon">🛒</span>
       </button>
 

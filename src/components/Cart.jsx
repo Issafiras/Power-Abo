@@ -18,7 +18,7 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
           <div className="empty-state-icon pulse">🛒</div>
           <p className="text-lg font-semibold">Kurven er tom</p>
           <p className="text-secondary">
-            Vælg mobilplaner fra listen nedenfor
+            Vælg mobilabonnementer fra listen nedenfor
           </p>
         </div>
 

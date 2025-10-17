@@ -286,7 +286,7 @@ function App() {
               <div className="section-header">
                 <h2>📱 Vælg Mobilabonnementer</h2>
                 <p className="text-secondary">
-                  Vælg først operatør, derefter de planer der passer bedst til kunden
+                  Vælg først operatør, derefter de abonnementer der passer bedst til kunden
                 </p>
               </div>
 
@@ -324,9 +324,9 @@ function App() {
               ) : (
                 <div className="empty-state">
                   <div className="empty-state-icon">🔍</div>
-                  <p className="text-lg font-semibold">Ingen planer fundet</p>
+                  <p className="text-lg font-semibold">Ingen abonnementer fundet</p>
                   <p className="text-secondary">
-                    Prøv at ændre søgeord
+                    Prøv at ændre søgeordet
                   </p>
                 </div>
               )}

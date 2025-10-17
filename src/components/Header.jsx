@@ -65,10 +65,10 @@ export default function Header({
         <div className="header-content">
           {/* Logo og titel */}
           <div className="header-logo">
-            <h1 className="text-gradient bounce-in tracking-tight">⚡ Power Calculator</h1>
-            <p className="text-sm text-muted fade-in font-medium">Mobilabonnement & Streaming Beregner</p>
+            <h1 className="text-gradient bounce-in tracking-tight">⚡ Power Abo Beregner</h1>
+            <p className="text-sm text-muted fade-in font-medium">Sammenlign mobilabonnementer og streaming-tjenester</p>
             <div className="hero-subtitle fade-in" style={{ animationDelay: '200ms' }}>
-              <span className="badge badge-primary pulse">🎯 Professionel beregner</span>
+              <span className="badge badge-primary pulse">🎯 Professionel værktøj</span>
               <span className="badge badge-info">💡 Intelligent sammenligning</span>
               <span className="badge badge-success">⚡ Hurtig og præcis</span>
             </div>

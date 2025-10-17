@@ -40,11 +40,11 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
       <div className="search-container">
         <input
           type="text"
-          placeholder="Søg efter planer, data, features..."
+          placeholder="Søg efter abonnementer, data, funktioner..."
           className="input search-input"
           value={searchQuery}
           onChange={(e) => onSearch(e.target.value)}
-          aria-label="Søg i planer"
+          aria-label="Søg i abonnementer"
         />
         <span className="search-icon">🔍</span>
       </div>

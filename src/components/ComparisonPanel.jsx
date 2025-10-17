@@ -140,7 +140,7 @@ export default function ComparisonPanel({
                     onChange={(e) => onAutoAdjustChange(e.target.checked)}
                     disabled={cashDiscountLocked}
                   />
-                  <span className="text-sm">🔄 Auto (min 500 kr)</span>
+                  <span className="text-sm">🔄 Auto-justér (minimum 500 kr)</span>
                 </label>
               </div>
             </div>

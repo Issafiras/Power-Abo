@@ -26,14 +26,14 @@ export default function StreamingSelector({
       <div className="section-header">
         <h2>📊 Kundens Nuværende Situation</h2>
         <p className="text-secondary">
-          Vælg kundens aktuelle streaming-tjenester og mobiludgifter
+          Vælg kundens nuværende streaming-tjenester og mobiludgifter
         </p>
       </div>
 
       {/* Mobil udgifter input */}
       <div className="mobile-cost-input">
         <label htmlFor="mobile-cost" className="input-label">
-          💳 Nuværende mobiludgifter pr. måned
+          💳 Nuværende månedlige mobiludgifter
         </label>
         <div className="input-with-currency">
           <input
