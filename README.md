@@ -1,21 +1,21 @@
-# ⚡ Power Calculator
+# ⚡ Power Abo Beregner
 
-En moderne webapplikation til beregning og sammenligning af mobilabonnementer og streaming-tjenester.
+En moderne webapplikation til beregning og sammenligning af mobilabonnementer og streaming-tjenester. Professionelt værktøj med intelligent sammenligning og hurtig, præcis beregning.
 
 ## 🎯 Features
 
 ### Kundefunktionalitet
 - ✅ **Streaming Selector**: Multi-select grid med alle populære streaming-tjenester
 - ✅ **CBB MIX Selector**: Dedikeret interface til CBB MIX streaming-pakker
-- ✅ **Mobiludgifter Input**: Indtast kundens nuværende mobiludgifter
-- ✅ **Provider Filtering**: Filtrer planer fra Telmore, Telenor eller CBB
-- ✅ **Smart Søgning**: Søg efter planer baseret på data, features eller pris
-- ✅ **Dynamisk Kurv**: Tilføj planer med quantity controls
+- ✅ **Mobiludgifter Input**: Indtast kundens nuværende månedlige mobiludgifter
+- ✅ **Provider Filtering**: Filtrer abonnementer fra Telmore, Telenor eller CBB
+- ✅ **Smart Søgning**: Søg efter abonnementer baseret på data, funktioner eller pris
+- ✅ **Dynamisk Kurv**: Tilføj abonnementer med quantity controls
 - ✅ **Live Beregninger**: Realtids beregning af totaler og besparelser
 
 ### Avancerede Features
 - 💰 **Kontant Rabat**: Justerbar kontant rabat med låsefunktion
-- 🔄 **Auto-adjust**: Automatisk justering for minimum 500 kr besparelse
+- 🔄 **Auto-justér**: Automatisk justering for minimum 500 kr besparelse
 - 📊 **Præsentationsvisning**: Fullscreen view med animeret besparelse
 - 🎨 **Dark/Light Mode**: Tema-toggle mellem mørk og lys tilstand
 - ⌨️ **Keyboard Shortcuts**: Genveje til hurtigere navigation
@@ -27,7 +27,7 @@ En moderne webapplikation til beregning og sammenligning af mobilabonnementer og
 - ✅ **Telenor Familie-rabat**: Automatisk -50 kr/md pr. ekstra linje
 - ✅ **Streaming Coverage**: Checker hvilke tjenester er inkluderet
 - ✅ **6-måneders analyse**: Viser total besparelse over 6 måneder
-- ✅ **Indtjening**: Tracker total indtjening fra valgte planer
+- ✅ **Indtjening**: Tracker total indtjening fra valgte abonnementer
 
 ## 🚀 Installation
 
@@ -39,7 +39,7 @@ En moderne webapplikation til beregning og sammenligning af mobilabonnementer og
 
 1. **Naviger til projekt-mappen:**
    ```bash
-   cd power-calculator-app
+   cd Power-Abo
    ```
 
 2. **Installer dependencies:**
@@ -92,31 +92,34 @@ npm run build
 ## 📁 Projekt Struktur
 
 ```
-power-calculator-app/
+Power-Abo/
 ├── public/
 │   ├── index.html          # HTML template
-│   └── favicon.ico         # Favicon
+│   ├── favicon.ico         # Favicon
+│   └── logos/              # Provider og streaming logos
 ├── src/
 │   ├── components/
 │   │   ├── Header.jsx              # Header med kontroller
 │   │   ├── ProviderTabs.jsx        # Provider filter tabs
-│   │   ├── PlanCard.jsx            # Plan kort
+│   │   ├── PlanCard.jsx            # Abonnement kort
 │   │   ├── StreamingSelector.jsx   # Streaming valg
 │   │   ├── CBBMixSelector.jsx      # CBB MIX streaming-pakker
 │   │   ├── Cart.jsx                # Kurv
 │   │   ├── ComparisonPanel.jsx     # Sammenligning
-│   │   └── PresentationView.jsx    # Præsentation
+│   │   ├── PresentationView.jsx    # Præsentation
+│   │   └── Footer.jsx              # Footer
 │   ├── data/
-│   │   ├── plans.js                # Mobilabonnementer
-│   │   └── streamingServices.js    # Streaming-tjenester
+│   │   ├── plans.js                # Mobilabonnementer database
+│   │   └── streamingServices.js    # Streaming-tjenester database
 │   ├── styles/
 │   │   ├── variables.css           # CSS variabler
 │   │   ├── components.css          # Komponent styles
-│   │   └── main.css                # Global styles
+│   │   ├── main.css                # Global styles
+│   │   └── cbb-mix.css             # CBB MIX specifik styling
 │   ├── utils/
 │   │   ├── calculations.js         # Beregningslogik
-│   │   ├── storage.js              # LocalStorage
-│   │   └── validators.js           # Validering
+│   │   ├── storage.js              # LocalStorage håndtering
+│   │   └── validators.js           # Input validering
 │   ├── App.jsx                     # Hovedkomponent
 │   └── main.jsx                    # Entry point
 ├── package.json
@@ -260,13 +263,13 @@ Kunde 6-md total - Vores 6-md total = Besparelse
 
 ## 📝 Development Notes
 
-### Tilføj nye planer
+### Tilføj nye abonnementer
 Rediger `/src/data/plans.js`:
 ```javascript
 {
   id: 'unique-id',
   provider: 'telmore|telenor|cbb',
-  name: 'Plan navn',
+  name: 'Abonnement navn',
   data: '100 GB',
   price: 299,
   introPrice: 99,        // Valgfri
@@ -276,7 +279,12 @@ Rediger `/src/data/plans.js`:
   familyDiscount: true,  // Kun Telenor
   color: '#ff6b1a',
   streaming: ['netflix', 'hbo-max'],
-  streamingCount: 2      // Hvis streaming inkluderet
+  streamingCount: 2,     // Hvis streaming inkluderet
+  cbbMixAvailable: true, // Kun CBB
+  cbbMixPricing: {       // Kun CBB MIX
+    2: 160, 3: 210, 4: 260, 5: 310,
+    6: 360, 7: 410, 8: 460
+  }
 }
 ```
 
@@ -324,13 +332,56 @@ npm run dev
 
 Dette projekt er udviklet til intern brug.
 
+## 🎯 Tekstforbedringer v1.1
+
+### Forbedret Brugervenlighed
+Appen har gennemgået en omfattende tekstforbedring for at gøre den mere professionel og forståelig:
+
+#### **Konsistent Terminologi**
+- "Planer" → "Abonnementer" gennem hele appen
+- "features" → "funktioner" på dansk
+- Mere professionel og klar beskrivelser
+
+#### **Forbedret Navigation**
+- **Header**: "Power Abo Beregner" med klar beskrivelse
+- **Søgning**: "Søg efter abonnementer, data, funktioner..."
+- **Labels**: "Tilføj til kurv" i stedet for "Læg i kurv"
+
+#### **Klarere Instruktioner**
+- "Nuværende månedlige mobiludgifter" (mere præcist)
+- "Auto-justér (minimum 500 kr)" (tydeligere)
+- "Valgte Abonnementer" (konsistent terminologi)
+
+#### **Professionel Tone**
+- Alle tekster er nu mere professionelle og mindre tekniske
+- Bedre forståelighed for alle brugere
+- Ensartet brug af danske termer gennem hele appen
+
+## 🆕 Seneste Opdateringer
+
+### v1.1 - Tekstforbedringer (Januar 2025)
+- ✅ **Forbedret brugervenlighed**: Konsistent terminologi gennem hele appen
+- ✅ **Professionel tekst**: "Power Abo Beregner" med klar beskrivelse
+- ✅ **Bedre navigation**: "Abonnementer" i stedet for "planer" overalt
+- ✅ **Forbedret søgning**: "Søg efter abonnementer, data, funktioner"
+- ✅ **Klarere instruktioner**: Mere forståelige beskrivelser og labels
+- ✅ **Konsistent terminologi**: Ensartet brug af danske termer
+
+### v1.0 - Initial Release
+- ✅ Komplet funktionalitet for mobilabonnement beregning
+- ✅ Streaming-tjenester integration
+- ✅ CBB MIX support
+- ✅ Præsentationsvisning
+- ✅ Dark/Light mode
+
 ## 👨‍💻 Udviklet af
 
-Power Calculator v1.0 - 2025
+Power Abo Beregner v1.1 - 2025  
+Udviklet til POWER butik – kun til internt brug.
 
 ---
 
-**God fornøjelse med Power Calculator!** ⚡
+**God fornøjelse med Power Abo Beregner!** ⚡
 
 For spørgsmål eller support, se dokumentationen eller kontakt udvikleren.
 
