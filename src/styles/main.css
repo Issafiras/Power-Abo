@@ -7,6 +7,8 @@
 @import './variables.css';
 @import './components.css';
 @import './cbb-mix.css';
+@import './animations.css';
+@import './utilities.css';
 
 /* Reset og base styles */
 *,
@@ -71,7 +73,7 @@ body::before {
   z-index: 1;
 }
 
-/* Typography */
+/* Enhanced Typography with Fluid Scaling */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
@@ -79,27 +81,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: var(--font-4xl);
+  font-size: var(--fluid-text-3xl);
 }
 
 h2 {
-  font-size: var(--font-3xl);
+  font-size: var(--fluid-text-2xl);
 }
 
 h3 {
-  font-size: var(--font-2xl);
+  font-size: var(--fluid-text-xl);
 }
 
 h4 {
-  font-size: var(--font-xl);
+  font-size: var(--fluid-text-lg);
 }
 
 h5 {
-  font-size: var(--font-lg);
+  font-size: var(--fluid-text-base);
 }
 
 h6 {
-  font-size: var(--font-base);
+  font-size: var(--fluid-text-sm);
 }
 
 p {
@@ -444,17 +446,51 @@ a:hover {
   }
 }
 
-/* Utility: Smooth reveal on scroll */
+/* Enhanced Utility: Smooth reveal on scroll */
 .reveal-on-scroll {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(30px) scale(0.95);
   transition: opacity var(--duration-slow) var(--ease-in-out-cubic),
               transform var(--duration-slow) var(--ease-in-out-cubic);
 }
 
 .reveal-on-scroll.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+}
+
+/* Advanced reveal with stagger */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s var(--ease-in-out-cubic),
+              transform 0.6s var(--ease-in-out-cubic);
+}
+
+.reveal-stagger.is-visible > *:nth-child(1) { 
+  opacity: 1; 
+  transform: translateY(0); 
+  transition-delay: 0ms;
+}
+.reveal-stagger.is-visible > *:nth-child(2) { 
+  opacity: 1; 
+  transform: translateY(0); 
+  transition-delay: 100ms;
+}
+.reveal-stagger.is-visible > *:nth-child(3) { 
+  opacity: 1; 
+  transform: translateY(0); 
+  transition-delay: 200ms;
+}
+.reveal-stagger.is-visible > *:nth-child(4) { 
+  opacity: 1; 
+  transform: translateY(0); 
+  transition-delay: 300ms;
+}
+.reveal-stagger.is-visible > *:nth-child(5) { 
+  opacity: 1; 
+  transform: translateY(0); 
+  transition-delay: 400ms;
 }
 
 /* Accessibility */
@@ -507,6 +543,59 @@ a:hover {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* Performance optimering - GPU acceleration */
+.glass-card,
+.btn,
+.cart-item,
+.plan-card {
+  will-change: transform;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+/* Micro-interactions */
+@keyframes microBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.btn:active {
+  animation: microBounce 0.2s ease;
+}
+
+/* Advanced stagger animations */
+@keyframes slideInStagger {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.stagger-animation > * {
+  animation: slideInStagger 0.6s ease-out forwards;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-animation > *:nth-child(2) { animation-delay: 100ms; }
+.stagger-animation > *:nth-child(3) { animation-delay: 200ms; }
+.stagger-animation > *:nth-child(4) { animation-delay: 300ms; }
+.stagger-animation > *:nth-child(5) { animation-delay: 400ms; }
+.stagger-animation > *:nth-child(6) { animation-delay: 500ms; }
+
+/* Focus trap for accessibility */
+.focus-trap {
+  position: relative;
+}
+
+.focus-trap:focus-within {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 3px;
+  border-radius: var(--radius-lg);
 }
 
 /* Print styles */
