@@ -69,12 +69,14 @@ export default function PlanCard({
       ) : plan.provider === 'telenor' ? (
         // Telenor specifik struktur
         <div className="subscription-card color-telenor-dark-blue">
-          {/* Badge */}
-          <div className="subscription__badge-block">
-            <div className="subscription__badge text-size--16 badge--hot-pink color-white">
-              Flest vælger
+          {/* Badge - kun hvis mostPopular er true */}
+          {plan.mostPopular && (
+            <div className="subscription__badge-block">
+              <div className="subscription__badge text-size--16 badge--hot-pink color-white">
+                Flest vælger
+              </div>
             </div>
-          </div>
+          )}
           
           {/* Card wrapper */}
           <div className="subscription-card__wrapper background-white">
@@ -227,14 +229,14 @@ export default function PlanCard({
       {/* Add to cart knap */}
       <button
         onClick={() => onAddToCart(plan)}
-        className="btn btn-primary plan-add-btn"
+        className="btn btn-premium plan-add-btn"
         style={{ 
           background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)`,
           boxShadow: `0 0 20px ${brandColor}40`
         }}
       >
-        <span>Læg i kurv</span>
-        <span>🛒</span>
+        <span className="btn-text">Læg i kurv</span>
+        <span className="cart-icon">🛒</span>
       </button>
 
       <style jsx>{`
@@ -355,6 +357,28 @@ export default function PlanCard({
 
         .plan-add-btn:hover {
           animation: pulseGlow 1s ease-in-out infinite;
+        }
+
+        .plan-add-btn:hover .cart-icon {
+          animation: cartBounce 0.6s ease-in-out;
+        }
+
+        .plan-add-btn:active .cart-icon {
+          transform: scale(1.2);
+        }
+
+        @keyframes cartBounce {
+          0%, 100% { transform: translateX(0) rotate(0deg); }
+          25% { transform: translateX(-2px) rotate(-5deg); }
+          75% { transform: translateX(2px) rotate(5deg); }
+        }
+
+        .plan-add-btn .btn-text {
+          transition: all var(--transition-fast);
+        }
+
+        .plan-add-btn:hover .btn-text {
+          transform: translateX(-2px);
         }
 
         .cbb-mix-section {

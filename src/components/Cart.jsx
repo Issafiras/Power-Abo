@@ -285,6 +285,27 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
         .quantity-btn {
           font-size: var(--font-xl);
           font-weight: var(--font-bold);
+          transition: all var(--transition-fast);
+        }
+
+        .quantity-btn:hover {
+          transform: scale(1.1);
+          background: var(--color-orange);
+          color: white;
+          box-shadow: var(--glow-orange);
+        }
+
+        .quantity-btn:active {
+          transform: scale(0.95);
+        }
+
+        .quantity-value {
+          transition: all var(--transition-fast);
+        }
+
+        .quantity-btn:hover + .quantity-value {
+          transform: scale(1.1);
+          color: var(--color-orange);
         }
 
         .quantity-value {

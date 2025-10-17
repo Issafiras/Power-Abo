@@ -46,12 +46,32 @@ export default function Header({
 
   return (
     <header className="header fade-in-down">
+      {/* Hero Background med partikler */}
+      <div className="hero-background">
+        <div className="particle particle-1"></div>
+        <div className="particle particle-2"></div>
+        <div className="particle particle-3"></div>
+        <div className="particle particle-4"></div>
+        <div className="particle particle-5"></div>
+        <div className="floating-orbs">
+          <div className="orb orb-1"></div>
+          <div className="orb orb-2"></div>
+          <div className="orb orb-3"></div>
+        </div>
+        <div className="hero-gradient-overlay"></div>
+      </div>
+
       <div className="container">
         <div className="header-content">
           {/* Logo og titel */}
           <div className="header-logo">
-            <h1 className="text-gradient bounce-in">⚡ Power Calculator</h1>
-            <p className="text-sm text-muted fade-in">Mobilabonnement & Streaming Beregner</p>
+            <h1 className="text-gradient bounce-in tracking-tight">⚡ Power Calculator</h1>
+            <p className="text-sm text-muted fade-in font-medium">Mobilabonnement & Streaming Beregner</p>
+            <div className="hero-subtitle fade-in" style={{ animationDelay: '200ms' }}>
+              <span className="badge badge-primary pulse">🎯 Professionel beregner</span>
+              <span className="badge badge-info">💡 Intelligent sammenligning</span>
+              <span className="badge badge-success">⚡ Hurtig og præcis</span>
+            </div>
           </div>
 
           {/* Kontroller */}
@@ -59,7 +79,7 @@ export default function Header({
             {/* Kontant rabat toggle */}
             <button
               onClick={onToggleCashDiscount}
-              className={`btn btn-secondary ${showCashDiscount ? 'active' : ''}`}
+              className={`btn btn-glass btn-sm ${showCashDiscount ? 'active' : ''}`}
               title="Vis/skjul kontant rabat"
             >
               💰 Kontant Rabat
@@ -68,7 +88,7 @@ export default function Header({
             {/* Tema toggle */}
             <button
               onClick={onThemeToggle}
-              className="btn btn-icon btn-secondary"
+              className="btn btn-icon btn-glass"
               title="Skift tema (Ctrl+T)"
               aria-label="Skift tema"
             >
@@ -78,7 +98,7 @@ export default function Header({
             {/* Præsentation */}
             <button
               onClick={onPresentationToggle}
-              className="btn btn-primary"
+              className="btn btn-premium btn-lg"
               title="Vis præsentation (Ctrl+P)"
             >
               📊 Præsentér
@@ -87,7 +107,7 @@ export default function Header({
             {/* Reset */}
             <button
               onClick={() => setShowConfirm(true)}
-              className="btn btn-danger"
+              className="btn btn-gradient-orange btn-sm"
               title="Nulstil alt (Ctrl+R)"
             >
               🔄 Nulstil
@@ -107,13 +127,13 @@ export default function Header({
             <div className="modal-actions">
               <button 
                 onClick={() => setShowConfirm(false)} 
-                className="btn btn-secondary"
+                className="btn btn-glass"
               >
                 Annullér
               </button>
               <button 
                 onClick={handleResetConfirm} 
-                className="btn btn-danger"
+                className="btn btn-gradient-orange"
               >
                 Ja, nulstil alt
               </button>
@@ -127,11 +147,152 @@ export default function Header({
           background: var(--glass-bg);
           backdrop-filter: blur(var(--blur-xl));
           border-bottom: 1px solid var(--glass-border);
-          padding: var(--spacing-lg) 0;
+          padding: var(--spacing-2xl) 0;
           position: sticky;
           top: 0;
           z-index: var(--z-sticky);
           transition: all var(--transition-smooth);
+          overflow: hidden;
+        }
+
+        .hero-background {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          pointer-events: none;
+          z-index: -1;
+        }
+
+        .particle {
+          position: absolute;
+          background: var(--color-orange);
+          border-radius: 50%;
+          opacity: 0.6;
+          animation: float 6s ease-in-out infinite;
+        }
+
+        .particle-1 {
+          width: 4px;
+          height: 4px;
+          top: 20%;
+          left: 10%;
+          animation-delay: 0s;
+          animation-duration: 8s;
+        }
+
+        .particle-2 {
+          width: 6px;
+          height: 6px;
+          top: 60%;
+          left: 85%;
+          animation-delay: 2s;
+          animation-duration: 10s;
+          background: var(--color-telenor);
+        }
+
+        .particle-3 {
+          width: 3px;
+          height: 3px;
+          top: 80%;
+          left: 20%;
+          animation-delay: 4s;
+          animation-duration: 7s;
+          background: var(--color-cbb);
+        }
+
+        .particle-4 {
+          width: 5px;
+          height: 5px;
+          top: 30%;
+          left: 70%;
+          animation-delay: 1s;
+          animation-duration: 9s;
+        }
+
+        .particle-5 {
+          width: 2px;
+          height: 2px;
+          top: 70%;
+          left: 50%;
+          animation-delay: 3s;
+          animation-duration: 11s;
+          background: var(--color-success);
+        }
+
+        .floating-orbs {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+        }
+
+        .orb {
+          position: absolute;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(255, 107, 26, 0.1), rgba(56, 189, 248, 0.1));
+          backdrop-filter: blur(10px);
+          animation: float 12s ease-in-out infinite;
+        }
+
+        .orb-1 {
+          width: 120px;
+          height: 120px;
+          top: 10%;
+          left: 5%;
+          animation-delay: 0s;
+          animation-duration: 15s;
+        }
+
+        .orb-2 {
+          width: 80px;
+          height: 80px;
+          top: 50%;
+          right: 10%;
+          animation-delay: 5s;
+          animation-duration: 18s;
+          background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(16, 185, 129, 0.1));
+        }
+
+        .orb-3 {
+          width: 60px;
+          height: 60px;
+          bottom: 20%;
+          left: 60%;
+          animation-delay: 8s;
+          animation-duration: 12s;
+          background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(255, 107, 26, 0.1));
+        }
+
+        .hero-gradient-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: radial-gradient(
+            ellipse at center,
+            rgba(255, 107, 26, 0.05) 0%,
+            transparent 70%
+          );
+          opacity: 0.8;
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+          }
+          25% {
+            transform: translateY(-20px) translateX(10px) rotate(90deg);
+          }
+          50% {
+            transform: translateY(-10px) translateX(-5px) rotate(180deg);
+          }
+          75% {
+            transform: translateY(-30px) translateX(15px) rotate(270deg);
+          }
         }
 
         .header::before {
@@ -172,6 +333,34 @@ export default function Header({
 
         .header-logo p {
           margin: 0;
+        }
+
+        .hero-subtitle {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-sm);
+          margin-top: var(--spacing-md);
+          align-items: center;
+        }
+
+        .hero-subtitle .badge {
+          font-size: var(--font-xs);
+          padding: var(--spacing-xs) var(--spacing-sm);
+          animation: fadeInUp var(--duration-normal) var(--ease-in-out-cubic) forwards;
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        .hero-subtitle .badge:nth-child(1) {
+          animation-delay: 300ms;
+        }
+
+        .hero-subtitle .badge:nth-child(2) {
+          animation-delay: 400ms;
+        }
+
+        .hero-subtitle .badge:nth-child(3) {
+          animation-delay: 500ms;
         }
 
         .header-actions {
@@ -217,6 +406,10 @@ export default function Header({
         }
 
         @media (max-width: 900px) {
+          .header {
+            padding: var(--spacing-lg) 0;
+          }
+
           .header-content {
             flex-direction: column;
             align-items: stretch;
@@ -224,6 +417,20 @@ export default function Header({
 
           .header-logo {
             text-align: center;
+          }
+
+          .header-logo h1 {
+            font-size: var(--font-2xl);
+          }
+
+          .hero-subtitle {
+            justify-content: center;
+            flex-wrap: wrap;
+          }
+
+          .hero-subtitle .badge {
+            font-size: 10px;
+            padding: 4px 8px;
           }
 
           .header-actions {
@@ -234,6 +441,30 @@ export default function Header({
           .header-actions .btn:not(.btn-icon) {
             flex: 1;
             min-width: 120px;
+          }
+
+          /* Reducer partikel animation på mobile */
+          .particle {
+            display: none;
+          }
+
+          .orb {
+            opacity: 0.3;
+          }
+
+          .orb-1 {
+            width: 60px;
+            height: 60px;
+          }
+
+          .orb-2 {
+            width: 40px;
+            height: 40px;
+          }
+
+          .orb-3 {
+            width: 30px;
+            height: 30px;
           }
         }
       `}</style>

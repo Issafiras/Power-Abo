@@ -214,8 +214,25 @@ export default function StreamingSelector({
         }
 
         .streaming-card:hover .streaming-icon {
-          transform: scale(1.05);
+          transform: scale(1.05) rotate(5deg);
           box-shadow: var(--shadow-lg);
+          animation: iconPulse 0.6s ease-in-out;
+        }
+
+        @keyframes iconPulse {
+          0% { transform: scale(1.05) rotate(5deg); }
+          50% { transform: scale(1.1) rotate(-2deg); }
+          100% { transform: scale(1.05) rotate(5deg); }
+        }
+
+        .streaming-card:hover .streaming-name {
+          transform: translateY(-2px);
+          color: var(--color-orange);
+        }
+
+        .streaming-card:hover .streaming-price {
+          transform: scale(1.05);
+          color: var(--color-orange-light);
         }
 
         /* Logo billede styles */

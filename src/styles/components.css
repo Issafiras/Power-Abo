@@ -150,6 +150,187 @@
   box-shadow: 0 0 40px rgba(239, 68, 68, 0.6), 0 10px 30px rgba(239, 68, 68, 0.3);
 }
 
+/* Premium Button Variants */
+.btn-premium {
+  background: linear-gradient(135deg, 
+    var(--color-orange) 0%,
+    var(--color-orange-light) 50%,
+    var(--color-orange-dark) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    var(--glow-orange),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.btn-premium:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.btn-premium:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 10px 25px rgba(255, 107, 26, 0.4),
+    0 0 30px rgba(255, 107, 26, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-premium:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* Glass Button Variant */
+.btn-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur-lg));
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.btn-glass:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-glass:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+/* Gradient Button Variants */
+.btn-gradient-orange {
+  background: linear-gradient(135deg, var(--color-orange), var(--color-orange-dark));
+  border: none;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gradient-orange::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-gradient-orange:hover:not(:disabled)::after {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-gradient-blue {
+  background: linear-gradient(135deg, var(--color-telenor), var(--color-telenor-dark));
+  border: none;
+  color: white;
+  box-shadow: var(--glow-blue);
+}
+
+.btn-gradient-blue:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.6), 0 10px 30px rgba(56, 189, 248, 0.3);
+}
+
+.btn-gradient-purple {
+  background: linear-gradient(135deg, var(--color-cbb), var(--color-cbb-light));
+  border: none;
+  color: white;
+  box-shadow: var(--glow-purple);
+}
+
+.btn-gradient-purple:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.6), 0 10px 30px rgba(168, 85, 247, 0.3);
+}
+
+/* Button Size Variants */
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-sm);
+  min-height: 36px;
+}
+
+.btn-lg {
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: var(--font-lg);
+  min-height: 52px;
+}
+
+.btn-xl {
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  font-size: var(--font-xl);
+  min-height: 60px;
+}
+
+/* Button States */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.btn-loading .btn-text {
+  opacity: 0;
+}
+
 .btn-icon {
   padding: var(--spacing-sm);
   min-width: 44px;

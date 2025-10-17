@@ -27,6 +27,7 @@ export const plans = [
     earnings: 900,
     features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
     familyDiscount: true,
+    mostPopular: true,
     color: '#38bdf8',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: []
