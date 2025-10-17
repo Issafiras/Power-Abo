@@ -11,6 +11,7 @@ import PlanCard from './components/PlanCard';
 import Cart from './components/Cart';
 import ComparisonPanel from './components/ComparisonPanel';
 import PresentationView from './components/PresentationView';
+import Footer from './components/Footer';
 import { plans, getPlansByProvider, searchPlans } from './data/plans';
 import {
   saveCart,
@@ -374,6 +375,9 @@ function App() {
           {toast.message}
         </div>
       )}
+
+      {/* Footer */}
+      <Footer />
 
       <style jsx>{`
         .app {
