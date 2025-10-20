@@ -27,14 +27,55 @@ const PROXY_SERVICES = [
   }
 ];
 
-const PROXY_TIMEOUT_MS = 8000;
+const PROXY_TIMEOUT_MS = 3000; // Reduceret fra 8s til 3s for hurtigere fejlhåndtering
 
 // Cache for at huske hvilken proxy der virkede sidst
 let workingProxyIndex = null;
+let proxySuccessCount = {}; // Tæller succes for hver proxy
+let proxyFailureCount = {}; // Tæller fejl for hver proxy
 
 const POWER_API_BASE = isProduction 
   ? 'https://www.power.dk/api/v2'
   : '/api/power';
+
+/**
+ * Prøv en enkelt proxy-tjeneste
+ */
+async function trySingleProxy(proxyIndex, targetUrl, options) {
+  const proxy = PROXY_SERVICES[proxyIndex];
+  const proxyName = proxy.name || `Proxy ${proxyIndex + 1}`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
+
+  try {
+    const proxyUrl = proxy.buildUrl(targetUrl);
+    console.log(`🔄 Prøver proxy: ${proxyName}`);
+    
+    const response = await fetch(proxyUrl, {
+      ...options,
+      headers: {
+        ...options.headers,
+        ...(proxy.headers || {}),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      signal: controller.signal
+    });
+
+    if (response.ok) {
+      console.log(`✅ ${proxyName} virker!`);
+      proxySuccessCount[proxyIndex] = (proxySuccessCount[proxyIndex] || 0) + 1;
+      return response;
+    } else {
+      proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
+      throw new Error(`${proxyName} fejlede: ${response.status} ${response.statusText}`);
+    }
+  } catch (error) {
+    proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 /**
  * Prøv at hente data via forskellige proxy-tjenester med retry logik
@@ -52,10 +93,35 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
   const targetUrl = url;
   let lastError = null;
 
-  // Hvis vi har en virkende proxy, prøv den først
-  const proxyIndices = workingProxyIndex !== null 
-    ? [workingProxyIndex, ...Array.from({length: PROXY_SERVICES.length}, (_, i) => i).filter(i => i !== workingProxyIndex)]
-    : Array.from({length: PROXY_SERVICES.length}, (_, i) => i);
+  // Sorter proxy-tjenester baseret på succes-rate
+  const getProxyScore = (index) => {
+    const success = proxySuccessCount[index] || 0;
+    const failures = proxyFailureCount[index] || 0;
+    const total = success + failures;
+    if (total === 0) return 0.5; // Neutrale score for nye proxy-tjenester
+    return success / total;
+  };
+
+  // Sorter proxy-tjenester efter score (højeste først)
+  const proxyIndices = Array.from({length: PROXY_SERVICES.length}, (_, i) => i)
+    .sort((a, b) => getProxyScore(b) - getProxyScore(a));
+
+  // Prøv de to bedste proxy-tjenester parallelt som fallback
+  if (proxyIndices.length >= 2) {
+    const bestProxy = proxyIndices[0];
+    const secondBestProxy = proxyIndices[1];
+    
+    // Hvis den bedste proxy har en god score, prøv kun den først
+    if (getProxyScore(bestProxy) > 0.7) {
+      console.log(`🚀 Prøver kun den bedste proxy: ${PROXY_SERVICES[bestProxy].name}`);
+      try {
+        const result = await trySingleProxy(bestProxy, targetUrl, options);
+        if (result) return result;
+      } catch (error) {
+        console.log(`⚠️ Bedste proxy fejlede, prøver næstbedste...`);
+      }
+    }
+  }
 
   for (let i = 0; i < proxyIndices.length; i++) {
     const proxyIndex = proxyIndices[i];
@@ -81,7 +147,8 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
 
       if (response.ok) {
         console.log(`✅ ${proxyName} virker!`);
-        // Cache denne proxy som den der virker
+        // Registrer succes
+        proxySuccessCount[proxyIndex] = (proxySuccessCount[proxyIndex] || 0) + 1;
         workingProxyIndex = proxyIndex;
         return response;
       } else {
@@ -94,9 +161,14 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
         }
         
         console.warn(`⚠️ ${proxyName} returnerede status ${response.status}`);
+        // Registrer fejl
+        proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
         lastError = new Error(`${proxyName} fejlede: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
+      // Registrer fejl
+      proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
+      
       if (error.name === 'AbortError') {
         console.warn(`⏱️ ${proxyName} overskred timeout på ${PROXY_TIMEOUT_MS}ms`);
         lastError = new Error(`${proxyName} overskred timeout`);
@@ -119,7 +191,32 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
  */
 export function resetProxyCache() {
   workingProxyIndex = null;
-  console.log('🔄 Proxy cache nulstillet');
+  proxySuccessCount = {};
+  proxyFailureCount = {};
+  console.log('🔄 Proxy cache og statistikker nulstillet');
+}
+
+/**
+ * Vis proxy-statistikker for debugging
+ */
+export function getProxyStats() {
+  const stats = PROXY_SERVICES.map((proxy, index) => {
+    const success = proxySuccessCount[index] || 0;
+    const failures = proxyFailureCount[index] || 0;
+    const total = success + failures;
+    const successRate = total > 0 ? (success / total * 100).toFixed(1) : 'N/A';
+    
+    return {
+      name: proxy.name,
+      success,
+      failures,
+      total,
+      successRate: `${successRate}%`
+    };
+  });
+  
+  console.log('📊 Proxy-statistikker:', stats);
+  return stats;
 }
 
 /**
