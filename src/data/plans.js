@@ -14,7 +14,7 @@ export const plans = [
     earnings: 700,
     features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
     familyDiscount: true,
-    color: '#38bdf8',
+    color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: []
   },
@@ -28,7 +28,7 @@ export const plans = [
     features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
     familyDiscount: true,
     mostPopular: true,
-    color: '#38bdf8',
+    color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: []
   },
@@ -41,7 +41,7 @@ export const plans = [
     earnings: 1200,
     features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
     familyDiscount: true,
-    color: '#38bdf8',
+    color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: []
   },
@@ -54,7 +54,7 @@ export const plans = [
     earnings: 1300,
     features: ['5G', 'eSIM', 'EU Roaming', 'Familie', 'Ubegrænset'],
     familyDiscount: true,
-    color: '#38bdf8',
+    color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: []
   },
@@ -69,7 +69,7 @@ export const plans = [
     price: 129,
     earnings: 400,
     features: ['5G', 'EU Roaming'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: []
   },
   {
@@ -83,7 +83,7 @@ export const plans = [
     introMonths: 3,
     earnings: 700,
     features: ['5G', 'EU Roaming', 'Intro-pris'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: []
   },
   {
@@ -95,7 +95,7 @@ export const plans = [
     price: 169,
     earnings: 700,
     features: ['5G', 'EU Roaming'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: []
   },
   {
@@ -109,7 +109,7 @@ export const plans = [
     introMonths: 1,
     earnings: 700,
     features: ['5G', 'EU Roaming', 'HBO Max', 'Intro-pris'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: ['hbo-max']
   },
   {
@@ -121,7 +121,7 @@ export const plans = [
     price: 229,
     earnings: 700,
     features: ['5G', 'EU Roaming', 'Ubegrænset'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: []
   },
   {
@@ -135,7 +135,7 @@ export const plans = [
     introMonths: 1,
     earnings: 1000,
     features: ['5G', 'EU Roaming', '2 Streaming', 'Intro-pris'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: [],
     streamingCount: 2
   },
@@ -150,7 +150,7 @@ export const plans = [
     introMonths: 1,
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '3 Streaming', 'Intro-pris'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: [],
     streamingCount: 3
   },
@@ -163,7 +163,7 @@ export const plans = [
     price: 449,
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '4 Streaming'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: [],
     streamingCount: 4
   },
@@ -176,7 +176,7 @@ export const plans = [
     price: 499,
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '5 Streaming'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: [],
     streamingCount: 5
   },
@@ -189,7 +189,7 @@ export const plans = [
     price: 559,
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '8 Streaming'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: [],
     streamingCount: 8
   },
@@ -202,7 +202,7 @@ export const plans = [
     price: 599,
     earnings: 1100,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '9 Streaming'],
-    color: '#ff6b1a',
+    color: '#002788',
     streaming: [],
     streamingCount: 9
   },
@@ -217,7 +217,7 @@ export const plans = [
     price: 109,
     earnings: 300,
     features: ['4G', 'EU Roaming', 'CBB MIX'],
-    color: '#a855f7',
+    color: '#410016',
     streaming: [],
     cbbMixAvailable: true, // CBB MIX tilgængelig
     cbbMixPricing: {
@@ -239,7 +239,7 @@ export const plans = [
     price: 129,
     earnings: 500,
     features: ['4G', 'EU Roaming', 'CBB MIX'],
-    color: '#a855f7',
+    color: '#410016',
     streaming: [],
     cbbMixAvailable: true,
     cbbMixPricing: {
@@ -261,7 +261,7 @@ export const plans = [
     price: 149,
     earnings: 800,
     features: ['4G', 'EU Roaming', 'CBB MIX'],
-    color: '#a855f7',
+    color: '#410016',
     streaming: [],
     cbbMixAvailable: true,
     cbbMixPricing: {
@@ -283,7 +283,7 @@ export const plans = [
     price: 199,
     earnings: 800,
     features: ['4G', 'World Roaming', 'Global', 'CBB MIX'],
-    color: '#a855f7',
+    color: '#410016',
     streaming: [],
     cbbMixAvailable: true,
     cbbMixPricing: {

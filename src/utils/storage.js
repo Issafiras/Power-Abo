@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   CART: 'power_calculator_cart',
   STREAMING: 'power_calculator_streaming',
   CUSTOMER_MOBILE_COST: 'power_calculator_mobile_cost',
+  ORIGINAL_ITEM_PRICE: 'power_calculator_original_item_price',
   CASH_DISCOUNT: 'power_calculator_cash_discount',
   CASH_DISCOUNT_LOCKED: 'power_calculator_cash_discount_locked',
   AUTO_ADJUST: 'power_calculator_auto_adjust',
@@ -90,6 +91,15 @@ export function loadCustomerMobileCost() {
   return getItem(STORAGE_KEYS.CUSTOMER_MOBILE_COST, 0);
 }
 
+// Varens pris inden rabat
+export function saveOriginalItemPrice(price) {
+  setItem(STORAGE_KEYS.ORIGINAL_ITEM_PRICE, price);
+}
+
+export function loadOriginalItemPrice() {
+  return getItem(STORAGE_KEYS.ORIGINAL_ITEM_PRICE, 0);
+}
+
 // Kontant rabat funktioner
 export function saveCashDiscount(amount) {
   setItem(STORAGE_KEYS.CASH_DISCOUNT, amount);
@@ -145,6 +155,7 @@ export function exportState() {
     cart: loadCart(),
     streaming: loadSelectedStreaming(),
     mobileCost: loadCustomerMobileCost(),
+    originalItemPrice: loadOriginalItemPrice(),
     cashDiscount: loadCashDiscount(),
     cashDiscountLocked: loadCashDiscountLocked(),
     autoAdjust: loadAutoAdjust(),
@@ -158,6 +169,7 @@ export function importState(state) {
   if (state.cart) saveCart(state.cart);
   if (state.streaming) saveSelectedStreaming(state.streaming);
   if (typeof state.mobileCost === 'number') saveCustomerMobileCost(state.mobileCost);
+  if (typeof state.originalItemPrice === 'number') saveOriginalItemPrice(state.originalItemPrice);
   if (typeof state.cashDiscount === 'number' || state.cashDiscount === null) saveCashDiscount(state.cashDiscount);
   if (typeof state.cashDiscountLocked === 'boolean') saveCashDiscountLocked(state.cashDiscountLocked);
   if (typeof state.autoAdjust === 'boolean') saveAutoAdjust(state.autoAdjust);

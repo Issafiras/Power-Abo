@@ -3,6 +3,9 @@
  * Håndterer intro-priser, familie-rabatter, og totaler
  */
 
+// Konstanter
+export const SETUP_FEE_PER_LINE = 99; // Oprettelsesgebyr per mobilabonnement
+
 /**
  * Beregn 6-måneders pris for en plan med intro-pris håndtering
  * @param {Object} plan - Plan objekt
@@ -137,13 +140,14 @@ export function checkStreamingCoverage(cartItems, selectedStreaming) {
  * Beregn kunde totaler
  * @param {number} currentMobileCost - Nuværende mobiludgifter pr. måned
  * @param {number} streamingCost - Total streaming-udgifter pr. måned
+ * @param {number} originalItemPrice - Varens pris inden rabat (engangspris)
  * @returns {Object} { monthly: number, sixMonth: number }
  */
-export function calculateCustomerTotal(currentMobileCost, streamingCost) {
+export function calculateCustomerTotal(currentMobileCost, streamingCost, originalItemPrice = 0) {
   const monthly = (currentMobileCost || 0) + (streamingCost || 0);
   return {
     monthly,
-    sixMonth: monthly * 6
+    sixMonth: (monthly * 6) + (originalItemPrice || 0)
   };
 }
 
@@ -152,12 +156,19 @@ export function calculateCustomerTotal(currentMobileCost, streamingCost) {
  * @param {Array} cartItems - Array af kurv-items
  * @param {number} streamingCost - Ikke-inkluderet streaming-omkostning
  * @param {number} cashDiscount - Kontant rabat (valgfri)
+ * @param {number} originalItemPrice - Varens pris inden rabat (engangspris)
  * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number }
  */
-export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0) {
+export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0) {
   if (!cartItems || cartItems.length === 0) {
-    return { monthly: 0, sixMonth: 0, telenorDiscount: 0 };
+    return { monthly: 0, sixMonth: 0, telenorDiscount: 0, setupFee: 0 };
   }
+
+  // Beregn totalt antal mobilabonnementer
+  const totalLines = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  
+  // Beregn oprettelsesgebyr
+  const setupFee = totalLines * SETUP_FEE_PER_LINE;
 
   // Beregn 6-måneders total for alle planer (inkl. CBB Mix)
   const plansSixMonth = cartItems.reduce((total, item) => {
@@ -186,12 +197,16 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
   const beforeCashDiscount = afterFamilyDiscount + streamingSixMonth;
 
   // Træk kontant rabat (kun hvis aktiv)
-  const sixMonth = beforeCashDiscount - (cashDiscount || 0);
+  const afterCashDiscount = beforeCashDiscount - (cashDiscount || 0);
+  
+  // Tilføj varens pris og oprettelsesgebyr (engangsbetalinger)
+  const sixMonth = afterCashDiscount + (originalItemPrice || 0) + setupFee;
 
   return {
-    monthly: sixMonth / 6,
+    monthly: afterCashDiscount / 6, // Monthly beregnes uden engangsbetalinger
     sixMonth: Math.max(0, sixMonth), // Må ikke være negativ
-    telenorDiscount
+    telenorDiscount,
+    setupFee
   };
 }
 

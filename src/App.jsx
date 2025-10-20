@@ -20,6 +20,8 @@ import {
   loadSelectedStreaming,
   saveCustomerMobileCost,
   loadCustomerMobileCost,
+  saveOriginalItemPrice,
+  loadOriginalItemPrice,
   saveCashDiscount,
   loadCashDiscount,
   saveCashDiscountLocked,
@@ -39,6 +41,7 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [selectedStreaming, setSelectedStreaming] = useState([]);
   const [customerMobileCost, setCustomerMobileCost] = useState(0);
+  const [originalItemPrice, setOriginalItemPrice] = useState(0);
   const [cashDiscount, setCashDiscount] = useState(null);
   const [cashDiscountLocked, setCashDiscountLocked] = useState(false);
   const [autoAdjust, setAutoAdjust] = useState(false);
@@ -58,6 +61,7 @@ function App() {
     const savedCart = loadCart();
     const savedStreaming = loadSelectedStreaming();
     const savedMobileCost = loadCustomerMobileCost();
+    const savedOriginalItemPrice = loadOriginalItemPrice();
     const savedCashDiscount = loadCashDiscount();
     const savedCashDiscountLocked = loadCashDiscountLocked();
     const savedAutoAdjust = loadAutoAdjust();
@@ -67,6 +71,7 @@ function App() {
     setCartItems(savedCart);
     setSelectedStreaming(savedStreaming);
     setCustomerMobileCost(savedMobileCost);
+    setOriginalItemPrice(savedOriginalItemPrice);
     setCashDiscount(savedCashDiscount);
     setCashDiscountLocked(savedCashDiscountLocked);
     setAutoAdjust(savedAutoAdjust);
@@ -86,6 +91,10 @@ function App() {
   useEffect(() => {
     saveCustomerMobileCost(customerMobileCost);
   }, [customerMobileCost]);
+
+  useEffect(() => {
+    saveOriginalItemPrice(originalItemPrice);
+  }, [originalItemPrice]);
 
   useEffect(() => {
     saveCashDiscount(cashDiscount);
@@ -187,6 +196,14 @@ function App() {
     }
   };
 
+  // Original item price handler
+  const handleOriginalItemPriceChange = (value) => {
+    const validation = validatePrice(value);
+    if (validation.valid) {
+      setOriginalItemPrice(validation.value);
+    }
+  };
+
   // Cash discount handler
   const handleCashDiscountChange = (value) => {
     const validation = validatePrice(value);
@@ -223,6 +240,7 @@ function App() {
     setCartItems([]);
     setSelectedStreaming([]);
     setCustomerMobileCost(0);
+    setOriginalItemPrice(0);
     setCashDiscount(null);
     setCashDiscountLocked(false);
     setAutoAdjust(false);
@@ -277,6 +295,8 @@ function App() {
               onStreamingToggle={handleStreamingToggle}
               customerMobileCost={customerMobileCost}
               onMobileCostChange={handleMobileCostChange}
+              originalItemPrice={originalItemPrice}
+              onOriginalItemPriceChange={handleOriginalItemPriceChange}
             />
           </section>
 
@@ -345,6 +365,7 @@ function App() {
                 cartItems={cartItems}
                 selectedStreaming={selectedStreaming}
                 customerMobileCost={customerMobileCost}
+                originalItemPrice={originalItemPrice}
                 cashDiscount={cashDiscount}
                 onCashDiscountChange={handleCashDiscountChange}
                 cashDiscountLocked={cashDiscountLocked}
@@ -364,6 +385,7 @@ function App() {
           cartItems={cartItems}
           selectedStreaming={selectedStreaming}
           customerMobileCost={customerMobileCost}
+          originalItemPrice={originalItemPrice}
           cashDiscount={cashDiscount}
           onClose={() => setShowPresentation(false)}
         />

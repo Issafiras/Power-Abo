@@ -17,6 +17,7 @@ export default function PresentationView({
   cartItems,
   selectedStreaming,
   customerMobileCost,
+  originalItemPrice,
   cashDiscount,
   onClose
 }) {
@@ -27,11 +28,12 @@ export default function PresentationView({
   const notIncludedStreamingCost = getStreamingTotal(streamingCoverage.notIncluded);
   const streamingCost = getStreamingTotal(selectedStreaming);
   
-  const customerTotals = calculateCustomerTotal(customerMobileCost, streamingCost);
+  const customerTotals = calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice);
   const ourOfferTotals = calculateOurOfferTotal(
     cartItems,
     notIncludedStreamingCost,
-    cashDiscount
+    cashDiscount,
+    originalItemPrice
   );
   const savings = calculateSavings(customerTotals.sixMonth, ourOfferTotals.sixMonth);
   const isPositiveSavings = savings > 0;
@@ -107,6 +109,12 @@ export default function PresentationView({
                 <span className="detail-label">Streaming:</span>
                 <span className="detail-value">{formatCurrency(streamingCost)}/md</span>
               </div>
+              {originalItemPrice > 0 && (
+                <div className="detail-row">
+                  <span className="detail-label">Varens pris:</span>
+                  <span className="detail-value">{formatCurrency(originalItemPrice)}</span>
+                </div>
+              )}
               <div className="detail-row total">
                 <span className="detail-label">Total/md:</span>
                 <span className="detail-value">{formatCurrency(customerTotals.monthly)}</span>
@@ -134,6 +142,18 @@ export default function PresentationView({
                 <div className="detail-row">
                   <span className="detail-label">Streaming tillæg:</span>
                   <span className="detail-value">{formatCurrency(notIncludedStreamingCost)}/md</span>
+                </div>
+              )}
+              {originalItemPrice > 0 && (
+                <div className="detail-row">
+                  <span className="detail-label">Varens pris:</span>
+                  <span className="detail-value">{formatCurrency(originalItemPrice)}</span>
+                </div>
+              )}
+              {ourOfferTotals.setupFee > 0 && (
+                <div className="detail-row">
+                  <span className="detail-label">Oprettelsesgebyr:</span>
+                  <span className="detail-value">{formatCurrency(ourOfferTotals.setupFee)}</span>
                 </div>
               )}
               <div className="detail-row total">

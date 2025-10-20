@@ -19,6 +19,7 @@ export default function ComparisonPanel({
   cartItems,
   selectedStreaming,
   customerMobileCost,
+  originalItemPrice,
   cashDiscount,
   onCashDiscountChange,
   cashDiscountLocked,
@@ -36,13 +37,14 @@ export default function ComparisonPanel({
 
   // Kunde totaler
   const streamingCost = getStreamingTotal(selectedStreaming);
-  const customerTotals = calculateCustomerTotal(customerMobileCost, streamingCost);
+  const customerTotals = calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice);
 
   // Vores tilbud (uden kontant rabat for auto-adjust beregning)
   const ourOfferWithoutDiscount = calculateOurOfferTotal(
     cartItems,
     notIncludedStreamingCost,
-    0
+    0,
+    originalItemPrice
   );
 
   // Auto-adjust kontant rabat
@@ -63,7 +65,8 @@ export default function ComparisonPanel({
   const ourOfferTotals = calculateOurOfferTotal(
     cartItems,
     notIncludedStreamingCost,
-    cashDiscount
+    cashDiscount,
+    originalItemPrice
   );
 
   // Besparelse
@@ -222,6 +225,12 @@ export default function ComparisonPanel({
               <span className="amount-label">Streaming/md:</span>
               <span className="amount-value">{formatCurrency(streamingCost)}</span>
             </div>
+            {originalItemPrice > 0 && (
+              <div className="amount-row">
+                <span className="amount-label">Varens pris:</span>
+                <span className="amount-value">{formatCurrency(originalItemPrice)}</span>
+              </div>
+            )}
             <div className="amount-row total">
               <span className="amount-label font-semibold">Total/md:</span>
               <span className="amount-value font-bold">
@@ -267,6 +276,18 @@ export default function ComparisonPanel({
               <div className="amount-row">
                 <span className="amount-label">Streaming tillæg:</span>
                 <span className="amount-value">{formatCurrency(notIncludedStreamingCost)}/md</span>
+              </div>
+            )}
+            {originalItemPrice > 0 && (
+              <div className="amount-row">
+                <span className="amount-label">Varens pris:</span>
+                <span className="amount-value">{formatCurrency(originalItemPrice)}</span>
+              </div>
+            )}
+            {ourOfferTotals.setupFee > 0 && (
+              <div className="amount-row">
+                <span className="amount-label">Oprettelsesgebyr:</span>
+                <span className="amount-value">{formatCurrency(ourOfferTotals.setupFee)}</span>
               </div>
             )}
             <div className="amount-row total">

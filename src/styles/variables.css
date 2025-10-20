@@ -9,13 +9,16 @@
   --color-orange-light: #ff8847;
   --color-orange-dark: #e55a0f;
   
-  --color-telenor: #38bdf8;
-  --color-telenor-light: #7dd3fc;
-  --color-telenor-dark: #0ea5e9;
+  --color-telenor: #0207b2;
+  --color-telenor-light: #3b4fdb;
+  --color-telenor-dark: #010459;
+  --color-telenor-bg: #ffffff;
   
-  --color-telmore: #ff6b1a;
-  --color-cbb: #a855f7;
-  --color-cbb-light: #c084fc;
+  --color-telmore: #002788;
+  --color-telmore-bg: #f3b2d0;
+  --color-cbb: #410016;
+  --color-cbb-light: #6b0024;
+  --color-cbb-bg: #ffc50f;
   
   /* Status farver */
   --color-success: #10b981;

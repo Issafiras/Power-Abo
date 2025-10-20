@@ -10,15 +10,22 @@ export default function StreamingSelector({
   selectedStreaming, 
   onStreamingToggle,
   customerMobileCost,
-  onMobileCostChange 
+  onMobileCostChange,
+  originalItemPrice,
+  onOriginalItemPriceChange
 }) {
   const streamingTotal = getStreamingTotal(selectedStreaming);
   const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
-  const sixMonthTotal = monthlyTotal * 6;
+  const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
 
   const handleMobileCostChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     onMobileCostChange(value);
+  };
+
+  const handleOriginalItemPriceChange = (e) => {
+    const value = parseFloat(e.target.value) || 0;
+    onOriginalItemPriceChange(value);
   };
 
   return (
@@ -47,6 +54,26 @@ export default function StreamingSelector({
             step="10"
           />
           <span className="currency-suffix">kr/md</span>
+        </div>
+      </div>
+
+      {/* Varens pris inden rabat input */}
+      <div className="original-item-price-input">
+        <label htmlFor="original-item-price" className="input-label">
+          🏷️ Varens pris inden rabat og besparelse
+        </label>
+        <div className="input-with-currency">
+          <input
+            id="original-item-price"
+            type="number"
+            className="input"
+            placeholder="0"
+            value={originalItemPrice || ''}
+            onChange={handleOriginalItemPriceChange}
+            min="0"
+            step="10"
+          />
+          <span className="currency-suffix">kr</span>
         </div>
       </div>
 
@@ -134,6 +161,10 @@ export default function StreamingSelector({
         }
 
         .mobile-cost-input {
+          margin-bottom: var(--spacing-md);
+        }
+
+        .original-item-price-input {
           margin-bottom: var(--spacing-md);
         }
 

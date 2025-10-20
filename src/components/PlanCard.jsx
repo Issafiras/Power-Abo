@@ -19,7 +19,7 @@ export default function PlanCard({
   const brandColor = plan.color || 'var(--color-orange)';
 
   return (
-    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' ? 'telenor-card' : ''}`}>
+    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' ? 'telenor-card' : ''} ${plan.provider === 'telmore' ? 'telmore-card' : ''}`}>
       {plan.provider === 'cbb' ? (
         // CBB specifik struktur
         <div className="refined-product-card__main-card">
@@ -322,7 +322,7 @@ export default function PlanCard({
         .price-family {
           margin-top: var(--spacing-xs);
           padding: var(--spacing-xs) var(--spacing-sm);
-          background: rgba(56, 189, 248, 0.1);
+          background: rgba(2, 7, 178, 0.1);
           border-radius: var(--radius-sm);
         }
 
@@ -384,9 +384,9 @@ export default function PlanCard({
         .cbb-mix-section {
           margin: var(--spacing-sm) 0;
           padding: var(--spacing-sm);
-          background: rgba(168, 85, 247, 0.1);
+          background: rgba(65, 0, 22, 0.05);
           border-radius: var(--radius-md);
-          border: 1px solid rgba(168, 85, 247, 0.2);
+          border: 1px solid rgba(65, 0, 22, 0.2);
         }
 
         .mix-toggle {
@@ -399,13 +399,13 @@ export default function PlanCard({
           gap: var(--spacing-sm);
           cursor: pointer;
           font-weight: var(--font-semibold);
-          color: var(--color-purple);
+          color: #410016;
         }
 
         .mix-checkbox {
           width: 18px;
           height: 18px;
-          accent-color: var(--color-purple);
+          accent-color: #410016;
         }
 
         .mix-toggle-text {
@@ -414,9 +414,9 @@ export default function PlanCard({
 
         /* CBB Card Styling - Præcis som rigtige CBB kort */
         .cbb-card {
-          background: linear-gradient(135deg, #FFE4B5, #FFD700);
-          border: 2px solid #DAA520;
-          color: #8B4513;
+          background: #ffc50f;
+          border: 2px solid #410016;
+          color: #410016;
           font-family: 'Arial', sans-serif;
         }
 
@@ -424,7 +424,7 @@ export default function PlanCard({
           display: flex;
           flex-direction: column;
           height: 100%;
-          background: linear-gradient(135deg, #FFE4B5, #FFD700);
+          background: #ffc50f;
           border-radius: 12px;
           overflow: hidden;
         }
@@ -446,7 +446,7 @@ export default function PlanCard({
           display: flex;
           align-items: center;
           gap: 6px;
-          background: #DC143C;
+          background: #410016;
           color: white;
           padding: 6px 12px;
           border-radius: 20px;
@@ -480,7 +480,7 @@ export default function PlanCard({
         .current-product-content__value {
           font-size: 32px;
           font-weight: 900;
-          color: #8B4513;
+          color: #410016;
           margin: 0;
           line-height: 1;
         }
@@ -488,7 +488,7 @@ export default function PlanCard({
         .current-product-content__label {
           font-size: 14px;
           font-weight: 600;
-          color: #8B4513;
+          color: #410016;
           margin: 0;
           margin-top: 2px;
         }
@@ -505,13 +505,13 @@ export default function PlanCard({
         .product-content__roaming-data .current-product-content__value {
           font-size: 14px;
           font-weight: 600;
-          color: #8B4513;
+          color: #410016;
         }
 
         .refined-product-card__main-card--price-area {
           background: white;
           padding: 16px;
-          border-top: 1px solid #DAA520;
+          border-top: 1px solid #410016;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -526,35 +526,35 @@ export default function PlanCard({
         .current-price-line__price {
           font-size: 24px;
           font-weight: 900;
-          color: #8B4513;
+          color: #410016;
           margin: 0;
         }
 
         .current-price-line__label {
           font-size: 14px;
           font-weight: 600;
-          color: #8B4513;
+          color: #410016;
           margin: 0;
         }
 
         .cbb-card .plan-add-btn {
-          background: linear-gradient(135deg, #8B4513, #A0522D);
+          background: linear-gradient(135deg, #410016, #6b0024);
           color: white;
           border: none;
-          box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+          box-shadow: 0 4px 12px rgba(65, 0, 22, 0.3);
           margin-top: 12px;
         }
 
          .cbb-card .plan-add-btn:hover {
-           background: linear-gradient(135deg, #A0522D, #8B4513);
-           box-shadow: 0 6px 16px rgba(139, 69, 19, 0.4);
+           background: linear-gradient(135deg, #6b0024, #410016);
+           box-shadow: 0 6px 16px rgba(65, 0, 22, 0.4);
          }
 
          /* Telenor Card Styling - Præcis som rigtige Telenor kort */
          .telenor-card {
-           background: linear-gradient(135deg, #1e293b, #334155);
-           border: 2px solid #000F3C;
-           color: #ffffff;
+           background: #ffffff;
+           border: 2px solid #0207b2;
+           color: #0207b2;
            font-family: 'Arial', sans-serif;
            position: relative;
            overflow: hidden;
@@ -576,7 +576,7 @@ export default function PlanCard({
          }
 
          .subscription__badge {
-           background: #FF1493;
+           background: #0207b2;
            color: white;
            padding: 4px 12px;
            border-radius: 4px;
@@ -589,13 +589,13 @@ export default function PlanCard({
            flex: 1;
            display: flex;
            flex-direction: column;
-           background: linear-gradient(135deg, #1e293b, #334155);
+           background: #ffffff;
            border-radius: 8px;
            overflow: hidden;
          }
 
          .subscription-card__img {
-           background: linear-gradient(135deg, #000F3C, #1e3a8a);
+           background: linear-gradient(135deg, #0207b2, #3b4fdb);
            color: white;
            padding: 20px;
            position: relative;
@@ -603,24 +603,24 @@ export default function PlanCard({
          }
 
          .telenor-family-discount {
-           background: rgba(255, 255, 255, 0.1);
+           background: rgba(2, 7, 178, 0.05);
            padding: 12px 16px;
            border-radius: 8px;
            margin-top: 12px;
-           border: 1px solid rgba(255, 255, 255, 0.2);
+           border: 1px solid rgba(2, 7, 178, 0.2);
          }
 
          .family-discount-badge {
-           color: #60a5fa;
+           color: #0207b2;
            font-size: 14px;
            font-weight: bold;
            margin-bottom: 4px;
          }
 
          .family-discount-info {
-           color: white;
+           color: #0207b2;
            font-size: 12px;
-           opacity: 0.9;
+           opacity: 0.8;
          }
 
          .subscription-card__title {
@@ -631,7 +631,7 @@ export default function PlanCard({
          }
 
          .color-telenor-light-blue {
-           color: #60a5fa;
+           color: #ffffff;
          }
 
          .heading--medium {
@@ -668,11 +668,11 @@ export default function PlanCard({
            gap: 12px;
            margin-bottom: 8px;
            font-size: 14px;
-           color: #ffffff;
+           color: #0207b2;
          }
 
          .color-telenor-blue {
-           color: #3b82f6;
+           color: #0207b2;
          }
 
          .icon {
@@ -694,16 +694,77 @@ export default function PlanCard({
          }
 
          .telenor-card .plan-add-btn {
-           background: linear-gradient(135deg, #000F3C, #1e3a8a);
+           background: linear-gradient(135deg, #0207b2, #3b4fdb);
            color: white;
            border: none;
-           box-shadow: 0 4px 12px rgba(0, 15, 60, 0.3);
+           box-shadow: 0 4px 12px rgba(2, 7, 178, 0.3);
            margin-top: 12px;
          }
 
          .telenor-card .plan-add-btn:hover {
-           background: linear-gradient(135deg, #1e3a8a, #000F3C);
-           box-shadow: 0 6px 16px rgba(0, 15, 60, 0.4);
+           background: linear-gradient(135deg, #3b4fdb, #0207b2);
+           box-shadow: 0 6px 16px rgba(2, 7, 178, 0.4);
+         }
+
+         /* Telmore Card Styling */
+         .telmore-card {
+           background: #f3b2d0;
+           border: 2px solid #002788;
+           color: #002788;
+         }
+
+         .telmore-card .plan-header {
+           border-color: #002788;
+         }
+
+         .telmore-card .plan-provider {
+           color: #002788;
+         }
+
+         .telmore-card .plan-title h3 {
+           color: #002788;
+         }
+
+         .telmore-card .plan-data {
+           color: #002788;
+           opacity: 0.8;
+         }
+
+         .telmore-card .price-amount {
+           color: #002788;
+         }
+
+         .telmore-card .price-period,
+         .telmore-card .price-detail {
+           color: #002788;
+           opacity: 0.7;
+         }
+
+         .telmore-card .badge {
+           background: rgba(0, 39, 136, 0.1);
+           color: #002788;
+           border: 1px solid rgba(0, 39, 136, 0.2);
+         }
+
+         .telmore-card .plan-streaming {
+           background: rgba(0, 39, 136, 0.1);
+           border: 1px solid rgba(0, 39, 136, 0.2);
+         }
+
+         .telmore-card .streaming-label {
+           color: #002788;
+         }
+
+         .telmore-card .plan-add-btn {
+           background: linear-gradient(135deg, #002788, #003fa3);
+           color: white;
+           border: none;
+           box-shadow: 0 4px 12px rgba(0, 39, 136, 0.3);
+         }
+
+         .telmore-card .plan-add-btn:hover {
+           background: linear-gradient(135deg, #003fa3, #002788);
+           box-shadow: 0 6px 16px rgba(0, 39, 136, 0.4);
          }
 
          @media (max-width: 900px) {
