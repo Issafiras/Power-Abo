@@ -6,28 +6,44 @@
 // Bestem API base URL baseret på miljø
 const isProduction = window.location.hostname === 'issafiras.github.io';
 
-// Liste af alternative CORS proxy-tjenester
+// Liste af alternative CORS proxy-tjenester.
+// Vi bruger konfigurationsobjekter for at kunne håndtere forskellige URL-formater og tilpasse headers per proxy.
 const PROXY_SERVICES = [
-  'https://api.allorigins.win/raw?url=',
-  'https://cors-anywhere.herokuapp.com/',
-  'https://thingproxy.freeboard.io/fetch/',
-  'https://corsproxy.io/?'
+  {
+    name: 'AllOrigins',
+    buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+  },
+  {
+    name: 'CodeTabs',
+    buildUrl: (targetUrl) => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`
+  },
+  {
+    name: 'IsomorphicGit',
+    buildUrl: (targetUrl) => `https://cors.isomorphic-git.org/${targetUrl}`
+  },
+  {
+    name: 'CorsProxy.io',
+    buildUrl: (targetUrl) => `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+  }
 ];
+
+const PROXY_TIMEOUT_MS = 8000;
 
 const POWER_API_BASE = isProduction 
   ? 'https://www.power.dk/api/v2'
   : '/api/power';
 
 /**
- * Prøv at hente data via forskellige proxy-tjenester
+ * Prøv at hente data via forskellige proxy-tjenester med retry logik
  * @param {string} url - URL til at hente
  * @param {Object} options - Fetch options
+ * @param {number} attempt - Nuværende forsøg (internt brugt)
  * @returns {Promise<Response>} Fetch response
  */
-async function fetchWithProxyFallback(url, options = {}) {
+async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
   if (!isProduction) {
-    // I udviklingsmiljø, brug direkte URL
-    return fetch(url, options);
+    // I udviklingsmiljø, brug direkte URL med retry logik
+    return fetchWithRetry(url, options, attempt);
   }
 
   const targetUrl = url;
@@ -35,42 +51,92 @@ async function fetchWithProxyFallback(url, options = {}) {
 
   for (let i = 0; i < PROXY_SERVICES.length; i++) {
     const proxy = PROXY_SERVICES[i];
-    let proxyUrl;
-    
-    try {
-      if (proxy.includes('allorigins.win')) {
-        proxyUrl = `${proxy}${encodeURIComponent(targetUrl)}`;
-      } else if (proxy.includes('corsproxy.io')) {
-        proxyUrl = `${proxy}${targetUrl}`;
-      } else {
-        proxyUrl = `${proxy}${targetUrl}`;
-      }
+    const proxyName = proxy.name || `Proxy ${i + 1}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
 
-      console.log(`🔄 Prøver proxy ${i + 1}/${PROXY_SERVICES.length}: ${proxy}`);
+    try {
+      const proxyUrl = proxy.buildUrl(targetUrl);
+      console.log(`🔄 Prøver proxy ${i + 1}/${PROXY_SERVICES.length}: ${proxyName}`);
       
       const response = await fetch(proxyUrl, {
         ...options,
         headers: {
           ...options.headers,
+          ...(proxy.headers || {}),
           'X-Requested-With': 'XMLHttpRequest'
-        }
+        },
+        signal: controller.signal
       });
 
       if (response.ok) {
-        console.log(`✅ Proxy ${i + 1} virker!`);
+        console.log(`✅ ${proxyName} virker!`);
         return response;
       } else {
-        console.warn(`⚠️ Proxy ${i + 1} returnerede status ${response.status}`);
-        lastError = new Error(`Proxy ${i + 1} fejlede: ${response.status} ${response.statusText}`);
+        // Hvis det er en 429 eller 5xx fejl, prøv retry
+        if ((response.status === 429 || response.status >= 500) && attempt < 3) {
+          const backoff = [250, 750, 1750][attempt - 1];
+          console.log(`⏳ ${proxyName} returnerede ${response.status}, prøver igen om ${backoff}ms...`);
+          await new Promise(r => setTimeout(r, backoff));
+          return fetchWithProxyFallback(url, options, attempt + 1);
+        }
+        
+        console.warn(`⚠️ ${proxyName} returnerede status ${response.status}`);
+        lastError = new Error(`${proxyName} fejlede: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      console.warn(`❌ Proxy ${i + 1} fejlede:`, error.message);
-      lastError = error;
+      if (error.name === 'AbortError') {
+        console.warn(`⏱️ ${proxyName} overskred timeout på ${PROXY_TIMEOUT_MS}ms`);
+        lastError = new Error(`${proxyName} overskred timeout`);
+      } else {
+        console.warn(`❌ ${proxyName} fejlede:`, error.message);
+        lastError = error;
+      }
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
   // Hvis alle proxy-tjenester fejler, kast den sidste fejl
   throw new Error(`Alle proxy-tjenester fejlede. Sidste fejl: ${lastError?.message || 'Ukendt fejl'}`);
+}
+
+/**
+ * Hjælpefunktion til retry logik for direkte API kald
+ * @param {string} url - URL til at hente
+ * @param {Object} options - Fetch options
+ * @param {number} attempt - Nuværende forsøg
+ * @returns {Promise<Response>} Fetch response
+ */
+async function fetchWithRetry(url, options = {}, attempt = 1) {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      cache: 'no-store'
+    });
+    
+    if (response.ok) {
+      return response;
+    }
+    
+    // Retry på 429 eller 5xx fejl
+    if ((response.status === 429 || response.status >= 500) && attempt < 3) {
+      const backoff = [250, 750, 1750][attempt - 1];
+      console.log(`⏳ API returnerede ${response.status}, prøver igen om ${backoff}ms...`);
+      await new Promise(r => setTimeout(r, backoff));
+      return fetchWithRetry(url, options, attempt + 1);
+    }
+    
+    return response;
+  } catch (error) {
+    if (attempt < 3) {
+      const backoff = [250, 750, 1750][attempt - 1];
+      console.log(`⏳ Netværksfejl, prøver igen om ${backoff}ms...`);
+      await new Promise(r => setTimeout(r, backoff));
+      return fetchWithRetry(url, options, attempt + 1);
+    }
+    throw error;
+  }
 }
 
 /**
@@ -145,7 +211,7 @@ export async function getProductPrices(productIds) {
       return {};
     }
     
-    const url = `${POWER_API_BASE}/products/prices?productIdsStr=${idsString}`;
+    const url = `${POWER_API_BASE}/products/prices?ids=${idsString}`;
     console.log('📡 Pris API URL:', url);
     
     const response = await fetchWithProxyFallback(url, {
