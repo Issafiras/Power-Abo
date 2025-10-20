@@ -22,7 +22,7 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
           </p>
         </div>
 
-        <style jsx>{`
+        <style>{`
           .cart {
             padding: var(--spacing-2xl);
             min-height: 400px;
@@ -175,7 +175,7 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
       </div>
 
 
-      <style jsx>{`
+      <style>{`
         .cart {
           padding: var(--spacing-lg);
         }

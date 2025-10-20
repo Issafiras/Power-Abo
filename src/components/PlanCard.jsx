@@ -239,7 +239,7 @@ export default function PlanCard({
         <span className="cart-icon">🛒</span>
       </button>
 
-      <style jsx>{`
+      <style>{`
         .plan-card {
           display: flex;
           flex-direction: column;

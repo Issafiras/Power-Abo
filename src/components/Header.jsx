@@ -142,7 +142,7 @@ export default function Header({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .header {
           background: var(--glass-bg);
           backdrop-filter: blur(var(--blur-xl));

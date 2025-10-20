@@ -280,7 +280,7 @@ export default function PresentationView({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .presentation-overlay {
           position: fixed;
           inset: 0;

@@ -49,7 +49,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         <span className="search-icon">🔍</span>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .provider-tabs-container {
           display: flex;
           flex-direction: column;

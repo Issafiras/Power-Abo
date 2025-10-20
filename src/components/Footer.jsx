@@ -24,7 +24,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .footer {
           background: var(--glass-bg);
           backdrop-filter: blur(var(--blur-xl));

@@ -88,7 +88,7 @@ export default function ComparisonPanel({
           </p>
         </div>
 
-        <style jsx>{`
+        <style>{`
           .comparison-panel {
             padding: var(--spacing-2xl);
           }
@@ -322,7 +322,7 @@ export default function ComparisonPanel({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .comparison-panel {
           padding: var(--spacing-lg);
         }

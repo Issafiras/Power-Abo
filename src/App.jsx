@@ -56,6 +56,10 @@ function App() {
   const [cbbMixEnabled, setCbbMixEnabled] = useState({});
   const [cbbMixCount, setCbbMixCount] = useState({});
 
+  // EAN søgning state
+  const [eanSearchResults, setEanSearchResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+
   // Load fra localStorage ved mount
   useEffect(() => {
     const savedCart = loadCart();
@@ -256,6 +260,36 @@ function App() {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  // EAN søgning handler
+  const handleEANSearch = async (searchResult) => {
+    setIsSearching(true);
+    setEanSearchResults(searchResult);
+    
+    // Hvis der er fundet produkter, vis dem i en toast
+    if (searchResult.products && searchResult.products.length > 0) {
+      const firstProduct = searchResult.products[0];
+      const price = searchResult.prices[firstProduct.productId] || firstProduct.price || 'Ukendt pris';
+      showToast(`Fundet: ${firstProduct.title || firstProduct.name} - ${price} kr`, 'success');
+      
+      // Auto-fyld original item price hvis der er en pris
+      if (typeof price === 'number' && price > 0) {
+        setOriginalItemPrice(price);
+        console.log('💰 Pris sat i originalItemPrice:', price);
+      }
+    } else {
+      // Fallback: Brug filterpris hvis min==max
+      if (typeof searchResult.fallbackPrice === 'number' && searchResult.fallbackPrice > 0) {
+        setOriginalItemPrice(searchResult.fallbackPrice);
+        showToast(`Pris fundet: ${searchResult.fallbackPrice} kr (via filter)`, 'success');
+        console.log('💰 Fallback pris sat i originalItemPrice:', searchResult.fallbackPrice);
+      } else {
+        showToast('Ingen produkter fundet for denne søgeterm', 'error');
+      }
+    }
+    
+    setIsSearching(false);
+  };
+
   // Filtrerede planer
   const getFilteredPlans = () => {
     let filtered = activeProvider === 'all' 
@@ -297,6 +331,8 @@ function App() {
               onMobileCostChange={handleMobileCostChange}
               originalItemPrice={originalItemPrice}
               onOriginalItemPriceChange={handleOriginalItemPriceChange}
+              onEANSearch={handleEANSearch}
+              isSearching={isSearching}
             />
           </section>
 
@@ -401,7 +437,7 @@ function App() {
       {/* Footer */}
       <Footer />
 
-      <style jsx>{`
+      <style>{`
         .app {
           min-height: 100vh;
           display: flex;

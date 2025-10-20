@@ -5,6 +5,7 @@
 
 import { streamingServices, getStreamingTotal } from '../data/streamingServices';
 import { formatCurrency } from '../utils/calculations';
+import { searchProductsWithPrices, validateEAN } from '../utils/powerApi';
 
 export default function StreamingSelector({ 
   selectedStreaming, 
@@ -12,7 +13,9 @@ export default function StreamingSelector({
   customerMobileCost,
   onMobileCostChange,
   originalItemPrice,
-  onOriginalItemPriceChange
+  onOriginalItemPriceChange,
+  onEANSearch,
+  isSearching = false
 }) {
   const streamingTotal = getStreamingTotal(selectedStreaming);
   const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
@@ -26,6 +29,30 @@ export default function StreamingSelector({
   const handleOriginalItemPriceChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     onOriginalItemPriceChange(value);
+  };
+
+  const handleEANSearch = async (e) => {
+    e.preventDefault();
+    const eanInput = e.target.ean.value.trim();
+    
+    if (!eanInput) return;
+    
+    const validation = validateEAN(eanInput);
+    if (!validation.valid) {
+      alert(validation.message);
+      return;
+    }
+    
+    try {
+      const result = await searchProductsWithPrices(eanInput);
+      if (onEANSearch) {
+        onEANSearch(result);
+      }
+      // Ryd input felt efter succesfuld søgning
+      e.target.ean.value = '';
+    } catch (error) {
+      alert(`Fejl ved søgning: ${error.message}`);
+    }
   };
 
   return (
@@ -75,6 +102,35 @@ export default function StreamingSelector({
           />
           <span className="currency-suffix">kr</span>
         </div>
+      </div>
+
+      {/* Produkt søgning */}
+      <div className="ean-search-input">
+        <label htmlFor="ean-search" className="input-label">
+          🔍 Søg vare efter navn, EAN eller mærke
+        </label>
+        <form onSubmit={handleEANSearch} className="ean-search-form">
+          <div className="input-with-button">
+            <input
+              id="ean-search"
+              name="ean"
+              type="text"
+              className="input"
+              placeholder="F.eks. iPhone, Samsung, 4894526079567"
+              maxLength="50"
+            />
+            <button 
+              type="submit" 
+              className="btn btn-primary ean-search-btn"
+              disabled={isSearching}
+            >
+              {isSearching ? 'Søger...' : 'Søg'}
+            </button>
+          </div>
+        </form>
+        <p className="ean-help-text">
+          Søg efter produktnavn, mærke, EAN-kode eller beskrivelse
+        </p>
       </div>
 
       <div className="divider"></div>
@@ -147,7 +203,7 @@ export default function StreamingSelector({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .streaming-selector {
           padding: var(--spacing-lg);
         }
@@ -166,6 +222,34 @@ export default function StreamingSelector({
 
         .original-item-price-input {
           margin-bottom: var(--spacing-md);
+        }
+
+        .ean-search-input {
+          margin-bottom: var(--spacing-md);
+        }
+
+        .ean-search-form {
+          margin-bottom: var(--spacing-sm);
+        }
+
+        .input-with-button {
+          display: flex;
+          gap: var(--spacing-sm);
+        }
+
+        .input-with-button input {
+          flex: 1;
+        }
+
+        .ean-search-btn {
+          white-space: nowrap;
+          padding: var(--spacing-sm) var(--spacing-md);
+        }
+
+        .ean-help-text {
+          font-size: var(--font-sm);
+          color: var(--text-muted);
+          margin: 0;
         }
 
         .input-label {
