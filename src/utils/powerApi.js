@@ -29,6 +29,9 @@ const PROXY_SERVICES = [
 
 const PROXY_TIMEOUT_MS = 8000;
 
+// Cache for at huske hvilken proxy der virkede sidst
+let workingProxyIndex = null;
+
 const POWER_API_BASE = isProduction 
   ? 'https://www.power.dk/api/v2'
   : '/api/power';
@@ -49,15 +52,22 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
   const targetUrl = url;
   let lastError = null;
 
-  for (let i = 0; i < PROXY_SERVICES.length; i++) {
-    const proxy = PROXY_SERVICES[i];
-    const proxyName = proxy.name || `Proxy ${i + 1}`;
+  // Hvis vi har en virkende proxy, prøv den først
+  const proxyIndices = workingProxyIndex !== null 
+    ? [workingProxyIndex, ...Array.from({length: PROXY_SERVICES.length}, (_, i) => i).filter(i => i !== workingProxyIndex)]
+    : Array.from({length: PROXY_SERVICES.length}, (_, i) => i);
+
+  for (let i = 0; i < proxyIndices.length; i++) {
+    const proxyIndex = proxyIndices[i];
+    const proxy = PROXY_SERVICES[proxyIndex];
+    const proxyName = proxy.name || `Proxy ${proxyIndex + 1}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
 
     try {
       const proxyUrl = proxy.buildUrl(targetUrl);
-      console.log(`🔄 Prøver proxy ${i + 1}/${PROXY_SERVICES.length}: ${proxyName}`);
+      const isRetryingWorkingProxy = workingProxyIndex !== null && i === 0;
+      console.log(`🔄 Prøver proxy ${i + 1}/${proxyIndices.length}: ${proxyName}${isRetryingWorkingProxy ? ' (cached)' : ''}`);
       
       const response = await fetch(proxyUrl, {
         ...options,
@@ -71,6 +81,8 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
 
       if (response.ok) {
         console.log(`✅ ${proxyName} virker!`);
+        // Cache denne proxy som den der virker
+        workingProxyIndex = proxyIndex;
         return response;
       } else {
         // Hvis det er en 429 eller 5xx fejl, prøv retry
@@ -97,8 +109,17 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
     }
   }
 
-  // Hvis alle proxy-tjenester fejler, kast den sidste fejl
+  // Hvis alle proxy-tjenester fejler, nulstil cache og kast fejl
+  workingProxyIndex = null;
   throw new Error(`Alle proxy-tjenester fejlede. Sidste fejl: ${lastError?.message || 'Ukendt fejl'}`);
+}
+
+/**
+ * Nulstil proxy cache (nyttigt hvis cached proxy begynder at fejle)
+ */
+export function resetProxyCache() {
+  workingProxyIndex = null;
+  console.log('🔄 Proxy cache nulstillet');
 }
 
 /**
