@@ -3,7 +3,11 @@
  * Håndterer integration med Power.dk's API for produkt søgning og pris hentning
  */
 
-const POWER_API_BASE = '/api/power';
+// Bestem API base URL baseret på miljø
+const isProduction = window.location.hostname === 'issafiras.github.io';
+const POWER_API_BASE = isProduction 
+  ? 'https://www.power.dk/api/v2' 
+  : '/api/power';
 
 /**
  * Søg efter produkter baseret på søgeterm (EAN, navn, mærke, beskrivelse osv.)
@@ -13,7 +17,9 @@ const POWER_API_BASE = '/api/power';
 export async function searchProductsByEAN(searchTerm) {
   try {
     console.log('🔍 Søger efter produkter med term:', searchTerm);
-    const url = `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`;
+    const url = isProduction 
+      ? `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`
+      : `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`;
     console.log('📡 API URL:', url);
     
     const response = await fetch(url, {
@@ -21,6 +27,10 @@ export async function searchProductsByEAN(searchTerm) {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        ...(isProduction && {
+          'Origin': 'https://issafiras.github.io',
+          'Referer': 'https://issafiras.github.io/Power-Abo/'
+        })
       },
       mode: 'cors'
     });
@@ -70,7 +80,9 @@ export async function getProductPrices(productIds) {
       return {};
     }
     
-    const url = `${POWER_API_BASE}/products/prices?productIdsStr=${idsString}`;
+    const url = isProduction 
+      ? `${POWER_API_BASE}/products/prices?productIdsStr=${idsString}`
+      : `${POWER_API_BASE}/products/prices?productIdsStr=${idsString}`;
     console.log('📡 Pris API URL:', url);
     
     const response = await fetch(url, {
@@ -78,6 +90,10 @@ export async function getProductPrices(productIds) {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        ...(isProduction && {
+          'Origin': 'https://issafiras.github.io',
+          'Referer': 'https://issafiras.github.io/Power-Abo/'
+        })
       },
       mode: 'cors'
     });
