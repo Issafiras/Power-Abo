@@ -6,7 +6,7 @@
 // Bestem API base URL baseret på miljø
 const isProduction = window.location.hostname === 'issafiras.github.io';
 const POWER_API_BASE = isProduction 
-  ? 'https://www.power.dk/api/v2' 
+  ? 'https://thingproxy.freeboard.io/fetch/https://www.power.dk/api/v2'
   : '/api/power';
 
 /**
@@ -26,11 +26,7 @@ export async function searchProductsByEAN(searchTerm) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        ...(isProduction && {
-          'Origin': 'https://issafiras.github.io',
-          'Referer': 'https://issafiras.github.io/Power-Abo/'
-        })
+        'Content-Type': 'application/json'
       },
       mode: 'cors'
     });
@@ -89,11 +85,7 @@ export async function getProductPrices(productIds) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        ...(isProduction && {
-          'Origin': 'https://issafiras.github.io',
-          'Referer': 'https://issafiras.github.io/Power-Abo/'
-        })
+        'Content-Type': 'application/json'
       },
       mode: 'cors'
     });
