@@ -5,9 +5,73 @@
 
 // Bestem API base URL baseret på miljø
 const isProduction = window.location.hostname === 'issafiras.github.io';
+
+// Liste af alternative CORS proxy-tjenester
+const PROXY_SERVICES = [
+  'https://api.allorigins.win/raw?url=',
+  'https://cors-anywhere.herokuapp.com/',
+  'https://thingproxy.freeboard.io/fetch/',
+  'https://corsproxy.io/?'
+];
+
 const POWER_API_BASE = isProduction 
-  ? 'https://thingproxy.freeboard.io/fetch/https://www.power.dk/api/v2'
+  ? 'https://www.power.dk/api/v2'
   : '/api/power';
+
+/**
+ * Prøv at hente data via forskellige proxy-tjenester
+ * @param {string} url - URL til at hente
+ * @param {Object} options - Fetch options
+ * @returns {Promise<Response>} Fetch response
+ */
+async function fetchWithProxyFallback(url, options = {}) {
+  if (!isProduction) {
+    // I udviklingsmiljø, brug direkte URL
+    return fetch(url, options);
+  }
+
+  const targetUrl = url;
+  let lastError = null;
+
+  for (let i = 0; i < PROXY_SERVICES.length; i++) {
+    const proxy = PROXY_SERVICES[i];
+    let proxyUrl;
+    
+    try {
+      if (proxy.includes('allorigins.win')) {
+        proxyUrl = `${proxy}${encodeURIComponent(targetUrl)}`;
+      } else if (proxy.includes('corsproxy.io')) {
+        proxyUrl = `${proxy}${targetUrl}`;
+      } else {
+        proxyUrl = `${proxy}${targetUrl}`;
+      }
+
+      console.log(`🔄 Prøver proxy ${i + 1}/${PROXY_SERVICES.length}: ${proxy}`);
+      
+      const response = await fetch(proxyUrl, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (response.ok) {
+        console.log(`✅ Proxy ${i + 1} virker!`);
+        return response;
+      } else {
+        console.warn(`⚠️ Proxy ${i + 1} returnerede status ${response.status}`);
+        lastError = new Error(`Proxy ${i + 1} fejlede: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.warn(`❌ Proxy ${i + 1} fejlede:`, error.message);
+      lastError = error;
+    }
+  }
+
+  // Hvis alle proxy-tjenester fejler, kast den sidste fejl
+  throw new Error(`Alle proxy-tjenester fejlede. Sidste fejl: ${lastError?.message || 'Ukendt fejl'}`);
+}
 
 /**
  * Søg efter produkter baseret på søgeterm (EAN, navn, mærke, beskrivelse osv.)
@@ -17,12 +81,10 @@ const POWER_API_BASE = isProduction
 export async function searchProductsByEAN(searchTerm) {
   try {
     console.log('🔍 Søger efter produkter med term:', searchTerm);
-    const url = isProduction 
-      ? `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`
-      : `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`;
+    const url = `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`;
     console.log('📡 API URL:', url);
     
-    const response = await fetch(url, {
+    const response = await fetchWithProxyFallback(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -53,7 +115,14 @@ export async function searchProductsByEAN(searchTerm) {
     return data;
   } catch (error) {
     console.error('❌ Fejl ved søgning efter produkter:', error);
-    throw new Error(`Kunne ikke søge efter produkter: ${error.message}`);
+    
+    if (error.message.includes('Alle proxy-tjenester fejlede')) {
+      throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere.');
+    } else if (error.message.includes('Failed to fetch')) {
+      throw new Error('Netværksfejl: Kunne ikke oprette forbindelse til Power.dk API.');
+    } else {
+      throw new Error(`Kunne ikke søge efter produkter: ${error.message}`);
+    }
   }
 }
 
@@ -76,12 +145,10 @@ export async function getProductPrices(productIds) {
       return {};
     }
     
-    const url = isProduction 
-      ? `${POWER_API_BASE}/products/prices?productIdsStr=${idsString}`
-      : `${POWER_API_BASE}/products/prices?productIdsStr=${idsString}`;
+    const url = `${POWER_API_BASE}/products/prices?productIdsStr=${idsString}`;
     console.log('📡 Pris API URL:', url);
     
-    const response = await fetch(url, {
+    const response = await fetchWithProxyFallback(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -104,7 +171,14 @@ export async function getProductPrices(productIds) {
     return data;
   } catch (error) {
     console.error('❌ Fejl ved hentning af priser:', error);
-    throw new Error(`Kunne ikke hente priser: ${error.message}`);
+    
+    if (error.message.includes('Alle proxy-tjenester fejlede')) {
+      throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere.');
+    } else if (error.message.includes('Failed to fetch')) {
+      throw new Error('Netværksfejl: Kunne ikke oprette forbindelse til Power.dk API.');
+    } else {
+      throw new Error(`Kunne ikke hente priser: ${error.message}`);
+    }
   }
 }
 
@@ -181,7 +255,17 @@ export async function searchProductsWithPrices(searchTerm) {
     return finalResult;
   } catch (error) {
     console.error('❌ Fejl ved kombineret søgning:', error);
-    throw error;
+    
+    // Giv mere specifik fejlhåndtering
+    if (error.message.includes('Alle proxy-tjenester fejlede')) {
+      throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere eller kontakt support.');
+    } else if (error.message.includes('Failed to fetch')) {
+      throw new Error('Netværksfejl: Kunne ikke oprette forbindelse til Power.dk API. Tjek din internetforbindelse.');
+    } else if (error.message.includes('API fejl')) {
+      throw new Error(`Power.dk API fejl: ${error.message}`);
+    } else {
+      throw new Error(`Uventet fejl: ${error.message}`);
+    }
   }
 }
 
