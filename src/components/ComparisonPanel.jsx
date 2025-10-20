@@ -128,6 +128,8 @@ export default function ComparisonPanel({
               <div className="cash-discount-controls">
                 <label className="checkbox-wrapper">
                   <input
+                    id="cash-discount-locked"
+                    name="cash-discount-locked"
                     type="checkbox"
                     className="checkbox"
                     checked={cashDiscountLocked}
@@ -137,6 +139,8 @@ export default function ComparisonPanel({
                 </label>
                 <label className="checkbox-wrapper">
                   <input
+                    id="auto-adjust"
+                    name="auto-adjust"
                     type="checkbox"
                     className="checkbox"
                     checked={autoAdjust}
@@ -149,6 +153,8 @@ export default function ComparisonPanel({
             </div>
             
             <input
+              id="cash-discount-amount"
+              name="cash-discount-amount"
               type="number"
               className="input cash-discount-input"
               placeholder="0"

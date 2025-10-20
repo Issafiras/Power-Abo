@@ -20,9 +20,17 @@ export default defineConfig({
           });
           proxy.on('proxyReq', (proxyReq, req, _res) => {
             console.log('Sending Request to the Target:', req.method, req.url);
+            // Tilføj CORS headers til request
+            proxyReq.setHeader('Origin', 'https://www.power.dk');
+            proxyReq.setHeader('Referer', 'https://www.power.dk/');
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+            // Tilføj CORS headers til response
+            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+            proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+            proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With';
+            proxyRes.headers['Access-Control-Allow-Credentials'] = 'false';
           });
         },
       }

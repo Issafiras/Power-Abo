@@ -207,6 +207,8 @@ export default function PlanCard({
           <div className="mix-toggle">
             <label className="mix-toggle-label">
               <input 
+                id={`cbb-mix-${plan.id}`}
+                name={`cbb-mix-${plan.id}`}
                 type="checkbox" 
                 checked={cbbMixEnabled}
                 onChange={(e) => onCBBMixToggle && onCBBMixToggle(plan.id, e.target.checked)}

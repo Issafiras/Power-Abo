@@ -72,6 +72,7 @@ export default function StreamingSelector({
         <div className="input-with-currency">
           <input
             id="mobile-cost"
+            name="mobile-cost"
             type="number"
             className="input"
             placeholder="299"
@@ -92,6 +93,7 @@ export default function StreamingSelector({
         <div className="input-with-currency">
           <input
             id="original-item-price"
+            name="original-item-price"
             type="number"
             className="input"
             placeholder="0"

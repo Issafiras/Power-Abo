@@ -11,19 +11,36 @@ const isProduction = window.location.hostname === 'issafiras.github.io';
 const PROXY_SERVICES = [
   {
     name: 'AllOrigins',
-    buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+    buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
   },
   {
-    name: 'CodeTabs',
-    buildUrl: (targetUrl) => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`
+    name: 'CorsAnywhere',
+    buildUrl: (targetUrl) => `https://cors-anywhere.herokuapp.com/${targetUrl}`,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
   },
   {
-    name: 'IsomorphicGit',
-    buildUrl: (targetUrl) => `https://cors.isomorphic-git.org/${targetUrl}`
+    name: 'ProxyCors',
+    buildUrl: (targetUrl) => `https://proxy.cors.sh/${targetUrl}`,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
   },
   {
     name: 'CorsProxy.io',
-    buildUrl: (targetUrl) => `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+    buildUrl: (targetUrl) => `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
   }
 ];
 
@@ -51,15 +68,17 @@ async function trySingleProxy(proxyIndex, targetUrl, options) {
     const proxyUrl = proxy.buildUrl(targetUrl);
     console.log(`🔄 Prøver proxy: ${proxyName}`);
     
-    const response = await fetch(proxyUrl, {
-      ...options,
-      headers: {
-        ...options.headers,
-        ...(proxy.headers || {}),
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      signal: controller.signal
-    });
+      const response = await fetch(proxyUrl, {
+        ...options,
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          ...options.headers,
+          ...(proxy.headers || {}),
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        signal: controller.signal
+      });
 
     if (response.ok) {
       console.log(`✅ ${proxyName} virker!`);
@@ -137,6 +156,8 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
       
       const response = await fetch(proxyUrl, {
         ...options,
+        mode: 'cors',
+        credentials: 'omit',
         headers: {
           ...options.headers,
           ...(proxy.headers || {}),
@@ -274,7 +295,8 @@ export async function searchProductsByEAN(searchTerm) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      mode: 'cors'
+      mode: 'cors',
+      credentials: 'omit'
     });
     
     console.log('📊 Response status:', response.status, response.statusText);
@@ -338,7 +360,8 @@ export async function getProductPrices(productIds) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      mode: 'cors'
+      mode: 'cors',
+      credentials: 'omit'
     });
     
     console.log('📊 Pris response status:', response.status, response.statusText);

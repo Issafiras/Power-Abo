@@ -39,6 +39,8 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
       {/* Søgefelt */}
       <div className="search-container">
         <input
+          id="search-query"
+          name="search-query"
           type="text"
           placeholder="Søg efter abonnementer, data, funktioner..."
           className="input search-input"
