@@ -121,6 +121,71 @@ function App() {
     saveShowCashDiscount(showCashDiscount);
   }, [showCashDiscount]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handlePointerDown = (event) => {
+      const target = event.target.closest('.btn');
+      if (!target || !(target instanceof HTMLElement) || target.disabled) return;
+
+      const rect = target.getBoundingClientRect();
+      const rippleSize = Math.max(rect.width, rect.height) * 2;
+      const rippleX = event.clientX - rect.left;
+      const rippleY = event.clientY - rect.top;
+
+      target.style.setProperty('--ripple-size', `${rippleSize}px`);
+      target.style.setProperty('--ripple-x', `${rippleX}px`);
+      target.style.setProperty('--ripple-y', `${rippleY}px`);
+
+      target.classList.remove('is-rippling');
+      // Force reflow to allow retriggering animation
+      void target.offsetWidth;
+      target.classList.add('is-rippling');
+
+      const handleAnimationEnd = () => {
+        target.classList.remove('is-rippling');
+      };
+
+      target.addEventListener('animationend', handleAnimationEnd, { once: true });
+    };
+
+    const registerPointerListener = () => {
+      document.addEventListener('pointerdown', handlePointerDown);
+    };
+
+    const unregisterPointerListener = () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+
+    const handleMotionChange = (event) => {
+      if (event.matches) {
+        unregisterPointerListener();
+      } else {
+        registerPointerListener();
+      }
+    };
+
+    if (!prefersReducedMotion.matches) {
+      registerPointerListener();
+    }
+
+    if (prefersReducedMotion.addEventListener) {
+      prefersReducedMotion.addEventListener('change', handleMotionChange);
+    } else if (prefersReducedMotion.addListener) {
+      prefersReducedMotion.addListener(handleMotionChange);
+    }
+
+    return () => {
+      unregisterPointerListener();
+      if (prefersReducedMotion.removeEventListener) {
+        prefersReducedMotion.removeEventListener('change', handleMotionChange);
+      } else if (prefersReducedMotion.removeListener) {
+        prefersReducedMotion.removeListener(handleMotionChange);
+      }
+    };
+  }, []);
+
   // Toast handler
   const showToast = (message, type = 'success') => {
     setToast({ message, type });

@@ -87,19 +87,19 @@
 .btn::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
+  top: var(--ripple-y, 50%);
+  left: var(--ripple-x, 50%);
+  width: var(--ripple-size, 0px);
+  height: var(--ripple-size, 0px);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+  pointer-events: none;
 }
 
-.btn:active::before {
-  width: 300px;
-  height: 300px;
+.btn.is-rippling::before {
+  animation: rippleEffect 600ms ease-out forwards;
 }
 
 .btn:disabled {
@@ -153,9 +153,18 @@
   box-shadow: var(--glow-green);
 }
 
-.btn-success:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 0 40px rgba(16, 185, 129, 0.6), 0 10px 30px rgba(16, 185, 129, 0.3);
+@keyframes rippleEffect {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0.45;
+  }
+  70% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
 }
 
 .btn-danger {
@@ -946,8 +955,11 @@
     transition-duration: 0.01ms !important;
   }
 
-  .pulse,
-  .pulse-glow {
+  .btn::before {
+    display: none;
+  }
+
+  .btn.is-rippling::before {
     animation: none !important;
   }
 }
