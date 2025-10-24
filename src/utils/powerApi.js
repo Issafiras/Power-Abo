@@ -16,20 +16,37 @@ const isProduction = window.location.hostname === 'issafiras.github.io';
 const PROXY_SERVICES = [
   {
     name: 'CorsProxy.io',
-    buildUrl: (targetUrl) => `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+    buildUrl: (targetUrl) => `https://corsproxy.io/?${targetUrl}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     },
     priority: 1, // Højeste prioritet
     timeout: 3000 // Hurtigste timeout
   },
   {
     name: 'AllOrigins',
-    buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+    buildUrl: (targetUrl) => `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
+    },
+    transformResponse: async (response, targetUrl) => {
+      const payload = await response.json();
+
+      if (!payload || typeof payload.contents !== 'string') {
+        throw new Error('AllOrigins: Ugyldigt svarformat');
+      }
+
+      // Genskab et Response-objekt med originalt JSON indhold, så resten af koden
+      // kan arbejde på samme måde som ved direkte API-kald.
+      return new Response(payload.contents, {
+        status: payload.status?.http_code || response.status,
+        statusText: payload.status?.text || response.statusText,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Proxy-Source': 'AllOrigins',
+          'X-Target-Url': targetUrl
+        }
+      });
     },
     priority: 2,
     timeout: 4000
@@ -38,8 +55,7 @@ const PROXY_SERVICES = [
     name: 'ProxyCors',
     buildUrl: (targetUrl) => `https://proxy.cors.sh/${targetUrl}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     },
     priority: 3,
     timeout: 5000
@@ -48,9 +64,7 @@ const PROXY_SERVICES = [
     name: 'CorsAnywhere',
     buildUrl: (targetUrl) => `https://cors-anywhere.herokuapp.com/${targetUrl}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
+      'Accept': 'application/json'
     },
     priority: 4,
     timeout: 6000
@@ -179,24 +193,34 @@ async function tryProxyFast(proxyIndex, targetUrl, options) {
   const startTime = Date.now();
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), CONFIG.FAST_TIMEOUT);
+  const method = (options.method || 'GET').toUpperCase();
+
+  // Undgå unødvendige headers for simple GET requests for at minimere CORS preflight
+  const sanitizedHeaders = { ...(options.headers || {}) };
+  if (method === 'GET') {
+    delete sanitizedHeaders['Content-Type'];
+  }
 
   try {
     const proxyUrl = proxy.buildUrl(targetUrl);
-    
-    const response = await fetch(proxyUrl, {
+
+    let response = await fetch(proxyUrl, {
       ...options,
       mode: 'cors',
       credentials: 'omit',
       headers: {
-        ...options.headers,
         ...proxy.headers,
-        'X-Requested-With': 'XMLHttpRequest'
+        ...sanitizedHeaders
       },
       signal: controller.signal
     });
 
+    if (proxy.transformResponse) {
+      response = await proxy.transformResponse(response, targetUrl);
+    }
+
     const responseTime = Date.now() - startTime;
-    
+
     if (response.ok) {
       updateProxyStats(proxyIndex, true, responseTime);
       console.log(`⚡ ${proxyName} (${responseTime}ms)`);
@@ -369,8 +393,7 @@ export async function prefetchProxies() {
   const options = {
     method: 'GET',
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     }
   };
   
@@ -404,7 +427,6 @@ async function fetchWithRetry(url, options = {}, attempt = 1) {
       credentials: 'omit',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         ...options.headers
       },
       signal: controller.signal
@@ -451,8 +473,7 @@ export async function searchProductsByEAN(searchTerm) {
     const response = await fetchWithProxyFallback(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       },
       mode: 'cors',
       credentials: 'omit'
@@ -516,8 +537,7 @@ export async function getProductPrices(productIds) {
     const response = await fetchWithProxyFallback(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       },
       mode: 'cors',
       credentials: 'omit'
