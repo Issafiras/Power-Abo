@@ -166,14 +166,18 @@ export function exportState() {
 
 // Importér storage state
 export function importState(state) {
-  if (state.cart) saveCart(state.cart);
-  if (state.streaming) saveSelectedStreaming(state.streaming);
+  if (!state || typeof state !== 'object') {
+    return;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(state, 'cart')) saveCart(state.cart);
+  if (Object.prototype.hasOwnProperty.call(state, 'streaming')) saveSelectedStreaming(state.streaming);
   if (typeof state.mobileCost === 'number') saveCustomerMobileCost(state.mobileCost);
   if (typeof state.originalItemPrice === 'number') saveOriginalItemPrice(state.originalItemPrice);
   if (typeof state.cashDiscount === 'number' || state.cashDiscount === null) saveCashDiscount(state.cashDiscount);
   if (typeof state.cashDiscountLocked === 'boolean') saveCashDiscountLocked(state.cashDiscountLocked);
   if (typeof state.autoAdjust === 'boolean') saveAutoAdjust(state.autoAdjust);
-  if (state.theme) saveTheme(state.theme);
+  if (Object.prototype.hasOwnProperty.call(state, 'theme')) saveTheme(state.theme);
   if (typeof state.showCashDiscount === 'boolean') saveShowCashDiscount(state.showCashDiscount);
 }
 
