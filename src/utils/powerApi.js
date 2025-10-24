@@ -580,6 +580,42 @@ export async function searchProductsWithPrices(searchTerm) {
     // Først søg efter produkter
     const searchResult = await searchProductsByEAN(searchTerm);
 
+    const extractDirectPrice = (product) => {
+      const candidates = [
+        product?.price,
+        product?.currentPrice,
+        product?.priceInfo?.currentPrice,
+        product?.priceInfo?.price,
+        product?.priceInfo?.priceWithoutSubscription,
+        product?.priceData?.price,
+        product?.priceData?.currentPrice
+      ];
+
+      for (const value of candidates) {
+        if (typeof value === 'number' && !Number.isNaN(value)) {
+          return value;
+        }
+
+        if (typeof value === 'string') {
+          const trimmed = value.trim();
+          let normalized = trimmed;
+
+          if (normalized.includes(',')) {
+            normalized = normalized.replace(/\./g, '').replace(/,/g, '.');
+          }
+
+          normalized = normalized.replace(/[^0-9.]/g, '');
+
+          const parsed = Number.parseFloat(normalized);
+          if (!Number.isNaN(parsed)) {
+            return parsed;
+          }
+        }
+      }
+
+      return null;
+    };
+
     // Fallback: Hvis der ikke er produkter i svaret, men filters indeholder BasicPrice med min==max,
     // så brug dette tal som pris.
     if (!searchResult.products || searchResult.products.length === 0) {
@@ -615,19 +651,40 @@ export async function searchProductsWithPrices(searchTerm) {
     // Kun hent priser hvis der er produkter
     let prices = {};
     if (productIds.length > 0) {
-      try {
-        prices = await getProductPrices(productIds);
-      } catch (priceError) {
-        console.warn('⚠️ Kunne ikke hente priser, men produkter blev fundet:', priceError.message);
-        console.log('💡 Bruger priser direkte fra produktobjekter i stedet');
-        
-        // Fallback: Brug priser direkte fra produktobjekter
-        searchResult.products.forEach(product => {
-          if (product.price !== undefined) {
-            prices[product.productId] = product.price;
-            console.log(`💰 Pris fra produkt: ${product.productId} = ${product.price}`);
-          }
-        });
+      searchResult.products.forEach(product => {
+        const directPrice = extractDirectPrice(product);
+        if (directPrice != null) {
+          prices[product.productId] = directPrice;
+        }
+      });
+
+      const missingPriceIds = productIds.filter(productId => !(productId in prices));
+
+      if (missingPriceIds.length === 0) {
+        console.log('✅ Brugte direkte priser fra produktsøgningen – ekstra pris-kald er ikke nødvendigt');
+      }
+
+      if (missingPriceIds.length > 0) {
+        try {
+          const fetchedPrices = await getProductPrices(missingPriceIds);
+          prices = {
+            ...prices,
+            ...fetchedPrices
+          };
+          console.log('🧩 Kombinerede direkte produktpriser med API priser for manglende ID\'er');
+        } catch (priceError) {
+          console.warn('⚠️ Kunne ikke hente priser, men produkter blev fundet:', priceError.message);
+          console.log('💡 Bruger priser direkte fra produktobjekter i stedet');
+
+          // Fallback: Brug priser direkte fra produktobjekter
+          searchResult.products.forEach(product => {
+            const directPrice = extractDirectPrice(product);
+            if (directPrice != null) {
+              prices[product.productId] = directPrice;
+              console.log(`💰 Pris fra produkt: ${product.productId} = ${directPrice}`);
+            }
+          });
+        }
       }
     }
     
