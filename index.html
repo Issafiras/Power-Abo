@@ -85,20 +85,6 @@
   
   <script type="module" src="/src/main.jsx"></script>
   
-  <script>
-    // Fjern loading screen når React er klar
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-          loadingScreen.classList.add('fade-out');
-          setTimeout(() => {
-            loadingScreen.remove();
-          }, 500);
-        }
-      }, 500);
-    });
-  </script>
 </body>
 </html>
 
