@@ -25,9 +25,28 @@ const PROXY_SERVICES = [
   },
   {
     name: 'AllOrigins',
-    buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+    buildUrl: (targetUrl) => `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
     headers: {
       'Accept': 'application/json'
+    },
+    transformResponse: async (response, targetUrl) => {
+      const payload = await response.json();
+
+      if (!payload || typeof payload.contents !== 'string') {
+        throw new Error('AllOrigins: Ugyldigt svarformat');
+      }
+
+      // Genskab et Response-objekt med originalt JSON indhold, så resten af koden
+      // kan arbejde på samme måde som ved direkte API-kald.
+      return new Response(payload.contents, {
+        status: payload.status?.http_code || response.status,
+        statusText: payload.status?.text || response.statusText,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Proxy-Source': 'AllOrigins',
+          'X-Target-Url': targetUrl
+        }
+      });
     },
     priority: 2,
     timeout: 4000
@@ -185,7 +204,7 @@ async function tryProxyFast(proxyIndex, targetUrl, options) {
   try {
     const proxyUrl = proxy.buildUrl(targetUrl);
 
-    const response = await fetch(proxyUrl, {
+    let response = await fetch(proxyUrl, {
       ...options,
       mode: 'cors',
       credentials: 'omit',
@@ -195,6 +214,10 @@ async function tryProxyFast(proxyIndex, targetUrl, options) {
       },
       signal: controller.signal
     });
+
+    if (proxy.transformResponse) {
+      response = await proxy.transformResponse(response, targetUrl);
+    }
 
     const responseTime = Date.now() - startTime;
     

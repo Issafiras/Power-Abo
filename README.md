@@ -1,387 +1,215 @@
 # ⚡ Power Abo Beregner
 
-En moderne webapplikation til beregning og sammenligning af mobilabonnementer og streaming-tjenester. Professionelt værktøj med intelligent sammenligning og hurtig, præcis beregning.
+Power Abo Beregner er et rådgivningsværktøj til POWER-butikker, som kombinerer mobilabonnementer og streaming-tjenester i én samlet beregning. Applikationen er bygget i React/Vite og er optimeret til hurtig prisberegning, professionel præsentation og fuld kontrol over streaming-tilvalg.
 
-## 🎯 Features
+## 🧭 Indholdsfortegnelse
+- [Overblik](#-overblik)
+- [Feature highlights](#-feature-highlights)
+- [Power.dk-integration](#-powerdk-integration)
+- [Kom godt i gang](#-kom-godt-i-gang)
+- [Tilgængelige scripts](#-tilgængelige-scripts)
+- [Projektstruktur](#-projektstruktur)
+- [Data vedligeholdelse](#-data-vedligeholdelse)
+- [Beregninger og logik](#-beregninger-og-logik)
+- [Deployment](#-deployment)
+- [Fejlsøgning](#-fejlsøgning)
+- [Licens og kontakt](#-licens-og-kontakt)
 
-### Kundefunktionalitet
-- ✅ **Streaming Selector**: Multi-select grid med alle populære streaming-tjenester
-- ✅ **CBB MIX Selector**: Dedikeret interface til CBB MIX streaming-pakker
-- ✅ **Mobiludgifter Input**: Indtast kundens nuværende månedlige mobiludgifter
-- ✅ **Provider Filtering**: Filtrer abonnementer fra Telmore, Telenor eller CBB
-- ✅ **Smart Søgning**: Søg efter abonnementer baseret på data, funktioner eller pris
-- ✅ **Dynamisk Kurv**: Tilføj abonnementer med quantity controls
-- ✅ **Live Beregninger**: Realtids beregning af totaler og besparelser
+## 📌 Overblik
+- **Formål:** Hjælper butikspersonale med at dokumentere besparelser, indtjening og streaming-dækning for kunder.
+- **Tech stack:** React 18, Vite 5, moderne JavaScript (ES2022+), modulært CSS med custom properties og lokale utility-klasser.
+- **Data-håndtering:** Lokale JSON-lignende datasæt til abonnementer og streaming-tjenester, suppleret af live opslag mod Power.dk for hardwarepriser.
+- **Tema & UI:** Understøtter dark/light-mode, keyboard shortcuts og en fuldskærms præsentationsvisning til kundedialog.
 
-### Avancerede Features
-- 💰 **Kontant Rabat**: Justerbar kontant rabat med låsefunktion
-- 🔄 **Auto-justér**: Automatisk justering for minimum 500 kr besparelse
-- 📊 **Præsentationsvisning**: Fullscreen view med animeret besparelse
-- 🎨 **Dark/Light Mode**: Tema-toggle mellem mørk og lys tilstand
-- ⌨️ **Keyboard Shortcuts**: Genveje til hurtigere navigation
-- 💾 **Data Persistens**: Automatisk lagring i localStorage
-- 📱 **Responsivt Design**: Fungerer perfekt på mobil, tablet og desktop
+## ✨ Feature highlights
+### Kundeoplevelse
+- **Streaming Selector:** Grid med multi-select og prisopdatering i realtid.
+- **CBB MIX Selector:** Specialiseret workflow til CBB MIX pakker (2–8 tjenester).
+- **Mobiludgifter:** Inputfelter til eksisterende månedlige omkostninger og visning af 6-måneders total.
+- **Provider filtre:** Hurtig filtrering mellem Telmore, Telenor og CBB-abonnementer.
+- **Smart søgning:** Fritekst-søgning på data, funktioner, pris eller produktnavne.
+- **Dynamisk kurv:** Antalstyring direkte på abonnementskortene med automatisk total.
 
-### Beregninger
-- ✅ **Intro-pris håndtering**: Korrekt beregning af intro-perioder
-- ✅ **Telenor Familie-rabat**: Automatisk -50 kr/md pr. ekstra linje
-- ✅ **Streaming Coverage**: Checker hvilke tjenester er inkluderet
-- ✅ **6-måneders analyse**: Viser total besparelse over 6 måneder
-- ✅ **Indtjening**: Tracker total indtjening fra valgte abonnementer
+### Rådgivningsværktøjer
+- **Kontant rabat:** Manuel justering med lås, så rabatten ikke overskrives.
+- **Auto-justér:** Sikrer minimum 500 kr. i dokumenteret besparelse.
+- **Præsentationsvisning:** Fuldskærm med animeret besparelse og høj læsbarhed.
+- **Indtjeningsoversigt:** Viser samlet indtjening baseret på valgte abonnementer.
+- **Streaming coverage:** Matcher valgte streamingtjenester med kundens ønsker.
 
-## 🚀 Installation
+### UX & tilgængelighed
+- **Dark/Light-mode toggle** og tilstandslagring i `localStorage`.
+- **Keyboard shortcuts:**
+  - `Ctrl + R` → Nulstil alle valg
+  - `Ctrl + P` → Åbn/luk præsentationsvisning
+  - `Ctrl + T` → Skift tema
+  - `Escape` → Luk præsentation
+- **Responsivt layout** til mobil, tablet og store skærme.
 
+## 🔌 Power.dk-integration
+Applikationen henter produkt- og prisdata fra Power.dk for at supplere de lokale datasæt.
+
+- **Produktlister:** `https://www.power.dk/api/v2/productlists?q=<term>&size=10`
+- **Prisopslag:** `https://www.power.dk/api/v2/products/prices?ids=<comma-separated-ids>`
+- **Proxy-rotation:** `src/utils/powerApi.js` håndterer et sæt CORS-proxyer (CorsProxy.io, AllOrigins, ProxyCors, CorsAnywhere) med health-score, caching og retries.
+- **Fallbacks:** Hvis alle proxyer fejler, anvendes prisdata fra selve produktlisten for at sikre at beregningen kan gennemføres.
+- **Cache:** Resultater caches i fem minutter for at begrænse antal eksterne kald.
+
+### Lokal udvikling
+Vite-proxyen i `vite.config.js` mappe `/api/power/*` til Power.dk's REST-API, så udvikling kan ske uden browser-CORS problemer. Alle requests reskrives til `/api/v2/*` og får nødvendige headers for at efterligne en Power.dk-browser-session.
+
+## 🚀 Kom godt i gang
 ### Forudsætninger
-- Node.js 18.x eller nyere
-- npm eller yarn
+- Node.js **18.x** eller nyere
+- npm (følger med Node). Yarn fungerer også, men dokumentationen tager udgangspunkt i npm
 
-### Setup
-
-1. **Naviger til projekt-mappen:**
-   ```bash
-   cd Power-Abo
-   ```
-
-2. **Installer dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-
-4. **Åbn browser:**
-   - Applikationen åbner automatisk på `http://localhost:3000`
-
-## 📦 Build til Production
-
-### Byg projektet:
+### Installation & lokal kørsel
 ```bash
-npm run build
+# Klon repository og gå ind i projektet
+cd Power-Abo
+
+# Installer dependencies
+npm install
+
+# Start udviklingsserveren (åbner automatisk på http://localhost:3000)
+npm run dev
 ```
 
-Build-filerne genereres i `/dist` mappen.
-
-### Preview production build:
+### Production build
 ```bash
+# Byg optimeret bundle i /dist
+npm run build
+
+# Forhåndsvis produktionsbuild på lokal server
 npm run preview
 ```
 
-## 🌐 Deployment
+## 📜 Tilgængelige scripts
+| Script | Beskrivelse |
+| --- | --- |
+| `npm run dev` | Starter Vite-udviklingsserveren på port 3000 med auto-open |
+| `npm run build` | Producerer production build i `dist/` med sourcemaps |
+| `npm run preview` | Serverer den byggede app lokalt til validering |
+| `npm run lint` | ESLint-check af hele projektet (`.js`/`.jsx`) |
 
-### Vercel (Anbefalet)
-1. Installer Vercel CLI: `npm i -g vercel`
-2. Kør: `vercel`
-3. Følg instruktionerne
-
-### Netlify
-1. Byg projektet: `npm run build`
-2. Drag & drop `/dist` mappen til Netlify
-
-### GitHub Pages
-```bash
-# I vite.config.js, tilføj:
-# base: '/repository-name/'
-
-npm run build
-# Deploy /dist mappen til gh-pages branch
-```
-
-## 📁 Projekt Struktur
-
+## 🗂️ Projektstruktur
 ```
 Power-Abo/
 ├── public/
-│   ├── index.html          # HTML template
-│   ├── favicon.ico         # Favicon
-│   └── logos/              # Provider og streaming logos
+│   ├── favicon.ico
+│   └── logos/               # Assets til abonnementer og streaming
 ├── src/
+│   ├── App.jsx              # Hovedkomponent og tilstandshåndtering
+│   ├── main.jsx             # Entry point (ReactDOM createRoot)
 │   ├── components/
-│   │   ├── Header.jsx              # Header med kontroller
-│   │   ├── ProviderTabs.jsx        # Provider filter tabs
-│   │   ├── PlanCard.jsx            # Abonnement kort
-│   │   ├── StreamingSelector.jsx   # Streaming valg
-│   │   ├── CBBMixSelector.jsx      # CBB MIX streaming-pakker
-│   │   ├── Cart.jsx                # Kurv
-│   │   ├── ComparisonPanel.jsx     # Sammenligning
-│   │   ├── PresentationView.jsx    # Præsentation
-│   │   └── Footer.jsx              # Footer
+│   │   ├── Header.jsx
+│   │   ├── ProviderTabs.jsx
+│   │   ├── PlanCard.jsx
+│   │   ├── Cart.jsx
+│   │   ├── ComparisonPanel.jsx
+│   │   ├── StreamingSelector.jsx
+│   │   ├── CBBMixSelector.jsx
+│   │   ├── PresentationView.jsx
+│   │   └── Footer.jsx
 │   ├── data/
-│   │   ├── plans.js                # Mobilabonnementer database
-│   │   └── streamingServices.js    # Streaming-tjenester database
+│   │   ├── plans.js
+│   │   └── streamingServices.js
 │   ├── styles/
-│   │   ├── variables.css           # CSS variabler
-│   │   ├── components.css          # Komponent styles
-│   │   ├── main.css                # Global styles
-│   │   └── cbb-mix.css             # CBB MIX specifik styling
-│   ├── utils/
-│   │   ├── calculations.js         # Beregningslogik
-│   │   ├── storage.js              # LocalStorage håndtering
-│   │   └── validators.js           # Input validering
-│   ├── App.jsx                     # Hovedkomponent
-│   └── main.jsx                    # Entry point
+│   │   ├── variables.css    # Design tokens (farver, spacing)
+│   │   ├── components.css
+│   │   ├── cbb-mix.css
+│   │   ├── animations.css
+│   │   ├── compact.css
+│   │   ├── utilities.css
+│   │   └── main.css
+│   └── utils/
+│       ├── calculations.js
+│       ├── powerApi.js
+│       ├── storage.js
+│       └── validators.js
 ├── package.json
 ├── vite.config.js
 └── README.md
 ```
 
-## ⌨️ Keyboard Shortcuts
-
-- **Ctrl + R**: Nulstil alt
-- **Ctrl + P**: Åbn/luk præsentation
-- **Ctrl + T**: Skift tema (dark/light)
-- **Escape**: Luk præsentation
-
-## 🎨 Design System
-
-### Farver
-- **Brand Orange**: `#ff6b1a`
-- **Telenor Blå**: `#38bdf8`
-- **CBB Lilla**: `#a855f7`
-- **Success**: `#10b981`
-- **Danger**: `#ef4444`
-
-### Spacing
-- **xs**: 0.25rem (4px)
-- **sm**: 0.5rem (8px)
-- **md**: 1rem (16px)
-- **lg**: 1.5rem (24px)
-- **xl**: 2rem (32px)
-- **2xl**: 3rem (48px)
-- **3xl**: 4rem (64px)
-
-### Breakpoints
-- **Mobile**: < 900px
-- **Tablet**: 900px - 1600px
-- **Desktop**: > 1600px
-
-## 📊 Mobilabonnementer Database
-
-### Telenor
-- 20 GB: 149 kr/md (indtjening: 700 kr)
-- 70 GB: 199 kr/md (indtjening: 900 kr)
-- 120 GB: 239 kr/md (indtjening: 1200 kr)
-- Fri Data: 289 kr/md (indtjening: 1300 kr)
-- **Familiepris**: -50 kr/md pr. ekstra linje
-
-### Telmore
-- 30 GB: 129 kr/md (indtjening: 400 kr)
-- 70 GB: 149 kr/md, intro 74 kr første 3 mdr (indtjening: 700 kr)
-- 60 GB: 169 kr/md (indtjening: 700 kr)
-- 100 GB + HBO Max: 219 kr/md, intro 99 kr (indtjening: 700 kr)
-- Fri Data: 229 kr/md (indtjening: 700 kr)
-- 100 GB + 2 streaming: 299 kr/md, intro 99 kr (indtjening: 1000 kr)
-- Fri Data + 3 streaming: 399 kr/md, intro 99 kr (indtjening: 1100 kr)
-- Fri Data + 4 streaming: 449 kr/md (indtjening: 1100 kr)
-- Fri Data + 5 streaming: 499 kr/md (indtjening: 1100 kr)
-- Premium (8 streaming): 559 kr/md (indtjening: 1100 kr)
-- Ultimate (9 streaming): 599 kr/md (indtjening: 1100 kr)
-
-### CBB
-- 60 GB: 109 kr/md (indtjening: 300 kr)
-- 200 GB: 129 kr/md (indtjening: 500 kr)
-- 500 GB: 149 kr/md (indtjening: 800 kr)
-- 100 GB World-data: 199 kr/md (indtjening: 800 kr)
-
-### CBB MIX (Streaming pakker)
-- **CBB MIX 2**: 2 streaming-tjenester for 160 kr/md
-- **CBB MIX 3**: 3 streaming-tjenester for 210 kr/md
-- **CBB MIX 4**: 4 streaming-tjenester for 260 kr/md
-- **CBB MIX 5**: 5 streaming-tjenester for 310 kr/md
-- **CBB MIX 6**: 6 streaming-tjenester for 360 kr/md
-- **CBB MIX 7**: 7 streaming-tjenester for 410 kr/md
-- **CBB MIX 8**: 8 streaming-tjenester for 460 kr/md
-
-## 📺 Streaming-tjenester
-
-### Standard tjenester
-- Netflix: 129 kr/md (Standard plan)
-- Viaplay: 149 kr/md (Standard plan)
-- Max (HBO Max): 129 kr/md (Standard plan)
-- TV2 Play Basis: 99 kr/md (Basis plan)
-- Saxo: 79 kr/md (20 timers plan)
-- Disney+: 149 kr/md (Standard plan)
-- SkyShowtime: 89 kr/md (Standard plan)
-- Prime Video: 59 kr/md (Standalone plan)
-- Musik (Spotify/Apple Music): 119 kr/md (Individual plan)
-
-### CBB MIX eksklusive tjenester
-- **Podimo Premium**: 79 kr/md (kun via CBB MIX)
-- **Mofibo**: 89 kr/md (20 timer, kun via CBB MIX)
-- **Nordisk Film+**: 89 kr/md (kun via CBB MIX)
-
-### CBB MIX priser
-- 2 tjenester: 160 kr/md
-- 3 tjenester: 210 kr/md
-- 4 tjenester: 260 kr/md
-- 5 tjenester: 310 kr/md
-- 6 tjenester: 360 kr/md
-- 7 tjenester: 410 kr/md
-- 8 tjenester: 460 kr/md
-
-## 🧮 Beregningslogik
-
-### 6-måneders pris
-```javascript
-// Med intro-pris:
-(introPrice × introMonths × qty) + (normalPrice × (6 - introMonths) × qty)
-
-// Uden intro-pris:
-normalPrice × 6 × qty
-```
-
-### Telenor Familie-rabat
-```javascript
-// Rabat pr. måned:
-(antal_linjer - 1) × 50 kr
-
-// 6-måneders rabat:
-månedlig_rabat × 6
-```
-
-### Besparelse
-```javascript
-Kunde 6-md total - Vores 6-md total = Besparelse
-```
-
-## 🔧 Teknologi Stack
-
-- **React 18.x**: UI framework
-- **Vite**: Build tool og dev server
-- **CSS3**: Styling med custom properties
-- **LocalStorage API**: Data persistens
-- **Modern JavaScript (ES2022+)**: Ingen legacy code
-
-## 🎯 Browser Support
-
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## 📝 Development Notes
-
-### Tilføj nye abonnementer
-Rediger `/src/data/plans.js`:
+## 🧾 Data vedligeholdelse
+### Mobilabonnementer (`src/data/plans.js`)
 ```javascript
 {
   id: 'unique-id',
-  provider: 'telmore|telenor|cbb',
+  provider: 'telmore' | 'telenor' | 'cbb',
   name: 'Abonnement navn',
   data: '100 GB',
   price: 299,
-  introPrice: 99,        // Valgfri
-  introMonths: 3,        // Valgfri
-  earnings: 1000,
+  introPrice: 99,      // Valgfrit (kr./md)
+  introMonths: 3,      // Valgfrit (antal måneder)
+  earnings: 1000,      // Provision i kr.
   features: ['5G', 'EU Roaming'],
-  familyDiscount: true,  // Kun Telenor
+  familyDiscount: true, // Kun Telenor
   color: '#ff6b1a',
   streaming: ['netflix', 'hbo-max'],
-  streamingCount: 2,     // Hvis streaming inkluderet
-  cbbMixAvailable: true, // Kun CBB
-  cbbMixPricing: {       // Kun CBB MIX
-    2: 160, 3: 210, 4: 260, 5: 310,
-    6: 360, 7: 410, 8: 460
-  }
+  streamingCount: 2,
+  cbbMixAvailable: true,
+  cbbMixPricing: { 2: 160, 3: 210, 4: 260, 5: 310, 6: 360, 7: 410, 8: 460 }
 }
 ```
 
-### Tilføj nye streaming-tjenester
-Rediger `/src/data/streamingServices.js`:
+### Streaming-tjenester (`src/data/streamingServices.js`)
 ```javascript
 {
-  id: 'unique-id',
-  name: 'Tjeneste navn',
-  price: 99,
-  logo: '/logos/service.png',
-  bgColor: '#000000',
+  id: 'netflix',
+  name: 'Netflix',
+  price: 129,
+  logo: '/logos/netflix.svg',
+  bgColor: '#141414',
   category: 'streaming',
-  cbbMixOnly: false // true for CBB MIX eksklusive tjenester
+  cbbMixOnly: false
 }
 ```
 
-### CBB MIX funktionalitet
-CBB MIX tjenester kan kun tilgås via CBB MIX pakker. Tilføj `cbbMixOnly: true` for eksklusive tjenester som Podimo, Mofibo og Nordisk Film+.
+### Prisreferencer (jan 2025)
+- **Telenor:** 20 GB (149 kr/md, 700 kr indtjening) → Fri data (289 kr/md, 1300 kr indtjening) med -50 kr/md familiepris per ekstra linje.
+- **Telmore:** Fra 30 GB (129 kr/md) til Ultimate (599 kr/md) inkl. forskellige streamingpakker og intropriser.
+- **CBB:** 60 GB (109 kr/md) til 500 GB (149 kr/md) samt World-data og MIX-pakker (2–8 tjenester fra 160–460 kr/md).
+- **CBB MIX eksklusiver:** Podimo Premium, Mofibo og Nordisk Film+.
 
-### Styling
-Alle CSS-variabler er defineret i `/src/styles/variables.css`. Rediger her for at ændre farver, spacing, etc.
+## 🧮 Beregninger og logik
+| Beregning | Formel |
+| --- | --- |
+| 6-måneders pris (med intro) | `(introPrice × introMonths × qty) + (normalPrice × (6 - introMonths) × qty)` |
+| 6-måneders pris (uden intro) | `normalPrice × 6 × qty` |
+| Telenor familie-rabat pr. måned | `(antalLinjer - 1) × 50` |
+| Telenor familie-rabat (6 mdr.) | `månedligRabat × 6` |
+| Besparelse | `Kundens 6-måneders total - Vores 6-måneders total` |
 
-## 🐛 Troubleshooting
+Alle beregninger findes i `src/utils/calculations.js`, og validering af input i `src/utils/validators.js`.
 
-### Applikationen starter ikke
-```bash
-# Slet node_modules og reinstaller
-rm -rf node_modules
-npm install
-npm run dev
-```
+## 🚢 Deployment
+### Vercel (anbefalet)
+1. Installer CLI: `npm i -g vercel`
+2. Kør `vercel` og følg prompts (project root = `Power-Abo/`).
+3. Vercel understøtter automatisk SPA-routing.
 
-### Data gemmes ikke
-- Check at browser understøtter localStorage
-- Se browser console for fejlmeddelelser
-- Prøv at rydde browser cache
+### Netlify
+1. `npm run build`
+2. Upload `dist/` via Netlify UI eller brug CLI (`netlify deploy --prod`).
 
-### Styling ser forkert ud
-- Hard refresh: Ctrl+Shift+R (Windows) eller Cmd+Shift+R (Mac)
-- Ryd browser cache
-- Check at alle CSS-filer er importeret korrekt
+### GitHub Pages
+1. Sørg for at `base` i `vite.config.js` matcher repository-navn (default: `/Power-Abo/`).
+2. `npm run build`
+3. Deploy `dist/` til `gh-pages` branch (fx via `gh-pages` npm-pakke eller GitHub Actions).
 
-## 📄 License
+## 🛠️ Fejlsøgning
+| Problem | Løsning |
+| --- | --- |
+| Udviklingsserver starter ikke | Slet `node_modules`, kør `npm install`, start igen |
+| Data gemmes ikke | Kontrollér at browser understøtter `localStorage`, ryd cache, tjek konsollen |
+| Styling ser forkert ud | Hard refresh (`Ctrl/Cmd + Shift + R`), bekræft at CSS-filer er importeret |
+| Power API fejler | Se browserkonsollen for proxy-fejl. Systemet falder tilbage til cached data eller produktpriser når muligt |
 
-Dette projekt er udviklet til intern brug.
-
-## 🎯 Tekstforbedringer v1.1
-
-### Forbedret Brugervenlighed
-Appen har gennemgået en omfattende tekstforbedring for at gøre den mere professionel og forståelig:
-
-#### **Konsistent Terminologi**
-- "Planer" → "Abonnementer" gennem hele appen
-- "features" → "funktioner" på dansk
-- Mere professionel og klar beskrivelser
-
-#### **Forbedret Navigation**
-- **Header**: "Power Abo Beregner" med klar beskrivelse
-- **Søgning**: "Søg efter abonnementer, data, funktioner..."
-- **Labels**: "Tilføj til kurv" i stedet for "Læg i kurv"
-
-#### **Klarere Instruktioner**
-- "Nuværende månedlige mobiludgifter" (mere præcist)
-- "Auto-justér (minimum 500 kr)" (tydeligere)
-- "Valgte Abonnementer" (konsistent terminologi)
-
-#### **Professionel Tone**
-- Alle tekster er nu mere professionelle og mindre tekniske
-- Bedre forståelighed for alle brugere
-- Ensartet brug af danske termer gennem hele appen
-
-## 🆕 Seneste Opdateringer
-
-### v1.1 - Tekstforbedringer (Januar 2025)
-- ✅ **Forbedret brugervenlighed**: Konsistent terminologi gennem hele appen
-- ✅ **Professionel tekst**: "Power Abo Beregner" med klar beskrivelse
-- ✅ **Bedre navigation**: "Abonnementer" i stedet for "planer" overalt
-- ✅ **Forbedret søgning**: "Søg efter abonnementer, data, funktioner"
-- ✅ **Klarere instruktioner**: Mere forståelige beskrivelser og labels
-- ✅ **Konsistent terminologi**: Ensartet brug af danske termer
-
-### v1.0 - Initial Release
-- ✅ Komplet funktionalitet for mobilabonnement beregning
-- ✅ Streaming-tjenester integration
-- ✅ CBB MIX support
-- ✅ Præsentationsvisning
-- ✅ Dark/Light mode
-
-## 👨‍💻 Udviklet af
-
-Power Abo Beregner v1.1 - 2025  
-Udviklet til POWER butik – kun til internt brug.
-
----
+## 📄 Licens og kontakt
+- Projektet er udviklet til intern brug i POWER-butikker og må ikke distribueres offentligt.
+- Version **v1.1 (2025)** – kontakt den interne udvikler for support og spørgsmål.
 
 **God fornøjelse med Power Abo Beregner!** ⚡
-
-For spørgsmål eller support, se dokumentationen eller kontakt udvikleren.
 
