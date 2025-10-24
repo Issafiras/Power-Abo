@@ -3,7 +3,7 @@
  * Sammenligner kundens situation med vores tilbud
  */
 
-import { useEffect } from 'react';
+import { useEffect, memo } from 'react';
 import {
   formatCurrency,
   calculateCustomerTotal,
@@ -15,7 +15,7 @@ import {
 } from '../utils/calculations';
 import { getStreamingTotal } from '../data/streamingServices';
 
-export default function ComparisonPanel({
+const ComparisonPanel = memo(function ComparisonPanel({
   cartItems,
   selectedStreaming,
   customerMobileCost,
@@ -619,5 +619,7 @@ export default function ComparisonPanel({
       `}</style>
     </div>
   );
-}
+});
+
+export default ComparisonPanel;
 

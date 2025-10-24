@@ -3,11 +3,11 @@
  * Viser en enkelt mobilplan med features og pris
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { formatCurrency } from '../utils/calculations';
 import CBBMixSelector from './CBBMixSelector';
 
-export default function PlanCard({ 
+const PlanCard = memo(function PlanCard({ 
   plan, 
   onAddToCart, 
   onCBBMixToggle, 
@@ -132,6 +132,8 @@ export default function PlanCard({
                   src={plan.logo} 
                   alt={plan.provider}
                   className="provider-logo"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 plan.provider.toUpperCase()
@@ -807,5 +809,6 @@ export default function PlanCard({
       `}</style>
     </div>
   );
-}
+});
 
+export default PlanCard;

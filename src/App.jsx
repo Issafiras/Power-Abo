@@ -3,7 +3,7 @@
  * Håndterer global state og orkestrerer alle subkomponenter
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Header from './components/Header';
 import StreamingSelector from './components/StreamingSelector';
 import ProviderTabs from './components/ProviderTabs';
@@ -60,27 +60,31 @@ function App() {
   const [eanSearchResults, setEanSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Load fra localStorage ved mount
+  // Load fra localStorage ved mount - optimized with single effect
   useEffect(() => {
-    const savedCart = loadCart();
-    const savedStreaming = loadSelectedStreaming();
-    const savedMobileCost = loadCustomerMobileCost();
-    const savedOriginalItemPrice = loadOriginalItemPrice();
-    const savedCashDiscount = loadCashDiscount();
-    const savedCashDiscountLocked = loadCashDiscountLocked();
-    const savedAutoAdjust = loadAutoAdjust();
-    const savedTheme = loadTheme();
-    const savedShowCashDiscount = loadShowCashDiscount();
+    // Batch all localStorage reads
+    const savedData = {
+      cart: loadCart(),
+      streaming: loadSelectedStreaming(),
+      mobileCost: loadCustomerMobileCost(),
+      originalItemPrice: loadOriginalItemPrice(),
+      cashDiscount: loadCashDiscount(),
+      cashDiscountLocked: loadCashDiscountLocked(),
+      autoAdjust: loadAutoAdjust(),
+      theme: loadTheme(),
+      showCashDiscount: loadShowCashDiscount()
+    };
 
-    setCartItems(savedCart);
-    setSelectedStreaming(savedStreaming);
-    setCustomerMobileCost(savedMobileCost);
-    setOriginalItemPrice(savedOriginalItemPrice);
-    setCashDiscount(savedCashDiscount);
-    setCashDiscountLocked(savedCashDiscountLocked);
-    setAutoAdjust(savedAutoAdjust);
-    setTheme(savedTheme);
-    setShowCashDiscount(savedShowCashDiscount);
+    // Batch all state updates
+    setCartItems(savedData.cart);
+    setSelectedStreaming(savedData.streaming);
+    setCustomerMobileCost(savedData.mobileCost);
+    setOriginalItemPrice(savedData.originalItemPrice);
+    setCashDiscount(savedData.cashDiscount);
+    setCashDiscountLocked(savedData.cashDiscountLocked);
+    setAutoAdjust(savedData.autoAdjust);
+    setTheme(savedData.theme);
+    setShowCashDiscount(savedData.showCashDiscount);
   }, []);
 
   // Gem til localStorage ved ændringer
@@ -127,8 +131,8 @@ function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Cart handlers
-  const handleAddToCart = (plan) => {
+  // Cart handlers - memoized for performance
+  const handleAddToCart = useCallback((plan) => {
     const existingItem = cartItems.find(item => item.plan.id === plan.id);
     
     if (existingItem) {
@@ -156,9 +160,9 @@ function App() {
       setCartItems([...cartItems, newItem]);
       showToast(`${plan.name} tilføjet til kurven`);
     }
-  };
+  }, [cartItems, cbbMixEnabled, cbbMixCount]);
 
-  const handleUpdateQuantity = (planId, newQuantity) => {
+  const handleUpdateQuantity = useCallback((planId, newQuantity) => {
     const validation = validateQuantity(newQuantity);
     if (!validation.valid) {
       showToast(validation.error, 'error');
@@ -175,49 +179,49 @@ function App() {
         ? { ...item, quantity: validation.value }
         : item
     ));
-  };
+  }, [cartItems]);
 
-  const handleRemoveFromCart = (planId) => {
+  const handleRemoveFromCart = useCallback((planId) => {
     const item = cartItems.find(item => item.plan.id === planId);
     setCartItems(cartItems.filter(item => item.plan.id !== planId));
     showToast(`${item?.plan.name} fjernet fra kurven`, 'error');
-  };
+  }, [cartItems]);
 
-  // Streaming handlers
-  const handleStreamingToggle = (serviceId) => {
+  // Streaming handlers - memoized for performance
+  const handleStreamingToggle = useCallback((serviceId) => {
     if (selectedStreaming.includes(serviceId)) {
       setSelectedStreaming(selectedStreaming.filter(id => id !== serviceId));
     } else {
       setSelectedStreaming([...selectedStreaming, serviceId]);
     }
-  };
+  }, [selectedStreaming]);
 
-  // Mobile cost handler
-  const handleMobileCostChange = (value) => {
+  // Mobile cost handler - memoized for performance
+  const handleMobileCostChange = useCallback((value) => {
     const validation = validatePrice(value);
     if (validation.valid) {
       setCustomerMobileCost(validation.value);
     }
-  };
+  }, []);
 
-  // Original item price handler
-  const handleOriginalItemPriceChange = (value) => {
+  // Original item price handler - memoized for performance
+  const handleOriginalItemPriceChange = useCallback((value) => {
     const validation = validatePrice(value);
     if (validation.valid) {
       setOriginalItemPrice(validation.value);
     }
-  };
+  }, []);
 
-  // Cash discount handler
-  const handleCashDiscountChange = (value) => {
+  // Cash discount handler - memoized for performance
+  const handleCashDiscountChange = useCallback((value) => {
     const validation = validatePrice(value);
     if (validation.valid) {
       setCashDiscount(validation.value);
     }
-  };
+  }, []);
 
-  // CBB MIX handlers
-  const handleCBBMixToggle = (planId, enabled) => {
+  // CBB MIX handlers - memoized for performance
+  const handleCBBMixToggle = useCallback((planId, enabled) => {
     setCbbMixEnabled(prev => ({
       ...prev,
       [planId]: enabled
@@ -229,17 +233,17 @@ function App() {
         [planId]: 2 // Reset to default
       }));
     }
-  };
+  }, []);
 
-  const handleCBBMixCountChange = (planId, count) => {
+  const handleCBBMixCountChange = useCallback((planId, count) => {
     setCbbMixCount(prev => ({
       ...prev,
       [planId]: count
     }));
-  };
+  }, []);
 
-  // Reset handler
-  const handleReset = () => {
+  // Reset handler - memoized for performance
+  const handleReset = useCallback(() => {
     resetAll();
     setCartItems([]);
     setSelectedStreaming([]);
@@ -253,15 +257,15 @@ function App() {
     setCbbMixEnabled({});
     setCbbMixCount({});
     showToast('Alt nulstillet', 'success');
-  };
+  }, []);
 
-  // Theme toggle
-  const handleThemeToggle = () => {
+  // Theme toggle - memoized for performance
+  const handleThemeToggle = useCallback(() => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  }, [theme]);
 
-  // EAN søgning handler
-  const handleEANSearch = async (searchResult) => {
+  // EAN søgning handler - memoized for performance
+  const handleEANSearch = useCallback(async (searchResult) => {
     setIsSearching(true);
     setEanSearchResults(searchResult);
     
@@ -288,10 +292,10 @@ function App() {
     }
     
     setIsSearching(false);
-  };
+  }, []);
 
-  // Filtrerede planer
-  const getFilteredPlans = () => {
+  // Filtrerede planer - memoized for performance
+  const filteredPlans = useMemo(() => {
     let filtered = activeProvider === 'all' 
       ? plans 
       : getPlansByProvider(activeProvider);
@@ -303,9 +307,7 @@ function App() {
     }
     
     return filtered;
-  };
-
-  const filteredPlans = getFilteredPlans();
+  }, [activeProvider, searchQuery]);
 
   return (
     <div className="app">
