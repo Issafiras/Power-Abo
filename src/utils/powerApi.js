@@ -6,275 +6,56 @@
 // Bestem API base URL baseret på miljø
 const isProduction = window.location.hostname === 'issafiras.github.io';
 
-// Liste af alternative CORS proxy-tjenester.
-// Vi bruger konfigurationsobjekter for at kunne håndtere forskellige URL-formater og tilpasse headers per proxy.
-const PROXY_SERVICES = [
-  {
-    name: 'AllOrigins',
-    buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  },
-  {
-    name: 'CorsAnywhere',
-    buildUrl: (targetUrl) => `https://cors-anywhere.herokuapp.com/${targetUrl}`,
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  },
-  {
-    name: 'ProxyCors',
-    buildUrl: (targetUrl) => `https://proxy.cors.sh/${targetUrl}`,
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  },
-  {
-    name: 'CorsProxy.io',
-    buildUrl: (targetUrl) => `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  }
-];
-
-const PROXY_TIMEOUT_MS = 3000; // Reduceret fra 8s til 3s for hurtigere fejlhåndtering
-
-// Cache for at huske hvilken proxy der virkede sidst
-let workingProxyIndex = null;
-let proxySuccessCount = {}; // Tæller succes for hver proxy
-let proxyFailureCount = {}; // Tæller fejl for hver proxy
-
 const POWER_API_BASE = isProduction 
   ? 'https://www.power.dk/api/v2'
   : '/api/power';
 
 /**
- * Prøv en enkelt proxy-tjeneste
- */
-async function trySingleProxy(proxyIndex, targetUrl, options) {
-  const proxy = PROXY_SERVICES[proxyIndex];
-  const proxyName = proxy.name || `Proxy ${proxyIndex + 1}`;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
-
-  try {
-    const proxyUrl = proxy.buildUrl(targetUrl);
-    console.log(`🔄 Prøver proxy: ${proxyName}`);
-    
-      const response = await fetch(proxyUrl, {
-        ...options,
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          ...options.headers,
-          ...(proxy.headers || {}),
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        signal: controller.signal
-      });
-
-    if (response.ok) {
-      console.log(`✅ ${proxyName} virker!`);
-      proxySuccessCount[proxyIndex] = (proxySuccessCount[proxyIndex] || 0) + 1;
-      return response;
-    } else {
-      proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
-      throw new Error(`${proxyName} fejlede: ${response.status} ${response.statusText}`);
-    }
-  } catch (error) {
-    proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-/**
- * Prøv at hente data via forskellige proxy-tjenester med retry logik
- * @param {string} url - URL til at hente
- * @param {Object} options - Fetch options
- * @param {number} attempt - Nuværende forsøg (internt brugt)
- * @returns {Promise<Response>} Fetch response
- */
-async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
-  if (!isProduction) {
-    // I udviklingsmiljø, brug direkte URL med retry logik
-    return fetchWithRetry(url, options, attempt);
-  }
-
-  const targetUrl = url;
-  let lastError = null;
-
-  // Sorter proxy-tjenester baseret på succes-rate
-  const getProxyScore = (index) => {
-    const success = proxySuccessCount[index] || 0;
-    const failures = proxyFailureCount[index] || 0;
-    const total = success + failures;
-    if (total === 0) return 0.5; // Neutrale score for nye proxy-tjenester
-    return success / total;
-  };
-
-  // Sorter proxy-tjenester efter score (højeste først)
-  const proxyIndices = Array.from({length: PROXY_SERVICES.length}, (_, i) => i)
-    .sort((a, b) => getProxyScore(b) - getProxyScore(a));
-
-  // Prøv de to bedste proxy-tjenester parallelt som fallback
-  if (proxyIndices.length >= 2) {
-    const bestProxy = proxyIndices[0];
-    const secondBestProxy = proxyIndices[1];
-    
-    // Hvis den bedste proxy har en god score, prøv kun den først
-    if (getProxyScore(bestProxy) > 0.7) {
-      console.log(`🚀 Prøver kun den bedste proxy: ${PROXY_SERVICES[bestProxy].name}`);
-      try {
-        const result = await trySingleProxy(bestProxy, targetUrl, options);
-        if (result) return result;
-      } catch (error) {
-        console.log(`⚠️ Bedste proxy fejlede, prøver næstbedste...`);
-      }
-    }
-  }
-
-  for (let i = 0; i < proxyIndices.length; i++) {
-    const proxyIndex = proxyIndices[i];
-    const proxy = PROXY_SERVICES[proxyIndex];
-    const proxyName = proxy.name || `Proxy ${proxyIndex + 1}`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
-
-    try {
-      const proxyUrl = proxy.buildUrl(targetUrl);
-      const isRetryingWorkingProxy = workingProxyIndex !== null && i === 0;
-      console.log(`🔄 Prøver proxy ${i + 1}/${proxyIndices.length}: ${proxyName}${isRetryingWorkingProxy ? ' (cached)' : ''}`);
-      
-      const response = await fetch(proxyUrl, {
-        ...options,
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          ...options.headers,
-          ...(proxy.headers || {}),
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        signal: controller.signal
-      });
-
-      if (response.ok) {
-        console.log(`✅ ${proxyName} virker!`);
-        // Registrer succes
-        proxySuccessCount[proxyIndex] = (proxySuccessCount[proxyIndex] || 0) + 1;
-        workingProxyIndex = proxyIndex;
-        return response;
-      } else {
-        // Hvis det er en 429 eller 5xx fejl, prøv retry
-        if ((response.status === 429 || response.status >= 500) && attempt < 3) {
-          const backoff = [250, 750, 1750][attempt - 1];
-          console.log(`⏳ ${proxyName} returnerede ${response.status}, prøver igen om ${backoff}ms...`);
-          await new Promise(r => setTimeout(r, backoff));
-          return fetchWithProxyFallback(url, options, attempt + 1);
-        }
-        
-        console.warn(`⚠️ ${proxyName} returnerede status ${response.status}`);
-        // Registrer fejl
-        proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
-        lastError = new Error(`${proxyName} fejlede: ${response.status} ${response.statusText}`);
-      }
-    } catch (error) {
-      // Registrer fejl
-      proxyFailureCount[proxyIndex] = (proxyFailureCount[proxyIndex] || 0) + 1;
-      
-      if (error.name === 'AbortError') {
-        console.warn(`⏱️ ${proxyName} overskred timeout på ${PROXY_TIMEOUT_MS}ms`);
-        lastError = new Error(`${proxyName} overskred timeout`);
-      } else {
-        console.warn(`❌ ${proxyName} fejlede:`, error.message);
-        lastError = error;
-      }
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
-
-  // Hvis alle proxy-tjenester fejler, nulstil cache og kast fejl
-  workingProxyIndex = null;
-  throw new Error(`Alle proxy-tjenester fejlede. Sidste fejl: ${lastError?.message || 'Ukendt fejl'}`);
-}
-
-/**
- * Nulstil proxy cache (nyttigt hvis cached proxy begynder at fejle)
- */
-export function resetProxyCache() {
-  workingProxyIndex = null;
-  proxySuccessCount = {};
-  proxyFailureCount = {};
-  console.log('🔄 Proxy cache og statistikker nulstillet');
-}
-
-/**
- * Vis proxy-statistikker for debugging
- */
-export function getProxyStats() {
-  const stats = PROXY_SERVICES.map((proxy, index) => {
-    const success = proxySuccessCount[index] || 0;
-    const failures = proxyFailureCount[index] || 0;
-    const total = success + failures;
-    const successRate = total > 0 ? (success / total * 100).toFixed(1) : 'N/A';
-    
-    return {
-      name: proxy.name,
-      success,
-      failures,
-      total,
-      successRate: `${successRate}%`
-    };
-  });
-  
-  console.log('📊 Proxy-statistikker:', stats);
-  return stats;
-}
-
-/**
- * Hjælpefunktion til retry logik for direkte API kald
- * @param {string} url - URL til at hente
- * @param {Object} options - Fetch options
- * @param {number} attempt - Nuværende forsøg
- * @returns {Promise<Response>} Fetch response
+ * Fetch med retry logik for direkte API kald
  */
 async function fetchWithRetry(url, options = {}, attempt = 1) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
+    console.log(`🔄 API kald forsøg ${attempt}: ${url}`);
+    
     const response = await fetch(url, {
       ...options,
-      cache: 'no-store'
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      signal: controller.signal
     });
-    
+
     if (response.ok) {
+      console.log(`✅ API kald succesfuldt`);
       return response;
+    } else {
+      // Hvis det er en 429 eller 5xx fejl, prøv retry
+      if ((response.status === 429 || response.status >= 500) && attempt < 3) {
+        const backoff = [250, 750, 1750][attempt - 1];
+        console.log(`⏳ API returnerede ${response.status}, prøver igen om ${backoff}ms...`);
+        await new Promise(r => setTimeout(r, backoff));
+        return fetchWithRetry(url, options, attempt + 1);
+      }
+      
+      throw new Error(`API fejlede: ${response.status} ${response.statusText}`);
     }
-    
-    // Retry på 429 eller 5xx fejl
-    if ((response.status === 429 || response.status >= 500) && attempt < 3) {
-      const backoff = [250, 750, 1750][attempt - 1];
-      console.log(`⏳ API returnerede ${response.status}, prøver igen om ${backoff}ms...`);
-      await new Promise(r => setTimeout(r, backoff));
-      return fetchWithRetry(url, options, attempt + 1);
-    }
-    
-    return response;
   } catch (error) {
-    if (attempt < 3) {
+    if (attempt < 3 && !controller.signal.aborted) {
       const backoff = [250, 750, 1750][attempt - 1];
       console.log(`⏳ Netværksfejl, prøver igen om ${backoff}ms...`);
       await new Promise(r => setTimeout(r, backoff));
       return fetchWithRetry(url, options, attempt + 1);
     }
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -289,7 +70,7 @@ export async function searchProductsByEAN(searchTerm) {
     const url = `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`;
     console.log('📡 API URL:', url);
     
-    const response = await fetchWithProxyFallback(url, {
+    const response = await fetchWithRetry(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -322,9 +103,7 @@ export async function searchProductsByEAN(searchTerm) {
   } catch (error) {
     console.error('❌ Fejl ved søgning efter produkter:', error);
     
-    if (error.message.includes('Alle proxy-tjenester fejlede')) {
-      throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere.');
-    } else if (error.message.includes('Failed to fetch')) {
+    if (error.message.includes('Failed to fetch')) {
       throw new Error('Netværksfejl: Kunne ikke oprette forbindelse til Power.dk API.');
     } else {
       throw new Error(`Kunne ikke søge efter produkter: ${error.message}`);
@@ -354,7 +133,7 @@ export async function getProductPrices(productIds) {
     const url = `${POWER_API_BASE}/products/prices?ids=${idsString}`;
     console.log('📡 Pris API URL:', url);
     
-    const response = await fetchWithProxyFallback(url, {
+    const response = await fetchWithRetry(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -379,9 +158,7 @@ export async function getProductPrices(productIds) {
   } catch (error) {
     console.error('❌ Fejl ved hentning af priser:', error);
     
-    if (error.message.includes('Alle proxy-tjenester fejlede')) {
-      throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere.');
-    } else if (error.message.includes('Failed to fetch')) {
+    if (error.message.includes('Failed to fetch')) {
       throw new Error('Netværksfejl: Kunne ikke oprette forbindelse til Power.dk API.');
     } else {
       throw new Error(`Kunne ikke hente priser: ${error.message}`);
@@ -464,9 +241,7 @@ export async function searchProductsWithPrices(searchTerm) {
     console.error('❌ Fejl ved kombineret søgning:', error);
     
     // Giv mere specifik fejlhåndtering
-    if (error.message.includes('Alle proxy-tjenester fejlede')) {
-      throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere eller kontakt support.');
-    } else if (error.message.includes('Failed to fetch')) {
+    if (error.message.includes('Failed to fetch')) {
       throw new Error('Netværksfejl: Kunne ikke oprette forbindelse til Power.dk API. Tjek din internetforbindelse.');
     } else if (error.message.includes('API fejl')) {
       throw new Error(`Power.dk API fejl: ${error.message}`);
