@@ -16,10 +16,9 @@ const isProduction = window.location.hostname === 'issafiras.github.io';
 const PROXY_SERVICES = [
   {
     name: 'CorsProxy.io',
-    buildUrl: (targetUrl) => `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+    buildUrl: (targetUrl) => `https://corsproxy.io/?${targetUrl}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     },
     priority: 1, // Højeste prioritet
     timeout: 3000 // Hurtigste timeout
@@ -28,8 +27,7 @@ const PROXY_SERVICES = [
     name: 'AllOrigins',
     buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     },
     priority: 2,
     timeout: 4000
@@ -38,8 +36,7 @@ const PROXY_SERVICES = [
     name: 'ProxyCors',
     buildUrl: (targetUrl) => `https://proxy.cors.sh/${targetUrl}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     },
     priority: 3,
     timeout: 5000
@@ -48,9 +45,7 @@ const PROXY_SERVICES = [
     name: 'CorsAnywhere',
     buildUrl: (targetUrl) => `https://cors-anywhere.herokuapp.com/${targetUrl}`,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
+      'Accept': 'application/json'
     },
     priority: 4,
     timeout: 6000
@@ -179,18 +174,24 @@ async function tryProxyFast(proxyIndex, targetUrl, options) {
   const startTime = Date.now();
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), CONFIG.FAST_TIMEOUT);
+  const method = (options.method || 'GET').toUpperCase();
+
+  // Undgå unødvendige headers for simple GET requests for at minimere CORS preflight
+  const sanitizedHeaders = { ...(options.headers || {}) };
+  if (method === 'GET') {
+    delete sanitizedHeaders['Content-Type'];
+  }
 
   try {
     const proxyUrl = proxy.buildUrl(targetUrl);
-    
+
     const response = await fetch(proxyUrl, {
       ...options,
       mode: 'cors',
       credentials: 'omit',
       headers: {
-        ...options.headers,
         ...proxy.headers,
-        'X-Requested-With': 'XMLHttpRequest'
+        ...sanitizedHeaders
       },
       signal: controller.signal
     });
@@ -369,8 +370,7 @@ export async function prefetchProxies() {
   const options = {
     method: 'GET',
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Accept': 'application/json'
     }
   };
   
@@ -404,7 +404,6 @@ async function fetchWithRetry(url, options = {}, attempt = 1) {
       credentials: 'omit',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         ...options.headers
       },
       signal: controller.signal
@@ -451,8 +450,7 @@ export async function searchProductsByEAN(searchTerm) {
     const response = await fetchWithProxyFallback(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       },
       mode: 'cors',
       credentials: 'omit'
@@ -516,8 +514,7 @@ export async function getProductPrices(productIds) {
     const response = await fetchWithProxyFallback(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       },
       mode: 'cors',
       credentials: 'omit'
