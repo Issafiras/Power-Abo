@@ -51,7 +51,9 @@ Applikationen henter produkt- og prisdata fra Power.dk for at supplere de lokale
 
 - **Produktlister:** `https://www.power.dk/api/v2/productlists?q=<term>&size=10`
 - **Prisopslag:** `https://www.power.dk/api/v2/products/prices?ids=<comma-separated-ids>`
-- **Proxy-rotation:** `src/utils/powerApi.js` håndterer et sæt CORS-proxyer (CorsProxy.io, AllOrigins, ProxyCors, CorsAnywhere) med health-score, caching og retries.
+- **Proxy-rotation:** `src/utils/powerApi.js` håndterer et sæt CORS-proxyer (CodeTabs, CorsProxy.io, ProxyCors, AllOrigins, ThingProxy, CorsAnywhere) med health-score, caching og retries. ProxyCors kan forsynes med en API-nøgle via `VITE_PROXY_CORS_API_KEY`.
+
+> **Tip:** Opret en `.env`-fil og angiv `VITE_PROXY_CORS_API_KEY=<din_nøgle>` for at udnytte proxy.cors.sh med en personlig nøgle og reducere risikoen for rate limits.
 - **Fallbacks:** Hvis alle proxyer fejler, anvendes prisdata fra selve produktlisten for at sikre at beregningen kan gennemføres.
 - **Cache:** Resultater caches i fem minutter for at begrænse antal eksterne kald.
 

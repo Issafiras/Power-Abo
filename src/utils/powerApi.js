@@ -12,35 +12,55 @@
 // Bestem API base URL baseret på miljø
 const isProduction = window.location.hostname === 'issafiras.github.io';
 
+// Tillad konfiguration af API nøgler via miljøvariabler (fx Vite)
+const PROXY_CORS_API_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PROXY_CORS_API_KEY)
+  ? import.meta.env.VITE_PROXY_CORS_API_KEY
+  : null;
+
 // Optimeret liste af proxy-tjenester med bedste først
 const PROXY_SERVICES = [
   {
-    name: 'CorsProxy.io',
-    buildUrl: (targetUrl) => `https://corsproxy.io/?${targetUrl}`,
+    name: 'CodeTabs',
+    buildUrl: (targetUrl) => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`,
     headers: {
       'Accept': 'application/json'
     },
     priority: 1, // Højeste prioritet
-    timeout: 3000 // Hurtigste timeout
+    timeout: 2500 // Hurtigste timeout
+  },
+  {
+    name: 'CorsProxy.io',
+    buildUrl: (targetUrl) => `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
+    headers: {
+      'Accept': 'application/json'
+    },
+    priority: 2,
+    timeout: 3000
+  },
+  {
+    name: 'ProxyCors',
+    buildUrl: (targetUrl) => `https://proxy.cors.sh/${targetUrl}`,
+    headers: {
+      'Accept': 'application/json',
+      ...(PROXY_CORS_API_KEY ? { 'x-cors-api-key': PROXY_CORS_API_KEY } : {})
+    },
+    priority: 3,
+    timeout: 4000
   },
   {
     name: 'AllOrigins',
-    buildUrl: (targetUrl) => `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
+    buildUrl: (targetUrl) => `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
     headers: {
       'Accept': 'application/json'
     },
     transformResponse: async (response, targetUrl) => {
-      const payload = await response.json();
+      // AllOrigins raw-endpoint returnerer allerede ren respons, men vi sikrer
+      // ensartethed ved at klone dataen.
+      const payload = await response.text();
 
-      if (!payload || typeof payload.contents !== 'string') {
-        throw new Error('AllOrigins: Ugyldigt svarformat');
-      }
-
-      // Genskab et Response-objekt med originalt JSON indhold, så resten af koden
-      // kan arbejde på samme måde som ved direkte API-kald.
-      return new Response(payload.contents, {
-        status: payload.status?.http_code || response.status,
-        statusText: payload.status?.text || response.statusText,
+      return new Response(payload, {
+        status: response.status,
+        statusText: response.statusText,
         headers: {
           'Content-Type': 'application/json',
           'X-Proxy-Source': 'AllOrigins',
@@ -48,16 +68,16 @@ const PROXY_SERVICES = [
         }
       });
     },
-    priority: 2,
-    timeout: 4000
+    priority: 4,
+    timeout: 4500
   },
   {
-    name: 'ProxyCors',
-    buildUrl: (targetUrl) => `https://proxy.cors.sh/${targetUrl}`,
+    name: 'ThingProxy',
+    buildUrl: (targetUrl) => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(targetUrl)}`,
     headers: {
       'Accept': 'application/json'
     },
-    priority: 3,
+    priority: 5,
     timeout: 5000
   },
   {
@@ -66,7 +86,7 @@ const PROXY_SERVICES = [
     headers: {
       'Accept': 'application/json'
     },
-    priority: 4,
+    priority: 6,
     timeout: 6000
   }
 ];
