@@ -6,7 +6,7 @@
 /**
  * Validér pris-input
  * @param {any} value - Værdi at validere
- * @returns {Object} { valid: boolean, error: string|null, value: number }
+ * @returns {Object} { valid: boolean, error: string|null, value: number|null }
  */
 export function validatePrice(value) {
   // Hvis null eller undefined, returner null (kontant rabat slået fra)
