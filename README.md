@@ -58,7 +58,7 @@ Applikationen henter produkt- og prisdata fra Power.dk for at supplere de lokale
 - **Cache:** Resultater caches i fem minutter for at begrænse antal eksterne kald.
 
 ### Lokal udvikling
-Vite-proxyen i `vite.config.js` mappe `/api/power/*` til Power.dk's REST-API, så udvikling kan ske uden browser-CORS problemer. Alle requests reskrives til `/api/v2/*` og får nødvendige headers for at efterligne en Power.dk-browser-session.
+Vite-proxyen i `vite.config.js` mappe `/api/power/*` til Power.dk's REST-API, så udvikling kan ske uden browser-CORS problemer. Alle requests omskrives til `/api/v2/*` og får nødvendige headers for at efterligne en Power.dk-browser-session.
 
 ## 🚀 Kom godt i gang
 ### Forudsætninger
