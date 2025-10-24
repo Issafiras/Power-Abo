@@ -252,7 +252,19 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
   // Tjek cache først
   const cached = getCachedResult(url);
   if (cached) {
-    return cached;
+    // Returner et mock Response objekt for cache hits
+    return {
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: async () => cached,
+      clone: () => ({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => cached
+      })
+    };
   }
 
   const targetUrl = url;
