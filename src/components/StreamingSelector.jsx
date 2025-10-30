@@ -31,6 +31,11 @@ export default function StreamingSelector({
   const detectorRef = useRef(null);
   const zxingReaderRef = useRef(null);
   const zxingScriptLoadedRef = useRef(false);
+  const videoTrackRef = useRef(null);
+  const [torchSupported, setTorchSupported] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
+
+  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
   const streamingTotal = getStreamingTotal(selectedStreaming);
   const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
   const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
@@ -85,6 +90,9 @@ export default function StreamingSelector({
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
     }
+    videoTrackRef.current = null;
+    setTorchSupported(false);
+    setTorchOn(false);
     setShowScanner(false);
   };
 
@@ -170,10 +178,18 @@ export default function StreamingSelector({
         audio: false
       });
       streamRef.current = stream;
+      const videoTrack = stream.getVideoTracks && stream.getVideoTracks()[0];
+      videoTrackRef.current = videoTrack || null;
+      try {
+        const caps = videoTrack && videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+        if (caps && typeof caps.torch === 'boolean') setTorchSupported(true);
+      } catch {}
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         // iOS kræver playsInline for at undgå fullscreen
         try { videoRef.current.setAttribute('playsinline', 'true'); } catch {}
+        try { videoRef.current.setAttribute('muted', 'true'); } catch {}
+        try { videoRef.current.muted = true; } catch {}
         await videoRef.current.play();
         // Vent på metadata før vi scanner, så har vi korrekte dimensioner
         if (videoRef.current.readyState < 2) {
@@ -186,6 +202,7 @@ export default function StreamingSelector({
           });
         }
       }
+      // Hvis BarcodeDetector ikke findes – brug ZXing på alle platforme
       if (!('BarcodeDetector' in window)) {
         setHasBarcodeApi(false);
         // Start ZXing fallback direkte
@@ -194,6 +211,19 @@ export default function StreamingSelector({
         await startZxingFallback();
         return;
       }
+      // Tjek understøttede formater – iOS Safari kan have BarcodeDetector men uden EAN
+      try {
+        const supported = (await window.BarcodeDetector.getSupportedFormats?.()) || [];
+        const need = ['ean-13','ean-8','upc-e','upc-a','code-128'];
+        const ok = need.some(f => supported.includes(f));
+        if (!ok) {
+          setHasBarcodeApi(false);
+          setScanning(true);
+          scanningRef.current = true;
+          await startZxingFallback();
+          return;
+        }
+      } catch {}
       if (!detectorRef.current) {
         detectorRef.current = new window.BarcodeDetector({ formats: ['ean-13', 'ean-8', 'upc-e', 'upc-a', 'code-128'] });
       }
@@ -229,6 +259,18 @@ export default function StreamingSelector({
     } catch (err) {
       setScanError('Kunne ikke få adgang til kamera. Tjek tilladelser.');
     }
+  };
+
+  const toggleTorch = async () => {
+    try {
+      const track = videoTrackRef.current;
+      if (!track) return;
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      if (!caps || typeof caps.torch !== 'boolean') return;
+      const newVal = !torchOn;
+      await track.applyConstraints({ advanced: [{ torch: newVal }] });
+      setTorchOn(newVal);
+    } catch {}
   };
 
   useEffect(() => {
@@ -341,7 +383,14 @@ export default function StreamingSelector({
           <div className="scanner-modal">
             <div className="scanner-header">
               <span>📷 Scan stregkode</span>
-              <button className="btn" onClick={stopScanner}>Luk</button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {torchSupported && (
+                  <button className="btn torch-btn" onClick={toggleTorch} aria-pressed={torchOn}>
+                    {torchOn ? '🔦 Sluk' : '🔦 Tænd'}
+                  </button>
+                )}
+                <button className="btn" onClick={stopScanner}>Luk</button>
+              </div>
             </div>
             {!hasBarcodeApi && (
               <div className="scanner-warning">
