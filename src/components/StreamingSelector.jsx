@@ -100,7 +100,12 @@ export default function StreamingSelector({
     setShowScanner(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          aspectRatio: { ideal: 0.75 }
+        },
         audio: false
       });
       streamRef.current = stream;
@@ -112,7 +117,7 @@ export default function StreamingSelector({
         setHasBarcodeApi(false);
         return;
       }
-      const detector = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_e', 'upc_a', 'code_128'] });
+      const detector = new window.BarcodeDetector({ formats: ['ean-13', 'ean-8', 'upc-e', 'upc-a', 'code-128'] });
       setScanning(true);
       const tick = async () => {
         if (!scanning || !videoRef.current) return;
@@ -137,6 +142,15 @@ export default function StreamingSelector({
       stopScanner();
     };
   }, []);
+
+  // Lås body-scroll når scanneren er åben
+  useEffect(() => {
+    if (showScanner) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [showScanner]);
 
   return (
     <div className="streaming-selector glass-card-no-hover fade-in-up">
@@ -371,6 +385,44 @@ export default function StreamingSelector({
         /* Scan skjult som default (PC) */
         .scan-btn { display: none; }
 
+        /* Scanner overlay – altid fixed og centreret */
+        .scanner-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.65);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+        }
+        .scanner-modal {
+          width: min(680px, 96vw);
+          background: var(--glass-bg, #111);
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-md);
+          box-shadow: var(--shadow-lg);
+          border: 1px solid rgba(255,255,255,0.08);
+          max-height: 96vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .scanner-header, .scanner-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--spacing-sm);
+          margin-bottom: var(--spacing-sm);
+        }
+        .scanner-video {
+          width: 100%;
+          aspect-ratio: 3 / 4;
+          background: #000;
+          border-radius: var(--radius-md);
+          object-fit: cover;
+        }
+        .scanner-warning { color: var(--color-warning, #f59e0b); margin-bottom: var(--spacing-sm); }
+        .scanner-error { color: var(--color-danger, #ef4444); margin-top: var(--spacing-sm); }
+
         .input-label {
           display: block;
           margin-bottom: var(--spacing-sm);
@@ -557,39 +609,6 @@ export default function StreamingSelector({
         /* Kun mobil/tablet */
         @media (max-width: 900px) {
           .scan-btn { display: inline-flex; }
-          .scanner-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.65);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 60;
-          }
-          .scanner-modal {
-            width: min(680px, 96vw);
-            background: var(--glass-bg, #111);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-md);
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255,255,255,0.08);
-          }
-          .scanner-header, .scanner-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm);
-          }
-          .scanner-video {
-            width: 100%;
-            aspect-ratio: 3 / 4;
-            background: #000;
-            border-radius: var(--radius-md);
-            object-fit: cover;
-          }
-          .scanner-warning { color: var(--color-warning, #f59e0b); margin-bottom: var(--spacing-sm); }
-          .scanner-error { color: var(--color-danger, #ef4444); margin-top: var(--spacing-sm); }
         }
 
         @media (max-width: 900px) {
