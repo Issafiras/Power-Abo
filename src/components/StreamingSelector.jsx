@@ -29,6 +29,8 @@ export default function StreamingSelector({
   const rafRef = useRef(null);
   const scanningRef = useRef(false);
   const detectorRef = useRef(null);
+  const zxingReaderRef = useRef(null);
+  const zxingScriptLoadedRef = useRef(false);
   const streamingTotal = getStreamingTotal(selectedStreaming);
   const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
   const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
@@ -71,6 +73,10 @@ export default function StreamingSelector({
     setScanning(false);
     scanningRef.current = false;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (zxingReaderRef.current) {
+      try { zxingReaderRef.current.reset(); } catch {}
+      zxingReaderRef.current = null;
+    }
     if (videoRef.current) {
       try { videoRef.current.pause(); } catch {}
       videoRef.current.srcObject = null;
@@ -94,6 +100,58 @@ export default function StreamingSelector({
       stopScanner();
     } catch (err) {
       setScanError(err.message || 'Ukendt fejl under søgning');
+    }
+  };
+
+  const loadZxingScript = () => new Promise((resolve, reject) => {
+    if (zxingScriptLoadedRef.current) return resolve();
+    const existing = document.querySelector('script[data-zxing]');
+    if (existing) {
+      zxingScriptLoadedRef.current = true;
+      return resolve();
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js';
+    script.async = true;
+    script.setAttribute('data-zxing', 'true');
+    script.onload = () => { zxingScriptLoadedRef.current = true; resolve(); };
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
+
+  const startZxingFallback = async () => {
+    try {
+      await loadZxingScript();
+      if (!window.ZXing || !window.ZXing.BrowserMultiFormatReader) return;
+      const Reader = window.ZXing.BrowserMultiFormatReader;
+      const reader = new Reader();
+      zxingReaderRef.current = reader;
+      // Begræns til relevante formater
+      try {
+        const hints = new window.ZXing.Map();
+        const formats = [
+          window.ZXing.BarcodeFormat.EAN_13,
+          window.ZXing.BarcodeFormat.EAN_8,
+          window.ZXing.BarcodeFormat.UPC_A,
+          window.ZXing.BarcodeFormat.UPC_E,
+          window.ZXing.BarcodeFormat.CODE_128
+        ];
+        hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+        reader.hints = hints;
+      } catch {}
+
+      await reader.decodeFromVideoDevice(undefined, videoRef.current, async (result, err) => {
+        if (!scanningRef.current) return;
+        if (result && result.getText) {
+          const text = String(result.getText()).trim();
+          const digits = text.replace(/\s+/g, '').replace(/[^0-9]/g, '');
+          if (digits.length >= 8) {
+            await onDetectedCode(digits);
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('ZXing fallback mislykkedes:', e);
     }
   };
 
@@ -130,6 +188,10 @@ export default function StreamingSelector({
       }
       if (!('BarcodeDetector' in window)) {
         setHasBarcodeApi(false);
+        // Start ZXing fallback direkte
+        setScanning(true);
+        scanningRef.current = true;
+        await startZxingFallback();
         return;
       }
       if (!detectorRef.current) {
@@ -157,6 +219,13 @@ export default function StreamingSelector({
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
+
+      // Start automatisk ZXing fallback efter 2 sekunder, hvis ingen detection endnu
+      setTimeout(() => {
+        if (scanningRef.current && !zxingReaderRef.current) {
+          startZxingFallback();
+        }
+      }, 2000);
     } catch (err) {
       setScanError('Kunne ikke få adgang til kamera. Tjek tilladelser.');
     }
