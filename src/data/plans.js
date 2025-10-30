@@ -18,6 +18,60 @@ export const plans = [
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: []
   },
+
+  // TELENOR BUSINESS (B2B) PLANER – priser ekskl. moms
+  {
+    id: 'telenor-b2b-25gb',
+    provider: 'telenor-b2b',
+    name: 'Business Mobil 25 GB',
+    data: '25 GB',
+    price: 109, // ekskl. moms
+    business: true,
+    priceVatExcluded: true,
+    features: ['Fri tale', '5G', 'EU Roaming'],
+    color: '#0207b2',
+    logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
+    streaming: []
+  },
+  {
+    id: 'telenor-b2b-50gb',
+    provider: 'telenor-b2b',
+    name: 'Business Mobil 50 GB',
+    data: '50 GB',
+    price: 149, // ekskl. moms
+    business: true,
+    priceVatExcluded: true,
+    features: ['Fri tale', '5G', 'EU Roaming'],
+    color: '#0207b2',
+    logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
+    streaming: []
+  },
+  {
+    id: 'telenor-b2b-100gb',
+    provider: 'telenor-b2b',
+    name: 'Business Mobil 100 GB',
+    data: '100 GB',
+    price: 169, // ekskl. moms
+    business: true,
+    priceVatExcluded: true,
+    features: ['Fri tale', '5G', 'EU Roaming'],
+    color: '#0207b2',
+    logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
+    streaming: []
+  },
+  {
+    id: 'telenor-b2b-1000gb',
+    provider: 'telenor-b2b',
+    name: 'Business Mobil 1000 GB',
+    data: '1000 GB',
+    price: 179, // ekskl. moms
+    business: true,
+    priceVatExcluded: true,
+    features: ['Fri tale', '5G', 'EU Roaming'],
+    color: '#0207b2',
+    logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
+    streaming: []
+  },
   {
     id: 'telenor-70gb',
     provider: 'telenor',

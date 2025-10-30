@@ -36,6 +36,26 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         ))}
       </div>
 
+      {/* Telenor segment underfaner */}
+      {(activeProvider === 'telenor' || activeProvider === 'telenor-b2b') && (
+        <div className="segment-toggle">
+          <button
+            className={`segment-btn ${activeProvider === 'telenor' ? 'active' : ''}`}
+            onClick={() => onProviderChange('telenor')}
+            aria-pressed={activeProvider === 'telenor'}
+          >
+            Privat
+          </button>
+          <button
+            className={`segment-btn ${activeProvider === 'telenor-b2b' ? 'active' : ''}`}
+            onClick={() => onProviderChange('telenor-b2b')}
+            aria-pressed={activeProvider === 'telenor-b2b'}
+          >
+            B2B
+          </button>
+        </div>
+      )}
+
       {/* Søgefelt */}
       <div className="search-container">
         <input
@@ -77,6 +97,25 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
 
         .tab-name {
           font-size: var(--font-sm);
+        }
+
+        .segment-toggle {
+          display: inline-flex;
+          gap: 8px;
+        }
+
+        .segment-btn {
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: 1px solid rgba(255,255,255,0.15);
+          background: var(--glass-bg);
+          color: var(--text-primary);
+        }
+
+        .segment-btn.active {
+          background: var(--color-orange);
+          color: white;
+          border-color: var(--color-orange);
         }
 
         .search-container {

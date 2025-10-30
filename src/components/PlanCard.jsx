@@ -66,7 +66,7 @@ export default function PlanCard({
             </div>
           </div>
         </div>
-      ) : plan.provider === 'telenor' ? (
+      ) : (plan.provider === 'telenor' || plan.provider === 'telenor-b2b') ? (
         // Telenor specifik struktur
         <div className="subscription-card color-telenor-dark-blue">
           {/* Badge - kun hvis mostPopular er true */}
@@ -88,7 +88,7 @@ export default function PlanCard({
                 </div>
                 <div className="col-auto text--right">
                   <div className="subscription-card__price text-bold text-italic">
-                    {plan.price},- <span className="currency-label">/md</span>
+                    {plan.price},- <span className="currency-label">/md{plan.business ? ' (ex. moms)' : ''}</span>
                   </div>
                 </div>
               </div>
