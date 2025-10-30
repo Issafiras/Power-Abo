@@ -7,6 +7,7 @@ import { streamingServices, getStreamingTotal } from '../data/streamingServices'
 import { formatCurrency } from '../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../utils/powerApi';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function StreamingSelector({ 
   selectedStreaming, 
@@ -378,32 +379,35 @@ export default function StreamingSelector({
         </p>
       </div>
 
-      {showScanner && (
-        <div className="scanner-backdrop" role="dialog" aria-modal="true" aria-label="Stregkode scanner">
-          <div className="scanner-modal">
-            <div className="scanner-header">
-              <span>📷 Scan stregkode</span>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                {torchSupported && (
-                  <button className="btn torch-btn" onClick={toggleTorch} aria-pressed={torchOn}>
-                    {torchOn ? '🔦 Sluk' : '🔦 Tænd'}
-                  </button>
-                )}
-                <button className="btn" onClick={stopScanner}>Luk</button>
+      {showScanner && createPortal(
+        (
+          <div className="scanner-backdrop" role="dialog" aria-modal="true" aria-label="Stregkode scanner">
+            <div className="scanner-modal">
+              <div className="scanner-header">
+                <span>📷 Scan stregkode</span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {torchSupported && (
+                    <button className="btn torch-btn" onClick={toggleTorch} aria-pressed={torchOn}>
+                      {torchOn ? '🔦 Sluk' : '🔦 Tænd'}
+                    </button>
+                  )}
+                  <button className="btn" onClick={stopScanner}>Luk</button>
+                </div>
               </div>
-            </div>
-            {!hasBarcodeApi && (
-              <div className="scanner-warning">
-                Din browser understøtter ikke indbygget stregkodescanning. Brug manuel søgning.
+              {!hasBarcodeApi && (
+                <div className="scanner-warning">
+                  Din browser understøtter ikke indbygget stregkodescanning. Brug manuel søgning.
+                </div>
+              )}
+              <video ref={videoRef} className="scanner-video" playsInline muted />
+              {scanError && <div className="scanner-error">⚠️ {scanError}</div>}
+              <div className="scanner-footer">
+                <button className="btn" onClick={stopScanner}>Annullér</button>
               </div>
-            )}
-            <video ref={videoRef} className="scanner-video" playsInline muted />
-            {scanError && <div className="scanner-error">⚠️ {scanError}</div>}
-            <div className="scanner-footer">
-              <button className="btn" onClick={stopScanner}>Annullér</button>
             </div>
           </div>
-        </div>
+        ),
+        document.body
       )}
 
       <div className="divider"></div>
@@ -531,12 +535,18 @@ export default function StreamingSelector({
         /* Scanner overlay – altid fixed og centreret */
         .scanner-backdrop {
           position: fixed;
-          inset: 0;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100dvh;
+          padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
           background: rgba(0,0,0,0.65);
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 9999;
+          z-index: 2147483647;
+          overscroll-behavior: contain;
+          touch-action: none;
         }
         .scanner-modal {
           width: min(680px, 96vw);
