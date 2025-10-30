@@ -27,6 +27,8 @@ export default function StreamingSelector({
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const rafRef = useRef(null);
+  const scanningRef = useRef(false);
+  const detectorRef = useRef(null);
   const streamingTotal = getStreamingTotal(selectedStreaming);
   const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
   const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
@@ -67,6 +69,7 @@ export default function StreamingSelector({
 
   const stopScanner = () => {
     setScanning(false);
+    scanningRef.current = false;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     if (videoRef.current) {
       try { videoRef.current.pause(); } catch {}
@@ -111,19 +114,41 @@ export default function StreamingSelector({
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        // iOS kræver playsInline for at undgå fullscreen
+        try { videoRef.current.setAttribute('playsinline', 'true'); } catch {}
         await videoRef.current.play();
+        // Vent på metadata før vi scanner, så har vi korrekte dimensioner
+        if (videoRef.current.readyState < 2) {
+          await new Promise((resolve) => {
+            const handler = () => {
+              videoRef.current && videoRef.current.removeEventListener('loadedmetadata', handler);
+              resolve();
+            };
+            videoRef.current && videoRef.current.addEventListener('loadedmetadata', handler, { once: true });
+          });
+        }
       }
       if (!('BarcodeDetector' in window)) {
         setHasBarcodeApi(false);
         return;
       }
-      const detector = new window.BarcodeDetector({ formats: ['ean-13', 'ean-8', 'upc-e', 'upc-a', 'code-128'] });
+      if (!detectorRef.current) {
+        detectorRef.current = new window.BarcodeDetector({ formats: ['ean-13', 'ean-8', 'upc-e', 'upc-a', 'code-128'] });
+      }
       setScanning(true);
+      scanningRef.current = true;
       const tick = async () => {
-        if (!scanning || !videoRef.current) return;
+        if (!scanningRef.current || !videoRef.current) return;
         try {
-          const barcodes = await detector.detect(videoRef.current);
-          const code = (barcodes && barcodes[0] && barcodes[0].rawValue ? barcodes[0].rawValue : '').trim();
+          const barcodes = await detectorRef.current.detect(videoRef.current);
+          let code = (barcodes && barcodes[0] && barcodes[0].rawValue ? barcodes[0].rawValue : '').trim();
+          // Normalisér: fjern whitespace og ikke-cifre for EAN/UPC
+          if (code) {
+            const digits = code.replace(/\s+/g, '').replace(/[^0-9]/g, '');
+            if (digits.length >= 8) {
+              code = digits;
+            }
+          }
           if (code) {
             await onDetectedCode(code);
             return;
