@@ -6,6 +6,7 @@
 import { streamingServices, getStreamingTotal } from '../data/streamingServices';
 import { formatCurrency } from '../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../utils/powerApi';
+import { useEffect, useRef, useState } from 'react';
 
 export default function StreamingSelector({ 
   selectedStreaming, 
@@ -17,6 +18,15 @@ export default function StreamingSelector({
   onEANSearch,
   isSearching = false
 }) {
+  const isMobile = typeof window !== 'undefined' && ((window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth <= 900);
+  const canScan = isMobile && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanError, setScanError] = useState(null);
+  const [hasBarcodeApi, setHasBarcodeApi] = useState(typeof window !== 'undefined' && 'BarcodeDetector' in window);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const rafRef = useRef(null);
   const streamingTotal = getStreamingTotal(selectedStreaming);
   const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
   const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
@@ -54,6 +64,79 @@ export default function StreamingSelector({
       alert(`Fejl ved søgning: ${error.message}`);
     }
   };
+
+  const stopScanner = () => {
+    setScanning(false);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (videoRef.current) {
+      try { videoRef.current.pause(); } catch {}
+      videoRef.current.srcObject = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    setShowScanner(false);
+  };
+
+  const onDetectedCode = async (code) => {
+    try {
+      const validation = validateEAN(code);
+      if (!validation.valid) {
+        setScanError(validation.message);
+        return;
+      }
+      const result = await searchProductsWithPrices(code);
+      if (onEANSearch) onEANSearch(result);
+      stopScanner();
+    } catch (err) {
+      setScanError(err.message || 'Ukendt fejl under søgning');
+    }
+  };
+
+  const startScanner = async () => {
+    if (!canScan) return;
+    setScanError(null);
+    setShowScanner(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      if (!('BarcodeDetector' in window)) {
+        setHasBarcodeApi(false);
+        return;
+      }
+      const detector = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_e', 'upc_a', 'code_128'] });
+      setScanning(true);
+      const tick = async () => {
+        if (!scanning || !videoRef.current) return;
+        try {
+          const barcodes = await detector.detect(videoRef.current);
+          const code = (barcodes && barcodes[0] && barcodes[0].rawValue ? barcodes[0].rawValue : '').trim();
+          if (code) {
+            await onDetectedCode(code);
+            return;
+          }
+        } catch {}
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      rafRef.current = requestAnimationFrame(tick);
+    } catch (err) {
+      setScanError('Kunne ikke få adgang til kamera. Tjek tilladelser.');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopScanner();
+    };
+  }, []);
 
   return (
     <div className="streaming-selector glass-card-no-hover fade-in-up">
@@ -121,6 +204,16 @@ export default function StreamingSelector({
               placeholder="F.eks. iPhone, Samsung, 4894526079567"
               maxLength="50"
             />
+            {canScan && (
+              <button 
+                type="button"
+                className="btn scan-btn"
+                onClick={startScanner}
+                aria-label="Scan stregkode"
+              >
+                📷 Scan
+              </button>
+            )}
             <button 
               type="submit" 
               className="btn btn-primary ean-search-btn"
@@ -134,6 +227,27 @@ export default function StreamingSelector({
           Søg efter produktnavn, mærke, EAN-kode eller beskrivelse
         </p>
       </div>
+
+      {showScanner && (
+        <div className="scanner-backdrop" role="dialog" aria-modal="true" aria-label="Stregkode scanner">
+          <div className="scanner-modal">
+            <div className="scanner-header">
+              <span>📷 Scan stregkode</span>
+              <button className="btn" onClick={stopScanner}>Luk</button>
+            </div>
+            {!hasBarcodeApi && (
+              <div className="scanner-warning">
+                Din browser understøtter ikke indbygget stregkodescanning. Brug manuel søgning.
+              </div>
+            )}
+            <video ref={videoRef} className="scanner-video" playsInline muted />
+            {scanError && <div className="scanner-error">⚠️ {scanError}</div>}
+            <div className="scanner-footer">
+              <button className="btn" onClick={stopScanner}>Annullér</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="divider"></div>
 
@@ -253,6 +367,9 @@ export default function StreamingSelector({
           color: var(--text-muted);
           margin: 0;
         }
+
+        /* Scan skjult som default (PC) */
+        .scan-btn { display: none; }
 
         .input-label {
           display: block;
@@ -435,6 +552,44 @@ export default function StreamingSelector({
 
         .total-value {
           color: var(--text-primary);
+        }
+
+        /* Kun mobil/tablet */
+        @media (max-width: 900px) {
+          .scan-btn { display: inline-flex; }
+          .scanner-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 60;
+          }
+          .scanner-modal {
+            width: min(680px, 96vw);
+            background: var(--glass-bg, #111);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,0.08);
+          }
+          .scanner-header, .scanner-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+          }
+          .scanner-video {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            background: #000;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+          }
+          .scanner-warning { color: var(--color-warning, #f59e0b); margin-bottom: var(--spacing-sm); }
+          .scanner-error { color: var(--color-danger, #ef4444); margin-top: var(--spacing-sm); }
         }
 
         @media (max-width: 900px) {
