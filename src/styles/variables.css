@@ -4,45 +4,45 @@
  */
 
 :root {
-  /* Brand farver */
+  /* Brand farver - Power.dk orange */
   --color-orange: #ff6b1a;
   --color-orange-light: #ff8847;
   --color-orange-dark: #e55a0f;
   
-  --color-telenor: #0207b2;
-  --color-telenor-light: #3b4fdb;
-  --color-telenor-dark: #010459;
+  --color-telenor: #6366F1;
+  --color-telenor-light: #A5B4FC;
+  --color-telenor-dark: #4338CA;
   --color-telenor-bg: #ffffff;
   
-  --color-telmore: #002788;
-  --color-telmore-bg: #f3b2d0;
-  --color-cbb: #410016;
-  --color-cbb-light: #6b0024;
-  --color-cbb-bg: #ffc50f;
+  --color-telmore: #8B5CF6;
+  --color-telmore-bg: #DDD6FE;
+  --color-cbb: #EC4899;
+  --color-cbb-light: #F9A8D4;
+  --color-cbb-bg: #FEF08A;
   
-  /* Status farver */
-  --color-success: #10b981;
-  --color-success-light: #34d399;
+  /* Status farver - Vibrant Gen Z */
+  --color-success: #10F59C;
+  --color-success-light: #5EF3C8;
   --color-success-dark: #059669;
   
-  --color-danger: #ef4444;
-  --color-danger-light: #f87171;
-  --color-danger-dark: #dc2626;
+  --color-danger: #FF3B5C;
+  --color-danger-light: #FF8097;
+  --color-danger-dark: #E01D41;
   
-  --color-warning: #f59e0b;
-  --color-info: #3b82f6;
+  --color-warning: #FFD60A;
+  --color-info: #60A5FA;
   
-  /* Dark theme */
-  --bg-primary: #0a0f1c;
-  --bg-secondary: #1a202c;
-  --bg-tertiary: #2d3748;
-  --bg-gradient-start: #0a0f1c;
-  --bg-gradient-end: #374151;
+  /* Dark theme - Gen Z deep purple */
+  --bg-primary: #0F0F23;
+  --bg-secondary: #1A1A3E;
+  --bg-tertiary: #2D1B4E;
+  --bg-gradient-start: #0F0F23;
+  --bg-gradient-end: #2D1B4E;
   
-  /* Glass effect */
-  --glass-bg: rgba(255, 255, 255, 0.06);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: rgba(0, 0, 0, 0.3);
+  /* Glass effect - More vibrant */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-shadow: rgba(0, 0, 0, 0.4);
   
   /* Text farver */
   --text-primary: #f9fafb;
@@ -74,11 +74,12 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   
-  /* Glow effects */
-  --glow-orange: 0 0 20px rgba(255, 107, 26, 0.3);
-  --glow-blue: 0 0 20px rgba(56, 189, 248, 0.3);
-  --glow-purple: 0 0 20px rgba(168, 85, 247, 0.3);
-  --glow-green: 0 0 20px rgba(16, 185, 129, 0.3);
+  /* Glow effects - Neon Gen Z */
+  --glow-orange: 0 0 30px rgba(255, 107, 26, 0.5), 0 0 60px rgba(255, 107, 26, 0.2);
+  --glow-blue: 0 0 30px rgba(99, 102, 241, 0.5), 0 0 60px rgba(99, 102, 241, 0.2);
+  --glow-purple: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
+  --glow-green: 0 0 30px rgba(16, 245, 156, 0.5), 0 0 60px rgba(16, 245, 156, 0.2);
+  --glow-pink: 0 0 30px rgba(236, 72, 153, 0.5), 0 0 60px rgba(236, 72, 153, 0.2);
   
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -146,11 +147,12 @@
   --shadow-glow-blue: 0 0 20px rgba(56, 189, 248, 0.3);
   --shadow-glow-purple: 0 0 20px rgba(168, 85, 247, 0.3);
   
-  /* Gradient variabler */
-  --gradient-primary: linear-gradient(135deg, #ff6b1a, #ff8847);
-  --gradient-secondary: linear-gradient(135deg, #38bdf8, #0ea5e9);
-  --gradient-accent: linear-gradient(135deg, #a855f7, #c084fc);
-  --gradient-success: linear-gradient(135deg, #10b981, #059669);
+  /* Gradient variabler - Gen Z gradients */
+  --gradient-primary: linear-gradient(135deg, #ff6b1a, #ff8847, #8B5CF6);
+  --gradient-secondary: linear-gradient(135deg, #6366F1, #A5B4FC, #60A5FA);
+  --gradient-accent: linear-gradient(135deg, #EC4899, #F9A8D4, #ff8847);
+  --gradient-success: linear-gradient(135deg, #10F59C, #5EF3C8, #34D399);
+  --gradient-rainbow: linear-gradient(135deg, #ff6b1a, #6366F1, #8B5CF6, #EC4899, #10F59C);
   
   /* Compact Fluid typography - Optimized for density */
   --fluid-text-sm: clamp(0.625rem, 0.6rem + 0.2vw, 0.8rem);

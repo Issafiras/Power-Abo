@@ -95,8 +95,7 @@ npm run preview
 | `npm run lint` | ESLint-check af hele projektet (`.js`/`.jsx`) |
 
 ## 🗂️ Projektstruktur
-```
-Power-Abo/
+```Power-Abo/
 ├── public/
 │   ├── favicon.ico
 │   └── logos/               # Assets til abonnementer og streaming
@@ -214,4 +213,5 @@ Alle beregninger findes i `src/utils/calculations.js`, og validering af input i 
 - Version **v1.1 (2025)** – kontakt den interne udvikler for support og spørgsmål.
 
 **God fornøjelse med Power Abo Beregner!** ⚡
+
 

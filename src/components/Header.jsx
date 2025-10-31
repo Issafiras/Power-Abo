@@ -11,7 +11,8 @@ export default function Header({
   theme, 
   onThemeToggle,
   showCashDiscount,
-  onToggleCashDiscount
+  onToggleCashDiscount,
+  onSmartCalculatorToggle
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -76,6 +77,17 @@ export default function Header({
 
           {/* Kontroller */}
           <div className="header-actions">
+            {/* AI Smart Calculator */}
+            {onSmartCalculatorToggle && (
+              <button
+                onClick={onSmartCalculatorToggle}
+                className="btn btn-glass btn-sm"
+                title="Åbn AI Anbefaling System"
+              >
+                🤖 AI Anbefaling
+              </button>
+            )}
+
             {/* Kontant rabat toggle */}
             <button
               onClick={onToggleCashDiscount}
@@ -144,8 +156,9 @@ export default function Header({
 
       <style>{`
         .header {
-          background: var(--glass-bg);
-          backdrop-filter: blur(var(--blur-xl));
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+          backdrop-filter: blur(30px) saturate(180%);
+          -webkit-backdrop-filter: blur(30px) saturate(180%);
           border-bottom: 1px solid var(--glass-border);
           padding: var(--spacing-2xl) 0;
           position: sticky;
@@ -153,6 +166,7 @@ export default function Header({
           z-index: var(--z-sticky);
           transition: all var(--transition-smooth);
           overflow: hidden;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         .hero-background {
