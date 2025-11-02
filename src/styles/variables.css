@@ -136,11 +136,11 @@
   --leading-normal: 1.5;
   --leading-relaxed: 1.75;
   
-  /* Backdrop blur - Apple frosted glass */
+  /* Backdrop blur - Performance optimized */
   --blur-sm: 8px;
-  --blur-md: 16px;
-  --blur-lg: 32px;
-  --blur-xl: 48px;
+  --blur-md: 12px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
   
   /* Advanced shadows */
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);

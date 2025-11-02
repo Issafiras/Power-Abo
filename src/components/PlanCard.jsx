@@ -247,13 +247,14 @@ export default function PlanCard({
           flex-direction: column;
           padding: var(--spacing-xl);
           gap: var(--spacing-md);
-          transition: all var(--transition-smooth);
+          transition: transform var(--transition-base), box-shadow var(--transition-base);
           cursor: pointer;
         }
 
         .plan-card:hover {
           transform: translateY(-4px);
           z-index: 10;
+          will-change: transform;
         }
 
         .plan-card:active {

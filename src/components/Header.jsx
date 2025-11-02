@@ -47,18 +47,11 @@ export default function Header({
 
   return (
     <header className="header fade-in-down">
-      {/* Hero Background med partikler */}
+      {/* Hero Background - Performance optimized (reduced particles) */}
       <div className="hero-background">
+        {/* Reduced particles for better performance */}
         <div className="particle particle-1"></div>
         <div className="particle particle-2"></div>
-        <div className="particle particle-3"></div>
-        <div className="particle particle-4"></div>
-        <div className="particle particle-5"></div>
-        <div className="floating-orbs">
-          <div className="orb orb-1"></div>
-          <div className="orb orb-2"></div>
-          <div className="orb orb-3"></div>
-        </div>
         <div className="hero-gradient-overlay"></div>
       </div>
 
@@ -157,14 +150,14 @@ export default function Header({
       <style>{`
         .header {
           background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(40px) saturate(180%);
-          -webkit-backdrop-filter: blur(40px) saturate(180%);
+          backdrop-filter: blur(var(--blur-lg)) saturate(150%);
+          -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(150%);
           border-bottom: 0.5px solid var(--glass-border);
           padding: var(--spacing-2xl) 0;
           position: sticky;
           top: 0;
           z-index: var(--z-sticky);
-          transition: all var(--transition-smooth);
+          transition: background var(--transition-base);
           overflow: hidden;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
@@ -183,8 +176,9 @@ export default function Header({
           position: absolute;
           background: var(--color-orange);
           border-radius: 50%;
-          opacity: 0.6;
-          animation: float 6s ease-in-out infinite;
+          opacity: 0.4;
+          animation: float 12s ease-in-out infinite;
+          will-change: transform;
         }
 
         .particle-1 {
@@ -193,7 +187,7 @@ export default function Header({
           top: 20%;
           left: 10%;
           animation-delay: 0s;
-          animation-duration: 8s;
+          animation-duration: 12s;
         }
 
         .particle-2 {
@@ -201,83 +195,9 @@ export default function Header({
           height: 6px;
           top: 60%;
           left: 85%;
-          animation-delay: 2s;
-          animation-duration: 10s;
+          animation-delay: 6s;
+          animation-duration: 14s;
           background: var(--color-telenor);
-        }
-
-        .particle-3 {
-          width: 3px;
-          height: 3px;
-          top: 80%;
-          left: 20%;
-          animation-delay: 4s;
-          animation-duration: 7s;
-          background: var(--color-cbb);
-        }
-
-        .particle-4 {
-          width: 5px;
-          height: 5px;
-          top: 30%;
-          left: 70%;
-          animation-delay: 1s;
-          animation-duration: 9s;
-        }
-
-        .particle-5 {
-          width: 2px;
-          height: 2px;
-          top: 70%;
-          left: 50%;
-          animation-delay: 3s;
-          animation-duration: 11s;
-          background: var(--color-success);
-        }
-
-        .floating-orbs {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-        }
-
-        .orb {
-          position: absolute;
-          border-radius: 50%;
-          background: linear-gradient(135deg, rgba(255, 107, 26, 0.1), rgba(56, 189, 248, 0.1));
-          backdrop-filter: blur(10px);
-          animation: float 12s ease-in-out infinite;
-        }
-
-        .orb-1 {
-          width: 120px;
-          height: 120px;
-          top: 10%;
-          left: 5%;
-          animation-delay: 0s;
-          animation-duration: 15s;
-        }
-
-        .orb-2 {
-          width: 80px;
-          height: 80px;
-          top: 50%;
-          right: 10%;
-          animation-delay: 5s;
-          animation-duration: 18s;
-          background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(16, 185, 129, 0.1));
-        }
-
-        .orb-3 {
-          width: 60px;
-          height: 60px;
-          bottom: 20%;
-          left: 60%;
-          animation-delay: 8s;
-          animation-duration: 12s;
-          background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(255, 107, 26, 0.1));
         }
 
         .hero-gradient-overlay {
@@ -460,25 +380,6 @@ export default function Header({
           /* Reducer partikel animation på mobile */
           .particle {
             display: none;
-          }
-
-          .orb {
-            opacity: 0.3;
-          }
-
-          .orb-1 {
-            width: 60px;
-            height: 60px;
-          }
-
-          .orb-2 {
-            width: 40px;
-            height: 40px;
-          }
-
-          .orb-3 {
-            width: 30px;
-            height: 30px;
           }
         }
       `}</style>

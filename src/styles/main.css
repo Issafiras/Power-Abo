@@ -58,8 +58,9 @@ body::before {
     radial-gradient(circle at 60% 20%, rgba(244, 114, 182, 0.06) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
-  animation: gradientShift 30s ease infinite;
+  animation: gradientShift 60s ease infinite;
   opacity: 0.6;
+  will-change: opacity, transform;
 }
 
 @keyframes gradientShift {
@@ -600,13 +601,16 @@ a:hover {
   100% { border-color: rgba(255, 107, 26, 0.8); }
 }
 
-/* Performance optimering - GPU acceleration */
-.glass-card,
-.btn,
-.cart-item,
-.plan-card {
+/* Performance optimering - GPU acceleration (only when needed) */
+.btn:not(:disabled):hover,
+.plan-card:hover {
   will-change: transform;
-  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+/* Content visibility for off-screen elements */
+.plans-grid .stagger-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
 }
 
 /* Micro-interactions */

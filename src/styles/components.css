@@ -3,20 +3,19 @@
  * Genbrug disse klasser på tværs af komponenter
  */
 
-/* Enhanced Glass card effect - Apple frosted glass */
+/* Enhanced Glass card effect - Performance optimized */
 .glass-card {
   background: rgba(255, 255, 255, 0.04);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(150%);
+  backdrop-filter: blur(var(--blur-lg)) saturate(150%);
   border: 0.5px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-2xl);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all var(--transition-smooth);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
   position: relative;
   overflow: hidden;
-  will-change: transform;
 }
 
 .glass-card::before {
@@ -33,6 +32,7 @@
     transparent
   );
   transition: left 0.5s;
+  pointer-events: none;
 }
 
 .glass-card:hover::before {
@@ -47,6 +47,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   border-color: rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.06);
+  will-change: transform;
 }
 
 .glass-card-no-hover {
@@ -74,13 +75,11 @@
   border-radius: var(--radius-lg);
   border: none;
   cursor: pointer;
-  transition: all var(--transition-smooth);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), background var(--transition-base);
   white-space: nowrap;
   min-height: 44px; /* Apple touch target */
   position: relative;
   overflow: hidden;
-  will-change: transform;
-  transform: translateZ(0);
 }
 
 .btn::before {
@@ -121,6 +120,7 @@
   box-shadow: 
     0 8px 24px rgba(255, 107, 26, 0.4),
     0 0 0 0.5px rgba(255, 255, 255, 0.1);
+  will-change: transform;
 }
 
 .btn-primary:active:not(:disabled) {
@@ -229,9 +229,8 @@
 /* Glass Button Variant */
 .btn-glass {
   background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(var(--blur-lg));
-  -webkit-backdrop-filter: blur(var(--blur-lg));
-  backdrop-filter: blur(var(--blur-lg));
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
   position: relative;
@@ -536,11 +535,12 @@
   padding: var(--spacing-xs);
   background: rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-xl);
-  -webkit-backdrop-filter: blur(var(--blur-lg));
-  backdrop-filter: blur(var(--blur-lg));
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
   overflow-x: auto;
   position: relative;
   border: 0.5px solid var(--glass-border);
+  scroll-behavior: smooth;
 }
 
 .tab {
@@ -552,7 +552,7 @@
   border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all var(--transition-smooth);
+  transition: background var(--transition-base), color var(--transition-base), transform var(--transition-base);
   white-space: nowrap;
   min-height: 44px;
   position: relative;
