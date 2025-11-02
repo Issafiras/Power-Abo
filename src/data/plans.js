@@ -362,7 +362,7 @@ export const plans = [
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: [],
     type: 'broadband',
-    availableFrom: '2024-11-05', // Bliver aktivt fra d. 5/11
+    availableFrom: '2025-11-05', // Bliver aktivt fra d. 5/11
     expiresAt: '2025-12-31' // Udløber i butikken d. 31/12/25
   }
 ];
