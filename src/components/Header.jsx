@@ -156,17 +156,17 @@ export default function Header({
 
       <style>{`
         .header {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-          backdrop-filter: blur(30px) saturate(180%);
-          -webkit-backdrop-filter: blur(30px) saturate(180%);
-          border-bottom: 1px solid var(--glass-border);
+          background: rgba(255, 255, 255, 0.04);
+          backdrop-filter: blur(40px) saturate(180%);
+          -webkit-backdrop-filter: blur(40px) saturate(180%);
+          border-bottom: 0.5px solid var(--glass-border);
           padding: var(--spacing-2xl) 0;
           position: sticky;
           top: 0;
           z-index: var(--z-sticky);
           transition: all var(--transition-smooth);
           overflow: hidden;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
         .hero-background {

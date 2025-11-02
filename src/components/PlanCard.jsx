@@ -245,19 +245,20 @@ export default function PlanCard({
         .plan-card {
           display: flex;
           flex-direction: column;
-          padding: var(--spacing-md);
-          gap: var(--spacing-sm);
-          transition: all var(--transition-base);
+          padding: var(--spacing-xl);
+          gap: var(--spacing-md);
+          transition: all var(--transition-smooth);
           cursor: pointer;
         }
 
         .plan-card:hover {
-          transform: translateY(-3px);
+          transform: translateY(-4px);
           z-index: 10;
         }
 
         .plan-card:active {
-          transform: translateY(-1px);
+          transform: translateY(-2px) scale(0.98);
+          transition: transform 100ms var(--ease-apple);
         }
 
         .plan-header {
@@ -355,10 +356,17 @@ export default function PlanCard({
           justify-content: space-between;
           position: relative;
           overflow: hidden;
+          border-radius: var(--radius-lg);
         }
 
         .plan-add-btn:hover {
-          animation: pulseGlow 1s ease-in-out infinite;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(255, 107, 26, 0.4);
+        }
+        
+        .plan-add-btn:active {
+          transform: translateY(0) scale(0.98);
+          transition: transform 100ms var(--ease-apple);
         }
 
         .plan-add-btn:hover .cart-icon {

@@ -108,7 +108,8 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         .tab {
           display: flex;
           align-items: center;
-          gap: var(--spacing-xs);
+          gap: var(--spacing-sm);
+          padding: var(--spacing-sm) var(--spacing-lg);
         }
 
         .tab-icon {
