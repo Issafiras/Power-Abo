@@ -37,7 +37,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
       </div>
 
       {/* Telenor segment underfaner */}
-      {(activeProvider === 'telenor' || activeProvider === 'telenor-b2b') && (
+      {(activeProvider === 'telenor' || activeProvider === 'telenor-b2b' || activeProvider === 'telenor-bredbånd') && (
         <div className="segment-toggle">
           <button
             className={`segment-btn ${activeProvider === 'telenor' ? 'active' : ''}`}
@@ -52,6 +52,33 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
             aria-pressed={activeProvider === 'telenor-b2b'}
           >
             B2B
+          </button>
+          <button
+            className={`segment-btn ${activeProvider === 'telenor-bredbånd' ? 'active' : ''}`}
+            onClick={() => onProviderChange('telenor-bredbånd')}
+            aria-pressed={activeProvider === 'telenor-bredbånd'}
+          >
+            Bredbånd
+          </button>
+        </div>
+      )}
+
+      {/* Telmore segment underfaner */}
+      {(activeProvider === 'telmore' || activeProvider === 'telmore-bredbånd') && (
+        <div className="segment-toggle">
+          <button
+            className={`segment-btn ${activeProvider === 'telmore' ? 'active' : ''}`}
+            onClick={() => onProviderChange('telmore')}
+            aria-pressed={activeProvider === 'telmore'}
+          >
+            Mobil
+          </button>
+          <button
+            className={`segment-btn ${activeProvider === 'telmore-bredbånd' ? 'active' : ''}`}
+            onClick={() => onProviderChange('telmore-bredbånd')}
+            aria-pressed={activeProvider === 'telmore-bredbånd'}
+          >
+            Bredbånd
           </button>
         </div>
       )}

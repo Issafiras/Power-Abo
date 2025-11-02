@@ -349,6 +349,42 @@ export const plans = [
       7: 410,  // 7 tjenester = 410 kr/md
       8: 460   // 8 tjenester = 460 kr/md
     }
+  },
+
+  // TELMORE BREDBÅND PLANER
+  {
+    id: 'telmore-5g-internet',
+    provider: 'telmore-bredbånd',
+    logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png',
+    name: '5G Internet',
+    data: 'Fri Data',
+    price: 289,
+    introPrice: 25,
+    introMonths: 2,
+    earnings: 900,
+    features: ['5G', 'Fri Data', 'Router inkl.', 'Intro-pris'],
+    color: '#002788',
+    streaming: [],
+    type: 'broadband'
+  },
+
+  // TELENOR BREDBÅND PLANER
+  {
+    id: 'telenor-bredbånd-fri-data',
+    provider: 'telenor-bredbånd',
+    name: 'Fri Data',
+    data: 'Fri Data',
+    price: 299,
+    introPrice: 99,
+    introMonths: 6,
+    earnings: 1000,
+    features: ['5G', 'Fri Data', 'Router inkl.', 'Intro-pris'],
+    color: '#0207b2',
+    logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
+    streaming: [],
+    type: 'broadband',
+    availableFrom: '2024-11-05', // Bliver aktivt fra d. 5/11
+    expiresAt: '2025-12-31' // Udløber i butikken d. 31/12/25
   }
 ];
 

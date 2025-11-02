@@ -19,7 +19,7 @@ export default function PlanCard({
   const brandColor = plan.color || 'var(--color-orange)';
 
   return (
-    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' ? 'telenor-card' : ''} ${plan.provider === 'telmore' ? 'telmore-card' : ''}`}>
+    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd' ? 'telenor-card' : ''} ${plan.provider === 'telmore' || plan.provider === 'telmore-bredbånd' ? 'telmore-card' : ''}`}>
       {plan.provider === 'cbb' ? (
         // CBB specifik struktur
         <div className="refined-product-card__main-card">
@@ -66,7 +66,7 @@ export default function PlanCard({
             </div>
           </div>
         </div>
-      ) : (plan.provider === 'telenor' || plan.provider === 'telenor-b2b') ? (
+      ) : (plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd') ? (
         // Telenor specifik struktur
         <div className="subscription-card color-telenor-dark-blue">
           {/* Badge - kun hvis mostPopular er true */}

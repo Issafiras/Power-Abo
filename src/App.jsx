@@ -405,7 +405,7 @@ function App() {
           <section className="section fade-in-up" style={{ animationDelay: '100ms' }}>
             <div className="plans-section glass-card">
               <div className="section-header">
-                <h2>📱 Vælg Mobilabonnementer</h2>
+                <h2>📱 Vælg Mobilabonnementer & Bredbånd</h2>
                 <p className="text-secondary">
                   Vælg først operatør, derefter de abonnementer der passer bedst til kunden
                 </p>
@@ -424,7 +424,7 @@ function App() {
                   <div className="empty-state-icon pulse">👆</div>
                   <p className="text-lg font-semibold">Vælg en operatør</p>
                   <p className="text-secondary">
-                    Vælg Telmore, Telenor eller CBB for at se tilgængelige abonnementer
+                    Vælg Telmore, Telenor, CBB eller Bredbånd for at se tilgængelige abonnementer
                   </p>
                 </div>
               ) : filteredPlans.length > 0 ? (
