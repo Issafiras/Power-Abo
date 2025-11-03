@@ -3,11 +3,13 @@
  * Multi-select grid af streaming-tjenester
  */
 
-import { streamingServices, getStreamingTotal } from '../data/streamingServices';
+import { streamingServices as staticStreaming } from '../data/streamingServices';
+import { canUseSupabase, getStreamingCached } from '../utils/supabaseData';
 import { formatCurrency } from '../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../utils/powerApi';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { saveSearchLog, saveProductSnapshot } from '../utils/backendApi';
 
 export default function StreamingSelector({ 
   selectedStreaming, 
@@ -37,9 +39,26 @@ export default function StreamingSelector({
   const [torchOn, setTorchOn] = useState(false);
 
   const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const streamingTotal = getStreamingTotal(selectedStreaming);
+  const [services, setServices] = useState(staticStreaming);
+  const streamingTotal = services
+    .filter(s => selectedStreaming.includes(s.id))
+    .reduce((sum, s) => sum + (s.price || 0), 0);
   const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
   const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
+  // Hent streaming-tjenester fra Supabase hvis aktivt
+  useEffect(() => {
+    let mounted = true;
+    if (!canUseSupabase()) return;
+    (async () => {
+      try {
+        const list = await getStreamingCached();
+        if (mounted && Array.isArray(list) && list.length > 0) setServices(list);
+      } catch (e) {
+        console.warn('Kunne ikke hente streaming services fra Supabase:', e?.message || e);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const handleMobileCostChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
@@ -68,6 +87,18 @@ export default function StreamingSelector({
       if (onEANSearch) {
         onEANSearch(result);
       }
+      // Log til Supabase (best-effort, påvirker ikke flow)
+      try {
+        await saveSearchLog({
+          query: eanInput,
+          resultsCount: Array.isArray(result?.products) ? result.products.length : 0,
+          meta: { hasFallbackPrice: typeof result?.fallbackPrice === 'number' }
+        });
+        if (Array.isArray(result?.products) && result.products.length > 0) {
+          const first = result.products[0];
+          await saveProductSnapshot({ productId: String(first.productId || first.id || ''), data: { product: first, prices: result?.prices || {} } });
+        }
+      } catch {}
       // Ryd input felt efter succesfuld søgning
       e.target.ean.value = '';
     } catch (error) {
@@ -414,7 +445,7 @@ export default function StreamingSelector({
 
       {/* Streaming grid */}
       <div className="streaming-grid">
-        {streamingServices.map((service, index) => {
+        {services.map((service, index) => {
           const isSelected = selectedStreaming.includes(service.id);
           
           return (

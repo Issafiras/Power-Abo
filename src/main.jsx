@@ -7,6 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/main.css';
+import AdminPage from './pages/AdminPage';
 
 let fadeTimeoutId = null;
 let removalTimeoutId = null;
@@ -41,9 +42,10 @@ if (typeof document !== 'undefined') {
   }
 }
 
+const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    {isAdminRoute ? <AdminPage /> : <App />}
   </React.StrictMode>
 );
 
