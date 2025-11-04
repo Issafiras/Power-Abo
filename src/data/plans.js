@@ -6,11 +6,11 @@
 export const plans = [
   // TELENOR PLANER
   {
-    id: 'telenor-20gb',
+    id: 'telenor-25gb',
     provider: 'telenor',
-    name: '20 GB',
-    data: '20 GB',
-    price: 149,
+    name: '25 GB',
+    data: '25 GB',
+    price: 159,
     earnings: 700,
     features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
     familyDiscount: true,
