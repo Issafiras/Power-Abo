@@ -73,6 +73,16 @@ export default function Header({
         <div className="header-content">
           {/* Logo og titel */}
           <div className="header-logo">
+            <p className="text-sm text-muted fade-in font-medium">Sammenlign mobilabonnementer og streaming-tjenester</p>
+            <div className="hero-subtitle fade-in" style={{ animationDelay: '200ms' }}>
+              <span className="badge badge-primary pulse">🎯 Professionel værktøj</span>
+              <span className="badge badge-info">💡 Intelligent sammenligning</span>
+              <span className="badge badge-success">⚡ Hurtig og præcis</span>
+            </div>
+          </div>
+
+          {/* Logo mellem badges og knapper */}
+          <div className="header-logo-center">
             {(() => {
               const logoSrc = `${import.meta.env.BASE_URL}power-logo.png`;
               return (
@@ -83,12 +93,6 @@ export default function Header({
                 />
               );
             })()}
-            <p className="text-sm text-muted fade-in font-medium">Sammenlign mobilabonnementer og streaming-tjenester</p>
-            <div className="hero-subtitle fade-in" style={{ animationDelay: '200ms' }}>
-              <span className="badge badge-primary pulse">🎯 Professionel værktøj</span>
-              <span className="badge badge-info">💡 Intelligent sammenligning</span>
-              <span className="badge badge-success">⚡ Hurtig og præcis</span>
-            </div>
           </div>
 
           {/* Kontroller */}
@@ -286,16 +290,17 @@ export default function Header({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--spacing-xl);
+          gap: var(--spacing-lg);
           width: 100%;
         }
 
         .header-logo {
           display: flex;
           flex-direction: column;
-          gap: var(--spacing-xs);
-          flex: 1;
+          gap: 2px;
+          flex: 0 0 auto;
           min-width: 0;
+          align-items: flex-start;
         }
 
         .header-logo h1 {
@@ -303,22 +308,31 @@ export default function Header({
           font-size: var(--font-3xl);
         }
 
+        .header-logo-center {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 1;
+          min-width: 0;
+          align-self: center;
+        }
+
         .app-logo {
-          height: 90px;
+          height: 300px;
           width: auto;
-          max-width: 400px;
+          max-width: 1100px;
           display: block;
           object-fit: contain;
           image-rendering: -webkit-optimize-contrast;
           image-rendering: crisp-edges;
           filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4)) drop-shadow(0 0 20px rgba(255, 107, 26, 0.2));
-          margin-bottom: var(--spacing-sm);
+          margin: 0 auto;
           transition: transform var(--transition-smooth);
         }
 
         .header.compact .app-logo {
-          height: 56px;
-          max-width: 260px;
+          height: 150px;
+          max-width: 650px;
           filter: drop-shadow(0 1px 8px rgba(0,0,0,0.35)) drop-shadow(0 0 12px rgba(255, 107, 26, 0.15));
         }
 
@@ -328,7 +342,7 @@ export default function Header({
 
         .header-logo p {
           margin: 0;
-          margin-top: var(--spacing-xs);
+          margin-top: 2px;
           line-height: 1.5;
         }
 
@@ -336,7 +350,7 @@ export default function Header({
           display: flex;
           flex-wrap: wrap;
           gap: var(--spacing-sm);
-          margin-top: var(--spacing-md);
+          margin-top: var(--spacing-sm);
           align-items: center;
         }
 
@@ -432,6 +446,7 @@ export default function Header({
           .header-content {
             flex-direction: column;
             align-items: stretch;
+            gap: var(--spacing-md);
           }
 
           .header-logo {
@@ -443,14 +458,19 @@ export default function Header({
             font-size: var(--font-2xl);
           }
 
+          .header-logo-center {
+            order: -1;
+            margin-bottom: var(--spacing-sm);
+          }
+
           .app-logo {
-            height: 64px;
-            max-width: 280px;
-            margin: 0 auto var(--spacing-sm);
+            height: 200px;
+            max-width: 700px;
+            margin: 0 auto;
           }
           .header.compact .app-logo {
-            height: 48px;
-            max-width: 220px;
+            height: 110px;
+            max-width: 480px;
           }
 
           .hero-subtitle {
