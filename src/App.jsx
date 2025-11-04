@@ -428,6 +428,32 @@ function App() {
       ? source
       : source.filter(p => p.provider === activeProvider);
 
+    // Filtrer baseret på datoer (availableFrom og expiresAt)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Sæt tid til midnat for at sammenligne kun datoer
+    
+    filtered = filtered.filter(plan => {
+      // Tjek availableFrom - plan skal være tilgængelig fra denne dato
+      if (plan.availableFrom) {
+        const availableFromDate = new Date(plan.availableFrom);
+        availableFromDate.setHours(0, 0, 0, 0);
+        if (today < availableFromDate) {
+          return false; // Plan er ikke tilgængelig endnu
+        }
+      }
+      
+      // Tjek expiresAt - plan skal være aktiv indtil denne dato
+      if (plan.expiresAt) {
+        const expiresAtDate = new Date(plan.expiresAt);
+        expiresAtDate.setHours(23, 59, 59, 999); // Inkluder hele dagen
+        if (today > expiresAtDate) {
+          return false; // Plan er udløbet
+        }
+      }
+      
+      return true;
+    });
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(plan => (

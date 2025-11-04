@@ -67,7 +67,7 @@ export default function PlanCard({
           </div>
         </div>
       ) : (plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd') ? (
-        // Telenor specifik struktur
+        // Telenor specifik struktur - Strømlinet design
         <div className="subscription-card color-telenor-dark-blue">
           {/* Badge - kun hvis mostPopular er true */}
           {plan.mostPopular && (
@@ -80,44 +80,55 @@ export default function PlanCard({
           
           {/* Card wrapper */}
           <div className="subscription-card__wrapper background-white">
-            {/* Image/Title area */}
-            <div className="subscription-card__img">
-              <div className="subscription-card__title full-width color-white">
-                <div className="col-auto text--left color-telenor-light-blue">
-                  <h3 className="heading heading--medium">{plan.name.split(' ')[0]} GB</h3>
+            {/* Header med logo, data og pris */}
+            <div className="subscription-card__header">
+              <div className="subscription-card__header-top">
+                {plan.logo && (
+                  <img 
+                    src={plan.logo} 
+                    alt="Telenor" 
+                    className="subscription-card__logo"
+                  />
+                )}
+                <div className="subscription-card__data-info">
+                  <h3 className="subscription-card__data-amount">
+                    {plan.data === 'Fri Data' ? 'Fri' : plan.name.split(' ')[0]}
+                  </h3>
+                  <span className="subscription-card__data-label">
+                    {plan.data === 'Fri Data' ? 'Data' : 'GB'}
+                  </span>
                 </div>
-                <div className="col-auto text--right">
-                  <div className="subscription-card__price text-bold text-italic">
-                    {plan.price},- <span className="currency-label">/md{plan.business ? ' (ex. moms)' : ''}</span>
-                  </div>
+              </div>
+              <div className="subscription-card__price-block">
+                <div className="subscription-card__price-main">
+                  {plan.price}
                 </div>
+                <div className="subscription-card__price-period">kr/md{plan.business ? ' (ex. moms)' : ''}</div>
               </div>
             </div>
             
-            {/* Samlerabat info */}
+            {/* Kompakt familie-rabat badge */}
             {plan.familyDiscount && (
-              <div className="telenor-family-discount">
-                <div className="family-discount-badge">
-                  👨‍👩‍👧‍👦 Familie samlerabat
-                </div>
-                <div className="family-discount-info">
-                  -50 kr/md pr. ekstra linje
-                </div>
+              <div className="telenor-family-discount-compact">
+                <span className="family-icon">👨‍👩‍👧‍👦</span>
+                <span className="family-text">-50 kr/md pr. ekstra linje</span>
               </div>
             )}
             
-            {/* Features list */}
-            <div className="subscription-features">
-              <ul className="list--reset">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="subscription-card__list-item">
-                    <span className="col-auto">
-                      <span className="color-telenor-blue icon icon-world icon--medium"></span>
-                    </span>
-                    <span className="col-stretch">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+            {/* Strømlinet features grid */}
+            <div className="subscription-features-grid">
+              {plan.features.slice(0, 4).map((feature, index) => (
+                <div key={index} className="subscription-feature-item">
+                  <span className="feature-icon">✓</span>
+                  <span className="feature-text">{feature}</span>
+                </div>
+              ))}
+              {plan.features.length > 4 && (
+                <div className="subscription-feature-item">
+                  <span className="feature-icon">+</span>
+                  <span className="feature-text">{plan.features.length - 4} flere</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -561,14 +572,22 @@ export default function PlanCard({
            box-shadow: 0 6px 16px rgba(65, 0, 22, 0.4);
          }
 
-         /* Telenor Card Styling - Præcis som rigtige Telenor kort */
+         /* Telenor Card Styling - Strømlinet design */
          .telenor-card {
            background: #ffffff;
-           border: 2px solid #0207b2;
+           border: 1px solid rgba(2, 7, 178, 0.15);
            color: #0207b2;
-           font-family: 'Arial', sans-serif;
+           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
            position: relative;
            overflow: hidden;
+           transition: all 0.3s ease;
+           box-shadow: 0 2px 8px rgba(2, 7, 178, 0.08);
+         }
+
+         .telenor-card:hover {
+           border-color: rgba(2, 7, 178, 0.3);
+           box-shadow: 0 4px 16px rgba(2, 7, 178, 0.12);
+           transform: translateY(-2px);
          }
 
          .subscription-card {
@@ -580,20 +599,21 @@ export default function PlanCard({
 
          .subscription__badge-block {
            position: absolute;
-           top: 0;
-           left: 0;
+           top: 12px;
+           left: 12px;
            z-index: 10;
-           padding: 8px;
          }
 
          .subscription__badge {
-           background: #0207b2;
+           background: linear-gradient(135deg, #ff006e, #ff4081);
            color: white;
-           padding: 4px 12px;
-           border-radius: 4px;
-           font-size: 12px;
-           font-weight: bold;
+           padding: 6px 14px;
+           border-radius: 20px;
+           font-size: 11px;
+           font-weight: 700;
            text-transform: uppercase;
+           letter-spacing: 0.5px;
+           box-shadow: 0 2px 8px rgba(255, 0, 110, 0.3);
          }
 
          .subscription-card__wrapper {
@@ -601,120 +621,141 @@ export default function PlanCard({
            display: flex;
            flex-direction: column;
            background: #ffffff;
-           border-radius: 8px;
-           overflow: hidden;
-         }
-
-         .subscription-card__img {
-           background: linear-gradient(135deg, #0207b2, #3b4fdb);
-           color: white;
            padding: 20px;
-           position: relative;
-           min-height: 120px;
+           gap: 16px;
          }
 
-         .telenor-family-discount {
-           background: rgba(2, 7, 178, 0.05);
-           padding: 12px 16px;
-           border-radius: 8px;
-           margin-top: 12px;
-           border: 1px solid rgba(2, 7, 178, 0.2);
-         }
-
-         .family-discount-badge {
-           color: #0207b2;
-           font-size: 14px;
-           font-weight: bold;
-           margin-bottom: 4px;
-         }
-
-         .family-discount-info {
-           color: #0207b2;
-           font-size: 12px;
-           opacity: 0.8;
-         }
-
-         .subscription-card__title {
+         /* Strømlinet header */
+         .subscription-card__header {
            display: flex;
            justify-content: space-between;
-           align-items: center;
-           margin-top: 20px;
+           align-items: flex-start;
+           padding-bottom: 16px;
+           border-bottom: 1px solid rgba(2, 7, 178, 0.1);
          }
 
-         .color-telenor-light-blue {
-           color: #ffffff;
-         }
-
-         .heading--medium {
-           font-size: 24px;
-           font-weight: bold;
-           margin: 0;
-         }
-
-         .subscription-card__price {
-           font-size: 20px;
-           font-weight: bold;
-           color: white;
-         }
-
-         .currency-label {
-           font-size: 14px;
-           font-weight: normal;
-         }
-
-         .subscription-features {
-           padding: 16px;
-           flex: 1;
-         }
-
-         .list--reset {
-           list-style: none;
-           padding: 0;
-           margin: 0;
-         }
-
-         .subscription-card__list-item {
+         .subscription-card__header-top {
            display: flex;
            align-items: center;
            gap: 12px;
-           margin-bottom: 8px;
+         }
+
+         .subscription-card__logo {
+           height: 32px;
+           width: auto;
+           object-fit: contain;
+         }
+
+         .subscription-card__data-info {
+           display: flex;
+           align-items: baseline;
+           gap: 4px;
+         }
+
+         .subscription-card__data-amount {
+           font-size: 32px;
+           font-weight: 800;
+           color: #0207b2;
+           margin: 0;
+           line-height: 1;
+         }
+
+         .subscription-card__data-label {
            font-size: 14px;
+           font-weight: 600;
+           color: rgba(2, 7, 178, 0.6);
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+         }
+
+         .subscription-card__price-block {
+           text-align: right;
+         }
+
+         .subscription-card__price-main {
+           font-size: 28px;
+           font-weight: 800;
+           color: #0207b2;
+           line-height: 1;
+         }
+
+         .subscription-card__price-period {
+           font-size: 12px;
+           color: rgba(2, 7, 178, 0.6);
+           font-weight: 500;
+           margin-top: 2px;
+         }
+
+         /* Kompakt familie-rabat */
+         .telenor-family-discount-compact {
+           display: flex;
+           align-items: center;
+           gap: 8px;
+           background: linear-gradient(135deg, rgba(2, 7, 178, 0.06), rgba(2, 7, 178, 0.03));
+           padding: 10px 14px;
+           border-radius: 8px;
+           border: 1px solid rgba(2, 7, 178, 0.15);
+         }
+
+         .family-icon {
+           font-size: 18px;
+         }
+
+         .family-text {
+           font-size: 13px;
+           font-weight: 600;
            color: #0207b2;
          }
 
-         .color-telenor-blue {
+         /* Strømlinet features grid */
+         .subscription-features-grid {
+           display: grid;
+           grid-template-columns: repeat(2, 1fr);
+           gap: 10px;
+           margin-top: 4px;
+         }
+
+         .subscription-feature-item {
+           display: flex;
+           align-items: center;
+           gap: 8px;
+           font-size: 13px;
            color: #0207b2;
          }
 
-         .icon {
-           width: 16px;
-           height: 16px;
-           display: inline-block;
+         .feature-icon {
+           width: 18px;
+           height: 18px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           background: rgba(2, 7, 178, 0.1);
+           border-radius: 50%;
+           font-size: 11px;
+           font-weight: 700;
+           color: #0207b2;
+           flex-shrink: 0;
          }
 
-         .icon-world::before {
-           content: "🌍";
-         }
-
-         .icon-heart::before {
-           content: "❤️";
-         }
-
-         .icon-coverage::before {
-           content: "📶";
+         .feature-text {
+           font-weight: 500;
+           line-height: 1.4;
          }
 
          .telenor-card .plan-add-btn {
            background: linear-gradient(135deg, #0207b2, #3b4fdb);
            color: white;
            border: none;
-           box-shadow: 0 4px 12px rgba(2, 7, 178, 0.3);
-           margin-top: 12px;
+           box-shadow: 0 4px 12px rgba(2, 7, 178, 0.25);
+           margin-top: 8px;
+           font-weight: 600;
+           transition: all 0.3s ease;
          }
 
          .telenor-card .plan-add-btn:hover {
-           background: linear-gradient(135deg, #3b4fdb, #0207b2);
-           box-shadow: 0 6px 16px rgba(2, 7, 178, 0.4);
+           background: linear-gradient(135deg, #3b4fdb, #1a3dd8);
+           box-shadow: 0 6px 20px rgba(2, 7, 178, 0.35);
+           transform: translateY(-1px);
          }
 
          /* Telmore Card Styling */
@@ -787,30 +828,47 @@ export default function PlanCard({
             font-size: var(--font-2xl);
           }
 
-          .subscription-card__img {
-            min-height: 100px;
+          /* Strømlinet Telenor design - mobile */
+          .subscription-card__wrapper {
             padding: 16px;
+            gap: 12px;
           }
 
-          .heading--medium {
-            font-size: 20px;
+          .subscription-card__header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding-bottom: 12px;
           }
 
-          .subscription-card__price {
-            font-size: 18px;
+          .subscription-card__header-top {
+            width: 100%;
           }
 
-          .telenor-family-discount {
+          .subscription-card__price-block {
+            text-align: left;
+            width: 100%;
+          }
+
+          .subscription-card__data-amount {
+            font-size: 28px;
+          }
+
+          .subscription-card__price-main {
+            font-size: 24px;
+          }
+
+          .subscription-features-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+          }
+
+          .telenor-family-discount-compact {
             padding: 8px 12px;
-            margin-top: 8px;
           }
 
-          .family-discount-badge {
+          .family-text {
             font-size: 12px;
-          }
-
-          .family-discount-info {
-            font-size: 11px;
           }
         }
       `}</style>

@@ -100,6 +100,20 @@ export const plans = [
     streaming: []
   },
   {
+    id: 'telenor-170kr',
+    provider: 'telenor',
+    name: '100 GB',
+    data: '100 GB fri tale',
+    price: 170,
+    earnings: 800,
+    features: ['5G', 'eSIM', '35 GB EU Roaming', '100 GB fri tale', 'Familie'],
+    familyDiscount: true,
+    color: '#0207b2',
+    logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
+    streaming: [],
+    expiresAt: '2025-12-31' // Udløber i butikken d. 31/12/25
+  },
+  {
     id: 'telenor-unlimited',
     provider: 'telenor',
     name: 'Fri Data',
@@ -362,7 +376,6 @@ export const plans = [
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: [],
     type: 'broadband',
-    availableFrom: '2025-11-05', // Bliver aktivt fra d. 5/11
     expiresAt: '2025-12-31' // Udløber i butikken d. 31/12/25
   }
 ];
