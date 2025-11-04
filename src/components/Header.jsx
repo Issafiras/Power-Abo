@@ -266,7 +266,16 @@ export default function Header({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--spacing-lg);
+          gap: var(--spacing-xl);
+          width: 100%;
+        }
+
+        .header-logo {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-xs);
+          flex: 1;
+          min-width: 0;
         }
 
         .header-logo h1 {
@@ -275,16 +284,26 @@ export default function Header({
         }
 
         .app-logo {
-          height: 56px;
+          height: 90px;
           width: auto;
+          max-width: 400px;
           display: block;
           object-fit: contain;
-          image-rendering: auto;
-          filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+          filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4)) drop-shadow(0 0 20px rgba(255, 107, 26, 0.2));
+          margin-bottom: var(--spacing-sm);
+          transition: transform var(--transition-smooth);
+        }
+
+        .app-logo:hover {
+          transform: scale(1.02);
         }
 
         .header-logo p {
           margin: 0;
+          margin-top: var(--spacing-xs);
+          line-height: 1.5;
         }
 
         .hero-subtitle {
@@ -319,6 +338,7 @@ export default function Header({
           display: flex;
           gap: var(--spacing-sm);
           align-items: center;
+          flex-shrink: 0;
         }
 
         .btn.active {
@@ -369,6 +389,7 @@ export default function Header({
 
           .header-logo {
             text-align: center;
+            align-items: center;
           }
 
           .header-logo h1 {
@@ -376,7 +397,9 @@ export default function Header({
           }
 
           .app-logo {
-            height: 44px;
+            height: 64px;
+            max-width: 280px;
+            margin: 0 auto var(--spacing-sm);
           }
 
           .hero-subtitle {
