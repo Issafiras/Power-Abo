@@ -15,6 +15,7 @@ export default function Header({
   onSmartCalculatorToggle
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -40,13 +41,26 @@ export default function Header({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [onPresentationToggle, onThemeToggle]);
 
+  // Shrink header on scroll for a more compact UI
+  useEffect(() => {
+    function handleScroll() {
+      const shouldBeCompact = window.scrollY > 24;
+      if (shouldBeCompact !== isCompact) {
+        setIsCompact(shouldBeCompact);
+      }
+    }
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isCompact]);
+
   const handleResetConfirm = () => {
     onReset();
     setShowConfirm(false);
   };
 
   return (
-    <header className="header fade-in-down">
+    <header className={`header fade-in-down ${isCompact ? 'compact' : ''}`}>
       {/* Hero Background - Performance optimized (reduced particles) */}
       <div className="hero-background">
         {/* Reduced particles for better performance */}
@@ -169,6 +183,12 @@ export default function Header({
           transition: background var(--transition-base);
           overflow: hidden;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .header.compact {
+          padding: var(--spacing-md) 0;
+          background: rgba(255, 255, 255, 0.06);
+          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
         }
 
         .hero-background {
@@ -296,6 +316,12 @@ export default function Header({
           transition: transform var(--transition-smooth);
         }
 
+        .header.compact .app-logo {
+          height: 56px;
+          max-width: 260px;
+          filter: drop-shadow(0 1px 8px rgba(0,0,0,0.35)) drop-shadow(0 0 12px rgba(255, 107, 26, 0.15));
+        }
+
         .app-logo:hover {
           transform: scale(1.02);
         }
@@ -322,6 +348,19 @@ export default function Header({
           transform: translateY(10px);
         }
 
+        .badge-primary {
+          background: rgba(255, 107, 26, 0.12);
+          border: 1px solid rgba(255, 107, 26, 0.3);
+        }
+        .badge-info {
+          background: rgba(59, 130, 246, 0.12);
+          border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .badge-success {
+          background: rgba(34, 197, 94, 0.12);
+          border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
         .hero-subtitle .badge:nth-child(1) {
           animation-delay: 300ms;
         }
@@ -339,6 +378,11 @@ export default function Header({
           gap: var(--spacing-sm);
           align-items: center;
           flex-shrink: 0;
+        }
+
+        .header.compact .header-actions .btn-lg {
+          padding: var(--spacing-sm) var(--spacing-md);
+          font-size: var(--font-sm);
         }
 
         .btn.active {
@@ -381,6 +425,9 @@ export default function Header({
           .header {
             padding: var(--spacing-lg) 0;
           }
+          .header.compact {
+            padding: var(--spacing-sm) 0;
+          }
 
           .header-content {
             flex-direction: column;
@@ -400,6 +447,10 @@ export default function Header({
             height: 64px;
             max-width: 280px;
             margin: 0 auto var(--spacing-sm);
+          }
+          .header.compact .app-logo {
+            height: 48px;
+            max-width: 220px;
           }
 
           .hero-subtitle {
