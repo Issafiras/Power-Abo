@@ -59,7 +59,11 @@ export default function Header({
         <div className="header-content">
           {/* Logo og titel */}
           <div className="header-logo">
-            <h1 className="text-gradient bounce-in tracking-tight">⚡ Power Abo Beregner</h1>
+            <img
+              src="/power-logo.png"
+              alt="Power Abonnement"
+              className="app-logo bounce-in"
+            />
             <p className="text-sm text-muted fade-in font-medium">Sammenlign mobilabonnementer og streaming-tjenester</p>
             <div className="hero-subtitle fade-in" style={{ animationDelay: '200ms' }}>
               <span className="badge badge-primary pulse">🎯 Professionel værktøj</span>
@@ -265,6 +269,13 @@ export default function Header({
           font-size: var(--font-3xl);
         }
 
+        .app-logo {
+          height: 56px;
+          width: auto;
+          display: block;
+          filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+        }
+
         .header-logo p {
           margin: 0;
         }
@@ -355,6 +366,10 @@ export default function Header({
 
           .header-logo h1 {
             font-size: var(--font-2xl);
+          }
+
+          .app-logo {
+            height: 44px;
           }
 
           .hero-subtitle {
