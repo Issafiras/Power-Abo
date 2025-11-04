@@ -84,7 +84,7 @@ export default function Header({
           {/* Logo mellem badges og knapper */}
           <div className="header-logo-center">
             {(() => {
-              const logoSrc = `${import.meta.env.BASE_URL}power-logo.png`;
+              const logoSrc = `${import.meta.env.BASE_URL}power-logo-white.png?v=1`;
               return (
                 <img
                   src={logoSrc}
