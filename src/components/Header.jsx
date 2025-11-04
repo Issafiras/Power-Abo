@@ -315,24 +315,29 @@ export default function Header({
           flex: 1;
           min-width: 0;
           align-self: center;
+          transition: all var(--transition-smooth);
+        }
+
+        .header.compact .header-logo-center {
+          flex: 0 0 auto;
         }
 
         .app-logo {
-          height: 300px;
+          height: 180px;
           width: auto;
-          max-width: 1100px;
+          max-width: 700px;
           display: block;
           object-fit: contain;
           image-rendering: -webkit-optimize-contrast;
           image-rendering: crisp-edges;
           filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4)) drop-shadow(0 0 20px rgba(255, 107, 26, 0.2));
           margin: 0 auto;
-          transition: transform var(--transition-smooth);
+          transition: all var(--transition-smooth);
         }
 
         .header.compact .app-logo {
-          height: 150px;
-          max-width: 650px;
+          height: 80px;
+          max-width: 350px;
           filter: drop-shadow(0 1px 8px rgba(0,0,0,0.35)) drop-shadow(0 0 12px rgba(255, 107, 26, 0.15));
         }
 
@@ -464,13 +469,13 @@ export default function Header({
           }
 
           .app-logo {
-            height: 200px;
-            max-width: 700px;
+            height: 140px;
+            max-width: 500px;
             margin: 0 auto;
           }
           .header.compact .app-logo {
-            height: 110px;
-            max-width: 480px;
+            height: 70px;
+            max-width: 300px;
           }
 
           .hero-subtitle {
