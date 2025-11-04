@@ -59,11 +59,16 @@ export default function Header({
         <div className="header-content">
           {/* Logo og titel */}
           <div className="header-logo">
-            <img
-              src="/power-logo.png"
-              alt="Power Abonnement"
-              className="app-logo bounce-in"
-            />
+            {(() => {
+              const logoSrc = `${import.meta.env.BASE_URL}power-logo.png`;
+              return (
+                <img
+                  src={logoSrc}
+                  alt="Power Abonnement"
+                  className="app-logo bounce-in"
+                />
+              );
+            })()}
             <p className="text-sm text-muted fade-in font-medium">Sammenlign mobilabonnementer og streaming-tjenester</p>
             <div className="hero-subtitle fade-in" style={{ animationDelay: '200ms' }}>
               <span className="badge badge-primary pulse">🎯 Professionel værktøj</span>
@@ -273,6 +278,8 @@ export default function Header({
           height: 56px;
           width: auto;
           display: block;
+          object-fit: contain;
+          image-rendering: auto;
           filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
         }
 
