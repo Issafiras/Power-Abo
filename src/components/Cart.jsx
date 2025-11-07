@@ -5,7 +5,7 @@
 
 import { formatCurrency, calculateSixMonthPrice } from '../utils/calculations';
 
-export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
+export default function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set() }) {
   if (cartItems.length === 0) {
     return (
       <div className="cart glass-card-no-hover fade-in-up">
@@ -69,7 +69,7 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
           return (
             <div 
               key={item.plan.id} 
-              className="cart-item fade-in-up" 
+              className={`cart-item fade-in-up ${newlyAddedPlans.has(item.plan.id) ? 'newly-added' : ''}`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Plan info */}
@@ -241,6 +241,51 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
 
         .cart-item:hover::before {
           opacity: 1;
+        }
+
+        .cart-item.newly-added {
+          animation: newlyAddedPulse 0.6s ease-out, fade-in-up 0.6s var(--ease-out-back);
+          border-color: var(--color-success);
+          box-shadow: 
+            var(--shadow-xl), 
+            0 0 40px rgba(16, 185, 129, 0.6),
+            0 0 0 2px rgba(16, 185, 129, 0.3) inset;
+          background: linear-gradient(135deg, 
+            rgba(16, 185, 129, 0.15) 0%, 
+            rgba(16, 185, 129, 0.08) 50%,
+            rgba(255, 255, 255, 0.08) 100%
+          );
+        }
+
+        .cart-item.newly-added::after {
+          content: '✨ Ny';
+          position: absolute;
+          top: var(--spacing-sm);
+          right: var(--spacing-sm);
+          background: var(--color-success);
+          color: white;
+          padding: var(--spacing-xs) var(--spacing-sm);
+          border-radius: var(--radius-sm);
+          font-size: var(--font-xs);
+          font-weight: var(--font-bold);
+          box-shadow: var(--glow-green);
+          animation: bounceIn var(--duration-slow) var(--ease-out-back);
+          z-index: 10;
+        }
+
+        @keyframes newlyAddedPulse {
+          0% {
+            transform: scale(0.95);
+            opacity: 0.8;
+          }
+          50% {
+            transform: scale(1.05);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
 
         .cart-item-header {

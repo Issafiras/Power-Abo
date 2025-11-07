@@ -13,8 +13,10 @@ import ComparisonPanel from './components/ComparisonPanel';
 import PresentationView from './components/PresentationView';
 import Footer from './components/Footer';
 import { plans } from './data/plans';
-import { canUseSupabase, getPlansCached } from './utils/supabaseData';
+import { canUseSupabase, getPlansCached, getStreamingCached } from './utils/supabaseData';
 import { getAppConfig } from './utils/backendApi';
+import { findBestSolution } from './utils/calculations';
+import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
 import {
   saveCart,
   loadCart,
@@ -22,6 +24,8 @@ import {
   loadSelectedStreaming,
   saveCustomerMobileCost,
   loadCustomerMobileCost,
+  saveNumberOfLines,
+  loadNumberOfLines,
   saveOriginalItemPrice,
   loadOriginalItemPrice,
   saveCashDiscount,
@@ -34,6 +38,8 @@ import {
   loadTheme,
   saveShowCashDiscount,
   loadShowCashDiscount,
+  saveExistingBrands,
+  loadExistingBrands,
   resetAll
 } from './utils/storage';
 import { validatePrice, validateQuantity } from './utils/validators';
@@ -43,6 +49,7 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [selectedStreaming, setSelectedStreaming] = useState([]);
   const [customerMobileCost, setCustomerMobileCost] = useState(0);
+  const [numberOfLines, setNumberOfLines] = useState(1);
   const [originalItemPrice, setOriginalItemPrice] = useState(0);
   const [cashDiscount, setCashDiscount] = useState(null);
   const [cashDiscountLocked, setCashDiscountLocked] = useState(false);
@@ -54,11 +61,15 @@ function App() {
   const [showPresentation, setShowPresentation] = useState(false);
   const [toast, setToast] = useState(null);
   const [remotePlans, setRemotePlans] = useState(null);
+  const [remoteStreaming, setRemoteStreaming] = useState(null);
   const [configLoaded, setConfigLoaded] = useState(false);
   
   // CBB MIX state
   const [cbbMixEnabled, setCbbMixEnabled] = useState({});
   const [cbbMixCount, setCbbMixCount] = useState({});
+  
+  // Eksisterende brands state
+  const [existingBrands, setExistingBrands] = useState([]);
 
   // EAN søgning state
   const [eanSearchResults, setEanSearchResults] = useState(null);
@@ -69,22 +80,26 @@ function App() {
     const savedCart = loadCart();
     const savedStreaming = loadSelectedStreaming();
     const savedMobileCost = loadCustomerMobileCost();
+    const savedNumberOfLines = loadNumberOfLines();
     const savedOriginalItemPrice = loadOriginalItemPrice();
     const savedCashDiscount = loadCashDiscount();
     const savedCashDiscountLocked = loadCashDiscountLocked();
     const savedAutoAdjust = loadAutoAdjust();
     const savedTheme = loadTheme();
     const savedShowCashDiscount = loadShowCashDiscount();
+    const savedExistingBrands = loadExistingBrands();
 
     setCartItems(savedCart);
     setSelectedStreaming(savedStreaming);
     setCustomerMobileCost(savedMobileCost);
+    setNumberOfLines(savedNumberOfLines);
     setOriginalItemPrice(savedOriginalItemPrice);
     setCashDiscount(savedCashDiscount);
     setCashDiscountLocked(savedCashDiscountLocked);
     setAutoAdjust(savedAutoAdjust);
     setTheme(savedTheme);
     setShowCashDiscount(savedShowCashDiscount);
+    setExistingBrands(savedExistingBrands);
   }, []);
 
   // Gem til localStorage ved ændringer
@@ -99,6 +114,10 @@ function App() {
   useEffect(() => {
     saveCustomerMobileCost(customerMobileCost);
   }, [customerMobileCost]);
+
+  useEffect(() => {
+    saveNumberOfLines(numberOfLines);
+  }, [numberOfLines]);
 
   useEffect(() => {
     saveOriginalItemPrice(originalItemPrice);
@@ -124,6 +143,10 @@ function App() {
   useEffect(() => {
     saveShowCashDiscount(showCashDiscount);
   }, [showCashDiscount]);
+
+  useEffect(() => {
+    saveExistingBrands(existingBrands);
+  }, [existingBrands]);
 
   // Skjult genvej: Ctrl + Shift + A åbner admin-siden i ny fane
   useEffect(() => {
@@ -154,6 +177,23 @@ function App() {
         if (mounted) setRemotePlans(Array.isArray(list) ? list : []);
       } catch (e) {
         console.warn('Kunne ikke hente planer fra Supabase:', e?.message || e);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  // Hent streaming-tjenester fra Supabase hvis aktivt
+  useEffect(() => {
+    let mounted = true;
+    if (!canUseSupabase()) return;
+    (async () => {
+      try {
+        const list = await getStreamingCached();
+        if (mounted && Array.isArray(list) && list.length > 0) {
+          setRemoteStreaming(list);
+        }
+      } catch (e) {
+        console.warn('Kunne ikke hente streaming services fra Supabase:', e?.message || e);
       }
     })();
     return () => { mounted = false; };
@@ -331,6 +371,14 @@ function App() {
     }
   };
 
+  // Number of lines handler
+  const handleNumberOfLinesChange = (value) => {
+    const validation = validateQuantity(value);
+    if (validation.valid) {
+      setNumberOfLines(validation.value);
+    }
+  };
+
   // Original item price handler
   const handleOriginalItemPriceChange = (value) => {
     const validation = validatePrice(value);
@@ -375,6 +423,7 @@ function App() {
     setCartItems([]);
     setSelectedStreaming([]);
     setCustomerMobileCost(0);
+    setNumberOfLines(1);
     setOriginalItemPrice(0);
     setCashDiscount(null);
     setCashDiscountLocked(false);
@@ -383,12 +432,71 @@ function App() {
     setSearchQuery('');
     setCbbMixEnabled({});
     setCbbMixCount({});
+    setExistingBrands([]);
     showToast('Alt nulstillet', 'success');
   };
 
   // Theme toggle
   const handleThemeToggle = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  // Auto-select løsning handler
+  const handleAutoSelectSolution = () => {
+    const availablePlans = (remotePlans && remotePlans.length > 0) ? remotePlans : plans;
+    const availableStreaming = (remoteStreaming && remoteStreaming.length > 0) ? remoteStreaming : staticStreaming;
+    
+    // Funktion til at hente streaming-pris
+    const getStreamingPrice = (serviceId) => {
+      const service = availableStreaming.find(s => s.id === serviceId) || getServiceById(serviceId);
+      return service ? (service.price || 0) : 0;
+    };
+    
+    // Find bedste løsning - brug numberOfLines som maksimum
+    // Ekskluder planer fra eksisterende brands
+    const excludedProviders = existingBrands.map(brand => {
+      // Konverter brand navn til provider format
+      if (brand === 'Telmore') return 'telmore';
+      if (brand === 'Telenor') return 'telenor';
+      if (brand === 'CBB') return 'cbb';
+      return brand.toLowerCase();
+    });
+    
+    const result = findBestSolution(
+      availablePlans,
+      selectedStreaming,
+      customerMobileCost,
+      originalItemPrice,
+      getStreamingPrice,
+      {
+        maxLines: numberOfLines || 5,
+        minSavings: -Infinity,
+        requiredLines: numberOfLines || 1,
+        excludedProviders: excludedProviders
+      }
+    );
+    
+    if (result.cartItems && result.cartItems.length > 0) {
+      // Opdater kurven med den fundne løsning
+      setCartItems(result.cartItems);
+      
+      // Opdater CBB Mix indstillinger hvis nødvendigt
+      const newCbbMixEnabled = {};
+      const newCbbMixCount = {};
+      result.cartItems.forEach(item => {
+        if (item.cbbMixEnabled) {
+          newCbbMixEnabled[item.plan.id] = true;
+          newCbbMixCount[item.plan.id] = item.cbbMixCount || 2;
+        }
+      });
+      setCbbMixEnabled(newCbbMixEnabled);
+      setCbbMixCount(newCbbMixCount);
+      
+      // Vis besked med forklaring
+      showToast(result.explanation, result.savings >= 0 ? 'success' : 'error');
+    } else {
+      showToast('Kunne ikke finde en løsning. Prøv at tilføje streaming-tjenester eller mobiludgifter.', 'error');
+    }
   };
 
   // EAN søgning handler
@@ -492,10 +600,15 @@ function App() {
               onStreamingToggle={handleStreamingToggle}
               customerMobileCost={customerMobileCost}
               onMobileCostChange={handleMobileCostChange}
+              numberOfLines={numberOfLines}
+              onNumberOfLinesChange={handleNumberOfLinesChange}
               originalItemPrice={originalItemPrice}
               onOriginalItemPriceChange={handleOriginalItemPriceChange}
               onEANSearch={handleEANSearch}
               isSearching={isSearching}
+              onAutoSelectSolution={handleAutoSelectSolution}
+              existingBrands={existingBrands}
+              onExistingBrandsChange={setExistingBrands}
             />
           </section>
 
@@ -564,6 +677,7 @@ function App() {
                 cartItems={cartItems}
                 selectedStreaming={selectedStreaming}
                 customerMobileCost={customerMobileCost}
+                numberOfLines={numberOfLines}
                 originalItemPrice={originalItemPrice}
                 cashDiscount={cashDiscount}
                 onCashDiscountChange={handleCashDiscountChange}

@@ -19,6 +19,7 @@ export default function ComparisonPanel({
   cartItems,
   selectedStreaming,
   customerMobileCost,
+  numberOfLines = 1,
   originalItemPrice,
   cashDiscount,
   onCashDiscountChange,
@@ -35,7 +36,7 @@ export default function ComparisonPanel({
   // Check CBB MIX kompatibilitet
   const cbbMixCompatibility = checkCBBMixCompatibility(cartItems);
 
-  // Kunde totaler
+  // Kunde totaler - mobiludgifter er allerede totalt (ikke pr. linje)
   const streamingCost = getStreamingTotal(selectedStreaming);
   const customerTotals = calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice);
 
@@ -224,7 +225,7 @@ export default function ComparisonPanel({
           </div>
           <div className="column-content">
             <div className="amount-row">
-              <span className="amount-label">Mobil/md:</span>
+              <span className="amount-label">Mobil/md {numberOfLines > 1 ? `(total for ${numberOfLines} linjer)` : '(total)'}:</span>
               <span className="amount-value">{formatCurrency(customerMobileCost || 0)}</span>
             </div>
             <div className="amount-row">

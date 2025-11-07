@@ -19,7 +19,12 @@ export default function StreamingSelector({
   originalItemPrice,
   onOriginalItemPriceChange,
   onEANSearch,
-  isSearching = false
+  isSearching = false,
+  onAutoSelectSolution = null,
+  numberOfLines = 1,
+  onNumberOfLinesChange = null,
+  existingBrands = [],
+  onExistingBrandsChange = null
 }) {
   const isMobile = typeof window !== 'undefined' && ((window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth <= 900);
   const canScan = isMobile && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -68,6 +73,13 @@ export default function StreamingSelector({
   const handleOriginalItemPriceChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     onOriginalItemPriceChange(value);
+  };
+
+  const handleNumberOfLinesChange = (e) => {
+    const value = parseInt(e.target.value, 10) || 1;
+    if (onNumberOfLinesChange) {
+      onNumberOfLinesChange(value);
+    }
   };
 
   const handleEANSearch = async (e) => {
@@ -329,10 +341,71 @@ export default function StreamingSelector({
         </p>
       </div>
 
+      {/* Antal mobilabonnementer input */}
+      {onNumberOfLinesChange && (
+        <div className="number-of-lines-input">
+          <label htmlFor="number-of-lines" className="input-label">
+            📱 Antal mobilabonnementer (linjer)
+          </label>
+          <div className="input-with-info">
+            <input
+              id="number-of-lines"
+              name="number-of-lines"
+              type="number"
+              className="input"
+              placeholder="1"
+              value={numberOfLines || 1}
+              onChange={handleNumberOfLinesChange}
+              min="1"
+              max="20"
+              step="1"
+            />
+            <span className="info-suffix">linje{numberOfLines !== 1 ? 'r' : ''}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Eksisterende brands selector */}
+      {onExistingBrandsChange && (
+        <div className="existing-brands-input">
+          <label className="input-label">
+            🚫 Har kunden allerede abonnement hos?
+          </label>
+          <p className="input-help-text" style={{ marginBottom: 'var(--spacing-sm)' }}>
+            Vælg brands som kunden allerede har - disse vil blive ekskluderet fra automatisk løsning
+          </p>
+          <div className="existing-brands-grid">
+            {['Telmore', 'Telenor', 'CBB'].map((brand) => {
+              const isSelected = existingBrands.includes(brand);
+              return (
+                <button
+                  key={brand}
+                  type="button"
+                  onClick={() => {
+                    if (isSelected) {
+                      onExistingBrandsChange(existingBrands.filter(b => b !== brand));
+                    } else {
+                      onExistingBrandsChange([...existingBrands, brand]);
+                    }
+                  }}
+                  className={`existing-brand-card glass-card ${isSelected ? 'selected' : ''}`}
+                  aria-pressed={isSelected}
+                >
+                  <span className="existing-brand-name">{brand}</span>
+                  {isSelected && (
+                    <span className="existing-brand-checkmark bounce-in">✓</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Mobil udgifter input */}
       <div className="mobile-cost-input">
         <label htmlFor="mobile-cost" className="input-label">
-          💳 Nuværende månedlige mobiludgifter
+          💳 Nuværende månedlige mobiludgifter {onNumberOfLinesChange && numberOfLines > 1 ? `(total for ${numberOfLines} linjer)` : '(total)'}
         </label>
         <div className="input-with-currency">
           <input
@@ -348,6 +421,11 @@ export default function StreamingSelector({
           />
           <span className="currency-suffix">kr/md</span>
         </div>
+        {onNumberOfLinesChange && numberOfLines > 1 && customerMobileCost > 0 && (
+          <p className="input-help-text">
+            Gennemsnit pr. linje: {formatCurrency((customerMobileCost || 0) / numberOfLines)}/md
+          </p>
+        )}
       </div>
 
       {/* Varens pris inden rabat input */}
@@ -439,6 +517,37 @@ export default function StreamingSelector({
           </div>
         ),
         document.body
+      )}
+
+      {/* Auto-select løsning knap - Prominent placeret */}
+      {onAutoSelectSolution && (
+        <div className="auto-select-section">
+          <div className="auto-select-header">
+            <div className="auto-select-icon-wrapper">
+              <span className="auto-select-icon">✨</span>
+            </div>
+            <h3 className="auto-select-title">Hurtig Løsning</h3>
+            <p className="auto-select-subtitle">
+              Klik på knappen nedenfor, så finder systemet automatisk den bedste kombination af planer
+            </p>
+          </div>
+          <button
+            onClick={onAutoSelectSolution}
+            className="btn btn-premium auto-select-btn"
+            disabled={!selectedStreaming.length && !customerMobileCost}
+          >
+            <span className="btn-icon">🚀</span>
+            <span className="btn-text">Find Bedste Løsning Nu</span>
+            <span className="btn-arrow">→</span>
+          </button>
+          {(!selectedStreaming.length && !customerMobileCost) && (
+            <div className="auto-select-hint-wrapper">
+              <p className="auto-select-hint">
+                💡 Vælg mindst én streaming-tjeneste nedenfor eller indtast mobiludgifter for at aktivere
+              </p>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="divider"></div>
@@ -560,6 +669,192 @@ export default function StreamingSelector({
           margin: 0;
         }
 
+        .auto-select-section {
+          margin: var(--spacing-xl) 0;
+          padding: var(--spacing-xl);
+          background: linear-gradient(135deg, 
+            rgba(255, 109, 31, 0.1) 0%, 
+            rgba(255, 109, 31, 0.05) 100%
+          );
+          border-radius: var(--radius-xl);
+          border: 2px solid rgba(255, 109, 31, 0.2);
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .auto-select-section::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(
+            circle,
+            rgba(255, 109, 31, 0.15) 0%,
+            transparent 70%
+          );
+          animation: gentlePulse 4s ease-in-out infinite;
+          pointer-events: none;
+        }
+
+        @keyframes gentlePulse {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        .auto-select-header {
+          margin-bottom: var(--spacing-xl);
+          position: relative;
+          z-index: 1;
+        }
+
+        .auto-select-icon-wrapper {
+          margin-bottom: var(--spacing-md);
+        }
+
+        .auto-select-icon {
+          font-size: var(--font-5xl);
+          display: inline-block;
+          animation: gentleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes gentleFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+
+        .auto-select-title {
+          font-size: var(--font-3xl);
+          font-weight: var(--font-extrabold);
+          margin: 0 0 var(--spacing-md) 0;
+          background: linear-gradient(135deg, var(--color-orange), #ff8c42, var(--color-orange));
+          background-size: 200% 200%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: gradientShift 3s ease infinite;
+        }
+
+        .auto-select-subtitle {
+          font-size: var(--font-lg);
+          color: var(--text-primary);
+          margin: 0;
+          line-height: 1.7;
+          font-weight: var(--font-medium);
+        }
+
+        .auto-select-btn {
+          width: 100%;
+          padding: var(--spacing-lg) var(--spacing-xl);
+          font-size: var(--font-xl);
+          font-weight: var(--font-extrabold);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-md);
+          background: linear-gradient(135deg, var(--color-orange), #ff8c42, var(--color-orange));
+          background-size: 200% 200%;
+          box-shadow: var(--glow-orange), 0 8px 32px rgba(255, 109, 31, 0.4);
+          transition: all var(--transition-smooth);
+          position: relative;
+          overflow: hidden;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: var(--radius-lg);
+          animation: gradientShift 3s ease infinite;
+          z-index: 1;
+        }
+
+        .auto-select-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent
+          );
+          transition: left 0.6s ease;
+        }
+
+        .auto-select-btn:hover:not(:disabled)::before {
+          left: 100%;
+        }
+
+        .auto-select-btn:hover:not(:disabled) {
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: var(--glow-extreme), 0 12px 48px rgba(255, 109, 31, 0.6);
+          animation: gradientShift 1.5s ease infinite, pulseGlow 2s ease-in-out infinite;
+        }
+
+        .auto-select-btn:active:not(:disabled) {
+          transform: translateY(-1px) scale(0.98);
+        }
+
+        .auto-select-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          animation: none;
+        }
+
+        .auto-select-btn .btn-icon {
+          font-size: var(--font-3xl);
+          animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        .auto-select-btn .btn-text {
+          font-size: var(--font-xl);
+        }
+
+        .auto-select-btn .btn-arrow {
+          font-size: var(--font-2xl);
+          transition: transform var(--transition-smooth);
+          opacity: 0.9;
+        }
+
+        .auto-select-btn:hover:not(:disabled) .btn-arrow {
+          transform: translateX(6px);
+        }
+
+        .auto-select-hint-wrapper {
+          margin-top: var(--spacing-lg);
+          padding: var(--spacing-md);
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: var(--radius-md);
+          border: 1px dashed rgba(255, 255, 255, 0.2);
+          position: relative;
+          z-index: 1;
+        }
+
+        .auto-select-hint {
+          margin: 0;
+          font-size: var(--font-base);
+          color: var(--text-secondary);
+          font-style: normal;
+        }
+
+        @keyframes pulseGlow {
+          0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+          }
+          50% {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 16px rgba(255, 255, 255, 1));
+          }
+        }
+
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
         /* Scan skjult som default (PC) */
         .scan-btn { display: none; }
 
@@ -630,6 +925,92 @@ export default function StreamingSelector({
 
         .input-with-currency input {
           padding-right: 5rem;
+        }
+
+        .number-of-lines-input {
+          margin-bottom: var(--spacing-md);
+        }
+
+        .input-with-info {
+          position: relative;
+        }
+
+        .info-suffix {
+          position: absolute;
+          right: var(--spacing-md);
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
+          font-weight: var(--font-semibold);
+          pointer-events: none;
+        }
+
+        .input-with-info input {
+          padding-right: 5rem;
+        }
+
+        .input-help-text {
+          margin-top: var(--spacing-xs);
+          font-size: var(--font-sm);
+          color: var(--text-muted);
+        }
+
+        .existing-brands-input {
+          margin-bottom: var(--spacing-md);
+        }
+
+        .existing-brands-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: var(--spacing-sm);
+        }
+
+        .existing-brand-card {
+          position: relative;
+          padding: var(--spacing-md);
+          text-align: center;
+          cursor: pointer;
+          transition: all var(--transition-smooth);
+          border: 2px solid transparent;
+          background: var(--glass-bg);
+        }
+
+        .existing-brand-card:hover {
+          transform: translateY(-2px);
+          border-color: var(--color-orange);
+          box-shadow: var(--shadow-md);
+        }
+
+        .existing-brand-card.selected {
+          border-color: var(--color-orange);
+          background: linear-gradient(135deg, 
+            rgba(255, 109, 31, 0.15) 0%, 
+            rgba(255, 109, 31, 0.08) 100%
+          );
+          box-shadow: var(--glow-orange);
+        }
+
+        .existing-brand-name {
+          font-weight: var(--font-semibold);
+          color: var(--text-primary);
+          font-size: var(--font-base);
+        }
+
+        .existing-brand-checkmark {
+          position: absolute;
+          top: var(--spacing-xs);
+          right: var(--spacing-xs);
+          width: 24px;
+          height: 24px;
+          background: var(--color-success);
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: var(--font-bold);
+          font-size: var(--font-sm);
+          box-shadow: var(--glow-green);
         }
 
         .streaming-grid {

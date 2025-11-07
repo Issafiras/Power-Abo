@@ -105,7 +105,7 @@ export const plans = [
     name: '100 GB',
     data: '100 GB fri tale',
     price: 170,
-    earnings: 800,
+    earnings: 1000,
     features: ['5G', 'eSIM', '35 GB EU Roaming', '100 GB fri tale', 'Familie'],
     familyDiscount: true,
     color: '#0207b2',

@@ -7,12 +7,14 @@ const STORAGE_KEYS = {
   CART: 'power_calculator_cart',
   STREAMING: 'power_calculator_streaming',
   CUSTOMER_MOBILE_COST: 'power_calculator_mobile_cost',
+  NUMBER_OF_LINES: 'power_calculator_number_of_lines',
   ORIGINAL_ITEM_PRICE: 'power_calculator_original_item_price',
   CASH_DISCOUNT: 'power_calculator_cash_discount',
   CASH_DISCOUNT_LOCKED: 'power_calculator_cash_discount_locked',
   AUTO_ADJUST: 'power_calculator_auto_adjust',
   THEME: 'power_calculator_theme',
-  SHOW_CASH_DISCOUNT: 'power_calculator_show_cash_discount'
+  SHOW_CASH_DISCOUNT: 'power_calculator_show_cash_discount',
+  EXISTING_BRANDS: 'power_calculator_existing_brands'
 };
 
 /**
@@ -91,6 +93,15 @@ export function loadCustomerMobileCost() {
   return getItem(STORAGE_KEYS.CUSTOMER_MOBILE_COST, 0);
 }
 
+// Antal mobilabonnementer (linjer)
+export function saveNumberOfLines(lines) {
+  setItem(STORAGE_KEYS.NUMBER_OF_LINES, lines);
+}
+
+export function loadNumberOfLines() {
+  return getItem(STORAGE_KEYS.NUMBER_OF_LINES, 1);
+}
+
 // Varens pris inden rabat
 export function saveOriginalItemPrice(price) {
   setItem(STORAGE_KEYS.ORIGINAL_ITEM_PRICE, price);
@@ -142,6 +153,15 @@ export function loadTheme() {
   return getItem(STORAGE_KEYS.THEME, 'dark');
 }
 
+// Eksisterende brands funktioner
+export function saveExistingBrands(brands) {
+  setItem(STORAGE_KEYS.EXISTING_BRANDS, brands);
+}
+
+export function loadExistingBrands() {
+  return getItem(STORAGE_KEYS.EXISTING_BRANDS, []);
+}
+
 // Reset alt
 export function resetAll() {
   Object.values(STORAGE_KEYS).forEach(key => {
@@ -155,12 +175,14 @@ export function exportState() {
     cart: loadCart(),
     streaming: loadSelectedStreaming(),
     mobileCost: loadCustomerMobileCost(),
+    numberOfLines: loadNumberOfLines(),
     originalItemPrice: loadOriginalItemPrice(),
     cashDiscount: loadCashDiscount(),
     cashDiscountLocked: loadCashDiscountLocked(),
     autoAdjust: loadAutoAdjust(),
     theme: loadTheme(),
-    showCashDiscount: loadShowCashDiscount()
+    showCashDiscount: loadShowCashDiscount(),
+    existingBrands: loadExistingBrands()
   };
 }
 
@@ -173,11 +195,13 @@ export function importState(state) {
   if (Object.prototype.hasOwnProperty.call(state, 'cart')) saveCart(state.cart);
   if (Object.prototype.hasOwnProperty.call(state, 'streaming')) saveSelectedStreaming(state.streaming);
   if (typeof state.mobileCost === 'number') saveCustomerMobileCost(state.mobileCost);
+  if (typeof state.numberOfLines === 'number') saveNumberOfLines(state.numberOfLines);
   if (typeof state.originalItemPrice === 'number') saveOriginalItemPrice(state.originalItemPrice);
   if (typeof state.cashDiscount === 'number' || state.cashDiscount === null) saveCashDiscount(state.cashDiscount);
   if (typeof state.cashDiscountLocked === 'boolean') saveCashDiscountLocked(state.cashDiscountLocked);
   if (typeof state.autoAdjust === 'boolean') saveAutoAdjust(state.autoAdjust);
   if (Object.prototype.hasOwnProperty.call(state, 'theme')) saveTheme(state.theme);
   if (typeof state.showCashDiscount === 'boolean') saveShowCashDiscount(state.showCashDiscount);
+  if (Array.isArray(state.existingBrands)) saveExistingBrands(state.existingBrands);
 }
 
