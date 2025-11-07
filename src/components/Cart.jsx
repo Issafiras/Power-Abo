@@ -199,11 +199,17 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
 
         .cart-item {
           padding: var(--spacing-md);
-          background: var(--glass-bg);
-          border-radius: var(--radius-md);
-          border: 1px solid var(--glass-border);
-          transition: all var(--transition-base);
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.08) 0%, 
+            rgba(255, 255, 255, 0.04) 100%
+          );
+          border-radius: var(--radius-lg);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          transition: all var(--transition-smooth);
           position: relative;
+          transform-style: preserve-3d;
+          backdrop-filter: blur(var(--blur-md)) saturate(150%);
+          -webkit-backdrop-filter: blur(var(--blur-md)) saturate(150%);
         }
 
         .cart-item::before {
@@ -222,8 +228,15 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
 
         .cart-item:hover {
           border-color: rgba(255, 255, 255, 0.3);
-          box-shadow: var(--shadow-xl), 0 0 20px rgba(255, 107, 26, 0.1);
-          transform: translateX(4px);
+          box-shadow: 
+            var(--shadow-xl), 
+            0 0 30px rgba(255, 109, 31, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+          transform: translateX(8px) translateY(-2px) rotateY(2deg) scale(1.02);
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.12) 0%, 
+            rgba(255, 255, 255, 0.06) 100%
+          );
         }
 
         .cart-item:hover::before {
@@ -289,10 +302,11 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove }) {
         }
 
         .quantity-btn:hover {
-          transform: scale(1.1);
+          transform: scale(1.15) rotate(5deg);
           background: var(--color-orange);
           color: white;
           box-shadow: var(--glow-orange);
+          filter: brightness(1.2);
         }
 
         .quantity-btn:active {

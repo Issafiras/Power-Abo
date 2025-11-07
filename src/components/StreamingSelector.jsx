@@ -643,28 +643,56 @@ export default function StreamingSelector({
           padding: var(--spacing-md);
           text-align: center;
           cursor: pointer;
-          transition: all var(--transition-base);
+          transition: all var(--transition-smooth);
           border: 2px solid transparent;
+          transform-style: preserve-3d;
+          overflow: hidden;
+        }
+
+        .streaming-card::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+          border-radius: 50%;
+          transform: translate(-50%, -50%);
+          transition: width 0.6s ease, height 0.6s ease;
+          pointer-events: none;
+        }
+
+        .streaming-card:hover::before {
+          width: 200px;
+          height: 200px;
         }
 
         .streaming-card:hover {
-          transform: translateY(-2px);
+          transform: translateY(-6px) rotateX(5deg) scale(1.05);
           border-color: var(--color-orange);
-          box-shadow: var(--shadow-md);
+          box-shadow: 
+            var(--shadow-lg),
+            0 0 30px rgba(255, 109, 31, 0.4);
         }
 
         .streaming-card:active {
-          transform: translateY(0);
+          transform: translateY(-2px) scale(0.98);
         }
 
         .streaming-card.selected {
           border-color: var(--color-orange);
-          background: rgba(255, 107, 26, 0.1);
+          background: linear-gradient(135deg, 
+            rgba(255, 109, 31, 0.15) 0%, 
+            rgba(255, 109, 31, 0.08) 100%
+          );
           box-shadow: var(--glow-orange);
+          transform: scale(1.02);
         }
 
         .streaming-card.selected:hover {
-          transform: translateY(-2px);
+          transform: translateY(-6px) rotateX(5deg) scale(1.08);
+          box-shadow: var(--glow-extreme);
         }
 
         .streaming-icon {
@@ -684,9 +712,12 @@ export default function StreamingSelector({
         }
 
         .streaming-card:hover .streaming-icon {
-          transform: scale(1.05) rotate(5deg);
-          box-shadow: var(--shadow-lg);
+          transform: scale(1.15) rotate(10deg) translateY(-4px);
+          box-shadow: 
+            var(--shadow-lg),
+            0 0 30px rgba(255, 109, 31, 0.5);
           animation: iconPulse 0.6s ease-in-out;
+          filter: brightness(1.2);
         }
 
         @keyframes iconPulse {
@@ -777,9 +808,32 @@ export default function StreamingSelector({
 
         .total-row.six-month {
           padding: var(--spacing-lg);
-          background: linear-gradient(135deg, rgba(255, 107, 26, 0.1), rgba(255, 107, 26, 0.05));
+          background: var(--gradient-primary);
+          background-size: 200% 200%;
           border-radius: var(--radius-lg);
-          border: 2px solid rgba(255, 107, 26, 0.3);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          animation: gradientShift 4s ease infinite;
+          box-shadow: 
+            var(--glow-orange),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .total-row.six-month::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent
+          );
+          animation: shimmer 3s ease infinite;
         }
 
         .total-label {

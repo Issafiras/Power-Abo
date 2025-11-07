@@ -4,21 +4,26 @@
  */
 
 :root {
-  /* Brand farver - Soft Apple-inspired Gen-Z palette */
+  /* Brand farver - Ultra-modern vibrant Gen-Z palette */
   --color-orange: #FF6D1F;
   --color-orange-light: #FF8F57;
   --color-orange-dark: #E55A0F;
+  --color-orange-glow: rgba(255, 109, 31, 0.6);
+  --color-orange-neon: #FF6D1F;
   
   --color-telenor: #5E8FFF;
   --color-telenor-light: #8FB3FF;
   --color-telenor-dark: #4A7AE8;
   --color-telenor-bg: #ffffff;
+  --color-telenor-glow: rgba(94, 143, 255, 0.6);
   
   --color-telmore: #A78BFA;
   --color-telmore-bg: #E9D5FF;
+  --color-telmore-glow: rgba(167, 139, 250, 0.6);
   --color-cbb: #F472B6;
   --color-cbb-light: #FBBF24;
   --color-cbb-bg: #FEF3C7;
+  --color-cbb-glow: rgba(244, 114, 182, 0.6);
   
   /* Status farver - Soft pastel Gen Z */
   --color-success: #34D399;
@@ -50,7 +55,7 @@
   --text-tertiary: #9ca3af;
   --text-muted: #6b7280;
   
-  /* Apple-inspired spacing - Generous whitespace */
+  /* Balanced spacing - Elegant but compact */
   --spacing-xs: 0.375rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 0.75rem;
@@ -67,19 +72,22 @@
   --radius-2xl: 2rem;
   --radius-full: 9999px;
   
-  /* Shadows */
+  /* Shadows - Multi-layer depth */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 15px 30px -10px rgba(0, 0, 0, 0.3);
+  --shadow-3d: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset, 0 -10px 20px rgba(0, 0, 0, 0.2) inset;
+  --shadow-neon: 0 0 20px rgba(255, 109, 31, 0.5), 0 0 40px rgba(255, 109, 31, 0.3), 0 10px 30px rgba(0, 0, 0, 0.3);
   
-  /* Glow effects - Neon Gen Z */
-  --glow-orange: 0 0 30px rgba(255, 107, 26, 0.5), 0 0 60px rgba(255, 107, 26, 0.2);
-  --glow-blue: 0 0 30px rgba(99, 102, 241, 0.5), 0 0 60px rgba(99, 102, 241, 0.2);
-  --glow-purple: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
-  --glow-green: 0 0 30px rgba(16, 245, 156, 0.5), 0 0 60px rgba(16, 245, 156, 0.2);
-  --glow-pink: 0 0 30px rgba(236, 72, 153, 0.5), 0 0 60px rgba(236, 72, 153, 0.2);
+  /* Glow effects - Ultra-neon Gen Z with multiple layers */
+  --glow-orange: 0 0 20px rgba(255, 109, 31, 0.8), 0 0 40px rgba(255, 109, 31, 0.5), 0 0 80px rgba(255, 109, 31, 0.3), 0 0 120px rgba(255, 109, 31, 0.1);
+  --glow-blue: 0 0 20px rgba(94, 143, 255, 0.8), 0 0 40px rgba(94, 143, 255, 0.5), 0 0 80px rgba(94, 143, 255, 0.3);
+  --glow-purple: 0 0 20px rgba(167, 139, 250, 0.8), 0 0 40px rgba(167, 139, 250, 0.5), 0 0 80px rgba(167, 139, 250, 0.3);
+  --glow-green: 0 0 20px rgba(16, 245, 156, 0.8), 0 0 40px rgba(16, 245, 156, 0.5), 0 0 80px rgba(16, 245, 156, 0.3);
+  --glow-pink: 0 0 20px rgba(244, 114, 182, 0.8), 0 0 40px rgba(244, 114, 182, 0.5), 0 0 80px rgba(244, 114, 182, 0.3);
+  --glow-extreme: 0 0 30px rgba(255, 109, 31, 1), 0 0 60px rgba(255, 109, 31, 0.8), 0 0 100px rgba(255, 109, 31, 0.6), 0 0 150px rgba(255, 109, 31, 0.4);
   
   /* Transitions - Apple spring-based */
   --transition-fast: 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -113,7 +121,7 @@
   --z-popover: 50;
   --z-tooltip: 60;
   
-  /* Compact Font sizes - Optimized for density */
+  /* Balanced Font sizes - Clean and readable */
   --font-xs: 0.625rem;
   --font-sm: 0.75rem;
   --font-base: 0.875rem;
@@ -142,19 +150,23 @@
   --blur-lg: 16px;
   --blur-xl: 24px;
   
-  /* Advanced shadows */
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-floating: 0 20px 40px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 20px rgba(255, 107, 26, 0.3);
-  --shadow-glow-blue: 0 0 20px rgba(56, 189, 248, 0.3);
-  --shadow-glow-purple: 0 0 20px rgba(168, 85, 247, 0.3);
+  /* Advanced shadows - Ultra depth */
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  --shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  --shadow-glow: 0 0 30px rgba(255, 109, 31, 0.6), 0 0 60px rgba(255, 109, 31, 0.3), 0 10px 40px rgba(0, 0, 0, 0.2);
+  --shadow-glow-blue: 0 0 30px rgba(94, 143, 255, 0.6), 0 0 60px rgba(94, 143, 255, 0.3);
+  --shadow-glow-purple: 0 0 30px rgba(167, 139, 250, 0.6), 0 0 60px rgba(167, 139, 250, 0.3);
+  --shadow-glow-green: 0 0 30px rgba(16, 245, 156, 0.6), 0 0 60px rgba(16, 245, 156, 0.3);
   
-  /* Gradient variabler - Gen Z gradients */
-  --gradient-primary: linear-gradient(135deg, #ff6b1a, #ff8847, #8B5CF6);
-  --gradient-secondary: linear-gradient(135deg, #6366F1, #A5B4FC, #60A5FA);
-  --gradient-accent: linear-gradient(135deg, #EC4899, #F9A8D4, #ff8847);
-  --gradient-success: linear-gradient(135deg, #10F59C, #5EF3C8, #34D399);
-  --gradient-rainbow: linear-gradient(135deg, #ff6b1a, #6366F1, #8B5CF6, #EC4899, #10F59C);
+  /* Gradient variabler - Ultra-vibrant Gen Z gradients */
+  --gradient-primary: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 25%, #8B5CF6 50%, #EC4899 75%, #FF6D1F 100%);
+  --gradient-secondary: linear-gradient(135deg, #5E8FFF 0%, #8FB3FF 50%, #A78BFA 100%);
+  --gradient-accent: linear-gradient(135deg, #EC4899 0%, #F9A8D4 50%, #FF8F57 100%);
+  --gradient-success: linear-gradient(135deg, #10F59C 0%, #5EF3C8 50%, #34D399 100%);
+  --gradient-rainbow: linear-gradient(135deg, #FF6D1F 0%, #5E8FFF 20%, #8B5CF6 40%, #EC4899 60%, #10F59C 80%, #FF6D1F 100%);
+  --gradient-neon: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 25%, #5E8FFF 50%, #A78BFA 75%, #EC4899 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.1) 100%);
+  --gradient-3d: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.1) 100%);
   
   /* Compact Fluid typography - Optimized for density */
   --fluid-text-sm: clamp(0.625rem, 0.6rem + 0.2vw, 0.8rem);

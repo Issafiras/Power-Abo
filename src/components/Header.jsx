@@ -61,12 +61,18 @@ export default function Header({
 
   return (
     <header className={`header fade-in-down ${isCompact ? 'compact' : ''}`}>
-      {/* Hero Background - Performance optimized (reduced particles) */}
+      {/* Hero Background - Ultra-modern particle system */}
       <div className="hero-background">
-        {/* Reduced particles for better performance */}
+        {/* Enhanced particle system */}
         <div className="particle particle-1"></div>
         <div className="particle particle-2"></div>
+        <div className="particle particle-3"></div>
+        <div className="particle particle-4"></div>
+        <div className="particle particle-5"></div>
+        <div className="particle particle-6"></div>
         <div className="hero-gradient-overlay"></div>
+        <div className="hero-gradient-animated"></div>
+        <div className="hero-mesh-gradient"></div>
       </div>
 
       <div className="container">
@@ -176,21 +182,28 @@ export default function Header({
 
       <style>{`
         .header {
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(var(--blur-lg)) saturate(150%);
-          -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(150%);
-          border-bottom: 0.5px solid var(--glass-border);
-          padding: var(--spacing-2xl) 0;
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.06) 0%, 
+            rgba(255, 255, 255, 0.03) 50%, 
+            rgba(255, 255, 255, 0.05) 100%
+          );
+          backdrop-filter: blur(var(--blur-lg)) saturate(180%) brightness(1.1);
+          -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(180%) brightness(1.1);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+          padding: var(--spacing-xl) 0;
           position: sticky;
           top: 0;
           z-index: var(--z-sticky);
-          transition: background var(--transition-base);
+          transition: all var(--transition-smooth);
           overflow: hidden;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+            0 1px 0 rgba(255, 255, 255, 0.2) inset;
         }
 
         .header.compact {
-          padding: var(--spacing-md) 0;
+          padding: var(--spacing-sm) 0;
           background: rgba(255, 255, 255, 0.06);
           box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
         }
@@ -207,30 +220,78 @@ export default function Header({
 
         .particle {
           position: absolute;
-          background: var(--color-orange);
           border-radius: 50%;
-          opacity: 0.4;
-          animation: float 12s ease-in-out infinite;
-          will-change: transform;
+          opacity: 0.6;
+          animation: floatAdvanced 15s ease-in-out infinite;
+          will-change: transform, opacity;
+          filter: blur(0.5px);
+          box-shadow: 0 0 10px currentColor;
         }
 
         .particle-1 {
-          width: 4px;
-          height: 4px;
-          top: 20%;
-          left: 10%;
+          width: 6px;
+          height: 6px;
+          top: 15%;
+          left: 8%;
           animation-delay: 0s;
           animation-duration: 12s;
+          background: var(--color-orange);
+          color: var(--color-orange);
         }
 
         .particle-2 {
-          width: 6px;
-          height: 6px;
-          top: 60%;
-          left: 85%;
-          animation-delay: 6s;
+          width: 8px;
+          height: 8px;
+          top: 65%;
+          left: 88%;
+          animation-delay: 2s;
           animation-duration: 14s;
           background: var(--color-telenor);
+          color: var(--color-telenor);
+        }
+
+        .particle-3 {
+          width: 5px;
+          height: 5px;
+          top: 40%;
+          left: 25%;
+          animation-delay: 4s;
+          animation-duration: 16s;
+          background: var(--color-cbb);
+          color: var(--color-cbb);
+        }
+
+        .particle-4 {
+          width: 7px;
+          height: 7px;
+          top: 80%;
+          left: 45%;
+          animation-delay: 6s;
+          animation-duration: 13s;
+          background: var(--color-telmore);
+          color: var(--color-telmore);
+        }
+
+        .particle-5 {
+          width: 4px;
+          height: 4px;
+          top: 25%;
+          left: 70%;
+          animation-delay: 8s;
+          animation-duration: 15s;
+          background: var(--color-orange-light);
+          color: var(--color-orange-light);
+        }
+
+        .particle-6 {
+          width: 6px;
+          height: 6px;
+          top: 55%;
+          left: 15%;
+          animation-delay: 10s;
+          animation-duration: 17s;
+          background: var(--color-success);
+          color: var(--color-success);
         }
 
         .hero-gradient-overlay {
@@ -240,25 +301,77 @@ export default function Header({
           right: 0;
           bottom: 0;
           background: radial-gradient(
-            ellipse at center,
-            rgba(255, 107, 26, 0.05) 0%,
-            transparent 70%
+            ellipse at 30% 40%,
+            rgba(255, 109, 31, 0.12) 0%,
+            transparent 50%
           );
-          opacity: 0.8;
+          opacity: 0.9;
+          animation: pulseGlow 4s ease-in-out infinite;
         }
 
-        @keyframes float {
+        .hero-gradient-animated {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: var(--gradient-neon);
+          background-size: 200% 200%;
+          opacity: 0.08;
+          animation: gradientFlow 8s ease infinite;
+          mix-blend-mode: overlay;
+        }
+
+        .hero-mesh-gradient {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: 
+            radial-gradient(circle at 20% 30%, rgba(94, 143, 255, 0.1) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(167, 139, 250, 0.1) 0%, transparent 40%),
+            radial-gradient(circle at 50% 50%, rgba(255, 109, 31, 0.08) 0%, transparent 50%);
+          opacity: 0.6;
+          animation: meshPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+          0%, 100% { opacity: 0.9; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        @keyframes gradientFlow {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes meshPulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 0.8; }
+        }
+
+        @keyframes floatAdvanced {
           0%, 100% {
-            transform: translateY(0px) translateX(0px) rotate(0deg);
+            transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+            opacity: 0.6;
           }
-          25% {
-            transform: translateY(-20px) translateX(10px) rotate(90deg);
+          20% {
+            transform: translateY(-25px) translateX(15px) rotate(72deg) scale(1.2);
+            opacity: 0.8;
           }
-          50% {
-            transform: translateY(-10px) translateX(-5px) rotate(180deg);
+          40% {
+            transform: translateY(-15px) translateX(-10px) rotate(144deg) scale(0.9);
+            opacity: 0.5;
           }
-          75% {
-            transform: translateY(-30px) translateX(15px) rotate(270deg);
+          60% {
+            transform: translateY(-35px) translateX(20px) rotate(216deg) scale(1.1);
+            opacity: 0.9;
+          }
+          80% {
+            transform: translateY(-10px) translateX(-15px) rotate(288deg) scale(1);
+            opacity: 0.7;
           }
         }
 
@@ -268,19 +381,15 @@ export default function Header({
           bottom: -1px;
           left: 0;
           right: 0;
-          height: 3px;
-          background: linear-gradient(90deg, 
-            var(--color-orange), 
-            var(--color-telenor),
-            var(--color-cbb),
-            var(--color-orange)
-          );
-          background-size: 200% 100%;
-          animation: gradientFlow 3s ease infinite;
-          opacity: 0.6;
+          height: 4px;
+          background: var(--gradient-rainbow);
+          background-size: 300% 100%;
+          animation: gradientFlowHeader 4s ease infinite;
+          opacity: 0.8;
+          box-shadow: 0 0 20px rgba(255, 109, 31, 0.5);
         }
 
-        @keyframes gradientFlow {
+        @keyframes gradientFlowHeader {
           0% { background-position: 0% 0%; }
           50% { background-position: 100% 0%; }
           100% { background-position: 0% 0%; }

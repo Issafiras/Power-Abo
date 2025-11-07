@@ -258,18 +258,40 @@ export default function PlanCard({
           flex-direction: column;
           padding: var(--spacing-xl);
           gap: var(--spacing-md);
-          transition: transform var(--transition-base), box-shadow var(--transition-base);
+          transition: all var(--transition-smooth);
           cursor: pointer;
+          transform-style: preserve-3d;
+          perspective: 1000px;
+          position: relative;
+        }
+
+        .plan-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: var(--gradient-glass);
+          opacity: 0;
+          transition: opacity var(--transition-smooth);
+          border-radius: var(--radius-lg);
+          pointer-events: none;
+          z-index: -1;
         }
 
         .plan-card:hover {
-          transform: translateY(-4px);
+          transform: translateY(-12px) rotateX(3deg) rotateY(2deg) scale(1.03);
           z-index: 10;
-          will-change: transform;
+          will-change: transform, box-shadow;
+        }
+
+        .plan-card:hover::before {
+          opacity: 0.4;
         }
 
         .plan-card:active {
-          transform: translateY(-2px) scale(0.98);
+          transform: translateY(-6px) rotateX(1deg) scale(0.99);
           transition: transform 100ms var(--ease-apple);
         }
 
@@ -279,6 +301,13 @@ export default function PlanCard({
           align-items: center;
           padding-bottom: var(--spacing-sm);
           border-bottom: 2px solid;
+          position: relative;
+          transition: all var(--transition-base);
+        }
+
+        .plan-card:hover .plan-header {
+          transform: translateX(4px);
+          border-bottom-width: 3px;
         }
 
         .plan-provider {
@@ -310,6 +339,12 @@ export default function PlanCard({
 
         .plan-pricing {
           padding: var(--spacing-md) 0;
+          position: relative;
+          transition: all var(--transition-base);
+        }
+
+        .plan-card:hover .plan-pricing {
+          transform: scale(1.05);
         }
 
         .price-intro,
@@ -322,6 +357,13 @@ export default function PlanCard({
         .price-amount {
           font-size: var(--font-3xl);
           font-weight: var(--font-extrabold);
+          transition: all var(--transition-base);
+          display: inline-block;
+        }
+
+        .plan-card:hover .price-amount {
+          transform: scale(1.1);
+          text-shadow: 0 0 20px currentColor;
         }
 
         .price-period {
@@ -369,15 +411,40 @@ export default function PlanCard({
           position: relative;
           overflow: hidden;
           border-radius: var(--radius-lg);
+          transform-style: preserve-3d;
+        }
+
+        .plan-add-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          transition: left 0.6s ease;
+        }
+
+        .plan-add-btn:hover::before {
+          left: 100%;
         }
 
         .plan-add-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(255, 107, 26, 0.4);
+          transform: translateY(-4px) rotateX(5deg) scale(1.05);
+          box-shadow: 
+            var(--glow-extreme),
+            0 12px 40px rgba(255, 109, 31, 0.6),
+            0 0 60px rgba(255, 109, 31, 0.4);
+          filter: brightness(1.1);
         }
         
         .plan-add-btn:active {
-          transform: translateY(0) scale(0.98);
+          transform: translateY(-1px) rotateX(2deg) scale(0.98);
           transition: transform 100ms var(--ease-apple);
         }
 

@@ -26,6 +26,36 @@ html {
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
   scroll-padding-top: 100px;
+  overflow-x: hidden;
+}
+
+/* Smooth scroll with momentum */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+html::-webkit-scrollbar {
+  width: 12px;
+}
+
+html::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-neon);
+  box-shadow: 0 0 10px rgba(255, 109, 31, 0.5);
 }
 
 body {
@@ -36,12 +66,14 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
-  font-feature-settings: 'kern' 1;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.011em;
   font-variant-ligatures: common-ligatures;
+  font-weight: 400;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body::before {
@@ -52,20 +84,61 @@ body::before {
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 20% 50%, rgba(255, 107, 26, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(94, 143, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 90%, rgba(167, 139, 250, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 60% 20%, rgba(244, 114, 182, 0.06) 0%, transparent 50%);
+    radial-gradient(circle at 20% 50%, rgba(255, 109, 31, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(94, 143, 255, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 40% 90%, rgba(167, 139, 250, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 60% 20%, rgba(244, 114, 182, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(16, 245, 156, 0.08) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
-  animation: gradientShift 60s ease infinite;
-  opacity: 0.6;
-  will-change: opacity, transform;
+  animation: gradientShiftAdvanced 80s ease infinite;
+  opacity: 0.7;
+  will-change: opacity, transform, background-position;
 }
 
-@keyframes gradientShift {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-neon);
+  background-size: 400% 400%;
+  opacity: 0.03;
+  animation: gradientFlowBackground 20s ease infinite;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: overlay;
+}
+
+@keyframes gradientShiftAdvanced {
+  0%, 100% { 
+    opacity: 0.7; 
+    transform: scale(1) rotate(0deg);
+    background-position: 0% 0%, 100% 100%, 50% 50%, 50% 50%, 50% 50%;
+  }
+  25% { 
+    opacity: 0.8; 
+    transform: scale(1.1) rotate(2deg);
+    background-position: 30% 20%, 70% 80%, 60% 40%, 40% 60%, 50% 50%;
+  }
+  50% { 
+    opacity: 0.9; 
+    transform: scale(1.15) rotate(0deg);
+    background-position: 50% 50%, 50% 50%, 70% 30%, 30% 70%, 50% 50%;
+  }
+  75% { 
+    opacity: 0.8; 
+    transform: scale(1.1) rotate(-2deg);
+    background-position: 70% 80%, 30% 20%, 40% 60%, 60% 40%, 50% 50%;
+  }
+}
+
+@keyframes gradientFlowBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes morphBackground {
@@ -101,11 +174,46 @@ body::before {
   z-index: 1;
 }
 
-/* Enhanced Typography with Fluid Scaling */
+/* Advanced animated overlay effects */
+#root::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 30% 40%, rgba(255, 109, 31, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 70% 60%, rgba(94, 143, 255, 0.05) 0%, transparent 40%);
+  animation: meshFloat 15s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+@keyframes meshFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.5;
+  }
+  33% {
+    transform: translate(5%, -5%) rotate(120deg);
+    opacity: 0.7;
+  }
+  66% {
+    transform: translate(-5%, 5%) rotate(240deg);
+    opacity: 0.6;
+  }
+}
+
+/* Premium Typography with Fluid Scaling */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
   margin-bottom: var(--spacing-md);
+  letter-spacing: -0.011em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1 {
