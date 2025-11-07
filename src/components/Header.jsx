@@ -103,53 +103,84 @@ export default function Header({
 
           {/* Kontroller */}
           <div className="header-actions">
-            {/* AI Smart Calculator */}
-            {onSmartCalculatorToggle && (
+            {/* Primære handlinger */}
+            <div className="header-actions-primary">
+              {/* AI Smart Calculator */}
+              {onSmartCalculatorToggle && (
+                <button
+                  onClick={onSmartCalculatorToggle}
+                  className="btn btn-glass btn-sm"
+                  title="Åbn AI Anbefaling System"
+                >
+                  🤖 AI Anbefaling
+                </button>
+              )}
+
+              {/* Præsentation */}
               <button
-                onClick={onSmartCalculatorToggle}
-                className="btn btn-glass btn-sm"
-                title="Åbn AI Anbefaling System"
+                onClick={onPresentationToggle}
+                className="btn btn-premium btn-lg"
+                title="Vis præsentation (Ctrl+P)"
               >
-                🤖 AI Anbefaling
+                📊 Præsentér
               </button>
-            )}
+            </div>
 
-            {/* Kontant rabat toggle */}
-            <button
-              onClick={onToggleCashDiscount}
-              className={`btn btn-glass btn-sm ${showCashDiscount ? 'active' : ''}`}
-              title="Vis/skjul kontant rabat"
-            >
-              💰 Kontant Rabat
-            </button>
+            {/* Sekundære handlinger */}
+            <div className="header-actions-secondary">
+              {/* Kontant rabat toggle */}
+              <button
+                onClick={onToggleCashDiscount}
+                className={`btn btn-glass btn-sm ${showCashDiscount ? 'active' : ''}`}
+                title="Vis/skjul kontant rabat"
+              >
+                💰 Kontant Rabat
+              </button>
 
-            {/* Tema toggle */}
-            <button
-              onClick={onThemeToggle}
-              className="btn btn-icon btn-glass"
-              title="Skift tema (Ctrl+T)"
-              aria-label="Skift tema"
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
+              {/* Tema toggle */}
+              <button
+                onClick={onThemeToggle}
+                className="btn btn-icon btn-glass"
+                title="Skift tema (Ctrl+T)"
+                aria-label="Skift tema"
+              >
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
 
-            {/* Præsentation */}
-            <button
-              onClick={onPresentationToggle}
-              className="btn btn-premium btn-lg"
-              title="Vis præsentation (Ctrl+P)"
-            >
-              📊 Præsentér
-            </button>
+              {/* Reset */}
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="btn btn-gradient-orange btn-sm"
+                title="Nulstil alt (Ctrl+R)"
+              >
+                🔄 Nulstil
+              </button>
+            </div>
 
-            {/* Reset */}
-            <button
-              onClick={() => setShowConfirm(true)}
-              className="btn btn-gradient-orange btn-sm"
-              title="Nulstil alt (Ctrl+R)"
-            >
-              🔄 Nulstil
-            </button>
+            {/* Dækningskort knapper */}
+            <div className="header-coverage-maps">
+              <a
+                href="https://www.telmore.dk/mobilt-bredbaand/daekningskort"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="coverage-map-btn coverage-map-btn-telmore"
+                title="Se Telmore dækningskort"
+              >
+                <span className="btn-icon">📍</span>
+                <span className="btn-text">Telmore Dækning</span>
+              </a>
+              
+              <a
+                href="https://www.telenor.dk/kundeservice/drift-og-dakning/dakning/dakningskort/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="coverage-map-btn coverage-map-btn-telenor"
+                title="Se Telenor/CBB dækningskort"
+              >
+                <span className="btn-icon">📍</span>
+                <span className="btn-text">Telenor/CBB Dækning</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -396,11 +427,18 @@ export default function Header({
         }
 
         .header-content {
-          display: flex;
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
           align-items: center;
-          justify-content: space-between;
           gap: var(--spacing-lg);
           width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+          .header-content {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+          }
         }
 
         .header-logo {
@@ -410,6 +448,15 @@ export default function Header({
           flex: 0 0 auto;
           min-width: 0;
           align-items: flex-start;
+          grid-column: 1;
+        }
+
+        @media (max-width: 1200px) {
+          .header-logo {
+            grid-column: 1;
+            align-items: center;
+            text-align: center;
+          }
         }
 
         .header-logo h1 {
@@ -421,14 +468,20 @@ export default function Header({
           display: flex;
           align-items: center;
           justify-content: center;
-          flex: 1;
           min-width: 0;
-          align-self: center;
           transition: all var(--transition-smooth);
+          grid-column: 2;
         }
 
         .header.compact .header-logo-center {
-          flex: 0 0 auto;
+          grid-column: 2;
+        }
+
+        @media (max-width: 1200px) {
+          .header-logo-center {
+            grid-column: 1;
+            order: -1;
+          }
         }
 
         .app-logo {
@@ -503,9 +556,101 @@ export default function Header({
 
         .header-actions {
           display: flex;
+          flex-direction: column;
+          gap: var(--spacing-sm);
+          align-items: flex-end;
+          flex-shrink: 0;
+          grid-column: 3;
+          justify-self: end;
+        }
+
+        @media (max-width: 1200px) {
+          .header-actions {
+            grid-column: 1;
+            align-items: stretch;
+            width: 100%;
+          }
+        }
+
+        .header-actions-primary {
+          display: flex;
           gap: var(--spacing-sm);
           align-items: center;
-          flex-shrink: 0;
+        }
+
+        .header-actions-secondary {
+          display: flex;
+          gap: var(--spacing-sm);
+          align-items: center;
+        }
+
+        .header-coverage-maps {
+          display: flex;
+          gap: var(--spacing-sm);
+          align-items: center;
+          margin-top: var(--spacing-sm);
+          padding-top: var(--spacing-sm);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .coverage-map-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-xs);
+          padding: var(--spacing-xs) var(--spacing-sm);
+          border-radius: var(--radius-md);
+          text-decoration: none;
+          font-weight: var(--font-semibold);
+          font-size: var(--font-xs);
+          transition: all var(--transition-base);
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .coverage-map-btn-telmore {
+          background: linear-gradient(135deg, #f3b2d0, #e89fc0);
+          color: #002788;
+          border: 2px solid #002788;
+          box-shadow: 0 0 15px rgba(243, 178, 208, 0.4);
+        }
+
+        .coverage-map-btn-telmore:hover {
+          background: linear-gradient(135deg, #e89fc0, #f3b2d0);
+          box-shadow: 0 4px 20px rgba(0, 39, 136, 0.4);
+          transform: translateY(-2px);
+        }
+
+        .coverage-map-btn-telenor {
+          background: linear-gradient(135deg, #0207b2, #3b4fdb);
+          color: white;
+          border: 2px solid #0207b2;
+          box-shadow: 0 0 15px rgba(2, 7, 178, 0.4);
+        }
+
+        .coverage-map-btn-telenor:hover {
+          background: linear-gradient(135deg, #3b4fdb, #1a3dd8);
+          box-shadow: 0 4px 20px rgba(2, 7, 178, 0.5);
+          transform: translateY(-2px);
+        }
+
+        .coverage-map-btn:active {
+          transform: translateY(0);
+        }
+
+        .coverage-map-btn-telmore:active,
+        .coverage-map-btn-telenor:active {
+          transform: translateY(0);
+        }
+
+        .coverage-map-btn .btn-icon {
+          font-size: var(--font-sm);
+        }
+
+        .coverage-map-btn .btn-text {
+          font-size: var(--font-xs);
+          white-space: nowrap;
         }
 
         .header.compact .header-actions .btn-lg {
@@ -558,23 +703,12 @@ export default function Header({
           }
 
           .header-content {
-            flex-direction: column;
-            align-items: stretch;
+            grid-template-columns: 1fr;
             gap: var(--spacing-md);
-          }
-
-          .header-logo {
-            text-align: center;
-            align-items: center;
           }
 
           .header-logo h1 {
             font-size: var(--font-2xl);
-          }
-
-          .header-logo-center {
-            order: -1;
-            margin-bottom: var(--spacing-sm);
           }
 
           .app-logo {
@@ -598,8 +732,31 @@ export default function Header({
           }
 
           .header-actions {
+            flex-direction: row;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
+            width: 100%;
+          }
+
+          .header-actions-primary,
+          .header-actions-secondary {
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+          }
+
+          .header-coverage-maps {
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            margin-top: var(--spacing-xs);
+            padding-top: var(--spacing-xs);
+          }
+
+          .coverage-map-btn {
+            flex: 1;
+            min-width: 140px;
           }
 
           .header-actions .btn:not(.btn-icon) {
