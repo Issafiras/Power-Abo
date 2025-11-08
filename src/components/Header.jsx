@@ -696,77 +696,155 @@ export default function Header({
 
         @media (max-width: 900px) {
           .header {
-            padding: var(--spacing-lg) 0;
+            padding: var(--spacing-md) 0;
+            backdrop-filter: blur(8px) saturate(120%) !important;
+            -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
           }
           .header.compact {
-            padding: var(--spacing-sm) 0;
+            padding: var(--spacing-xs) 0;
+          }
+
+          /* Deaktiver alle header animationer på mobil */
+          .header::before {
+            animation: none !important;
+            opacity: 0.3 !important;
+          }
+
+          .hero-background {
+            display: none !important;
+          }
+
+          .hero-gradient-overlay,
+          .hero-gradient-animated,
+          .hero-mesh-gradient {
+            display: none !important;
           }
 
           .header-content {
             grid-template-columns: 1fr;
-            gap: var(--spacing-md);
+            gap: var(--spacing-sm);
+          }
+
+          .header-logo {
+            order: 2;
+            text-align: center;
+          }
+
+          .header-logo p {
+            font-size: var(--font-xs);
+            margin-bottom: var(--spacing-xs);
           }
 
           .header-logo h1 {
-            font-size: var(--font-2xl);
+            font-size: var(--font-xl);
+          }
+
+          .header-logo-center {
+            order: 1;
+            margin-bottom: var(--spacing-xs);
           }
 
           .app-logo {
-            height: 140px;
-            max-width: 500px;
+            height: 100px;
+            max-width: 400px;
             margin: 0 auto;
+            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3)) !important;
+          }
+          .app-logo:hover {
+            transform: none !important;
           }
           .header.compact .app-logo {
-            height: 70px;
-            max-width: 300px;
+            height: 60px;
+            max-width: 250px;
           }
 
           .hero-subtitle {
             justify-content: center;
             flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-xs);
           }
 
           .hero-subtitle .badge {
-            font-size: 10px;
-            padding: 4px 8px;
+            font-size: 9px;
+            padding: 3px 6px;
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
           }
 
           .header-actions {
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
+            order: 3;
+            flex-direction: column;
+            gap: var(--spacing-xs);
             width: 100%;
+            margin-top: var(--spacing-sm);
           }
 
           .header-actions-primary,
           .header-actions-secondary {
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-xs);
             width: 100%;
+          }
+
+          .header-actions .btn {
+            width: 100%;
+            min-height: 44px;
+            font-size: var(--font-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+          }
+
+          .header-actions .btn-icon {
+            min-width: 44px;
+            min-height: 44px;
           }
 
           .header-coverage-maps {
-            flex-wrap: wrap;
-            justify-content: center;
+            order: 4;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-xs);
             width: 100%;
             margin-top: var(--spacing-xs);
             padding-top: var(--spacing-xs);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
           }
 
           .coverage-map-btn {
-            flex: 1;
-            min-width: 140px;
+            width: 100%;
+            min-height: 40px;
+            font-size: var(--font-xs);
+            padding: var(--spacing-xs);
           }
 
-          .header-actions .btn:not(.btn-icon) {
-            flex: 1;
-            min-width: 120px;
+          .coverage-map-btn:hover {
+            transform: none !important;
           }
 
-          /* Reducer partikel animation på mobile */
+          /* Deaktiver partikel animation på mobile */
           .particle {
-            display: none;
+            display: none !important;
+          }
+
+          /* Simplificer modal på mobil */
+          .modal-overlay {
+            padding: var(--spacing-md);
+          }
+
+          .modal-content {
+            padding: var(--spacing-lg);
+            max-width: 100%;
+          }
+
+          .modal-actions {
+            flex-direction: column;
+            gap: var(--spacing-sm);
+          }
+
+          .modal-actions .btn {
+            width: 100%;
           }
         }
       `}</style>

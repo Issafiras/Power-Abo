@@ -699,6 +699,26 @@ a:hover {
   .glow-animation {
     animation: none !important;
   }
+  
+  /* Deaktiver header animationer på mobil */
+  .header.fade-in-down {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Deaktiver logo animationer */
+  .app-logo.bounce-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Reducer header backdrop-filter yderligere */
+  .header {
+    backdrop-filter: blur(8px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
+  }
 }
 
 /* Enhanced Utility: Smooth reveal on scroll */
