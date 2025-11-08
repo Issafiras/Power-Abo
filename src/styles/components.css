@@ -1023,42 +1023,91 @@
     min-height: 48px;
   }
 
-  /* Reduce animations on mobile for performance */
+  /* Ultra simple animations on mobile - næsten ingen animationer */
   .stagger-item {
-    animation: fadeIn var(--duration-fast) ease-out forwards;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
   
-  /* Deaktiver komplekse glass-card animationer på mobil */
+  /* Deaktiver ALLE glass-card animationer på mobil */
   .glass-card::before {
-    animation: none !important;
+    display: none !important;
   }
   
   .glass-card::after {
     display: none !important;
   }
   
-  /* Reducer button animationer */
-  .btn-premium {
-    animation: none !important;
-  }
-  
-  .btn-premium::before {
+  /* Fjern alle button pseudo-elementer */
+  .btn-premium::before,
+  .btn-premium::after,
+  .btn-gradient-orange::after,
+  .btn::before {
     display: none !important;
   }
   
-  /* Deaktiver shimmer effekter */
+  /* Deaktiver alle shimmer effekter */
   .premium-shimmer {
     animation: none !important;
   }
   
-  /* Reducer progress bar animationer */
+  /* Deaktiver progress bar animationer */
   .progress-bar-fill::after {
+    display: none !important;
+  }
+  
+  /* Fjern ALLE hover effekter på glass-card */
+  .glass-card:hover::before,
+  .glass-card:hover::after {
+    display: none !important;
+    opacity: 0 !important;
+  }
+  
+  /* Simplificer glass-card hover - kun minimal border change */
+  .glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    transform: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  /* Simplificer button hover - kun opacity change */
+  .btn-primary:hover:not(:disabled),
+  .btn-secondary:hover:not(:disabled),
+  .btn-glass:hover:not(:disabled) {
+    opacity: 0.9 !important;
+    transform: none !important;
+  }
+  
+  /* Deaktiver ripple effekter */
+  .btn.is-rippling::before {
+    display: none !important;
+  }
+  
+  /* Deaktiver loading spinner animationer */
+  .spinner {
     animation: none !important;
   }
   
-  /* Deaktiver komplekse hover effekter */
-  .glass-card:hover::before {
-    opacity: 0 !important;
+  /* Simplificer loading dots */
+  .loading-dots span {
+    animation: none !important;
+    opacity: 0.5 !important;
+  }
+  
+  /* Deaktiver toast animationer */
+  .toast {
+    animation: none !important;
+  }
+  
+  /* Deaktiver empty state animationer */
+  .empty-state-icon {
+    animation: none !important;
+  }
+  
+  .empty-state:hover .empty-state-icon {
+    transform: none !important;
+    filter: none !important;
   }
 }
 

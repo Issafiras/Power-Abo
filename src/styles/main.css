@@ -584,70 +584,120 @@ a:hover {
   }
 }
 
-/* Mobile performance optimizations - Fix flimmer/flakken */
+/* Mobile performance optimizations - Fix flimmer/flakken - Ultra simple */
 @media (max-width: 900px) {
-  /* Deaktiver tunge baggrunds-animationer på mobil */
+  /* Deaktiver alle baggrunds-animationer på mobil */
   body::before {
     animation: none !important;
     will-change: auto !important;
     transform: none !important;
-    opacity: 0.5 !important;
+    opacity: 0.4 !important;
   }
   
   body::after {
     animation: none !important;
-    opacity: 0.02 !important;
+    opacity: 0.01 !important;
   }
   
   /* Deaktiver meshFloat animation på mobil */
   #root::before {
-    animation: none !important;
-    opacity: 0.3 !important;
-    transform: none !important;
+    display: none !important;
   }
   
-  /* Reducer backdrop-filter for bedre performance */
+  /* Reducer backdrop-filter kraftigt for bedre performance */
   .glass-card,
   .glass-card-no-hover {
-    -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-    backdrop-filter: blur(10px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
+    backdrop-filter: blur(8px) saturate(120%) !important;
   }
   
-  /* Fjern will-change properties der kan forårsage flimmer */
+  /* Fjern ALLE hover-effekter på mobil - helt statisk */
   .glass-card:hover {
+    transform: none !important;
     will-change: auto !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+    filter: none !important;
   }
   
-  /* Reducer transform animationer på hover */
-  .glass-card:hover {
-    transform: translateY(-4px) scale(1.01) !important;
-  }
-  
-  /* Simplificer button hover effekter */
-  .btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px) scale(1.02) !important;
+  /* Fjern alle button hover-effekter */
+  .btn-primary:hover:not(:disabled),
+  .btn-secondary:hover:not(:disabled),
+  .btn-glass:hover:not(:disabled),
+  .btn-premium:hover:not(:disabled) {
+    transform: none !important;
     will-change: auto !important;
+    filter: none !important;
   }
   
-  /* Deaktiver komplekse gradient animationer */
-  .btn-primary {
+  /* Deaktiver alle gradient animationer */
+  .btn-primary,
+  .btn-premium {
     animation: none !important;
     background-position: 0% 50% !important;
   }
   
-  /* Reducer shimmer animationer */
+  /* Deaktiver alle fade-in animationer */
+  .fade-in,
+  .fade-in-up,
+  .fade-in-down,
+  .slide-in-right,
+  .slide-in-left,
+  .scale-in,
+  .bounce-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Deaktiver stagger animationer */
+  .stagger-item {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Deaktiver reveal-on-scroll */
+  .reveal-on-scroll,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  
+  /* Reducer shimmer animationer - helt statisk */
   .skeleton {
     animation: none !important;
+    background: var(--glass-bg) !important;
   }
   
   .skeleton::after {
-    animation: none !important;
+    display: none !important;
   }
   
   /* Deaktiver text-gradient animation */
   .text-gradient {
     animation: none !important;
     background-position: 0% 50% !important;
+  }
+  
+  /* Reducer alle transitions til meget korte */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.1s !important;
+    transition-timing-function: ease !important;
+  }
+  
+  /* Deaktiver pulse animationer */
+  .pulse,
+  .pulse-glow {
+    animation: none !important;
+  }
+  
+  /* Deaktiver floating animationer */
+  .floating,
+  .glow-animation {
+    animation: none !important;
   }
 }
 

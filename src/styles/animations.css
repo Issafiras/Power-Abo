@@ -274,34 +274,50 @@
   }
 }
 
-/* Mobile performance optimizations - Deaktiver tunge animationer */
+/* Mobile performance optimizations - Deaktiver ALLE animationer */
 @media (max-width: 900px) {
+  /* Deaktiver ALLE animation klasser */
   .animate-float-advanced,
   .animate-pulse-advanced,
   .animate-glow-pulse,
   .animate-shimmer-advanced,
   .animate-gentle-float,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-scale-in-bounce,
+  .animate-rotate-in,
+  .animate-fade-in-up-advanced,
+  .animate-spring-bounce,
+  .animate-smooth-scale,
   .premium-float,
-  .premium-glow-pulse {
+  .premium-glow-pulse,
+  .scroll-reveal {
     animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
   
-  /* Simplificer hover effekter på mobil */
-  .hover-lift:hover {
-    transform: translateY(-2px) !important;
-  }
-  
-  .hover-scale:hover {
-    transform: scale(1.02) !important;
-  }
-  
+  /* Fjern ALLE hover effekter på mobil - helt statisk */
+  .hover-lift:hover,
+  .hover-scale:hover,
   .hover-rotate:hover {
-    transform: rotate(2deg) scale(1.02) !important;
+    transform: none !important;
   }
   
-  /* Reducer glow effekter */
   .hover-glow:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: none !important;
+  }
+  
+  /* Deaktiver stagger animationer */
+  .stagger-container.is-visible > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Deaktiver magnetic effekter */
+  .magnetic:hover {
+    transform: none !important;
   }
 }
 
