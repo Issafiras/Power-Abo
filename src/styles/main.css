@@ -584,6 +584,73 @@ a:hover {
   }
 }
 
+/* Mobile performance optimizations - Fix flimmer/flakken */
+@media (max-width: 900px) {
+  /* Deaktiver tunge baggrunds-animationer på mobil */
+  body::before {
+    animation: none !important;
+    will-change: auto !important;
+    transform: none !important;
+    opacity: 0.5 !important;
+  }
+  
+  body::after {
+    animation: none !important;
+    opacity: 0.02 !important;
+  }
+  
+  /* Deaktiver meshFloat animation på mobil */
+  #root::before {
+    animation: none !important;
+    opacity: 0.3 !important;
+    transform: none !important;
+  }
+  
+  /* Reducer backdrop-filter for bedre performance */
+  .glass-card,
+  .glass-card-no-hover {
+    -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+    backdrop-filter: blur(10px) saturate(150%) !important;
+  }
+  
+  /* Fjern will-change properties der kan forårsage flimmer */
+  .glass-card:hover {
+    will-change: auto !important;
+  }
+  
+  /* Reducer transform animationer på hover */
+  .glass-card:hover {
+    transform: translateY(-4px) scale(1.01) !important;
+  }
+  
+  /* Simplificer button hover effekter */
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02) !important;
+    will-change: auto !important;
+  }
+  
+  /* Deaktiver komplekse gradient animationer */
+  .btn-primary {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+  
+  /* Reducer shimmer animationer */
+  .skeleton {
+    animation: none !important;
+  }
+  
+  .skeleton::after {
+    animation: none !important;
+  }
+  
+  /* Deaktiver text-gradient animation */
+  .text-gradient {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+}
+
 /* Enhanced Utility: Smooth reveal on scroll */
 .reveal-on-scroll {
   opacity: 0;

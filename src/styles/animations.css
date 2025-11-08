@@ -274,6 +274,37 @@
   }
 }
 
+/* Mobile performance optimizations - Deaktiver tunge animationer */
+@media (max-width: 900px) {
+  .animate-float-advanced,
+  .animate-pulse-advanced,
+  .animate-glow-pulse,
+  .animate-shimmer-advanced,
+  .animate-gentle-float,
+  .premium-float,
+  .premium-glow-pulse {
+    animation: none !important;
+  }
+  
+  /* Simplificer hover effekter på mobil */
+  .hover-lift:hover {
+    transform: translateY(-2px) !important;
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.02) !important;
+  }
+  
+  .hover-rotate:hover {
+    transform: rotate(2deg) scale(1.02) !important;
+  }
+  
+  /* Reducer glow effekter */
+  .hover-glow:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
 /* Animation Delays */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }

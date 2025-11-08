@@ -1027,6 +1027,39 @@
   .stagger-item {
     animation: fadeIn var(--duration-fast) ease-out forwards;
   }
+  
+  /* Deaktiver komplekse glass-card animationer på mobil */
+  .glass-card::before {
+    animation: none !important;
+  }
+  
+  .glass-card::after {
+    display: none !important;
+  }
+  
+  /* Reducer button animationer */
+  .btn-premium {
+    animation: none !important;
+  }
+  
+  .btn-premium::before {
+    display: none !important;
+  }
+  
+  /* Deaktiver shimmer effekter */
+  .premium-shimmer {
+    animation: none !important;
+  }
+  
+  /* Reducer progress bar animationer */
+  .progress-bar-fill::after {
+    animation: none !important;
+  }
+  
+  /* Deaktiver komplekse hover effekter */
+  .glass-card:hover::before {
+    opacity: 0 !important;
+  }
 }
 
 @media (min-width: 901px) {
