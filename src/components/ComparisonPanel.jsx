@@ -82,8 +82,8 @@ export default function ComparisonPanel({
           <p className="text-secondary">Tilføj planer for at se sammenligning</p>
         </div>
         
-        <div className="empty-state scale-in">
-          <div className="empty-state-icon pulse">📊</div>
+        <div className="empty-state animate-scale-in">
+          <div className="empty-state-icon animate-pulse">📊</div>
           <p className="text-secondary">
             Ingen data at sammenligne endnu
           </p>
@@ -219,7 +219,7 @@ export default function ComparisonPanel({
       {/* Sammenligning grid */}
       <div className="comparison-grid">
         {/* Kunde kolonne */}
-        <div className="comparison-column customer slide-in-left">
+        <div className="comparison-column customer animate-slide-in-left">
           <div className="column-header">
             <h3>👤 Kunden</h3>
           </div>
@@ -254,13 +254,13 @@ export default function ComparisonPanel({
         </div>
 
         {/* VS */}
-        <div className="comparison-vs scale-in">
-          <div className="vs-icon pulse">⚡</div>
+        <div className="comparison-vs animate-scale-in">
+          <div className="vs-icon animate-pulse animate-pulse-glow">⚡</div>
           <div className="vs-text">VS</div>
         </div>
 
         {/* Vores tilbud kolonne */}
-        <div className="comparison-column offer slide-in-right">
+        <div className="comparison-column offer animate-slide-in-right">
           <div className="column-header">
             <h3>💼 Vores Tilbud</h3>
           </div>
@@ -316,11 +316,11 @@ export default function ComparisonPanel({
       <div className="divider"></div>
 
       {/* Besparelse */}
-      <div className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'} bounce-in`}>
+      <div className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'} animate-bounce-in`}>
         <div className="savings-label">
           {isPositiveSavings ? '✅ Besparelse' : '⚠️ Mersalg'}
         </div>
-        <div className={`savings-amount ${isPositiveSavings ? 'pulse-glow' : ''}`}>
+        <div className={`savings-amount ${isPositiveSavings ? 'animate-pulse-glow' : ''}`}>
           {isPositiveSavings ? '' : '-'}
           {formatCurrency(Math.abs(savings))}
         </div>

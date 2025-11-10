@@ -15,11 +15,12 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
     <div className="provider-tabs-container">
       {/* Tabs */}
       <div className="tabs">
-        {providers.map(provider => (
+        {providers.map((provider, index) => (
           <button
             key={provider.id}
             onClick={() => onProviderChange(provider.id)}
-            className={`tab ${activeProvider === provider.id ? 'tab-active' : ''}`}
+            className={`tab animate-fade-in ${activeProvider === provider.id ? 'tab-active' : ''}`}
+            style={{ animationDelay: `${index * 50}ms` }}
             aria-pressed={activeProvider === provider.id}
           >
             {provider.logo ? (

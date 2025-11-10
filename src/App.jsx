@@ -595,98 +595,117 @@ function App() {
         <div className="container">
           {/* Top section: Customer situation */}
           <section className="section fade-in-up">
-            <StreamingSelector
-              selectedStreaming={selectedStreaming}
-              onStreamingToggle={handleStreamingToggle}
-              customerMobileCost={customerMobileCost}
-              onMobileCostChange={handleMobileCostChange}
-              numberOfLines={numberOfLines}
-              onNumberOfLinesChange={handleNumberOfLinesChange}
-              originalItemPrice={originalItemPrice}
-              onOriginalItemPriceChange={handleOriginalItemPriceChange}
-              onEANSearch={handleEANSearch}
-              isSearching={isSearching}
-              onAutoSelectSolution={handleAutoSelectSolution}
-              existingBrands={existingBrands}
-              onExistingBrandsChange={setExistingBrands}
-            />
-          </section>
-
-          {/* Middle section: Provider selection & Plans */}
-          <section className="section fade-in-up" style={{ animationDelay: '100ms' }}>
-            <div className="plans-section glass-card">
-              <div className="section-header">
-                <h2>📱 Vælg Mobilabonnementer & Bredbånd</h2>
-                <p className="text-secondary">
-                  Vælg først operatør, derefter de abonnementer der passer bedst til kunden
-                </p>
-              </div>
-
-              <ProviderTabs
-                activeProvider={activeProvider}
-                onProviderChange={setActiveProvider}
-                searchQuery={searchQuery}
-                onSearch={setSearchQuery}
+            <div className="section-shell animate-smooth-scale">
+              <StreamingSelector
+                selectedStreaming={selectedStreaming}
+                onStreamingToggle={handleStreamingToggle}
+                customerMobileCost={customerMobileCost}
+                onMobileCostChange={handleMobileCostChange}
+                numberOfLines={numberOfLines}
+                onNumberOfLinesChange={handleNumberOfLinesChange}
+                originalItemPrice={originalItemPrice}
+                onOriginalItemPriceChange={handleOriginalItemPriceChange}
+                onEANSearch={handleEANSearch}
+                isSearching={isSearching}
+                onAutoSelectSolution={handleAutoSelectSolution}
+                existingBrands={existingBrands}
+                onExistingBrandsChange={setExistingBrands}
               />
-
-              {/* Plans grid */}
-              {activeProvider === 'all' ? (
-                <div className="empty-state">
-                  <div className="empty-state-icon pulse">👆</div>
-                  <p className="text-lg font-semibold">Vælg en operatør</p>
-                  <p className="text-secondary">
-                    Vælg Telmore, Telenor, CBB eller Bredbånd for at se tilgængelige abonnementer
-                  </p>
-                </div>
-              ) : filteredPlans.length > 0 ? (
-                <div className="plans-grid grid grid-cols-3">
-                  {filteredPlans.map((plan, index) => (
-                    <div key={plan.id} className="stagger-item" style={{ animationDelay: `${index * 50}ms` }}>
-                      <PlanCard
-                        plan={plan}
-                        onAddToCart={handleAddToCart}
-                        onCBBMixToggle={handleCBBMixToggle}
-                        onCBBMixCountChange={handleCBBMixCountChange}
-                        cbbMixEnabled={cbbMixEnabled[plan.id] || false}
-                        cbbMixCount={cbbMixCount[plan.id] || 2}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-state-icon">🔍</div>
-                  <p className="text-lg font-semibold">Ingen abonnementer fundet</p>
-                  <p className="text-secondary">
-                    Prøv at ændre søgeordet
-                  </p>
-                </div>
-              )}
             </div>
           </section>
 
+          <div className="section-divider" aria-hidden="true" />
+
+          {/* Middle section: Provider selection & Plans */}
+          <section className="section fade-in-up delay-100">
+            <div className="section-shell animate-smooth-scale">
+              <div className="plans-section">
+                <div className="section-header">
+                  <h2 className="section-header__title">
+                    <span role="img" aria-hidden="true">📱</span>
+                    Vælg Mobilabonnementer &amp; Bredbånd
+                  </h2>
+                  <p className="section-header__subtitle">
+                    Vælg først operatør, derefter de abonnementer der passer bedst til kunden
+                  </p>
+                </div>
+
+                <ProviderTabs
+                  activeProvider={activeProvider}
+                  onProviderChange={setActiveProvider}
+                  searchQuery={searchQuery}
+                  onSearch={setSearchQuery}
+                />
+
+                {/* Plans grid */}
+                {activeProvider === 'all' ? (
+                  <div className="empty-state">
+                    <div className="empty-state-icon pulse">👆</div>
+                    <p className="text-lg font-semibold">Vælg en operatør</p>
+                    <p className="text-secondary">
+                      Vælg Telmore, Telenor, CBB eller Bredbånd for at se tilgængelige abonnementer
+                    </p>
+                  </div>
+                ) : filteredPlans.length > 0 ? (
+                  <div className="plans-grid grid grid-cols-3">
+                    {filteredPlans.map((plan, index) => (
+                      <div
+                        key={plan.id}
+                        className="stagger-item animate-list-item"
+                        style={{ animationDelay: `${index * 60}ms` }}
+                      >
+                        <PlanCard
+                          plan={plan}
+                          onAddToCart={handleAddToCart}
+                          onCBBMixToggle={handleCBBMixToggle}
+                          onCBBMixCountChange={handleCBBMixCountChange}
+                          cbbMixEnabled={cbbMixEnabled[plan.id] || false}
+                          cbbMixCount={cbbMixCount[plan.id] || 2}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-state-icon animate-empty-state">🔍</div>
+                    <p className="text-lg font-semibold">Ingen abonnementer fundet</p>
+                    <p className="text-secondary">
+                      Prøv at ændre søgeordet
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <div className="section-divider" aria-hidden="true" />
+
           {/* Bottom section: Cart & Comparison */}
-          <section className="section fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="grid grid-cols-2">
-              <Cart
-                cartItems={cartItems}
-                onUpdateQuantity={handleUpdateQuantity}
-                onRemove={handleRemoveFromCart}
-              />
-              <ComparisonPanel
-                cartItems={cartItems}
-                selectedStreaming={selectedStreaming}
-                customerMobileCost={customerMobileCost}
-                numberOfLines={numberOfLines}
-                originalItemPrice={originalItemPrice}
-                cashDiscount={cashDiscount}
-                onCashDiscountChange={handleCashDiscountChange}
-                cashDiscountLocked={cashDiscountLocked}
-                onCashDiscountLockedChange={setCashDiscountLocked}
-                autoAdjust={autoAdjust}
-                onAutoAdjustChange={setAutoAdjust}
-                showCashDiscount={showCashDiscount}
-              />
+          <section className="section fade-in-up delay-200">
+            <div className="grid grid-cols-2 gap-lg">
+              <div className="section-shell section-shell--nest animate-list-item">
+                <Cart
+                  cartItems={cartItems}
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onRemove={handleRemoveFromCart}
+                />
+              </div>
+              <div className="section-shell section-shell--nest animate-list-item delay-100">
+                <ComparisonPanel
+                  cartItems={cartItems}
+                  selectedStreaming={selectedStreaming}
+                  customerMobileCost={customerMobileCost}
+                  numberOfLines={numberOfLines}
+                  originalItemPrice={originalItemPrice}
+                  cashDiscount={cashDiscount}
+                  onCashDiscountChange={handleCashDiscountChange}
+                  cashDiscountLocked={cashDiscountLocked}
+                  onCashDiscountLockedChange={setCashDiscountLocked}
+                  autoAdjust={autoAdjust}
+                  onAutoAdjustChange={setAutoAdjust}
+                  showCashDiscount={showCashDiscount}
+                />
+              </div>
             </div>
           </section>
         </div>

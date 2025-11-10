@@ -14,8 +14,8 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAdded
           <p className="text-secondary">Tilføj planer for at se beregninger</p>
         </div>
         
-        <div className="empty-state scale-in">
-          <div className="empty-state-icon pulse">🛒</div>
+        <div className="empty-state animate-scale-in">
+          <div className="empty-state-icon animate-pulse">🛒</div>
           <p className="text-lg font-semibold">Kurven er tom</p>
           <p className="text-secondary">
             Vælg mobilabonnementer fra listen nedenfor
@@ -54,7 +54,7 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAdded
     <div className="cart glass-card-no-hover fade-in-up">
       <div className="section-header">
         <h2>🛒 Kurv</h2>
-        <div className="cart-count badge badge-primary pulse">
+        <div className="cart-count badge badge-primary animate-pulse animate-pulse-glow">
           {cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
           {' '}linje{cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 'r' : ''}
         </div>
@@ -69,7 +69,7 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAdded
           return (
             <div 
               key={item.plan.id} 
-              className={`cart-item fade-in-up ${newlyAddedPlans.has(item.plan.id) ? 'newly-added' : ''}`}
+              className={`cart-item animate-fade-in-up ${newlyAddedPlans.has(item.plan.id) ? 'newly-added' : ''}`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Plan info */}

@@ -19,7 +19,7 @@ export default function PlanCard({
   const brandColor = plan.color || 'var(--color-orange)';
 
   return (
-    <div className={`plan-card glass-card scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd' ? 'telenor-card' : ''} ${plan.provider === 'telmore' || plan.provider === 'telmore-bredbånd' ? 'telmore-card' : ''}`}>
+    <div className={`plan-card glass-card animate-scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd' ? 'telenor-card' : ''} ${plan.provider === 'telmore' || plan.provider === 'telmore-bredbånd' ? 'telmore-card' : ''}`}>
       {plan.provider === 'cbb' ? (
         // CBB specifik struktur
         <div className="refined-product-card__main-card">
@@ -149,7 +149,7 @@ export default function PlanCard({
               )}
             </div>
             {plan.familyDiscount && (
-              <div className="badge badge-telenor bounce-in">👨‍👩‍👧‍👦 Familie</div>
+              <div className="badge badge-telenor animate-bounce-in">👨‍👩‍👧‍👦 Familie</div>
             )}
           </div>
 
@@ -242,7 +242,7 @@ export default function PlanCard({
       {/* Add to cart knap */}
       <button
         onClick={() => onAddToCart(plan)}
-        className="btn btn-premium plan-add-btn"
+        className="btn btn-premium plan-add-btn plan-add-btn--pulse-glow"
         style={{ 
           background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)`,
           boxShadow: `0 0 20px ${brandColor}40`
@@ -434,13 +434,19 @@ export default function PlanCard({
           left: 100%;
         }
 
-        .plan-add-btn:hover {
+        .plan-add-btn:hover,
+        .plan-add-btn--pulse-glow:hover {
           transform: translateY(-4px) rotateX(5deg) scale(1.05);
           box-shadow: 
             var(--glow-extreme),
             0 12px 40px rgba(255, 109, 31, 0.6),
             0 0 60px rgba(255, 109, 31, 0.4);
           filter: brightness(1.1);
+          animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        .plan-add-btn--pulse-glow:hover {
+          animation: pulseGlow 1.5s ease-in-out infinite;
         }
         
         .plan-add-btn:active {

@@ -152,6 +152,116 @@
   }
 }
 
+@keyframes badgeBounce {
+  0% {
+    transform: scale(0.8) translateY(-6px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) translateY(2px);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(0.96) translateY(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes badgePulseGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 109, 31, 0.45),
+      0 0 0 0 rgba(94, 143, 255, 0.3);
+  }
+  60% {
+    box-shadow:
+      0 0 0 12px rgba(255, 109, 31, 0),
+      0 0 0 6px rgba(94, 143, 255, 0);
+  }
+}
+
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.96);
+    filter: blur(6px);
+  }
+  80% {
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes toastExit {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.95);
+  }
+}
+
+@keyframes tooltipReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tooltipPulse {
+  0%, 100% {
+    box-shadow: 0 10px 24px rgba(255, 109, 31, 0.12);
+  }
+  50% {
+    box-shadow: 0 12px 30px rgba(94, 143, 255, 0.22);
+  }
+}
+
+@keyframes emptyStateBreathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  40% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes listItemLift {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cardHoverPulse {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: var(--shadow-glass);
+  }
+  50% {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-floating);
+  }
+}
+
 /* Animation Classes */
 .animate-float-advanced {
   animation: floatAdvanced 6s ease-in-out infinite;
@@ -199,6 +309,63 @@
 
 .animate-smooth-scale {
   animation: smoothScale 0.4s var(--ease-apple);
+}
+
+/* Standard animation classes */
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-out-back);
+}
+
+.animate-bounce-in {
+  animation: bounceIn var(--duration-slow) var(--ease-out-back);
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp var(--duration-normal) var(--ease-in-out-cubic);
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-in-out-cubic);
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.animate-badge-bounce {
+  animation: badgeBounce 550ms var(--ease-out-back);
+}
+
+.animate-badge-pulse {
+  animation: badgePulseGlow 2.6s ease-in-out infinite;
+}
+
+.animate-toast-enter {
+  animation: toastSlideIn 420ms var(--ease-fluid) forwards;
+}
+
+.animate-toast-exit {
+  animation: toastExit 300ms var(--ease-emphasized) forwards;
+}
+
+.animate-tooltip-reveal {
+  animation: tooltipReveal 180ms var(--ease-fluid) forwards;
+}
+
+.animate-tooltip-pulse {
+  animation: tooltipPulse 2s ease-in-out infinite;
+}
+
+.animate-empty-state {
+  animation: emptyStateBreathe 3s ease-in-out infinite;
+}
+
+.animate-list-item {
+  animation: listItemLift 360ms var(--ease-apple) forwards;
+}
+
+.animate-card-hover {
+  animation: cardHoverPulse 4s ease-in-out infinite;
 }
 
 /* Stagger Animation System */
@@ -289,6 +456,15 @@
   .animate-fade-in-up-advanced,
   .animate-spring-bounce,
   .animate-smooth-scale,
+  .animate-badge-bounce,
+  .animate-badge-pulse,
+  .animate-toast-enter,
+  .animate-toast-exit,
+  .animate-tooltip-reveal,
+  .animate-tooltip-pulse,
+  .animate-empty-state,
+  .animate-list-item,
+  .animate-card-hover,
   .premium-float,
   .premium-glow-pulse,
   .scroll-reveal {

@@ -561,7 +561,7 @@ export default function StreamingSelector({
             <button
               key={service.id}
               onClick={() => onStreamingToggle(service.id)}
-              className={`streaming-card glass-card stagger-item ${isSelected ? 'selected' : ''}`}
+              className={`streaming-card glass-card stagger-item animate-fade-in-up ${isSelected ? 'selected' : ''}`}
               style={{ 
                 animationDelay: `${index * 50}ms`,
                 '--brand-color': service.color || 'var(--color-orange)',
@@ -587,7 +587,7 @@ export default function StreamingSelector({
               <div className="streaming-name">{service.name}</div>
               <div className="streaming-price">{formatCurrency(service.price)}/md</div>
               {isSelected && (
-                <div className="streaming-checkmark bounce-in">✓</div>
+                <div className="streaming-checkmark animate-bounce-in animate-pulse">✓</div>
               )}
             </button>
           );
