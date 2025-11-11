@@ -3,9 +3,10 @@
  * Viser tilføjede planer med quantity controls
  */
 
+import React from 'react';
 import { formatCurrency, calculateSixMonthPrice } from '../utils/calculations';
 
-export default function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set() }) {
+function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set() }) {
   if (cartItems.length === 0) {
     return (
       <div className="cart glass-card-no-hover fade-in-up">
@@ -446,4 +447,6 @@ export default function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAdded
     </div>
   );
 }
+
+export default React.memo(Cart);
 

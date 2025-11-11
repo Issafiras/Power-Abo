@@ -7,7 +7,7 @@ import React from 'react';
 import { formatCurrency } from '../utils/calculations';
 import CBBMixSelector from './CBBMixSelector';
 
-export default function PlanCard({ 
+function PlanCard({ 
   plan, 
   onAddToCart, 
   onCBBMixToggle, 
@@ -948,4 +948,6 @@ export default function PlanCard({
     </div>
   );
 }
+
+export default React.memo(PlanCard);
 

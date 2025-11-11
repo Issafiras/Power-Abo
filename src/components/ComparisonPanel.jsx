@@ -3,7 +3,7 @@
  * Sammenligner kundens situation med vores tilbud
  */
 
-import { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   formatCurrency,
   calculateCustomerTotal,
@@ -15,7 +15,7 @@ import {
 } from '../utils/calculations';
 import { getStreamingTotal } from '../data/streamingServices';
 
-export default function ComparisonPanel({
+function ComparisonPanel({
   cartItems,
   selectedStreaming,
   customerMobileCost,
@@ -29,23 +29,43 @@ export default function ComparisonPanel({
   onAutoAdjustChange,
   showCashDiscount
 }) {
-  // Beregn streaming coverage med CBB MIX support
-  const streamingCoverage = checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming);
-  const notIncludedStreamingCost = getStreamingTotal(streamingCoverage.notIncluded);
+  // Beregn streaming coverage med CBB MIX support - memoized
+  const streamingCoverage = useMemo(() => 
+    checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming),
+    [cartItems, selectedStreaming]
+  );
   
-  // Check CBB MIX kompatibilitet
-  const cbbMixCompatibility = checkCBBMixCompatibility(cartItems);
+  const notIncludedStreamingCost = useMemo(() => 
+    getStreamingTotal(streamingCoverage.notIncluded),
+    [streamingCoverage.notIncluded]
+  );
+  
+  // Check CBB MIX kompatibilitet - memoized
+  const cbbMixCompatibility = useMemo(() => 
+    checkCBBMixCompatibility(cartItems),
+    [cartItems]
+  );
 
-  // Kunde totaler - mobiludgifter er allerede totalt (ikke pr. linje)
-  const streamingCost = getStreamingTotal(selectedStreaming);
-  const customerTotals = calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice);
+  // Kunde totaler - mobiludgifter er allerede totalt (ikke pr. linje) - memoized
+  const streamingCost = useMemo(() => 
+    getStreamingTotal(selectedStreaming),
+    [selectedStreaming]
+  );
+  
+  const customerTotals = useMemo(() => 
+    calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice),
+    [customerMobileCost, streamingCost, originalItemPrice]
+  );
 
-  // Vores tilbud (uden kontant rabat for auto-adjust beregning)
-  const ourOfferWithoutDiscount = calculateOurOfferTotal(
-    cartItems,
-    notIncludedStreamingCost,
-    0,
-    originalItemPrice
+  // Vores tilbud (uden kontant rabat for auto-adjust beregning) - memoized
+  const ourOfferWithoutDiscount = useMemo(() => 
+    calculateOurOfferTotal(
+      cartItems,
+      notIncludedStreamingCost,
+      0,
+      originalItemPrice
+    ),
+    [cartItems, notIncludedStreamingCost, originalItemPrice]
   );
 
   // Auto-adjust kontant rabat
@@ -62,16 +82,23 @@ export default function ComparisonPanel({
     }
   }, [autoAdjust, cashDiscountLocked, customerTotals.sixMonth, ourOfferWithoutDiscount.sixMonth, cartItems.length, cashDiscount, onCashDiscountChange]);
 
-  // Vores tilbud med kontant rabat
-  const ourOfferTotals = calculateOurOfferTotal(
-    cartItems,
-    notIncludedStreamingCost,
-    cashDiscount,
-    originalItemPrice
+  // Vores tilbud med kontant rabat - memoized
+  const ourOfferTotals = useMemo(() => 
+    calculateOurOfferTotal(
+      cartItems,
+      notIncludedStreamingCost,
+      cashDiscount,
+      originalItemPrice
+    ),
+    [cartItems, notIncludedStreamingCost, cashDiscount, originalItemPrice]
   );
 
-  // Besparelse
-  const savings = calculateSavings(customerTotals.sixMonth, ourOfferTotals.sixMonth);
+  // Besparelse - memoized
+  const savings = useMemo(() => 
+    calculateSavings(customerTotals.sixMonth, ourOfferTotals.sixMonth),
+    [customerTotals.sixMonth, ourOfferTotals.sixMonth]
+  );
+  
   const isPositiveSavings = savings > 0;
 
   if (cartItems.length === 0) {
@@ -621,4 +648,6 @@ export default function ComparisonPanel({
     </div>
   );
 }
+
+export default React.memo(ComparisonPanel);
 

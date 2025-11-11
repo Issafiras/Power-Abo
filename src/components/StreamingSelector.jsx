@@ -7,11 +7,11 @@ import { streamingServices as staticStreaming } from '../data/streamingServices'
 import { canUseSupabase, getStreamingCached } from '../utils/supabaseData';
 import { formatCurrency } from '../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../utils/powerApi';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { saveSearchLog, saveProductSnapshot } from '../utils/backendApi';
 
-export default function StreamingSelector({ 
+function StreamingSelector({ 
   selectedStreaming, 
   onStreamingToggle,
   customerMobileCost,
@@ -1257,4 +1257,6 @@ export default function StreamingSelector({
     </div>
   );
 }
+
+export default React.memo(StreamingSelector);
 

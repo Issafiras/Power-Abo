@@ -3,7 +3,7 @@
  * Håndterer global state og orkestrerer alle subkomponenter
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Header from './components/Header';
 import StreamingSelector from './components/StreamingSelector';
 import ProviderTabs from './components/ProviderTabs';
@@ -58,6 +58,7 @@ function App() {
   const [showCashDiscount, setShowCashDiscount] = useState(false);
   const [activeProvider, setActiveProvider] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showPresentation, setShowPresentation] = useState(false);
   const [toast, setToast] = useState(null);
   const [remotePlans, setRemotePlans] = useState(null);
@@ -74,6 +75,15 @@ function App() {
   // EAN søgning state
   const [eanSearchResults, setEanSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Debounce search query (300ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Load fra localStorage ved mount
   useEffect(() => {
@@ -102,51 +112,25 @@ function App() {
     setExistingBrands(savedExistingBrands);
   }, []);
 
-  // Gem til localStorage ved ændringer
+  // Batch localStorage operations - gem alle state ændringer i én operation
   useEffect(() => {
     saveCart(cartItems);
-  }, [cartItems]);
-
-  useEffect(() => {
     saveSelectedStreaming(selectedStreaming);
-  }, [selectedStreaming]);
-
-  useEffect(() => {
     saveCustomerMobileCost(customerMobileCost);
-  }, [customerMobileCost]);
-
-  useEffect(() => {
     saveNumberOfLines(numberOfLines);
-  }, [numberOfLines]);
-
-  useEffect(() => {
     saveOriginalItemPrice(originalItemPrice);
-  }, [originalItemPrice]);
-
-  useEffect(() => {
     saveCashDiscount(cashDiscount);
-  }, [cashDiscount]);
-
-  useEffect(() => {
     saveCashDiscountLocked(cashDiscountLocked);
-  }, [cashDiscountLocked]);
-
-  useEffect(() => {
     saveAutoAdjust(autoAdjust);
-  }, [autoAdjust]);
+    saveShowCashDiscount(showCashDiscount);
+    saveExistingBrands(existingBrands);
+  }, [cartItems, selectedStreaming, customerMobileCost, numberOfLines, originalItemPrice, cashDiscount, cashDiscountLocked, autoAdjust, showCashDiscount, existingBrands]);
 
+  // Theme skal også opdatere DOM - separat useEffect
   useEffect(() => {
     saveTheme(theme);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
-
-  useEffect(() => {
-    saveShowCashDiscount(showCashDiscount);
-  }, [showCashDiscount]);
-
-  useEffect(() => {
-    saveExistingBrands(existingBrands);
-  }, [existingBrands]);
 
   // Skjult genvej: Ctrl + Shift + A åbner admin-siden i ny fane
   useEffect(() => {
@@ -293,43 +277,45 @@ function App() {
   }, []);
 
   // Toast handler
-  const showToast = (message, type = 'success') => {
+  const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
-  };
+  }, []);
 
   // Cart handlers
-  const handleAddToCart = (plan) => {
-    const existingItem = cartItems.find(item => item.plan.id === plan.id);
-    
-    if (existingItem) {
-      // Opdater quantity
-      const validation = validateQuantity(existingItem.quantity + 1);
-      if (!validation.valid) {
-        showToast(validation.error, 'error');
-        return;
-      }
+  const handleAddToCart = useCallback((plan) => {
+    setCartItems(prev => {
+      const existingItem = prev.find(item => item.plan.id === plan.id);
       
-      setCartItems(cartItems.map(item =>
-        item.plan.id === plan.id
-          ? { ...item, quantity: validation.value }
-          : item
-      ));
-      showToast(`${plan.name} opdateret i kurven`);
-    } else {
-      // Tilføj ny med CBB Mix data hvis tilgængelig
-      const newItem = { 
-        plan, 
-        quantity: 1,
-        cbbMixEnabled: plan.cbbMixAvailable ? (cbbMixEnabled[plan.id] || false) : false,
-        cbbMixCount: plan.cbbMixAvailable ? (cbbMixCount[plan.id] || 2) : 0
-      };
-      setCartItems([...cartItems, newItem]);
-      showToast(`${plan.name} tilføjet til kurven`);
-    }
-  };
+      if (existingItem) {
+        // Opdater quantity
+        const validation = validateQuantity(existingItem.quantity + 1);
+        if (!validation.valid) {
+          showToast(validation.error, 'error');
+          return prev;
+        }
+        
+        showToast(`${plan.name} opdateret i kurven`);
+        return prev.map(item =>
+          item.plan.id === plan.id
+            ? { ...item, quantity: validation.value }
+            : item
+        );
+      } else {
+        // Tilføj ny med CBB Mix data hvis tilgængelig
+        const newItem = { 
+          plan, 
+          quantity: 1,
+          cbbMixEnabled: plan.cbbMixAvailable ? (cbbMixEnabled[plan.id] || false) : false,
+          cbbMixCount: plan.cbbMixAvailable ? (cbbMixCount[plan.id] || 2) : 0
+        };
+        showToast(`${plan.name} tilføjet til kurven`);
+        return [...prev, newItem];
+      }
+    });
+  }, [cbbMixEnabled, cbbMixCount, showToast]);
 
-  const handleUpdateQuantity = (planId, newQuantity) => {
+  const handleUpdateQuantity = useCallback((planId, newQuantity) => {
     const validation = validateQuantity(newQuantity);
     if (!validation.valid) {
       showToast(validation.error, 'error');
@@ -341,62 +327,66 @@ function App() {
       return;
     }
 
-    setCartItems(cartItems.map(item =>
+    setCartItems(prev => prev.map(item =>
       item.plan.id === planId
         ? { ...item, quantity: validation.value }
         : item
     ));
-  };
+  }, [handleRemoveFromCart]);
 
-  const handleRemoveFromCart = (planId) => {
-    const item = cartItems.find(item => item.plan.id === planId);
-    setCartItems(cartItems.filter(item => item.plan.id !== planId));
-    showToast(`${item?.plan.name} fjernet fra kurven`, 'error');
-  };
+  const handleRemoveFromCart = useCallback((planId) => {
+    setCartItems(prev => {
+      const item = prev.find(item => item.plan.id === planId);
+      if (item) {
+        showToast(`${item.plan.name} fjernet fra kurven`, 'error');
+      }
+      return prev.filter(item => item.plan.id !== planId);
+    });
+  }, [showToast]);
 
   // Streaming handlers
-  const handleStreamingToggle = (serviceId) => {
-    if (selectedStreaming.includes(serviceId)) {
-      setSelectedStreaming(selectedStreaming.filter(id => id !== serviceId));
-    } else {
-      setSelectedStreaming([...selectedStreaming, serviceId]);
-    }
-  };
+  const handleStreamingToggle = useCallback((serviceId) => {
+    setSelectedStreaming(prev => 
+      prev.includes(serviceId)
+        ? prev.filter(id => id !== serviceId)
+        : [...prev, serviceId]
+    );
+  }, []);
 
   // Mobile cost handler
-  const handleMobileCostChange = (value) => {
+  const handleMobileCostChange = useCallback((value) => {
     const validation = validatePrice(value);
     if (validation.valid) {
       setCustomerMobileCost(validation.value);
     }
-  };
+  }, []);
 
   // Number of lines handler
-  const handleNumberOfLinesChange = (value) => {
+  const handleNumberOfLinesChange = useCallback((value) => {
     const validation = validateQuantity(value);
     if (validation.valid) {
       setNumberOfLines(validation.value);
     }
-  };
+  }, []);
 
   // Original item price handler
-  const handleOriginalItemPriceChange = (value) => {
+  const handleOriginalItemPriceChange = useCallback((value) => {
     const validation = validatePrice(value);
     if (validation.valid) {
       setOriginalItemPrice(validation.value);
     }
-  };
+  }, []);
 
   // Cash discount handler
-  const handleCashDiscountChange = (value) => {
+  const handleCashDiscountChange = useCallback((value) => {
     const validation = validatePrice(value);
     if (validation.valid) {
       setCashDiscount(validation.value);
     }
-  };
+  }, []);
 
   // CBB MIX handlers
-  const handleCBBMixToggle = (planId, enabled) => {
+  const handleCBBMixToggle = useCallback((planId, enabled) => {
     setCbbMixEnabled(prev => ({
       ...prev,
       [planId]: enabled
@@ -408,17 +398,17 @@ function App() {
         [planId]: 2 // Reset to default
       }));
     }
-  };
+  }, []);
 
-  const handleCBBMixCountChange = (planId, count) => {
+  const handleCBBMixCountChange = useCallback((planId, count) => {
     setCbbMixCount(prev => ({
       ...prev,
       [planId]: count
     }));
-  };
+  }, []);
 
   // Reset handler
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     resetAll();
     setCartItems([]);
     setSelectedStreaming([]);
@@ -434,15 +424,15 @@ function App() {
     setCbbMixCount({});
     setExistingBrands([]);
     showToast('Alt nulstillet', 'success');
-  };
+  }, [showToast]);
 
   // Theme toggle
-  const handleThemeToggle = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  const handleThemeToggle = useCallback(() => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  }, []);
 
   // Auto-select løsning handler
-  const handleAutoSelectSolution = () => {
+  const handleAutoSelectSolution = useCallback(() => {
     const availablePlans = (remotePlans && remotePlans.length > 0) ? remotePlans : plans;
     const availableStreaming = (remoteStreaming && remoteStreaming.length > 0) ? remoteStreaming : staticStreaming;
     
@@ -497,10 +487,10 @@ function App() {
     } else {
       showToast('Kunne ikke finde en løsning. Prøv at tilføje streaming-tjenester eller mobiludgifter.', 'error');
     }
-  };
+  }, [remotePlans, remoteStreaming, selectedStreaming, customerMobileCost, originalItemPrice, numberOfLines, existingBrands, showToast]);
 
   // EAN søgning handler
-  const handleEANSearch = async (searchResult) => {
+  const handleEANSearch = useCallback(async (searchResult) => {
     setIsSearching(true);
     setEanSearchResults(searchResult);
     
@@ -527,10 +517,10 @@ function App() {
     }
     
     setIsSearching(false);
-  };
+  }, [showToast]);
 
-  // Filtrerede planer
-  const getFilteredPlans = () => {
+  // Filtrerede planer - memoized for performance (bruger debounced search query)
+  const filteredPlans = useMemo(() => {
     const source = (remotePlans && remotePlans.length > 0) ? remotePlans : plans;
     let filtered = activeProvider === 'all'
       ? source
@@ -562,8 +552,8 @@ function App() {
       return true;
     });
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+    if (debouncedSearchQuery.trim()) {
+      const q = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter(plan => (
         (plan.name || '').toLowerCase().includes(q) ||
         (plan.data || '').toLowerCase().includes(q) ||
@@ -574,20 +564,18 @@ function App() {
     }
 
     return filtered;
-  };
-
-  const filteredPlans = getFilteredPlans();
+  }, [remotePlans, activeProvider, debouncedSearchQuery]);
 
   return (
     <div className="app">
       {/* Header */}
       <Header
         onReset={handleReset}
-        onPresentationToggle={() => setShowPresentation(!showPresentation)}
+        onPresentationToggle={useCallback(() => setShowPresentation(prev => !prev), [])}
         theme={theme}
         onThemeToggle={handleThemeToggle}
         showCashDiscount={showCashDiscount}
-        onToggleCashDiscount={() => setShowCashDiscount(!showCashDiscount)}
+        onToggleCashDiscount={useCallback(() => setShowCashDiscount(prev => !prev), [])}
       />
 
       {/* Main content */}
@@ -632,9 +620,9 @@ function App() {
 
                 <ProviderTabs
                   activeProvider={activeProvider}
-                  onProviderChange={setActiveProvider}
+                  onProviderChange={useCallback((provider) => setActiveProvider(provider), [])}
                   searchQuery={searchQuery}
-                  onSearch={setSearchQuery}
+                  onSearch={useCallback((query) => setSearchQuery(query), [])}
                 />
 
                 {/* Plans grid */}
@@ -719,7 +707,7 @@ function App() {
           customerMobileCost={customerMobileCost}
           originalItemPrice={originalItemPrice}
           cashDiscount={cashDiscount}
-          onClose={() => setShowPresentation(false)}
+          onClose={useCallback(() => setShowPresentation(false), [])}
         />
       )}
 
