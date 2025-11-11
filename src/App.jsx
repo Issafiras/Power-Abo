@@ -315,6 +315,16 @@ function App() {
     });
   }, [cbbMixEnabled, cbbMixCount, showToast]);
 
+  const handleRemoveFromCart = useCallback((planId) => {
+    setCartItems(prev => {
+      const item = prev.find(item => item.plan.id === planId);
+      if (item) {
+        showToast(`${item.plan.name} fjernet fra kurven`, 'error');
+      }
+      return prev.filter(item => item.plan.id !== planId);
+    });
+  }, [showToast]);
+
   const handleUpdateQuantity = useCallback((planId, newQuantity) => {
     const validation = validateQuantity(newQuantity);
     if (!validation.valid) {
@@ -332,17 +342,7 @@ function App() {
         ? { ...item, quantity: validation.value }
         : item
     ));
-  }, [handleRemoveFromCart]);
-
-  const handleRemoveFromCart = useCallback((planId) => {
-    setCartItems(prev => {
-      const item = prev.find(item => item.plan.id === planId);
-      if (item) {
-        showToast(`${item.plan.name} fjernet fra kurven`, 'error');
-      }
-      return prev.filter(item => item.plan.id !== planId);
-    });
-  }, [showToast]);
+  }, [handleRemoveFromCart, showToast]);
 
   // Streaming handlers
   const handleStreamingToggle = useCallback((serviceId) => {
