@@ -413,6 +413,9 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     if (plan.business) return false;
     if (plan.type === 'broadband') return false;
     
+    // ALTID ekskluder CBB planer
+    if (plan.provider === 'cbb') return false;
+    
     // Ekskluder planer fra eksisterende brands
     if (excludedProviders && excludedProviders.length > 0) {
       const planProvider = plan.provider || '';
@@ -545,7 +548,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
 
   // Strategi 1: En plan med streaming + voice-only planer til resten
   if (selectedStreaming.length > 0 && sortedStreamingPlans.length > 0 && voiceOnlyPlans.length > 0) {
-    for (const streamingPlan of sortedStreamingPlans.slice(0, 10)) {
+    for (const streamingPlan of sortedStreamingPlans.slice(0, 5)) {
       let streamingLinesNeeded = 1;
       let streamingSlotsAvailable = 0;
       
@@ -701,7 +704,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     });
     
     // Prøv de billigste planer indtil vi finder en med positiv besparelse
-    for (const plan of sortedPlans.slice(0, 10)) {
+    for (const plan of sortedPlans.slice(0, 5)) {
       const testCart = [{
         plan,
         quantity: requiredLines,

@@ -41,14 +41,29 @@ export default function Header({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [onPresentationToggle, onThemeToggle]);
 
-  // Shrink header on scroll for a more compact UI
+  // Shrink header on scroll for a more compact UI - Optimized with throttling
   useEffect(() => {
+    let ticking = false;
+    let lastScrollY = window.scrollY;
+    
     function handleScroll() {
-      const shouldBeCompact = window.scrollY > 24;
-      if (shouldBeCompact !== isCompact) {
-        setIsCompact(shouldBeCompact);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          // Kun opdater hvis scroll position har ændret sig betydeligt (throttle)
+          if (Math.abs(currentScrollY - lastScrollY) > 5) {
+            const shouldBeCompact = currentScrollY > 24;
+            if (shouldBeCompact !== isCompact) {
+              setIsCompact(shouldBeCompact);
+            }
+            lastScrollY = currentScrollY;
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     }
+    
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -104,13 +119,13 @@ export default function Header({
         <div className="app-header__lead">
           <p className="app-header__kicker">Sammenlign mobilabonnementer og streaming-tjenester</p>
           <div className="app-header__badges">
-            <span className="badge badge-tonal animate-badge-bounce animate-badge-pulse">
+            <span className="badge badge-tonal">
               🎯 Professionel værktøj
             </span>
-            <span className="badge badge-tonal animate-badge-bounce">
+            <span className="badge badge-tonal">
               💡 Intelligent sammenligning
             </span>
-            <span className="badge badge-tonal animate-badge-bounce">
+            <span className="badge badge-tonal">
               ⚡ Hurtig og præcis
             </span>
           </div>
@@ -123,7 +138,7 @@ export default function Header({
               <img
                 src={logoSrc}
                 alt="Power Abonnement"
-                className="app-header__logo-image animate-spring-bounce"
+                className="app-header__logo-image"
               />
             );
           })()}

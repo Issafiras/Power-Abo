@@ -3,18 +3,18 @@
  * Håndterer global state og orkestrerer alle subkomponenter
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import Header from './components/Header';
 import StreamingSelector from './components/StreamingSelector';
 import ProviderTabs from './components/ProviderTabs';
 import PlanCard from './components/PlanCard';
 import Cart from './components/Cart';
 import ComparisonPanel from './components/ComparisonPanel';
-import PresentationView from './components/PresentationView';
 import Footer from './components/Footer';
+
+// Lazy load store komponenter
+const PresentationView = lazy(() => import('./components/PresentationView'));
 import { plans } from './data/plans';
-import { canUseSupabase, getPlansCached, getStreamingCached } from './utils/supabaseData';
-import { getAppConfig } from './utils/backendApi';
 import { findBestSolution } from './utils/calculations';
 import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
 import {
@@ -61,9 +61,6 @@ function App() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showPresentation, setShowPresentation] = useState(false);
   const [toast, setToast] = useState(null);
-  const [remotePlans, setRemotePlans] = useState(null);
-  const [remoteStreaming, setRemoteStreaming] = useState(null);
-  const [configLoaded, setConfigLoaded] = useState(false);
   
   // CBB MIX state
   const [cbbMixEnabled, setCbbMixEnabled] = useState({});
@@ -132,84 +129,7 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Skjult genvej: Ctrl + Shift + A åbner admin-siden i ny fane
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const adminSlug = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADMIN_SLUG) || 'admin';
-    const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/';
-    const adminPath = `${baseUrl}${adminSlug}.html`;
-    const handler = (e) => {
-      if (e.ctrlKey && e.shiftKey && String(e.key).toLowerCase() === 'a') {
-        try {
-          const url = new URL(adminPath, window.location.origin).toString();
-          window.open(url, '_blank', 'noopener,noreferrer');
-          e.preventDefault();
-        } catch {}
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
 
-  // Hent planer fra Supabase hvis aktivt
-  useEffect(() => {
-    let mounted = true;
-    if (!canUseSupabase()) return;
-    (async () => {
-      try {
-        const list = await getPlansCached();
-        if (mounted) setRemotePlans(Array.isArray(list) ? list : []);
-      } catch (e) {
-        console.warn('Kunne ikke hente planer fra Supabase:', e?.message || e);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  // Hent streaming-tjenester fra Supabase hvis aktivt
-  useEffect(() => {
-    let mounted = true;
-    if (!canUseSupabase()) return;
-    (async () => {
-      try {
-        const list = await getStreamingCached();
-        if (mounted && Array.isArray(list) && list.length > 0) {
-          setRemoteStreaming(list);
-        }
-      } catch (e) {
-        console.warn('Kunne ikke hente streaming services fra Supabase:', e?.message || e);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  // Hent app-config fra Supabase (feature flags, defaults)
-  useEffect(() => {
-    let mounted = true;
-    if (!canUseSupabase()) { setConfigLoaded(true); return; }
-    (async () => {
-      try {
-        const { ok, data } = await getAppConfig();
-        if (!mounted || !ok || !data) { setConfigLoaded(true); return; }
-
-        // Anvend sikre defaults hvis nøgler ikke findes
-        if (typeof data.default_theme === 'string') {
-          setTheme(prev => prev || data.default_theme);
-        }
-        if (typeof data.default_provider === 'string') {
-          setActiveProvider(prev => (prev === 'all' ? data.default_provider : prev));
-        }
-        if (typeof data.show_cash_discount === 'boolean') {
-          setShowCashDiscount(prev => (prev ?? data.show_cash_discount));
-        }
-      } catch {
-        // Ignorer fejl – app kører videre med lokale defaults
-      } finally {
-        if (mounted) setConfigLoaded(true);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -431,10 +351,15 @@ function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   }, []);
 
+  // Presentation toggle
+  const handlePresentationToggle = useCallback(() => {
+    setShowPresentation(prev => !prev);
+  }, []);
+
   // Auto-select løsning handler
   const handleAutoSelectSolution = useCallback(() => {
-    const availablePlans = (remotePlans && remotePlans.length > 0) ? remotePlans : plans;
-    const availableStreaming = (remoteStreaming && remoteStreaming.length > 0) ? remoteStreaming : staticStreaming;
+    const availablePlans = plans;
+    const availableStreaming = staticStreaming;
     
     // Funktion til at hente streaming-pris
     const getStreamingPrice = (serviceId) => {
@@ -444,13 +369,14 @@ function App() {
     
     // Find bedste løsning - brug numberOfLines som maksimum
     // Ekskluder planer fra eksisterende brands
-    const excludedProviders = existingBrands.map(brand => {
+    // ALTID ekskluder CBB
+    const excludedProviders = ['cbb', ...existingBrands.map(brand => {
       // Konverter brand navn til provider format
       if (brand === 'Telmore') return 'telmore';
       if (brand === 'Telenor') return 'telenor';
       if (brand === 'CBB') return 'cbb';
       return brand.toLowerCase();
-    });
+    })];
     
     const result = findBestSolution(
       availablePlans,
@@ -487,7 +413,7 @@ function App() {
     } else {
       showToast('Kunne ikke finde en løsning. Prøv at tilføje streaming-tjenester eller mobiludgifter.', 'error');
     }
-  }, [remotePlans, remoteStreaming, selectedStreaming, customerMobileCost, originalItemPrice, numberOfLines, existingBrands, showToast]);
+  }, [selectedStreaming, customerMobileCost, originalItemPrice, numberOfLines, existingBrands, showToast]);
 
   // EAN søgning handler
   const handleEANSearch = useCallback(async (searchResult) => {
@@ -521,7 +447,7 @@ function App() {
 
   // Filtrerede planer - memoized for performance (bruger debounced search query)
   const filteredPlans = useMemo(() => {
-    const source = (remotePlans && remotePlans.length > 0) ? remotePlans : plans;
+    const source = plans;
     let filtered = activeProvider === 'all'
       ? source
       : source.filter(p => p.provider === activeProvider);
@@ -564,14 +490,14 @@ function App() {
     }
 
     return filtered;
-  }, [remotePlans, activeProvider, debouncedSearchQuery]);
+  }, [activeProvider, debouncedSearchQuery]);
 
   return (
     <div className="app">
       {/* Header */}
       <Header
         onReset={handleReset}
-        onPresentationToggle={useCallback(() => setShowPresentation(prev => !prev), [])}
+        onPresentationToggle={handlePresentationToggle}
         theme={theme}
         onThemeToggle={handleThemeToggle}
         showCashDiscount={showCashDiscount}
@@ -620,9 +546,9 @@ function App() {
 
                 <ProviderTabs
                   activeProvider={activeProvider}
-                  onProviderChange={useCallback((provider) => setActiveProvider(provider), [])}
+                  onProviderChange={setActiveProvider}
                   searchQuery={searchQuery}
-                  onSearch={useCallback((query) => setSearchQuery(query), [])}
+                  onSearch={setSearchQuery}
                 />
 
                 {/* Plans grid */}
@@ -701,14 +627,16 @@ function App() {
 
       {/* Presentation view */}
       {showPresentation && (
-        <PresentationView
-          cartItems={cartItems}
-          selectedStreaming={selectedStreaming}
-          customerMobileCost={customerMobileCost}
-          originalItemPrice={originalItemPrice}
-          cashDiscount={cashDiscount}
-          onClose={useCallback(() => setShowPresentation(false), [])}
-        />
+        <Suspense fallback={<div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+          <PresentationView
+            cartItems={cartItems}
+            selectedStreaming={selectedStreaming}
+            customerMobileCost={customerMobileCost}
+            originalItemPrice={originalItemPrice}
+            cashDiscount={cashDiscount}
+            onClose={useCallback(() => setShowPresentation(false), [])}
+          />
+        </Suspense>
       )}
 
       {/* Toast notification */}

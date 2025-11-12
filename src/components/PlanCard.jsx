@@ -3,9 +3,11 @@
  * Viser en enkelt mobilplan med features og pris
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { formatCurrency } from '../utils/calculations';
-import CBBMixSelector from './CBBMixSelector';
+
+// Lazy load CBBMixSelector
+const CBBMixSelector = lazy(() => import('./CBBMixSelector'));
 
 function PlanCard({ 
   plan, 
@@ -88,6 +90,7 @@ function PlanCard({
                     src={plan.logo} 
                     alt="Telenor" 
                     className="subscription-card__logo"
+                    loading="lazy"
                   />
                 )}
                 <div className="subscription-card__data-info">
@@ -143,6 +146,7 @@ function PlanCard({
                   src={plan.logo} 
                   alt={plan.provider}
                   className="provider-logo"
+                  loading="lazy"
                 />
               ) : (
                 plan.provider.toUpperCase()
@@ -230,11 +234,13 @@ function PlanCard({
           </div>
           
           {cbbMixEnabled && (
-            <CBBMixSelector
-              selectedCount={cbbMixCount}
-              onCountChange={(count) => onCBBMixCountChange && onCBBMixCountChange(plan.id, count)}
-              cbbMixPricing={plan.cbbMixPricing}
-            />
+            <Suspense fallback={<div style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>Loading...</div>}>
+              <CBBMixSelector
+                selectedCount={cbbMixCount}
+                onCountChange={(count) => onCBBMixCountChange && onCBBMixCountChange(plan.id, count)}
+                cbbMixPricing={plan.cbbMixPricing}
+              />
+            </Suspense>
           )}
         </div>
       )}
@@ -260,8 +266,6 @@ function PlanCard({
           gap: var(--spacing-md);
           transition: all var(--transition-smooth);
           cursor: pointer;
-          transform-style: preserve-3d;
-          perspective: 1000px;
           position: relative;
         }
 
@@ -281,9 +285,8 @@ function PlanCard({
         }
 
         .plan-card:hover {
-          transform: translateY(-12px) rotateX(3deg) rotateY(2deg) scale(1.03);
+          transform: translateY(-4px) scale(1.01);
           z-index: 10;
-          will-change: transform, box-shadow;
         }
 
         .plan-card:hover::before {
@@ -291,7 +294,7 @@ function PlanCard({
         }
 
         .plan-card:active {
-          transform: translateY(-6px) rotateX(1deg) scale(0.99);
+          transform: translateY(-2px) scale(0.99);
           transition: transform 100ms var(--ease-apple);
         }
 
@@ -436,7 +439,7 @@ function PlanCard({
 
         .plan-add-btn:hover,
         .plan-add-btn--pulse-glow:hover {
-          transform: translateY(-4px) rotateX(5deg) scale(1.05);
+          transform: translateY(-2px) scale(1.02);
           box-shadow: 
             var(--glow-extreme),
             0 12px 40px rgba(255, 109, 31, 0.6),
@@ -450,7 +453,7 @@ function PlanCard({
         }
         
         .plan-add-btn:active {
-          transform: translateY(-1px) rotateX(2deg) scale(0.98);
+          transform: translateY(-1px) scale(0.98);
           transition: transform 100ms var(--ease-apple);
         }
 
