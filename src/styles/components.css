@@ -236,29 +236,133 @@
   border-bottom-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Responsive Apple Header */
+/* Responsive Apple Header - Premium Mobile Design for Tech Leaders */
 @media (max-width: 900px) {
   .apple-header {
-    height: 100px;
-}
+    height: 70px;  /* Kompakt men luftig */
+    background: rgba(0, 0, 0, 0.75);  /* Stærkere backdrop for premium look */
+    -webkit-backdrop-filter: saturate(200%) blur(24px);  /* Forbedret blur */
+    backdrop-filter: saturate(200%) blur(24px);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.15);  /* Finere border */
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);  /* Subtle shadow */
+  }
+
+  .apple-header--compact {
+    height: 64px;  /* Endnu mere kompakt ved scroll */
+    background: rgba(0, 0, 0, 0.85);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .apple-header__backdrop {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 100%);
+  }
 
   .apple-header__container {
-    padding: 0 16px;
+    max-width: 100% !important;  /* Fuld bredde på mobil */
+    padding: 0 var(--spacing-md);  /* Bedre side-padding: 20px */
+    height: 100%;
+    gap: var(--spacing-sm);  /* Bedre spacing mellem elementer */
+  }
+
+  /* Logo - Optimal størrelse for mobil */
+  .apple-header__logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .apple-header__logo-image {
-    height: 96px;
+    height: 44px !important;  /* Optimal størrelse - ikke for stor */
+    max-width: 160px;  /* Max bredde for at undgå overflow */
+    object-fit: contain;
+    transition: transform var(--transition-fast);
+  }
+
+  .apple-header__logo-link:active .apple-header__logo-image {
+    transform: scale(0.95);  /* Subtle press feedback */
+  }
+
+  /* Navigation Links - Bedre touch targets */
+  .apple-header__nav-links {
+    flex: 0 0 auto;
+    margin-right: auto;
   }
 
   .apple-header__nav-link {
-    font-size: 11px;
-    padding: 0 8px;
+    font-size: var(--font-sm) !important;  /* Større tekst: 14px */
+    font-weight: 500;
+    padding: var(--spacing-sm) var(--spacing-md) !important;  /* Bedre padding */
+    min-height: 44px !important;  /* WCAG AAA touch target */
+    border-radius: var(--radius-md);  /* Rounded corners */
+    transition: all var(--transition-fast);
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .apple-header__nav-link:active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0.98);
+  }
+
+  /* Actions - Premium touch targets */
+  .apple-header__actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);  /* Tættere spacing mellem ikoner */
+    margin-left: auto;
   }
 
   .apple-header__action-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
+    width: 44px !important;  /* WCAG AAA touch target */
+    height: 44px !important;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 18px !important;  /* Større ikoner */
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);  /* Subtle background */
+    border: 0.5px solid rgba(255, 255, 255, 0.1);  /* Subtle border */
+    transition: all var(--transition-fast);
+    color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .apple-header__action-icon:active {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(0.95);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .apple-header__icon-text {
+    font-size: var(--font-xs) !important;  /* 12px */
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  /* Sikr logo er centreret korrekt når nav links og actions er der */
+  .apple-header__logo {
+    z-index: 1;  /* Logo skal være over andre elementer */
+  }
+
+  /* Forbedret layout balance - sikr logo ikke overlapper med actions */
+  .apple-header__container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Sikr nav links ikke tager for meget plads */
+  .apple-header__nav-links {
+    position: relative;
+    z-index: 0;
+  }
+
+  /* Sikr actions ikke tager for meget plads */
+  .apple-header__actions {
+    position: relative;
+    z-index: 0;
   }
 }
 
@@ -927,16 +1031,99 @@
     width: 100%;
   }
 
+  /* Forbedrede touch targets på mobil - WCAG AAA (minimum 44px) */
+  .btn {
+    min-height: 48px !important;  /* Øget til 48px for bedre touch targets */
+    min-width: 48px !important;
+    padding: var(--spacing-md) var(--spacing-lg) !important;  /* Øget padding */
+    font-size: var(--font-base) !important;  /* Større tekst for bedre læsbarhed */
+    gap: var(--spacing-sm) !important;
+  }
+
   .app-header__actions-primary .btn {
-    min-height: 40px;
-    font-size: var(--font-xs);
-    padding: var(--spacing-xs) var(--spacing-md);
+    min-height: 48px !important;  /* WCAG AAA touch target */
+    font-size: var(--font-base) !important;  /* Større tekst */
+    padding: var(--spacing-md) var(--spacing-lg) !important;
     width: 100%;
   }
 
   .app-header__actions-secondary .btn {
-    min-height: 36px;
-    min-width: 36px;
+    min-height: 48px !important;  /* WCAG AAA touch target */
+    min-width: 48px !important;
+    font-size: var(--font-lg) !important;  /* Større ikoner */
+  }
+  
+  /* Forbedrede buttons i kort */
+  .plan-add-btn,
+  .cart-item .btn,
+  .quantity-btn {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    font-size: var(--font-base) !important;
+  }
+  
+  /* Forbedret input fields på mobil */
+  .input {
+    min-height: 48px !important;  /* WCAG AAA touch target */
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    font-size: var(--font-base) !important;
+  }
+  
+  /* Forbedret checkbox på mobil */
+  .checkbox {
+    min-width: 48px !important;
+    min-height: 48px !important;
+  }
+  
+  /* Forbedret tabs på mobil */
+  .tab {
+    min-height: 48px !important;
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    font-size: var(--font-base) !important;
+  }
+  
+  /* Forbedrede section headers på mobil */
+  .section-header {
+    margin-bottom: var(--spacing-lg) !important;  /* Øget spacing */
+    padding-bottom: var(--spacing-md) !important;
+  }
+  
+  .section-header__title {
+    font-size: var(--font-3xl) !important;  /* Større titel: 28px */
+    margin-bottom: var(--spacing-md) !important;
+    line-height: 1.2 !important;  /* Tættere line-height for bedre læsbarhed */
+    gap: var(--spacing-sm) !important;
+  }
+  
+  .section-header__subtitle {
+    font-size: var(--font-lg) !important;  /* Større undertitel: 18px */
+    line-height: 1.5 !important;
+    margin-top: var(--spacing-xs) !important;
+  }
+  
+  /* Forbedret glass cards på mobil */
+  .glass-card,
+  .glass-card-no-hover {
+    padding: var(--spacing-lg) !important;  /* Øget padding i kort */
+    border-radius: var(--radius-xl) !important;
+  }
+  
+  /* Forbedret streaming cards på mobil */
+  .streaming-card {
+    padding: var(--spacing-lg) !important;
+    min-height: 100px !important;  /* Mindre højde for bedre grid layout */
+  }
+  
+  /* Forbedret plan cards på mobil */
+  .plan-card {
+    padding: var(--spacing-lg) !important;
+  }
+  
+  /* Forbedret cart items på mobil */
+  .cart-item {
+    padding: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-md) !important;
   }
 
   .app-header__maps {
@@ -956,8 +1143,9 @@
 
 
   .section-shell {
-    padding: clamp(1.25rem, 4vw, 1.75rem);
+    padding: var(--spacing-lg);  /* Øget padding: 28px for bedre indre luft */
     border-radius: var(--radius-xl);
+    margin-bottom: var(--spacing-md);  /* Ekstra spacing mellem sektioner */
   }
 
   .section-shell:hover {

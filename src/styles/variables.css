@@ -303,15 +303,26 @@
   }
 }
 
-/* Responsive font size scaling */
+/* Responsive font size scaling - Forbedret læsbarhed på mobil */
 @media (max-width: 900px) {
   :root {
-    --font-base: 0.8125rem;
-    --font-xl: 1rem;
-    --font-2xl: 1.25rem;
-    --font-3xl: 1.5rem;
-    --font-4xl: 1.75rem;
-    --font-5xl: 2rem;
+    --font-xs: 0.75rem;      /* 12px - forbedret fra 0.625rem */
+    --font-sm: 0.875rem;     /* 14px - forbedret fra 0.75rem */
+    --font-base: 1rem;       /* 16px - forbedret fra 0.8125rem for bedre læsbarhed */
+    --font-lg: 1.125rem;     /* 18px - forbedret fra 1rem */
+    --font-xl: 1.25rem;      /* 20px - forbedret fra 1rem */
+    --font-2xl: 1.5rem;      /* 24px - forbedret fra 1.25rem */
+    --font-3xl: 1.75rem;     /* 28px - forbedret fra 1.5rem */
+    --font-4xl: 2rem;        /* 32px - forbedret fra 1.75rem */
+    --font-5xl: 2.25rem;     /* 36px - forbedret fra 2rem */
+    
+    /* Forbedret spacing på mobil - større gaps */
+    --spacing-xs: 0.5rem;    /* 8px */
+    --spacing-sm: 0.75rem;   /* 12px */
+    --spacing-md: 1.25rem;   /* 20px - øget fra 1rem for bedre separation */
+    --spacing-lg: 1.75rem;   /* 28px - øget fra 1.5rem */
+    --spacing-xl: 2.25rem;   /* 36px - øget fra 2rem */
+    --spacing-2xl: 3rem;     /* 48px */
   }
 }
 

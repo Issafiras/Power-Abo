@@ -739,15 +739,20 @@ function App() {
 
         @media (max-width: 900px) {
           .main-content {
-            padding: var(--spacing-md) 0;
+            padding: var(--spacing-lg) 0;  /* Øget vertikal padding */
+            padding-top: calc(70px + var(--spacing-lg));  /* Opdateret til ny header højde */
           }
 
           .plans-section {
-            padding: var(--spacing-md);
+            padding: var(--spacing-md);  /* Øget padding for bedre luft */
+          }
+          
+          .section-header {
+            margin-bottom: var(--spacing-lg) !important;
           }
 
           .cart-comparison-grid {
-            gap: var(--spacing-sm);
+            gap: var(--spacing-lg);  /* Øget gap for bedre separation */
           }
         }
 

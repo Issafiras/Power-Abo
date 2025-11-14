@@ -331,6 +331,27 @@ a:hover {
   .grid-cols-3 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
+
+  /* Fuld bredde på mobil - fjern container begrænsninger */
+  .container {
+    max-width: 100%;
+    padding-left: var(--spacing-md);  /* Øget padding: 20px for bedre luft */
+    padding-right: var(--spacing-md);
+  }
+  
+  /* Forbedret section spacing på mobil */
+  .section {
+    padding: var(--spacing-lg) 0;  /* Øget vertikal spacing */
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  /* Forbedret grid gaps på mobil */
+  .grid,
+  .plans-grid,
+  .streaming-grid,
+  .cart-comparison-grid {
+    gap: var(--spacing-lg);  /* Øget gap mellem kort */
+  }
 }
 
 /* Flex utilities */
@@ -627,7 +648,7 @@ a:hover {
 /* Mobile performance optimizations - Fix flimmer/flakken - Ultra simple */
 @media (max-width: 900px) {
   html {
-    scroll-padding-top: 80px;
+    scroll-padding-top: 70px;  /* Opdateret til ny header højde */
   }
 
   /* Deaktiver alle baggrunds-animationer på mobil */
