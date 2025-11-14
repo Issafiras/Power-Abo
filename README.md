@@ -1,74 +1,88 @@
-# ⚡ Power Abo Beregner
+# Power Abo Beregner
 
-Rådgivningsværktøj til POWER-butikker der kombinerer mobilabonnementer, **mobil bredbånd** og streaming-tjenester i én samlet beregning.
+Et intelligent rådgivningsværktøj der transformerer kompleksiteten ved at kombinere mobilabonnementer, mobil bredbånd og streaming-tjenester til en enkel, præcis beregning. Designet til POWER-butikker der ønsker at levere overlegen kunderådgivning gennem teknologi.
 
-**Tech stack:** React 18 + Vite 5 • Dark/Light mode • Responsiv design
+## Vision
 
-## 🚀 Quick Start
+At gøre det muligt for enhver rådgiver at levere præcis, datadrevet rådgivning på sekunder - ikke minutter. Ved at automatisere komplekse beregninger og sammenligninger frigiver vi tid til det, der virkelig betyder noget: menneskelig interaktion og kundeservice.
+
+## Teknologi
+
+Bygget med React 18 og Vite 5 for optimal performance og udvikleroplevelse. Moderne web-teknologi der leverer øjeblikkelig responsivitet og en sømløs brugeroplevelse på alle enheder.
+
+**Kerneteknologier:**
+- React 18 med hooks og moderne patterns
+- Vite 5 for hurtig udvikling og optimeret builds
+- Modulært CSS med CSS variabler for fleksibel theming
+- LocalStorage integration for persistering af brugerdata
+- Power.dk API integration for real-time priser
+
+## Hurtig Start
 
 ### Forudsætninger
-- Node.js 18+ og npm
+
+- Node.js 18 eller nyere
+- npm eller yarn
 
 ### Installation
 
 ```bash
-# Klon repository
 git clone <repository-url>
-cd Power-Abo-4
-
-# Installer dependencies
+cd Power-Abo-2
 npm install
-
-# Opsæt miljøvariabler (valgfrit)
-cp .env.example .env.local
 ```
 
-### Kør udviklingsserver
+### Udviklingsserver
 
 ```bash
 npm run dev
 ```
 
-Åbner automatisk på `http://localhost:3000`
+Applikationen åbner automatisk på `http://localhost:3000`
 
-## ✨ Features
+## Funktioner
 
-### Abonnementer & Bredbånd
+### Abonnementer og Bredbånd
+
+Applikationen håndterer komplekse scenarier med elegance:
+
 - **Telmore**: Privat planer med intro-priser og familie-rabatter
-- **Telenor**: Privat, B2B og bredbånd planer
+- **Telenor**: Privat, B2B og bredbånd planer med avancerede rabatstrukturer
 - **CBB**: Mobilabonnementer og CBB MIX pakker (2-8 streaming tjenester)
-- **Mobil bredbånd**: Telmore 5G, Telenor Fri Data support
-- Smart søgning og filtrering af planer
-- Auto-match med inkluderede streamingtjenester
+- **Mobil bredbånd**: Telmore 5G og Telenor Fri Data support
+
+Intelligent søgning og filtrering sikrer, at relevante planer vises øjeblikkeligt. Auto-match funktionalitet identificerer automatisk planer der inkluderer valgte streaming-tjenester.
 
 ### Streaming Tjenester
-- Multi-select grid med real-time priser
-- CBB MIX selector (2-8 tjenester)
-- Auto-match med inkluderede streamingtjenester i planer
-- Understøttede tjenester:
-  - Netflix, Disney+, MAX, Viaplay, TV2 Play
-  - Prime Video, SkyshowTime, Podimo, Mofibo
-  - Nordisk Film+, Saxo, Telenor Play
 
-### Rådgivning & Beregning
-- Kontant rabat med auto-justering
-- Præsentationsvisning (F11 fullscreen mode)
-- Indtjeningsoversigt (provision per plan)
-- Besparelsesberegning (kunde vs. nuværende)
-- Sammenligningspanel mellem planer
-- Antal linjer support (familie-rabatter)
+Multi-select interface med real-time prisberegning. CBB MIX selector gør det muligt at kombinere 2-8 tjenester i én pakke.
+
+**Understøttede tjenester:**
+Netflix, Disney+, MAX, Viaplay, TV2 Play, Prime Video, SkyshowTime, Podimo, Mofibo, Nordisk Film+, Saxo, Telenor Play
+
+### Rådgivning og Beregning
+
+- Kontant rabat med intelligent auto-justering
+- Præsentationsvisning (F11 fullscreen mode) til kundemøder
+- Indtjeningsoversigt med provision per plan
+- Besparelsesberegning der sammenligner kundens nuværende omkostninger med nye planer
+- Sammenligningspanel der viser forskelle mellem planer på et øjeblik
+- Antal linjer support med automatisk beregning af familie-rabatter
 
 ### Keyboard Shortcuts
-- `Ctrl + R` → Nulstil hele beregningen
+
+Designet for effektivitet:
+
+- `Ctrl + R` → Nulstil beregning
 - `Ctrl + P` → Præsentationsvisning (fullscreen)
 - `Ctrl + T` → Toggle dark/light mode
 - `Esc` → Luk modal/overlay
 - `F11` → Fullscreen præsentationsvisning
 
-## 📁 Projektstruktur
+## Projektstruktur
 
 ```
-Power-Abo-4/
+Power-Abo-2/
 ├── public/
 │   ├── logos/              # Streaming service logoer
 │   └── favicon.ico
@@ -86,7 +100,6 @@ Power-Abo-4/
 │   ├── data/
 │   │   ├── plans.js       # Mobilabonnementer & bredbånd
 │   │   └── streamingServices.js  # Streaming tjenester
-│   ├── pages/
 │   ├── styles/            # Modulært CSS
 │   │   ├── animations.css
 │   │   ├── cbb-mix.css
@@ -103,12 +116,12 @@ Power-Abo-4/
 │   │   └── validators.js  # Validering
 │   ├── App.jsx            # Hovedkomponent
 │   └── main.jsx           # Entry point
-├── index.html             # Hovedapplikation entry point
+├── index.html
 ├── vite.config.js         # Vite konfiguration
 └── package.json
 ```
 
-## 🔧 Scripts
+## Scripts
 
 | Script | Beskrivelse |
 |--------|-------------|
@@ -117,7 +130,7 @@ Power-Abo-4/
 | `npm run preview` | Preview production build lokalt |
 | `npm run lint` | ESLint check |
 
-## ⚙️ Konfiguration
+## Konfiguration
 
 ### Miljøvariabler
 
@@ -128,7 +141,7 @@ Opret en `.env.local` fil i projektets rod:
 VITE_PROXY_CORS_API_KEY=your-api-key
 ```
 
-## 📝 Data vedligeholdelse
+## Data Vedligeholdelse
 
 ### Tilføj ny plan (`src/data/plans.js`)
 
@@ -137,7 +150,7 @@ VITE_PROXY_CORS_API_KEY=your-api-key
   id: 'unique-id',
   provider: 'telmore' | 'telenor' | 'telenor-b2b' | 'telenor-bredbånd' | 'telmore-bredbånd' | 'cbb',
   name: 'Plan navn',
-  data: '25 GB',  // Data mængde
+  data: '25 GB',
   price: 299,
   introPrice: 99,      // Valgfrit
   introMonths: 6,      // Valgfrit
@@ -166,23 +179,23 @@ VITE_PROXY_CORS_API_KEY=your-api-key
 }
 ```
 
-## 🔌 Power.dk API Integration
+## Power.dk API Integration
 
-Applikationen henter hardwarepriser fra Power.dk via CORS-proxyer eller direkte proxy gennem Vite dev server.
+Applikationen henter hardwarepriser fra Power.dk via en intelligent proxy-løsning. Vite dev server fungerer som proxy, hvilket eliminerer CORS-problemer under udvikling.
 
 **Vite Proxy:**
 - Automatisk konfigureret i `vite.config.js`
 - Endpoint: `/api/power/*` → `https://www.power.dk/api/v2/*`
 
 **Eksterne CORS Proxy (valgfrit):**
-- Hvis Vite proxy fejler, bruges eksterne proxyer
+- Fallback løsning hvis Vite proxy fejler
 - Se `src/utils/powerApi.js` for proxy-rotation og fallback logik
 
 **API Endpoints:**
 - Produktsøgning: `/api/v2/productlists?q=<term>`
 - Prisopslag: `/api/v2/products/prices?ids=<ids>`
 
-## 🚢 Deployment
+## Deployment
 
 ### Vercel (Anbefalet)
 
@@ -193,15 +206,13 @@ vercel
 
 **Miljøvariabler i Vercel:**
 - Tilføj alle `VITE_*` variabler i Vercel dashboard
-- Sæt build command: `npm run build`
+- Build command: `npm run build`
 - Output directory: `dist`
 
 ### GitHub Pages
 
 ```bash
-# Build projektet
 npm run build
-
 # Deploy dist/ til gh-pages branch
 # Bemærk: Base path er sat til '/Power-Abo/' i vite.config.js
 ```
@@ -209,17 +220,12 @@ npm run build
 ### Netlify
 
 ```bash
-# Build command
-npm run build
-
-# Publish directory
-dist
-
-# Base directory
-/
+# Build command: npm run build
+# Publish directory: dist
+# Base directory: /
 ```
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 | Problem | Løsning |
 |---------|---------|
@@ -229,9 +235,9 @@ dist
 | API fejler | Se konsol for proxy-fejl, bruger cached/prisdata som fallback |
 | Build fejler | Tjek for syntax fejl, kør `npm run lint` |
 
-## 🎨 Styling
+## Styling
 
-Applikationen bruger modulært CSS med CSS variabler for theming:
+Modulært CSS arkitektur med CSS variabler for theming gør det muligt at tilpasse applikationen uden at kompromittere vedligeholdeligheden.
 
 - `variables.css` - Farver, spacing, breakpoints
 - `main.css` - Global styling
@@ -246,7 +252,7 @@ Applikationen bruger modulært CSS med CSS variabler for theming:
 - Manuelt toggle via `Ctrl + T` eller header knap
 - Gemmes i localStorage
 
-## 📊 Data Flow
+## Data Flow
 
 1. **Initial Load:**
    - Bruger lokale datafiler (`src/data/*.js`)
@@ -262,27 +268,27 @@ Applikationen bruger modulært CSS med CSS variabler for theming:
    - Auto-save ved hver ændring
    - Reset funktion til at nulstille alt
 
-## 🔒 Sikkerhed
+## Sikkerhed
 
 - **API Keys:** Aldrig commit til git (brug `.env.local`)
 - **CORS:** Håndteret via Vite proxy eller eksterne proxyer
 - **LocalStorage:** Ingen følsomme data gemmes
 
-## 📄 Licens
+## Licens
 
-Intern brug i POWER-butikker. Kontakt udvikler for support.
+Intern brug i POWER-butikker. Kontakt udviklerteamet for support.
 
-## 🤝 Bidrag
+## Bidrag
 
 1. Opret en feature branch
 2. Commit dine ændringer
 3. Push til branch
 4. Opret Pull Request
 
-## 📞 Support
+## Support
 
 For spørgsmål eller problemer, kontakt udviklerteamet.
 
 ---
 
-**Version v1.2 (2025)** – Med mobil bredbånd support ⚡
+**Version v1.2 (2025)** – Med mobil bredbånd support

@@ -27,6 +27,8 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 100px;
   overflow-x: hidden;
+  overflow-y: scroll;  /* Always show scrollbar to prevent layout shift */
+  height: 100%;  /* Ensure html takes full height */
   transition: background-color var(--transition-theme), color var(--transition-fast);
 }
 
@@ -74,14 +76,16 @@ body {
   line-height: var(--leading-normal);
   color: var(--text-primary);
   background-color: var(--bg-primary);
-  min-height: 100vh;
+  /* Removed min-height: 100vh to prevent double scrolling - #root handles it */
+  height: 100%;  /* Match html height */
   overflow-x: hidden;
+  overflow-y: auto;  /* Body handles scrolling */
   position: relative;
   font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;      /* Reduced for better readability */
   font-variant-ligatures: common-ligatures;
   font-weight: var(--font-normal);
   font-size: var(--font-base);
@@ -90,6 +94,8 @@ body {
     background-color var(--transition-theme),
     color var(--transition-fast),
     border-color var(--transition-fast);
+  /* GPU acceleration for smooth scrolling */
+  transform: translateZ(0);
 }
 
 body::before {
@@ -149,13 +155,17 @@ body::after {
   }
 }
 
-/* App container */
+/* App container - Full Width */
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;  /* Let body handle scrolling */
 }
 
 /* Advanced animated overlay effects - Steve Jobs Minimal */
@@ -190,71 +200,75 @@ body::after {
   }
 }
 
-/* Premium Typography - Steve Jobs Perfect Hierarchy */
+/* Premium Typography - Tech-Ikon Precision - Mathematical Ratios */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
-  margin-bottom: var(--spacing-sm);
-  letter-spacing: -0.025em;
+  margin-bottom: var(--spacing-md);
+  letter-spacing: -0.02em;        /* Reduced for clarity */
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  /* GPU acceleration for headings */
+  transform: translateZ(0);
 }
 
 h1 {
   font-size: var(--font-5xl);
   font-weight: var(--font-bold);
-  line-height: 1.05;
-  letter-spacing: -0.035em;
-  margin-bottom: var(--spacing-md);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.025em;
+  margin-bottom: var(--spacing-xl);
 }
 
 h2 {
   font-size: var(--font-4xl);
   font-weight: var(--font-bold);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  margin-bottom: var(--spacing-sm);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-lg);
 }
 
 h3 {
   font-size: var(--font-3xl);
   font-weight: var(--font-semibold);
-  line-height: 1.12;
-  letter-spacing: -0.025em;
-  margin-bottom: var(--spacing-sm);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.015em;
+  margin-bottom: var(--spacing-md);
 }
 
 h4 {
   font-size: var(--font-2xl);
   font-weight: var(--font-semibold);
-  line-height: 1.18;
-  letter-spacing: -0.02em;
-  margin-bottom: var(--spacing-sm);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--spacing-md);
 }
 
 h5 {
   font-size: var(--font-xl);
   font-weight: var(--font-medium);
-  line-height: 1.22;
-  letter-spacing: -0.015em;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
   margin-bottom: var(--spacing-md);
 }
 
 h6 {
   font-size: var(--font-lg);
   font-weight: var(--font-medium);
-  line-height: 1.28;
-  letter-spacing: -0.01em;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.005em;
   margin-bottom: var(--spacing-md);
 }
 
 p {
-  margin-bottom: var(--spacing-sm);
-  line-height: var(--leading-relaxed);
+  margin-bottom: var(--spacing-md);
+  line-height: var(--leading-normal);  /* 1.5x for WCAG AAA readability */
   color: var(--text-secondary);
   letter-spacing: -0.005em;
+  font-size: var(--font-base);
 }
 
 a {
@@ -269,13 +283,17 @@ a:hover {
   text-shadow: 0 0 10px rgba(255, 107, 26, 0.5);
 }
 
-/* Steve Jobs-inspired Layout - Ultra Generous Spacing */
+/* Tech-Ikon Layout - 3/4 Width - Pixel Perfect Alignment */
 .container {
   width: 100%;
   max-width: var(--container-max-width);
   margin: 0 auto;
   padding: 0 var(--container-padding);
-  transition: padding var(--transition-fast);
+  transition: padding var(--transition-smooth);
+  /* GPU acceleration */
+  transform: translateZ(0);
+  /* CSS containment for performance */
+  contain: layout style paint;
 }
 
 .section {
@@ -586,12 +604,15 @@ a:hover {
   color: var(--text-primary);
 }
 
-/* Focus visible */
+/* Focus visible - WCAG AAA Compliance */
 *:focus-visible {
   outline: 3px solid var(--color-orange);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 6px rgba(255, 107, 26, 0.2);
+  outline-offset: 4px;              /* Increased for better visibility */
+  box-shadow: 0 0 0 6px rgba(255, 107, 26, 0.3);
   transition: outline var(--transition-fast), box-shadow var(--transition-fast);
+  /* Ensure focus is always visible */
+  z-index: var(--z-base);
+  position: relative;
 }
 
 /* Safe area for notched devices */
@@ -703,13 +724,13 @@ a:hover {
     background-position: 0% 50% !important;
   }
   
-  /* Reducer alle transitions til meget korte */
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.1s !important;
-    transition-timing-function: ease !important;
-  }
+        /* Reducer alle transitions til meget korte - Performance First */
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.15s !important;  /* Slightly longer for smoother feel */
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
   
   /* Deaktiver pulse animationer */
   .pulse,
@@ -739,8 +760,8 @@ a:hover {
   
   /* Reducer header backdrop-filter yderligere */
   .header {
-    backdrop-filter: blur(8px) saturate(120%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
+    backdrop-filter: blur(8px) saturate(120%) !important;
   }
 }
 
@@ -834,7 +855,7 @@ a:hover {
   transition-delay: 400ms;
 }
 
-/* Accessibility */
+/* Accessibility - WCAG AAA */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -845,6 +866,27 @@ a:hover {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: var(--spacing-md);
+  background: var(--color-orange);
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  z-index: var(--z-tooltip);
+  font-weight: var(--font-semibold);
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--spacing-md);
+  outline: 3px solid white;
+  outline-offset: 2px;
 }
 
 /* Advanced Animations */
@@ -912,16 +954,25 @@ a:hover {
   100% { border-color: rgba(255, 107, 26, 0.8); }
 }
 
-/* Performance optimering - GPU acceleration (only when needed) */
+/* Performance Optimization - GPU Acceleration (Sparse Usage) */
 .btn:not(:disabled):hover,
 .plan-card:hover {
   will-change: transform;
+  transform: translateZ(0);  /* Force GPU layer */
 }
 
-/* Content visibility for off-screen elements */
+/* Remove will-change when not needed to save memory */
+.btn:not(:hover),
+.plan-card:not(:hover) {
+  will-change: auto;
+}
+
+/* Content visibility for off-screen elements - Performance First */
 .plans-grid .stagger-item {
   content-visibility: auto;
-  contain-intrinsic-size: 200px;
+  contain-intrinsic-size: 300px;
+  /* CSS containment for better performance */
+  contain: layout style paint;
 }
 
 /* Micro-interactions */

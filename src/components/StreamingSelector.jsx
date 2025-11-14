@@ -326,19 +326,27 @@ function StreamingSelector({
   }, [showScanner]);
 
   return (
-    <div className="streaming-selector glass-card-no-hover fade-in-up">
+      <div className="streaming-selector glass-card-no-hover fade-in-up">
       <div className="section-header">
-        <h2>📊 Kundens Nuværende Situation</h2>
+        <h2>
+          <span role="img" aria-hidden="true">📊</span>
+          Kundens Nuværende Situation
+        </h2>
         <p className="text-secondary">
           Vælg kundens nuværende streaming-tjenester og mobiludgifter
         </p>
       </div>
+      
+      {/* Skip to main content link for accessibility */}
+      <a href="#plans-section" className="sr-only skip-link">
+        Spring til hovedindhold
+      </a>
 
       {/* Antal mobilabonnementer input */}
       {onNumberOfLinesChange && (
         <div className="number-of-lines-input">
           <label htmlFor="number-of-lines" className="input-label">
-            📱 Antal mobilabonnementer (linjer)
+            📱 Antal mobilabonnementer.
           </label>
           <div className="input-with-info">
             <input
@@ -354,7 +362,7 @@ function StreamingSelector({
               max="20"
               step="1"
             />
-            <span className="info-suffix">linje{(numberOfLines || 1) !== 1 ? 'r' : ''}</span>
+            <span className="info-suffix">abonnement{(numberOfLines || 1) !== 1 ? 'er' : ''}</span>
           </div>
         </div>
       )}
@@ -366,7 +374,7 @@ function StreamingSelector({
             🚫 Har kunden allerede abonnement hos?
           </label>
           <p className="input-help-text" style={{ marginBottom: 'var(--spacing-sm)' }}>
-            Vælg brands som kunden allerede har - disse vil blive ekskluderet fra automatisk løsning
+            Vælg brands, som kunden allerede har – disse vil blive ekskluderet fra automatisk løsning
           </p>
           <div className="existing-brands-grid">
             {['Telmore', 'Telenor', 'CBB'].map((brand) => {
@@ -398,8 +406,8 @@ function StreamingSelector({
 
       {/* Mobil udgifter input */}
       <div className="mobile-cost-input">
-        <label htmlFor="mobile-cost" className="input-label">
-          💳 Nuværende månedlige mobiludgifter {onNumberOfLinesChange && numberOfLines > 1 ? `(total for ${numberOfLines} linjer)` : '(total)'}
+          <label htmlFor="mobile-cost" className="input-label">
+          💳 Nuværende månedlige mobiludgifter {onNumberOfLinesChange && numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}.
         </label>
         <div className="input-with-currency">
           <input
@@ -413,11 +421,11 @@ function StreamingSelector({
             min="0"
             step="10"
           />
-          <span className="currency-suffix">kr/md</span>
+          <span className="currency-suffix">kr./md.</span>
         </div>
         {onNumberOfLinesChange && numberOfLines > 1 && customerMobileCost > 0 && (
           <p className="input-help-text">
-            Gennemsnit pr. linje: {formatCurrency((customerMobileCost || 0) / numberOfLines)}/md
+            Gennemsnit pr. abonnement: {formatCurrency((customerMobileCost || 0) / numberOfLines)}/md.
           </p>
         )}
       </div>
@@ -425,7 +433,7 @@ function StreamingSelector({
       {/* Varens pris inden rabat input */}
       <div className="original-item-price-input">
         <label htmlFor="original-item-price" className="input-label">
-          🏷️ Varens pris inden rabat og besparelse
+          🏷️ Varens pris inden rabat og besparelse.
         </label>
         <div className="input-with-currency">
           <input
@@ -446,7 +454,7 @@ function StreamingSelector({
       {/* Produkt søgning */}
       <div className="ean-search-input">
         <label htmlFor="ean-search" className="input-label">
-          🔍 Søg vare efter navn, EAN eller mærke
+          🔍 Søg vare efter navn, EAN eller mærke.
         </label>
         <form onSubmit={handleEANSearch} className="ean-search-form">
           <div className="input-with-button">
@@ -478,7 +486,7 @@ function StreamingSelector({
           </div>
         </form>
         <p className="ean-help-text">
-          Søg efter produktnavn, mærke, EAN-kode eller beskrivelse
+          Søg efter produktnavn, mærke, EAN-kode eller beskrivelse.
         </p>
       </div>
 
@@ -499,7 +507,7 @@ function StreamingSelector({
               </div>
               {!hasBarcodeApi && (
                 <div className="scanner-warning">
-                  Din browser understøtter ikke indbygget stregkodescanning. Brug manuel søgning.
+                  Din browser understøtter ikke indbygget stregkodescanning. Brug manuel søgning i stedet.
                 </div>
               )}
               <video ref={videoRef} className="scanner-video" playsInline muted />
@@ -522,7 +530,7 @@ function StreamingSelector({
             </div>
             <h3 className="auto-select-title">Hurtig Løsning</h3>
             <p className="auto-select-subtitle">
-              Klik på knappen nedenfor, så finder systemet automatisk den bedste kombination af planer
+              Klik på knappen nedenfor, så finder systemet automatisk den bedste kombination af abonnementer.
             </p>
           </div>
           <button
@@ -537,7 +545,7 @@ function StreamingSelector({
           {(!selectedStreaming.length && !customerMobileCost) && (
             <div className="auto-select-hint-wrapper">
               <p className="auto-select-hint">
-                💡 Vælg mindst én streaming-tjeneste nedenfor eller indtast mobiludgifter for at aktivere
+                💡 Vælg mindst én streaming-tjeneste nedenfor eller indtast mobiludgifter for at aktivere.
               </p>
             </div>
           )}
@@ -562,6 +570,7 @@ function StreamingSelector({
                 '--brand-bg': service.bgColor || 'var(--glass-bg)'
               }}
               aria-pressed={isSelected}
+              aria-label={`${isSelected ? 'Fjern' : 'Tilføj'} ${service.name} streaming-tjeneste`}
             >
               <div className="streaming-icon" style={{ 
                 background: service.bgColor
@@ -580,7 +589,7 @@ function StreamingSelector({
                 )}
               </div>
               <div className="streaming-name">{service.name}</div>
-              <div className="streaming-price">{formatCurrency(service.price)}/md</div>
+              <div className="streaming-price">{formatCurrency(service.price)}/md.</div>
               {isSelected && (
                 <div className="streaming-checkmark animate-bounce-in animate-pulse">✓</div>
               )}
@@ -752,7 +761,7 @@ function StreamingSelector({
           background: linear-gradient(135deg, var(--color-orange), #ff8c42, var(--color-orange));
           background-size: 200% 200%;
           box-shadow: var(--glow-orange), 0 8px 32px rgba(255, 109, 31, 0.4);
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
           position: relative;
           overflow: hidden;
           border: 2px solid rgba(255, 255, 255, 0.3);
@@ -808,7 +817,7 @@ function StreamingSelector({
 
         .auto-select-btn .btn-arrow {
           font-size: var(--font-2xl);
-          transition: transform var(--transition-smooth);
+          transition: transform var(--transition-base);  /* Max 300ms */
           opacity: 0.9;
         }
 
@@ -965,7 +974,7 @@ function StreamingSelector({
           padding: var(--spacing-md);
           text-align: center;
           cursor: pointer;
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
           border: 2px solid transparent;
           background: var(--glass-bg);
         }
@@ -1019,7 +1028,7 @@ function StreamingSelector({
           padding: var(--spacing-md);
           text-align: center;
           cursor: pointer;
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
           border: 2px solid transparent;
           transform-style: preserve-3d;
           overflow: hidden;
@@ -1045,7 +1054,7 @@ function StreamingSelector({
         }
 
         .streaming-card:hover {
-          transform: translateY(-6px) rotateX(5deg) scale(1.05);
+          transform: translateY(-3px) translateZ(0);  /* Reduced motion, GPU accelerated */
           border-color: var(--color-orange);
           box-shadow: 
             var(--shadow-lg),
@@ -1053,7 +1062,7 @@ function StreamingSelector({
         }
 
         .streaming-card:active {
-          transform: translateY(-2px) scale(0.98);
+          transform: translateY(-1px) scale(0.98) translateZ(0);  /* GPU accelerated */
         }
 
         .streaming-card.selected {
@@ -1063,11 +1072,11 @@ function StreamingSelector({
             rgba(255, 109, 31, 0.08) 100%
           );
           box-shadow: var(--glow-orange);
-          transform: scale(1.02);
+          transform: scale(1.01) translateZ(0);  /* Subtle, GPU accelerated */
         }
 
         .streaming-card.selected:hover {
-          transform: translateY(-6px) rotateX(5deg) scale(1.08);
+          transform: translateY(-3px) translateZ(0);  /* Reduced motion, GPU accelerated */
           box-shadow: var(--glow-extreme);
         }
 
@@ -1082,18 +1091,17 @@ function StreamingSelector({
           justify-content: center;
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-md);
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
           margin-left: auto;
           margin-right: auto;
         }
 
         .streaming-card:hover .streaming-icon {
-          transform: scale(1.15) rotate(10deg) translateY(-4px);
+          transform: scale(1.1) translateZ(0);  /* Reduced rotation, GPU accelerated */
           box-shadow: 
             var(--shadow-lg),
             0 0 30px rgba(255, 109, 31, 0.5);
-          animation: iconPulse 0.6s ease-in-out;
-          filter: brightness(1.2);
+          filter: brightness(1.1);
         }
 
         @keyframes iconPulse {
@@ -1118,7 +1126,7 @@ function StreamingSelector({
           height: 100%;
           object-fit: contain;
           padding: 6px;
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
         }
 
         .streaming-card:hover .streaming-logo-img {

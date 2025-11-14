@@ -23,6 +23,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
               className={`tab ${activeProvider === provider.id ? 'tab-active' : ''}`}
               style={{ animationDelay: `${index * 60}ms` }}
               aria-pressed={activeProvider === provider.id}
+              aria-label={`Vis ${provider.name} abonnementer`}
             >
               <span className="tab-content">
                 {provider.logo ? (
@@ -52,6 +53,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
               className={`segment-btn ${activeProvider === 'telenor' ? 'segment-btn-active' : ''}`}
               onClick={() => onProviderChange('telenor')}
               aria-pressed={activeProvider === 'telenor'}
+              aria-label="Vis Telenor privat abonnementer"
             >
               <span>Privat</span>
             </button>
@@ -59,6 +61,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
               className={`segment-btn ${activeProvider === 'telenor-b2b' ? 'segment-btn-active' : ''}`}
               onClick={() => onProviderChange('telenor-b2b')}
               aria-pressed={activeProvider === 'telenor-b2b'}
+              aria-label="Vis Telenor B2B abonnementer"
             >
               <span>B2B</span>
             </button>
@@ -66,6 +69,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
               className={`segment-btn ${activeProvider === 'telenor-bredbånd' ? 'segment-btn-active' : ''}`}
               onClick={() => onProviderChange('telenor-bredbånd')}
               aria-pressed={activeProvider === 'telenor-bredbånd'}
+              aria-label="Vis Telenor bredbånd abonnementer"
             >
               <span>Bredbånd</span>
             </button>
@@ -80,6 +84,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
               className={`segment-btn ${activeProvider === 'telmore' ? 'segment-btn-active' : ''}`}
               onClick={() => onProviderChange('telmore')}
               aria-pressed={activeProvider === 'telmore'}
+              aria-label="Vis Telmore mobil abonnementer"
             >
               <span>Mobil</span>
             </button>
@@ -87,6 +92,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
               className={`segment-btn ${activeProvider === 'telmore-bredbånd' ? 'segment-btn-active' : ''}`}
               onClick={() => onProviderChange('telmore-bredbånd')}
               aria-pressed={activeProvider === 'telmore-bredbånd'}
+              aria-label="Vis Telmore bredbånd abonnementer"
             >
               <span>Bredbånd</span>
             </button>
@@ -185,7 +191,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
           border-radius: 0.75rem;
           overflow: hidden;
           opacity: 0;
-          animation: tabFadeIn 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+          animation: tabFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;  /* Max 300ms */
         }
 
         @keyframes tabFadeIn {
@@ -246,7 +252,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
           height: 2px;
           background: linear-gradient(90deg, #FF6D1F 0%, #FF8F57 100%);
           border-radius: 0 0 0.75rem 0.75rem;
-          animation: indicatorSlide 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+          animation: indicatorSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);  /* Max 300ms */
           box-shadow: 0 0 12px rgba(255, 109, 31, 0.5);
         }
 
@@ -319,7 +325,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
           letter-spacing: -0.005em;
           border-radius: 0.5rem;
           cursor: pointer;
-          transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);  /* Max 300ms */
           position: relative;
         }
 
@@ -351,7 +357,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 0.875rem;
           padding: 0.875rem 1rem;
-          transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);  /* Max 300ms */
           box-shadow: 
             0 2px 16px rgba(0, 0, 0, 0.25),
             inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -409,7 +415,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
           align-items: center;
           justify-content: center;
           border-radius: 0.375rem;
-          transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);  /* Max 300ms */
           opacity: 0.7;
         }
 

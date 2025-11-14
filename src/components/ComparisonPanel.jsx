@@ -29,7 +29,9 @@ function ComparisonPanel({
   autoAdjust,
   onAutoAdjustChange,
   showCashDiscount,
-  onToggleCashDiscount
+  onToggleCashDiscount,
+  freeSetup,
+  onFreeSetupChange
 }) {
   const [showEarnings, setShowEarnings] = useState(false);
 
@@ -79,9 +81,10 @@ function ComparisonPanel({
       cartItems,
       notIncludedStreamingCost,
       0,
-      originalItemPrice
+      originalItemPrice,
+      freeSetup
     ),
-    [cartItems, notIncludedStreamingCost, originalItemPrice]
+    [cartItems, notIncludedStreamingCost, originalItemPrice, freeSetup]
   );
 
   // Beregn total indtjening - memoized (engangsindtjening, ikke løbende)
@@ -113,9 +116,10 @@ function ComparisonPanel({
       cartItems,
       notIncludedStreamingCost,
       cashDiscount,
-      originalItemPrice
+      originalItemPrice,
+      freeSetup
     ),
-    [cartItems, notIncludedStreamingCost, cashDiscount, originalItemPrice]
+    [cartItems, notIncludedStreamingCost, cashDiscount, originalItemPrice, freeSetup]
   );
 
   // Besparelse - memoized
@@ -130,12 +134,15 @@ function ComparisonPanel({
     return (
       <div className="comparison-panel glass-card-no-hover fade-in-up">
         <div className="section-header">
-          <h2>📊 Sammenligning</h2>
-          <p className="text-secondary">Tilføj planer for at se sammenligning</p>
+          <h2>
+            <span role="img" aria-hidden="true">📊</span>
+            Sammenligning
+          </h2>
+          <p className="text-secondary">Tilføj abonnementer for at se sammenligning</p>
         </div>
         
         <div className="empty-state animate-scale-in">
-          <div className="empty-state-icon animate-pulse">📊</div>
+          <div className="empty-state-icon animate-pulse" aria-hidden="true">📊</div>
           <p className="text-secondary">
             Ingen data at sammenligne endnu
           </p>
@@ -170,7 +177,10 @@ function ComparisonPanel({
       <div className="section-header">
         <div className="section-header-top">
           <div>
-            <h2>📊 Sammenligning</h2>
+            <h2>
+              <span role="img" aria-hidden="true">📊</span>
+              Sammenligning
+            </h2>
             <p className="text-secondary">6-måneders analyse</p>
           </div>
           {onToggleCashDiscount && (
@@ -240,6 +250,27 @@ function ComparisonPanel({
         </>
       )}
 
+      {/* Gratis oprettelse checkbox */}
+      {cartItems.length > 0 && (
+        <>
+          <div className="free-setup-section">
+            <label className="checkbox-wrapper">
+              <input
+                id="free-setup"
+                name="free-setup"
+                type="checkbox"
+                className="checkbox"
+                checked={freeSetup}
+                onChange={(e) => onFreeSetupChange(e.target.checked)}
+              />
+              <span className="text-sm">🎁 Gratis oprettelse (rabat: {formatCurrency(ourOfferTotals.setupFee)})</span>
+            </label>
+          </div>
+
+          <div className="divider"></div>
+        </>
+      )}
+
       {/* Streaming status */}
       {selectedStreaming.length > 0 && (
         <>
@@ -251,7 +282,7 @@ function ComparisonPanel({
                 <span className="status-text">
                   {streamingCoverage.included.length} tjeneste
                   {streamingCoverage.included.length !== 1 ? 'r' : ''} inkluderet
-                  {cartItems.some(item => item.plan.streamingCount > 0) && ' (mix)'}
+                  {cartItems.some(item => item.plan.streamingCount > 0) && ' (mix).'}
                 </span>
               </div>
             )}
@@ -261,7 +292,7 @@ function ComparisonPanel({
                 <span className="status-text">
                   {streamingCoverage.notIncluded.length} tjeneste
                   {streamingCoverage.notIncluded.length !== 1 ? 'r' : ''} tillæg 
-                  ({formatCurrency(notIncludedStreamingCost)}/md)
+                  ({formatCurrency(notIncludedStreamingCost)}/md.).
                 </span>
               </div>
             )}
@@ -294,11 +325,11 @@ function ComparisonPanel({
           </div>
           <div className="column-content">
             <div className="amount-row">
-              <span className="amount-label">Mobil/md {numberOfLines > 1 ? `(total for ${numberOfLines} linjer)` : '(total)'}:</span>
+              <span className="amount-label">Mobil/md. {numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}:</span>
               <span className="amount-value">{formatCurrency(customerMobileCost || 0)}</span>
             </div>
             <div className="amount-row">
-              <span className="amount-label">Streaming/md:</span>
+              <span className="amount-label">Streaming/md.:</span>
               <span className="amount-value">{formatCurrency(streamingCost)}</span>
             </div>
             {originalItemPrice > 0 && (
@@ -308,7 +339,7 @@ function ComparisonPanel({
               </div>
             )}
             <div className="amount-row total">
-              <span className="amount-label font-semibold">Total/md:</span>
+              <span className="amount-label font-semibold">Total/md.:</span>
               <span className="amount-value font-bold">
                 {formatCurrency(customerTotals.monthly)}
               </span>
@@ -341,7 +372,7 @@ function ComparisonPanel({
           </div>
           <div className="column-content">
             <div className="amount-row">
-              <span className="amount-label">Planer/md:</span>
+              <span className="amount-label">Abonnementer/md.:</span>
               <span className="amount-value">
                 {formatCurrency(ourOfferTotals.monthly - (notIncludedStreamingCost || 0))}
               </span>
@@ -350,14 +381,14 @@ function ComparisonPanel({
               <div className="amount-row discount">
                 <span className="amount-label">Telenor rabat:</span>
                 <span className="amount-value text-success">
-                  -{formatCurrency(ourOfferTotals.telenorDiscount)}/md
+                  -{formatCurrency(ourOfferTotals.telenorDiscount)}/md.
                 </span>
               </div>
             )}
             {notIncludedStreamingCost > 0 && (
               <div className="amount-row">
                 <span className="amount-label">Streaming tillæg:</span>
-                <span className="amount-value">{formatCurrency(notIncludedStreamingCost)}/md</span>
+                <span className="amount-value">{formatCurrency(notIncludedStreamingCost)}/md.</span>
               </div>
             )}
             {originalItemPrice > 0 && (
@@ -372,8 +403,16 @@ function ComparisonPanel({
                 <span className="amount-value">{formatCurrency(ourOfferTotals.setupFee)}</span>
               </div>
             )}
+            {freeSetup && ourOfferTotals.setupFeeDiscount > 0 && (
+              <div className="amount-row discount">
+                <span className="amount-label">Gratis oprettelse:</span>
+                <span className="amount-value text-success">
+                  -{formatCurrency(ourOfferTotals.setupFeeDiscount)}
+                </span>
+              </div>
+            )}
             <div className="amount-row total">
-              <span className="amount-label font-semibold">Total/md:</span>
+              <span className="amount-label font-semibold">Total/md.:</span>
               <span className="amount-value font-bold">
                 {formatCurrency(ourOfferTotals.monthly)}
               </span>
@@ -420,7 +459,7 @@ function ComparisonPanel({
           {formatCurrency(Math.abs(savings))}
         </div>
         <div className="savings-subtitle">
-          over 6 måneder
+          over 6 måneder.
         </div>
       </div>
 
@@ -524,6 +563,32 @@ function ComparisonPanel({
           background: rgba(255, 255, 255, 0.04);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: var(--radius-md);
+        }
+
+        .free-setup-section {
+          margin-bottom: var(--spacing-lg);
+        }
+
+        .free-setup-section .checkbox-wrapper {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-md);
+          background: rgba(16, 185, 129, 0.05);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .free-setup-section .checkbox-wrapper:hover {
+          background: rgba(16, 185, 129, 0.1);
+          border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .free-setup-section .checkbox:checked + span {
+          color: var(--color-success);
+          font-weight: var(--font-semibold);
         }
 
         .info-row {
@@ -635,12 +700,12 @@ function ComparisonPanel({
           border-radius: var(--radius-lg);
           border: 2px solid var(--glass-border);
           overflow: hidden;
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
         }
 
         .comparison-column:hover {
           border-color: rgba(255, 255, 255, 0.3);
-          transform: translateY(-4px);
+          transform: translateY(-2px) translateZ(0);  /* Reduced motion, GPU accelerated */
           box-shadow: var(--shadow-xl), 0 0 20px rgba(255, 107, 26, 0.1);
         }
 
@@ -740,11 +805,11 @@ function ComparisonPanel({
           text-align: center;
           position: relative;
           overflow: hidden;
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
         }
 
         .savings-banner:hover {
-          transform: scale(1.02);
+          transform: scale(1.01) translateZ(0);  /* Subtle, GPU accelerated */
         }
 
         .savings-banner.positive {

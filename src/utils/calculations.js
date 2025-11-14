@@ -72,6 +72,16 @@ export function calculateTotalEarnings(cartItems) {
   if (!cartItems || cartItems.length === 0) return 0;
 
   return cartItems.reduce((total, item) => {
+    // Telenor 170 kr plan har forskellig indtjening for første vs. efterfølgende abonnementer
+    if (item.plan.id === 'telenor-170kr' && item.plan.earningsAdditional) {
+      // Første abonnement: 900 kr, resten: 1100 kr hver
+      const firstEarnings = item.plan.earnings || 0;
+      const additionalEarnings = item.plan.earningsAdditional || 0;
+      const additionalQuantity = Math.max(0, item.quantity - 1);
+      return total + firstEarnings + (additionalEarnings * additionalQuantity);
+    }
+    
+    // Standard beregning for alle andre planer
     return total + (item.plan.earnings * item.quantity);
   }, 0);
 }
@@ -160,9 +170,9 @@ export function calculateCustomerTotal(currentMobileCost, streamingCost, origina
  * @param {number} originalItemPrice - Varens pris inden rabat (engangspris)
  * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number }
  */
-export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0) {
+export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0, freeSetup = false) {
   if (!cartItems || cartItems.length === 0) {
-    return { monthly: 0, sixMonth: 0, telenorDiscount: 0, setupFee: 0 };
+    return { monthly: 0, sixMonth: 0, telenorDiscount: 0, setupFee: 0, setupFeeDiscount: 0 };
   }
 
   // Beregn totalt antal mobilabonnementer
@@ -170,6 +180,7 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
   
   // Beregn oprettelsesgebyr
   const setupFee = totalLines * SETUP_FEE_PER_LINE;
+  const setupFeeDiscount = freeSetup ? setupFee : 0;
 
   // Beregn 6-måneders total for alle planer (inkl. CBB Mix)
   const plansSixMonth = cartItems.reduce((total, item) => {
@@ -201,13 +212,15 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
   const afterCashDiscount = beforeCashDiscount - (cashDiscount || 0);
   
   // Tilføj varens pris og oprettelsesgebyr (engangsbetalinger)
-  const sixMonth = afterCashDiscount + (originalItemPrice || 0) + setupFee;
+  // Hvis gratis oprettelse, træk oprettelsesgebyret fra som rabat
+  const sixMonth = afterCashDiscount + (originalItemPrice || 0) + setupFee - setupFeeDiscount;
 
   return {
     monthly: afterCashDiscount / 6, // Monthly beregnes uden engangsbetalinger
     sixMonth: Math.max(0, sixMonth), // Må ikke være negativ
     telenorDiscount,
-    setupFee
+    setupFee,
+    setupFeeDiscount
   };
 }
 

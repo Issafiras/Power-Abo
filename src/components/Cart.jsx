@@ -10,16 +10,19 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
   if (cartItems.length === 0) {
     return (
       <div className="cart glass-card-no-hover fade-in-up">
-        <div className="section-header">
-          <h2>🛒 Kurv</h2>
-          <p className="text-secondary">Tilføj planer for at se beregninger</p>
-        </div>
+      <div className="section-header">
+        <h2>
+          <span role="img" aria-hidden="true">🛒</span>
+          Kurv
+        </h2>
+        <p className="text-secondary">Tilføj abonnementer for at se beregninger</p>
+      </div>
         
         <div className="empty-state animate-scale-in">
-          <div className="empty-state-icon animate-pulse">🛒</div>
+          <div className="empty-state-icon animate-pulse" aria-hidden="true">🛒</div>
           <p className="text-lg font-semibold">Kurven er tom</p>
           <p className="text-secondary">
-            Vælg mobilabonnementer fra listen nedenfor
+            Vælg mobilabonnementer fra listen nedenfor.
           </p>
         </div>
 
@@ -53,13 +56,16 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
 
   return (
     <div className="cart glass-card-no-hover fade-in-up">
-      <div className="section-header">
-        <h2>🛒 Kurv</h2>
-        <div className="cart-count badge badge-primary animate-pulse animate-pulse-glow">
-          {cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
-          {' '}linje{cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 'r' : ''}
+        <div className="section-header">
+          <h2>
+            <span role="img" aria-hidden="true">🛒</span>
+            Kurv
+          </h2>
+          <div className="cart-count badge badge-primary animate-pulse animate-pulse-glow" aria-label={`${cartItems.reduce((sum, item) => sum + item.quantity, 0)} abonnementer i kurv`}>
+            {cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
+            {' '}abonnement{cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 'er' : ''}
+          </div>
         </div>
-      </div>
 
       {/* Cart items */}
       <div className="cart-items">
@@ -97,18 +103,20 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
                   onClick={() => onUpdateQuantity(item.plan.id, item.quantity - 1)}
                   className="btn btn-icon btn-secondary quantity-btn"
                   disabled={item.quantity <= 1}
-                  aria-label="Reducer antal"
+                  aria-label={`Reducer antal ${item.plan.name}`}
+                  aria-controls={`quantity-${item.plan.id}`}
                 >
-                  −
+                  <span aria-hidden="true">−</span>
                 </button>
-                <span className="quantity-value">{item.quantity}</span>
+                <span id={`quantity-${item.plan.id}`} className="quantity-value" aria-label={`Antal: ${item.quantity}`}>{item.quantity}</span>
                 <button
                   onClick={() => onUpdateQuantity(item.plan.id, item.quantity + 1)}
                   className="btn btn-icon btn-secondary quantity-btn"
                   disabled={item.quantity >= 20}
-                  aria-label="Forøg antal"
+                  aria-label={`Forøg antal ${item.plan.name}`}
+                  aria-controls={`quantity-${item.plan.id}`}
                 >
-                  +
+                  <span aria-hidden="true">+</span>
                 </button>
               </div>
 
@@ -117,15 +125,15 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
                 {hasIntro ? (
                   <>
                     <div className="price-line">
-                      <span className="price-label">Intro ({item.plan.introMonths} mdr):</span>
+                      <span className="price-label">Intro ({item.plan.introMonths} mdr.):</span>
                       <span className="price-value">
-                        {formatCurrency(item.plan.introPrice * item.quantity)}/md
+                        {formatCurrency(item.plan.introPrice * item.quantity)}/md.
                       </span>
                     </div>
                     <div className="price-line">
                       <span className="price-label">Derefter:</span>
                       <span className="price-value">
-                        {formatCurrency(item.plan.price * item.quantity)}/md
+                        {formatCurrency(item.plan.price * item.quantity)}/md.
                       </span>
                     </div>
                   </>
@@ -133,7 +141,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
                   <div className="price-line">
                     <span className="price-label">Pris pr. måned:</span>
                     <span className="price-value">
-                      {formatCurrency(item.plan.price * item.quantity)}
+                      {formatCurrency(item.plan.price * item.quantity)}/md.
                     </span>
                   </div>
                 )}
@@ -144,7 +152,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
                     <div className="price-line cbb-mix-line">
                       <span className="price-label">🎬 CBB MIX ({item.cbbMixCount} tjenester):</span>
                       <span className="price-value">
-                        {formatCurrency((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * item.quantity)}/md
+                        {formatCurrency((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * item.quantity)}/md.
                       </span>
                     </div>
                   </div>
@@ -154,7 +162,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
                   <span className="price-label font-semibold">6 måneder:</span>
                   <span className="price-value font-bold">
                     {formatCurrency(sixMonthPrice + (item.cbbMixEnabled && item.cbbMixCount ? 
-                      ((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * 6 * item.quantity) : 0))}
+                      ((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * 6 * item.quantity) : 0))} kr.
                   </span>
                 </div>
 
@@ -206,7 +214,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
           );
           border-radius: var(--radius-lg);
           border: 1px solid rgba(255, 255, 255, 0.15);
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
           position: relative;
           transform-style: preserve-3d;
           backdrop-filter: blur(var(--blur-md)) saturate(150%);
@@ -233,7 +241,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
             var(--shadow-xl), 
             0 0 30px rgba(255, 109, 31, 0.3),
             0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-          transform: translateX(8px) translateY(-2px) rotateY(2deg) scale(1.02);
+          transform: translateX(4px) translateY(-1px) translateZ(0);  /* Reduced motion, GPU accelerated */
           background: linear-gradient(135deg, 
             rgba(255, 255, 255, 0.12) 0%, 
             rgba(255, 255, 255, 0.06) 100%
@@ -348,11 +356,11 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
         }
 
         .quantity-btn:hover {
-          transform: scale(1.15) rotate(5deg);
+          transform: scale(1.1) translateZ(0);  /* Reduced rotation, GPU accelerated */
           background: var(--color-orange);
           color: white;
           box-shadow: var(--glow-orange);
-          filter: brightness(1.2);
+          filter: brightness(1.1);
         }
 
         .quantity-btn:active {

@@ -21,7 +21,11 @@ function PlanCard({
   const brandColor = plan.color || 'var(--color-orange)';
 
   return (
-    <div className={`plan-card glass-card animate-scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd' ? 'telenor-card' : ''} ${plan.provider === 'telmore' || plan.provider === 'telmore-bredbånd' ? 'telmore-card' : ''}`}>
+    <div 
+      className={`plan-card glass-card animate-scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd' ? 'telenor-card' : ''} ${plan.provider === 'telmore' || plan.provider === 'telmore-bredbånd' ? 'telmore-card' : ''}`}
+      role="article"
+      aria-label={`${plan.name} abonnement fra ${plan.provider}`}
+    >
       {plan.provider === 'cbb' ? (
         // CBB specifik struktur
         <div className="refined-product-card__main-card">
@@ -106,7 +110,7 @@ function PlanCard({
                 <div className="subscription-card__price-main">
                   {plan.price}
                 </div>
-                <div className="subscription-card__price-period">kr/md{plan.business ? ' (ex. moms)' : ''}</div>
+                <div className="subscription-card__price-period">kr./md.{plan.business ? ' (ex. moms)' : ''}</div>
               </div>
             </div>
             
@@ -114,7 +118,7 @@ function PlanCard({
             {plan.familyDiscount && (
               <div className="telenor-family-discount-compact">
                 <span className="family-icon">👨‍👩‍👧‍👦</span>
-                <span className="family-text">-50 kr/md pr. ekstra linje</span>
+                <span className="family-text">-50 kr./md. pr. ekstra abonnement</span>
               </div>
             )}
             
@@ -171,11 +175,11 @@ function PlanCard({
                   <span className="price-amount" style={{ color: brandColor }}>
                     {formatCurrency(plan.introPrice)}
                   </span>
-                  <span className="price-period">/md</span>
+                  <span className="price-period">/md.</span>
                 </div>
                 <div className="price-detail text-muted">
                   i {plan.introMonths} {plan.introMonths === 1 ? 'måned' : 'måneder'}, 
-                  derefter {formatCurrency(plan.price)}/md
+                  derefter {formatCurrency(plan.price)}/md..
                 </div>
               </>
             ) : (
@@ -183,13 +187,13 @@ function PlanCard({
                 <span className="price-amount" style={{ color: brandColor }}>
                   {formatCurrency(plan.price)}
                 </span>
-                <span className="price-period">/md</span>
+                <span className="price-period">/md.</span>
               </div>
             )}
             
             {plan.familyDiscount && (
               <div className="price-family text-sm text-muted">
-                Samlerabat: -50 kr/md pr. ekstra linje
+                Samlerabat: -50 kr./md. pr. ekstra abonnement
               </div>
             )}
           </div>
@@ -253,9 +257,10 @@ function PlanCard({
           background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)`,
           boxShadow: `0 0 20px ${brandColor}40`
         }}
+        aria-label={`Tilføj ${plan.name} til kurv`}
       >
         <span className="btn-text">Tilføj til kurv</span>
-        <span className="cart-icon">🛒</span>
+        <span className="cart-icon" aria-hidden="true">🛒</span>
       </button>
 
       <style>{`
@@ -264,7 +269,7 @@ function PlanCard({
           flex-direction: column;
           padding: var(--spacing-2xl);
           gap: var(--spacing-lg);
-          transition: all var(--transition-smooth);
+          transition: all var(--transition-base);  /* Max 300ms */
           cursor: pointer;
           position: relative;
         }
@@ -278,14 +283,14 @@ function PlanCard({
           bottom: 0;
           background: var(--gradient-glass);
           opacity: 0;
-          transition: opacity var(--transition-smooth);
+          transition: opacity var(--transition-base);  /* Max 300ms */
           border-radius: var(--radius-lg);
           pointer-events: none;
           z-index: -1;
         }
 
         .plan-card:hover {
-          transform: translateY(-2px);
+          transform: translateY(-2px) translateZ(0);  /* GPU accelerated */
           z-index: 10;
         }
 
@@ -294,8 +299,8 @@ function PlanCard({
         }
 
         .plan-card:active {
-          transform: translateY(-2px) scale(0.99);
-          transition: transform 100ms var(--ease-apple);
+          transform: translateY(-1px) scale(0.99) translateZ(0);  /* GPU accelerated */
+          transition: transform var(--transition-fast) var(--ease-apple);
         }
 
         .plan-header {
@@ -347,7 +352,7 @@ function PlanCard({
         }
 
         .plan-card:hover .plan-pricing {
-          transform: scale(1.05);
+          transform: scale(1.02) translateZ(0);  /* Reduced scale, GPU accelerated */
         }
 
         .price-intro,
@@ -365,8 +370,8 @@ function PlanCard({
         }
 
         .plan-card:hover .price-amount {
-          transform: scale(1.1);
-          text-shadow: 0 0 20px currentColor;
+          transform: scale(1.05) translateZ(0);  /* Reduced scale, GPU accelerated */
+          text-shadow: 0 0 12px currentColor;  /* Subtle shadow */
         }
 
         .price-period {
@@ -576,7 +581,7 @@ function PlanCard({
         }
 
         .current-product-content__value {
-          font-size: 32px;
+          font-size: 24px;
           font-weight: 900;
           color: #410016;
           margin: 0;
@@ -592,11 +597,11 @@ function PlanCard({
         }
 
         .product-content__speak .current-product-content__value {
-          font-size: 24px;
+          font-size: 18px;
         }
 
         .product-content__data .current-product-content__value {
-          font-size: 48px;
+          font-size: 36px;
           font-weight: 900;
         }
 
@@ -622,7 +627,7 @@ function PlanCard({
         }
 
         .current-price-line__price {
-          font-size: 24px;
+          font-size: 20px;
           font-weight: 900;
           color: #410016;
           margin: 0;
@@ -729,7 +734,7 @@ function PlanCard({
          }
 
          .subscription-card__data-amount {
-           font-size: 32px;
+           font-size: 24px;
            font-weight: 800;
            color: #0207b2;
            margin: 0;
@@ -749,7 +754,7 @@ function PlanCard({
          }
 
          .subscription-card__price-main {
-           font-size: 28px;
+           font-size: 22px;
            font-weight: 800;
            color: #0207b2;
            line-height: 1;
@@ -927,11 +932,11 @@ function PlanCard({
           }
 
           .subscription-card__data-amount {
-            font-size: 28px;
+            font-size: 22px;
           }
 
           .subscription-card__price-main {
-            font-size: 24px;
+            font-size: 20px;
           }
 
           .subscription-features-grid {

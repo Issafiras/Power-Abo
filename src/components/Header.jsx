@@ -1,6 +1,6 @@
 /**
- * Header komponent
- * Viser app-titel, tema-toggle, og kontrol-knapper
+ * Header komponent - Steve Jobs / Apple Design
+ * Elegant, minimalistisk og sofistikeret header med perfekt attention to detail
  */
 
 import { useState, useEffect } from 'react';
@@ -41,33 +41,23 @@ export default function Header({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [onPresentationToggle, onThemeToggle]);
 
-  // Shrink header on scroll for a more compact UI - Optimized with throttling
+  // Apple-style scroll detection - smooth and performant
   useEffect(() => {
     let ticking = false;
-    let lastScrollY = window.scrollY;
     
     function handleScroll() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          // Kun opdater hvis scroll position har ændret sig betydeligt (throttle)
-          if (Math.abs(currentScrollY - lastScrollY) > 5) {
-            const shouldBeCompact = currentScrollY > 24;
-            if (shouldBeCompact !== isCompact) {
-              setIsCompact(shouldBeCompact);
-            }
-            lastScrollY = currentScrollY;
-          }
+          setIsCompact(window.scrollY > 10);
           ticking = false;
         });
         ticking = true;
       }
     }
     
-    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isCompact]);
+  }, []);
 
   const handleResetConfirm = () => {
     onReset();
@@ -75,13 +65,9 @@ export default function Header({
   };
 
   return (
-    <header className={`app-header fade-in-down ${isCompact ? 'app-header--compact' : ''}`}>
-      <div className="app-header__bg" aria-hidden="true">
-        <span className="app-header__aurora app-header__aurora--primary" />
-        <span className="app-header__aurora app-header__aurora--secondary" />
-        <span className="app-header__mesh" />
-        <span className="app-header__glow" />
-      </div>
+    <header className={`apple-header fade-in-down ${isCompact ? 'apple-header--compact' : ''}`}>
+      {/* Ultra minimal background blur layer - Steve Jobs Perfection */}
+      <div className="apple-header__backdrop" aria-hidden="true" />
 
       {/* Reset confirmation dialog */}
       {showConfirm && (
@@ -93,7 +79,7 @@ export default function Header({
             aria-labelledby="reset-dialog-title"
             onClick={e => e.stopPropagation()}
           >
-            <h3>Bekræft nulstilling</h3>
+            <h3 id="reset-dialog-title">Bekræft nulstilling</h3>
             <p className="text-secondary">
               Er du sikker på, at du vil nulstille alt? Dette kan ikke fortrydes.
             </p>
@@ -101,12 +87,14 @@ export default function Header({
               <button 
                 onClick={() => setShowConfirm(false)} 
                 className="btn btn-glass"
+                aria-label="Annullér nulstilling"
               >
                 Annullér
               </button>
               <button 
                 onClick={handleResetConfirm} 
-                className="btn btn-gradient-orange"
+                className="btn btn-premium"
+                aria-label="Bekræft nulstilling"
               >
                 Ja, nulstil alt
               </button>
@@ -115,52 +103,54 @@ export default function Header({
         </div>
       )}
 
-      <div className="container app-header__grid">
-        <div className="app-header__lead">
-          <p className="app-header__kicker">Sammenlign mobilabonnementer og streaming</p>
-        </div>
-
-        <div className="app-header__logo">
+      <nav className="apple-header__nav" aria-label="Hovednavigation">
+        <div className="apple-header__container">
+          {/* Logo - Centered Apple Style */}
+        <div className="apple-header__logo">
           {(() => {
             const logoSrc = `${import.meta.env.BASE_URL}power-logo-white.png?v=1`;
             return (
+                <a href="#" className="apple-header__logo-link" aria-label="Power Abonnement">
               <img
                 src={logoSrc}
                 alt="Power Abonnement"
-                className="app-header__logo-image"
+                className="apple-header__logo-image"
               />
+                </a>
             );
           })()}
         </div>
 
-        <div className="app-header__actions">
-          <div className="app-header__actions-primary">
-            {onPresentationToggle && (
-              <button
-                onClick={onPresentationToggle}
-                className="btn btn-premium"
-                title="Vis præsentation (Ctrl+P)"
-              >
+          {/* Navigation Links - Apple Style Subtle */}
+          <div className="apple-header__nav-links">
+          {onPresentationToggle && (
+            <button
+              onClick={onPresentationToggle}
+                className="apple-header__nav-link"
+              title="Vis præsentation (Ctrl+P)"
+              aria-label="Vis præsentation"
+            >
                 Præsentér
-              </button>
-            )}
+            </button>
+          )}
           </div>
 
-          <div className="app-header__actions-secondary">
+          {/* Actions - Right Side Minimal */}
+          <div className="apple-header__actions">
             {onSmartCalculatorToggle && (
               <button
                 onClick={onSmartCalculatorToggle}
-                className="btn btn-glass btn-icon"
+                className="apple-header__action-icon"
                 title="AI Anbefaling"
                 aria-label="AI Anbefaling"
               >
-                <span className="btn-icon-text">AI</span>
+                <span className="apple-header__icon-text">AI</span>
               </button>
             )}
 
             <button
               onClick={onThemeToggle}
-              className="btn btn-glass btn-icon"
+              className="apple-header__action-icon"
               title="Skift tema (Ctrl+T)"
               aria-label="Skift tema"
             >
@@ -169,37 +159,15 @@ export default function Header({
 
             <button
               onClick={() => setShowConfirm(true)}
-              className="btn btn-glass btn-icon"
+              className="apple-header__action-icon"
               title="Nulstil alt (Ctrl+R)"
               aria-label="Nulstil"
             >
               ↻
             </button>
           </div>
-
-          <div className="app-header__maps">
-            <a
-              href="https://www.telmore.dk/mobilt-bredbaand/daekningskort"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="coverage-map-btn coverage-map-btn-telmore"
-              title="Se Telmore dækningskort"
-            >
-              Telmore
-            </a>
-
-            <a
-              href="https://www.telenor.dk/kundeservice/drift-og-dakning/dakning/dakningskort/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="coverage-map-btn coverage-map-btn-telenor"
-              title="Se Telenor/CBB dækningskort"
-            >
-              Telenor
-            </a>
-          </div>
         </div>
-      </div>
+      </nav>
     </header>
   );
 }

@@ -105,7 +105,8 @@ export const plans = [
     name: '100 GB',
     data: '100 GB fri tale',
     price: 170,
-    earnings: 1000,
+    earnings: 900, // Første abonnement
+    earningsAdditional: 1100, // Efterfølgende abonnementer (med 50 kr rabat)
     features: ['5G', 'eSIM', '35 GB EU Roaming', '100 GB fri tale', 'Familie'],
     familyDiscount: true,
     color: '#0207b2',

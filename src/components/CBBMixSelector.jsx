@@ -40,7 +40,7 @@ export default function CBBMixSelector({
           >
             <div className="mix-option-content">
               <span className="mix-count">{option.label}</span>
-              <span className="mix-price">{formatCurrency(option.price)}/md</span>
+              <span className="mix-price">{formatCurrency(option.price)}/md.</span>
             </div>
             {selectedCount === option.count && (
               <div className="mix-check">✓</div>
@@ -54,11 +54,11 @@ export default function CBBMixSelector({
           <div className="mix-total">
             <span className="mix-total-label">CBB MIX total:</span>
             <span className="mix-total-price">
-              {formatCurrency(cbbMixPricing[selectedCount])}/md
+              {formatCurrency(cbbMixPricing[selectedCount])}/md.
             </span>
           </div>
           <p className="mix-note">
-            Du kan skifte mellem tjenesterne løbende uden binding
+            Du kan skifte mellem tjenesterne løbende uden binding.
           </p>
         </div>
       )}

@@ -4,7 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Mobilabonnement og streaming beregner - Sammenlign priser og besparelser" />
-  <!-- theme-color supported by Chrome, Safari, Edge, but not Firefox -->
+  <!-- 
+    theme-color: Progressive enhancement - supported by Chrome, Safari, Edge.
+    Not supported by Firefox, Firefox for Android, Opera (intentional - graceful degradation).
+    This is a progressive enhancement and will gracefully degrade in unsupported browsers.
+    NOTE: Linter warning about browser support is expected and can be safely ignored.
+    This meta tag is intentionally included for browsers that support it.
+  -->
   <meta name="theme-color" content="#ff6b1a" />
   
   <!-- Favicon -->
@@ -17,17 +23,53 @@
   <title>Power Calculator - Mobilabonnement Beregner</title>
   
   <style>
-    /* Loading screen */
+    /* Premium Loading Screen - Tech-Ikon Excellence */
     #loading-screen {
       position: fixed;
       inset: 0;
-      background: linear-gradient(135deg, #0a0f1c, #374151);
+      /* Sophisticated mesh gradient background */
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 109, 31, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(94, 143, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.04) 0%, transparent 60%),
+        linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #141414 100%);
+      background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+      background-position: 0% 0%, 100% 100%, 50% 50%, 0% 0%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      transition: opacity 0.5s ease-out;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      /* GPU acceleration */
+      transform: translateZ(0);
+      will-change: opacity;
+    }
+    
+    /* Animated aurora effect */
+    #loading-screen::before {
+      content: '';
+      position: absolute;
+      inset: -50%;
+      background: 
+        radial-gradient(circle at 30% 40%, rgba(255, 109, 31, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 70% 60%, rgba(94, 143, 255, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(167, 139, 250, 0.08) 0%, transparent 50%);
+      background-size: 150% 150%, 150% 150%, 150% 150%;
+      animation: auroraFlow 20s ease-in-out infinite;
+      opacity: 0.6;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+    
+    #loading-screen::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 50%, rgba(255, 255, 255, 0.01) 100%);
+      animation: auroraShift 15s ease-in-out infinite;
+      pointer-events: none;
     }
     
     #loading-screen.fade-out {
@@ -35,42 +77,217 @@
       pointer-events: none;
     }
     
+    /* Premium Logo Animation - Sophisticated Entrance */
     .loading-logo {
-      height: 72px;
+      height: 80px;
       width: auto;
-      margin-bottom: 1rem;
-      animation: pulse 2s ease-in-out infinite;
-      filter: drop-shadow(0 2px 10px rgba(0,0,0,0.35));
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: logoEntrance 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards,
+                 logoGlowPulse 3s ease-in-out 1.2s infinite;
+      filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5)) 
+              drop-shadow(0 0 30px rgba(255, 109, 31, 0.3));
+      transform: translateZ(0);
+      will-change: transform, opacity, filter;
     }
     
+    /* Premium Typography - Space Grotesk */
     .loading-text {
-      color: #f9fafb;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 1.5rem;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      font-size: 1.75rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #ff6b1a, #ff8847);
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 50%, #5E8FFF 100%);
+      background-size: 200% 200%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      animation: textGradientShift 4s ease-in-out infinite,
+                 textFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+      opacity: 0;
+      transform: translateY(10px);
+      margin-bottom: 0.5rem;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      will-change: background-position, opacity, transform;
     }
     
+    /* Modern Loading Indicator - Three Dots Ellipsis */
     .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top-color: #ff6b1a;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: center;
       margin-top: 2rem;
+      opacity: 0;
+      animation: dotsFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+      transform: translateZ(0);
     }
     
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
+    .loading-spinner span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FF6D1F, #FF8F57);
+      box-shadow: 0 0 20px rgba(255, 109, 31, 0.6),
+                  0 0 40px rgba(255, 109, 31, 0.3);
+      animation: dotBounce 1.4s ease-in-out infinite;
+      transform: translateZ(0);
+      will-change: transform, opacity;
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .loading-spinner span:nth-child(1) {
+      animation-delay: 0s;
+    }
+    
+    .loading-spinner span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .loading-spinner span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    /* Animations */
+    @keyframes auroraFlow {
+      0%, 100% {
+        background-position: 0% 0%, 100% 100%, 50% 50%;
+        opacity: 0.6;
+        transform: scale(1) translate3d(0, 0, 0);
+      }
+      33% {
+        background-position: 30% 40%, 70% 60%, 50% 60%;
+        opacity: 0.8;
+        transform: scale(1.05) translate3d(-2%, -2%, 0);
+      }
+      66% {
+        background-position: 60% 20%, 40% 80%, 50% 40%;
+        opacity: 0.7;
+        transform: scale(1.02) translate3d(2%, 2%, 0);
+      }
+    }
+    
+    @keyframes auroraShift {
+      0%, 100% {
+        opacity: 0.4;
+        transform: translate(0, 0);
+      }
+      50% {
+        opacity: 0.6;
+        transform: translate(-1%, -1%);
+      }
+    }
+    
+    @keyframes logoEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px) blur(10px);
+      }
+      60% {
+        transform: scale(1.05) translateY(0) blur(2px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0) blur(0);
+      }
+    }
+    
+    @keyframes logoGlowPulse {
+      0%, 100% {
+        filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5)) 
+                drop-shadow(0 0 30px rgba(255, 109, 31, 0.3));
+      }
+      50% {
+        filter: drop-shadow(0 4px 25px rgba(0, 0, 0, 0.6)) 
+                drop-shadow(0 0 50px rgba(255, 109, 31, 0.5))
+                drop-shadow(0 0 80px rgba(255, 109, 31, 0.2));
+      }
+    }
+    
+    @keyframes textGradientShift {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+    
+    @keyframes textFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes dotsFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes dotBounce {
+      0%, 80%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.7;
+      }
+      40% {
+        transform: translateY(-12px) scale(1.1);
+        opacity: 1;
+      }
+    }
+    
+    /* Performance optimizations - Mobile */
+    @media (max-width: 900px) {
+      #loading-screen::before,
+      #loading-screen::after {
+        animation: none !important;
+        opacity: 0.3 !important;
+      }
+      
+      .loading-logo {
+        animation: logoEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards !important;
+      }
+      
+      .loading-text {
+        animation: textFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards !important;
+      }
+      
+      .loading-spinner span {
+        box-shadow: 0 0 15px rgba(255, 109, 31, 0.5) !important;
+        width: 10px !important;
+        height: 10px !important;
+      }
+    }
+    
+    /* Accessibility - Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      #loading-screen::before,
+      #loading-screen::after {
+        animation: none !important;
+      }
+      
+      .loading-logo {
+        animation: logoEntrance 0.3s ease-out 0.2s forwards !important;
+      }
+      
+      .loading-text {
+        animation: textFadeIn 0.3s ease-out 0.4s forwards !important;
+      }
+      
+      .loading-spinner span {
+        animation: none !important;
+        opacity: 1 !important;
+      }
     }
   </style>
 </head>
@@ -79,7 +296,11 @@
   <div id="loading-screen">
     <img src="%BASE_URL%power-logo-white.png?v=1" alt="Power Abonnement" class="loading-logo" />
     <div class="loading-text">Power Calculator</div>
-    <div class="loading-spinner"></div>
+    <div class="loading-spinner">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
   </div>
   
   <!-- React app root -->

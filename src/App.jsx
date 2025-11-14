@@ -40,6 +40,8 @@ import {
   loadShowCashDiscount,
   saveExistingBrands,
   loadExistingBrands,
+  saveFreeSetup,
+  loadFreeSetup,
   resetAll
 } from './utils/storage';
 import { validatePrice, validateQuantity } from './utils/validators';
@@ -56,6 +58,7 @@ function App() {
   const [autoAdjust, setAutoAdjust] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [showCashDiscount, setShowCashDiscount] = useState(false);
+  const [freeSetup, setFreeSetup] = useState(false);
   const [activeProvider, setActiveProvider] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -95,6 +98,7 @@ function App() {
     const savedTheme = loadTheme();
     const savedShowCashDiscount = loadShowCashDiscount();
     const savedExistingBrands = loadExistingBrands();
+    const savedFreeSetup = loadFreeSetup();
 
     setCartItems(savedCart);
     setSelectedStreaming(savedStreaming);
@@ -107,6 +111,7 @@ function App() {
     setTheme(savedTheme);
     setShowCashDiscount(savedShowCashDiscount);
     setExistingBrands(savedExistingBrands);
+    setFreeSetup(savedFreeSetup);
   }, []);
 
   // Batch localStorage operations - gem alle state ændringer i én operation
@@ -121,7 +126,8 @@ function App() {
     saveAutoAdjust(autoAdjust);
     saveShowCashDiscount(showCashDiscount);
     saveExistingBrands(existingBrands);
-  }, [cartItems, selectedStreaming, customerMobileCost, numberOfLines, originalItemPrice, cashDiscount, cashDiscountLocked, autoAdjust, showCashDiscount, existingBrands]);
+    saveFreeSetup(freeSetup);
+  }, [cartItems, selectedStreaming, customerMobileCost, numberOfLines, originalItemPrice, cashDiscount, cashDiscountLocked, autoAdjust, showCashDiscount, existingBrands, freeSetup]);
 
   // Theme skal også opdatere DOM - separat useEffect
   useEffect(() => {
@@ -337,6 +343,7 @@ function App() {
     setOriginalItemPrice(0);
     setCashDiscount(null);
     setCashDiscountLocked(false);
+    setFreeSetup(false);
     setAutoAdjust(false);
     setActiveProvider('all');
     setSearchQuery('');
@@ -531,10 +538,10 @@ function App() {
             </div>
           </section>
 
-          <div className="section-divider" aria-hidden="true" />
+          <div className="section-divider" aria-hidden="true" style={{ margin: 'var(--spacing-md) auto' }} />
 
           {/* Middle section: Provider selection & Plans */}
-          <section className="section fade-in-up delay-100">
+          <section id="plans-section" className="section fade-in-up delay-100">
             <div className="section-shell animate-smooth-scale">
               <div className="plans-section">
                 <div className="section-header">
@@ -543,7 +550,7 @@ function App() {
                     Vælg Mobilabonnementer &amp; Bredbånd
                   </h2>
                   <p className="section-header__subtitle">
-                    Vælg først operatør, derefter de abonnementer der passer bedst til kunden
+                    Vælg først operatør, derefter de abonnementer, som passer bedst til kunden.
                   </p>
                 </div>
 
@@ -560,7 +567,7 @@ function App() {
                     <div className="empty-state-icon pulse">👆</div>
                     <p className="text-lg font-semibold">Vælg en operatør</p>
                     <p className="text-secondary">
-                      Vælg Telmore, Telenor, CBB eller Bredbånd for at se tilgængelige abonnementer
+                      Vælg Telmore, Telenor, CBB eller Bredbånd for at se tilgængelige abonnementer.
                     </p>
                   </div>
                 ) : filteredPlans.length > 0 ? (
@@ -587,7 +594,7 @@ function App() {
                     <div className="empty-state-icon animate-empty-state">🔍</div>
                     <p className="text-lg font-semibold">Ingen abonnementer fundet</p>
                     <p className="text-secondary">
-                      Prøv at ændre søgeordet
+                      Prøv at ændre søgeordet.
                     </p>
                   </div>
                 )}
@@ -595,7 +602,7 @@ function App() {
             </div>
           </section>
 
-          <div className="section-divider" aria-hidden="true" />
+          <div className="section-divider" aria-hidden="true" style={{ margin: 'var(--spacing-md) auto' }} />
 
           {/* Bottom section: Cart and Comparison side by side */}
           <section className="section fade-in-up delay-200">
@@ -623,6 +630,8 @@ function App() {
                   onAutoAdjustChange={setAutoAdjust}
                   showCashDiscount={showCashDiscount}
                   onToggleCashDiscount={useCallback(() => setShowCashDiscount(prev => !prev), [])}
+                  freeSetup={freeSetup}
+                  onFreeSetupChange={setFreeSetup}
                 />
                 </div>
               </div>
@@ -640,6 +649,7 @@ function App() {
             customerMobileCost={customerMobileCost}
             originalItemPrice={originalItemPrice}
             cashDiscount={cashDiscount}
+            freeSetup={freeSetup}
             onClose={handleClosePresentation}
           />
         </Suspense>
@@ -657,14 +667,21 @@ function App() {
 
       <style>{`
         .app {
-          min-height: 100vh;
+          /* Removed min-height: 100vh to prevent double scrolling - #root handles it */
           display: flex;
           flex-direction: column;
+          width: 100%;
+          max-width: 100%;
+          overflow-x: hidden;
+          overflow-y: visible;  /* Let body handle scrolling */
         }
 
         .main-content {
           flex: 1;
           padding: var(--spacing-md) 0;
+          padding-top: calc(120px + var(--spacing-md));
+          width: 100%;
+          max-width: 100%;
         }
 
         .plans-section {

@@ -14,7 +14,8 @@ const STORAGE_KEYS = {
   AUTO_ADJUST: 'power_calculator_auto_adjust',
   THEME: 'power_calculator_theme',
   SHOW_CASH_DISCOUNT: 'power_calculator_show_cash_discount',
-  EXISTING_BRANDS: 'power_calculator_existing_brands'
+  EXISTING_BRANDS: 'power_calculator_existing_brands',
+  FREE_SETUP: 'power_calculator_free_setup'
 };
 
 /**
@@ -162,6 +163,15 @@ export function loadExistingBrands() {
   return getItem(STORAGE_KEYS.EXISTING_BRANDS, []);
 }
 
+// Gratis oprettelse funktioner
+export function saveFreeSetup(enabled) {
+  setItem(STORAGE_KEYS.FREE_SETUP, enabled);
+}
+
+export function loadFreeSetup() {
+  return getItem(STORAGE_KEYS.FREE_SETUP, false);
+}
+
 // Reset alt
 export function resetAll() {
   Object.values(STORAGE_KEYS).forEach(key => {
@@ -182,7 +192,8 @@ export function exportState() {
     autoAdjust: loadAutoAdjust(),
     theme: loadTheme(),
     showCashDiscount: loadShowCashDiscount(),
-    existingBrands: loadExistingBrands()
+    existingBrands: loadExistingBrands(),
+    freeSetup: loadFreeSetup()
   };
 }
 
@@ -203,5 +214,6 @@ export function importState(state) {
   if (Object.prototype.hasOwnProperty.call(state, 'theme')) saveTheme(state.theme);
   if (typeof state.showCashDiscount === 'boolean') saveShowCashDiscount(state.showCashDiscount);
   if (Array.isArray(state.existingBrands)) saveExistingBrands(state.existingBrands);
+  if (typeof state.freeSetup === 'boolean') saveFreeSetup(state.freeSetup);
 }
 
