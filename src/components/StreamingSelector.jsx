@@ -326,7 +326,7 @@ function StreamingSelector({
   }, [showScanner]);
 
   return (
-      <div className="streaming-selector glass-card-no-hover fade-in-up">
+    <div className="streaming-selector glass-card-no-hover fade-in-up">
       <div className="section-header">
         <h2>
           <span role="img" aria-hidden="true">📊</span>

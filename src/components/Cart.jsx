@@ -10,13 +10,13 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
   if (cartItems.length === 0) {
     return (
       <div className="cart glass-card-no-hover fade-in-up">
-      <div className="section-header">
+        <div className="section-header">
         <h2>
           <span role="img" aria-hidden="true">🛒</span>
           Kurv
         </h2>
-        <p className="text-secondary">Tilføj abonnementer for at se beregninger</p>
-      </div>
+          <p className="text-secondary">Tilføj abonnementer for at se beregninger</p>
+        </div>
         
         <div className="empty-state animate-scale-in">
           <div className="empty-state-icon animate-pulse" aria-hidden="true">🛒</div>
@@ -56,16 +56,16 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
 
   return (
     <div className="cart glass-card-no-hover fade-in-up">
-        <div className="section-header">
+      <div className="section-header">
           <h2>
             <span role="img" aria-hidden="true">🛒</span>
             Kurv
           </h2>
           <div className="cart-count badge badge-primary animate-pulse animate-pulse-glow" aria-label={`${cartItems.reduce((sum, item) => sum + item.quantity, 0)} abonnementer i kurv`}>
-            {cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
-            {' '}abonnement{cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 'er' : ''}
-          </div>
+          {cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
+          {' '}abonnement{cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 'er' : ''}
         </div>
+      </div>
 
       {/* Cart items */}
       <div className="cart-items">

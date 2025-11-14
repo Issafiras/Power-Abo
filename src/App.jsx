@@ -739,20 +739,20 @@ function App() {
 
         @media (max-width: 900px) {
           .main-content {
-            padding: var(--spacing-lg) 0;  /* Øget vertikal padding */
-            padding-top: calc(70px + var(--spacing-lg));  /* Opdateret til ny header højde */
+            padding: var(--spacing-sm) 0;  /* Ultra minimal vertikal padding */
+            padding-top: calc(64px + var(--spacing-sm));
           }
 
           .plans-section {
-            padding: var(--spacing-md);  /* Øget padding for bedre luft */
+            padding: var(--spacing-sm);  /* Ultra minimal padding */
           }
           
           .section-header {
-            margin-bottom: var(--spacing-lg) !important;
+            margin-bottom: var(--spacing-sm) !important;
           }
 
           .cart-comparison-grid {
-            gap: var(--spacing-lg);  /* Øget gap for bedre separation */
+            gap: var(--spacing-sm);  /* Ultra minimal gap */
           }
         }
 

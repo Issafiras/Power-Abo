@@ -303,26 +303,26 @@
   }
 }
 
-/* Responsive font size scaling - Forbedret læsbarhed på mobil */
+/* Responsive font size scaling - Optimal balance for mobil */
 @media (max-width: 900px) {
   :root {
-    --font-xs: 0.75rem;      /* 12px - forbedret fra 0.625rem */
-    --font-sm: 0.875rem;     /* 14px - forbedret fra 0.75rem */
-    --font-base: 1rem;       /* 16px - forbedret fra 0.8125rem for bedre læsbarhed */
-    --font-lg: 1.125rem;     /* 18px - forbedret fra 1rem */
-    --font-xl: 1.25rem;      /* 20px - forbedret fra 1rem */
-    --font-2xl: 1.5rem;      /* 24px - forbedret fra 1.25rem */
-    --font-3xl: 1.75rem;     /* 28px - forbedret fra 1.5rem */
-    --font-4xl: 2rem;        /* 32px - forbedret fra 1.75rem */
-    --font-5xl: 2.25rem;     /* 36px - forbedret fra 2rem */
+    --font-xs: 0.6875rem;    /* 11px - reduceret fra 12px */
+    --font-sm: 0.8125rem;    /* 13px - reduceret fra 14px */
+    --font-base: 0.9375rem;  /* 15px - reduceret fra 16px for bedre balance */
+    --font-lg: 1rem;         /* 16px - reduceret fra 18px */
+    --font-xl: 1.125rem;     /* 18px - reduceret fra 20px */
+    --font-2xl: 1.25rem;     /* 20px - reduceret fra 24px */
+    --font-3xl: 1.5rem;      /* 24px - reduceret fra 28px */
+    --font-4xl: 1.75rem;     /* 28px - reduceret fra 32px */
+    --font-5xl: 2rem;        /* 32px - reduceret fra 36px */
     
-    /* Forbedret spacing på mobil - større gaps */
-    --spacing-xs: 0.5rem;    /* 8px */
-    --spacing-sm: 0.75rem;   /* 12px */
-    --spacing-md: 1.25rem;   /* 20px - øget fra 1rem for bedre separation */
-    --spacing-lg: 1.75rem;   /* 28px - øget fra 1.5rem */
-    --spacing-xl: 2.25rem;   /* 36px - øget fra 2rem */
-    --spacing-2xl: 3rem;     /* 48px */
+    /* Ultra minimal spacing på mobil - minimal scroll */
+    --spacing-xs: 0.25rem;   /* 4px - ultra minimal */
+    --spacing-sm: 0.375rem;  /* 6px - minimal */
+    --spacing-md: 0.5rem;    /* 8px - minimal */
+    --spacing-lg: 0.75rem;   /* 12px - minimal */
+    --spacing-xl: 1rem;      /* 16px - minimal */
+    --spacing-2xl: 1.25rem;  /* 20px - minimal */
   }
 }
 

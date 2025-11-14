@@ -339,18 +339,24 @@ a:hover {
     padding-right: var(--spacing-md);
   }
   
-  /* Forbedret section spacing på mobil */
+  /* Ultra minimal section spacing på mobil - minimal scroll */
   .section {
-    padding: var(--spacing-lg) 0;  /* Øget vertikal spacing */
-    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-sm) 0;  /* Ultra minimal vertikal spacing */
+    margin-bottom: var(--spacing-sm);
   }
   
-  /* Forbedret grid gaps på mobil */
+  /* Ultra minimal grid gaps på mobil */
   .grid,
   .plans-grid,
   .streaming-grid,
   .cart-comparison-grid {
-    gap: var(--spacing-lg);  /* Øget gap mellem kort */
+    gap: var(--spacing-sm);  /* Ultra minimal gap mellem kort */
+  }
+  
+  /* Ultra minimal container padding */
+  .container {
+    padding-left: var(--spacing-xs);  /* Ultra minimal: 4px */
+    padding-right: var(--spacing-xs);
   }
 }
 
@@ -648,7 +654,7 @@ a:hover {
 /* Mobile performance optimizations - Fix flimmer/flakken - Ultra simple */
 @media (max-width: 900px) {
   html {
-    scroll-padding-top: 70px;  /* Opdateret til ny header højde */
+    scroll-padding-top: 64px;  /* Opdateret til ny header højde */
   }
 
   /* Deaktiver alle baggrunds-animationer på mobil */
