@@ -38,9 +38,14 @@ export function validatePrice(value) {
 /**
  * Validér quantity (antal linjer)
  * @param {any} value - Værdi at validere
- * @returns {Object} { valid: boolean, error: string|null, value: number }
+ * @returns {Object} { valid: boolean, error: string|null, value: number|string }
  */
 export function validateQuantity(value) {
+  // Tillad tom værdi (bruges til at tillade sletning i input feltet)
+  if (value === '' || value === null || value === undefined) {
+    return { valid: true, error: null, value: '' };
+  }
+
   const num = typeof value === 'string' ? parseInt(value, 10) : value;
 
   if (isNaN(num) || !Number.isInteger(num)) {

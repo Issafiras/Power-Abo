@@ -4,28 +4,27 @@
  */
 
 :root {
-  /* Brand farver - Ultra-modern vibrant Gen-Z palette */
+  /* Brand Colors - Refined, Sophisticated Palette */
   --color-orange: #FF6D1F;
   --color-orange-light: #FF8F57;
   --color-orange-dark: #E55A0F;
-  --color-orange-glow: rgba(255, 109, 31, 0.6);
-  --color-orange-neon: #FF6D1F;
+  --color-orange-glow: rgba(255, 109, 31, 0.4);
   
   --color-telenor: #5E8FFF;
   --color-telenor-light: #8FB3FF;
   --color-telenor-dark: #4A7AE8;
   --color-telenor-bg: #ffffff;
-  --color-telenor-glow: rgba(94, 143, 255, 0.6);
+  --color-telenor-glow: rgba(94, 143, 255, 0.4);
   
   --color-telmore: #A78BFA;
   --color-telmore-bg: #E9D5FF;
-  --color-telmore-glow: rgba(167, 139, 250, 0.6);
+  --color-telmore-glow: rgba(167, 139, 250, 0.4);
   --color-cbb: #F472B6;
   --color-cbb-light: #FBBF24;
   --color-cbb-bg: #FEF3C7;
-  --color-cbb-glow: rgba(244, 114, 182, 0.6);
+  --color-cbb-glow: rgba(244, 114, 182, 0.4);
   
-  /* Status farver - Soft pastel Gen Z */
+  /* Status Colors - Refined, Subtle */
   --color-success: #34D399;
   --color-success-light: #6EE7B7;
   --color-success-dark: #059669;
@@ -37,44 +36,46 @@
   --color-warning: #FBBF24;
   --color-info: #60A5FA;
   
-  /* Dark theme - Apple-inspired deep dark */
+  /* Dark Theme - Pure, Deep, Apple-Inspired */
   --bg-primary: #000000;
   --bg-secondary: #1C1C1E;
   --bg-tertiary: #2C2C2E;
   --bg-gradient-start: #000000;
   --bg-gradient-end: #1C1C1E;
   
-  /* Glass effect - Ultra-modern frosted glass med forbedret depth */
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-border-strong: rgba(255, 255, 255, 0.28);
-  --glass-shadow: rgba(0, 0, 0, 0.6);
-  --surface-0: rgba(12, 12, 14, 0.4);
-  --surface-1: rgba(20, 20, 22, 0.7);
-  --surface-2: rgba(28, 28, 32, 0.85);
-  --surface-glow: rgba(255, 109, 31, 0.2);
-  --surface-muted: rgba(148, 163, 184, 0.12);
-  --surface-overlay: rgba(18, 18, 20, 0.65);
+  /* Glass Effect - Refined Frosted Glass */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-strong: rgba(255, 255, 255, 0.2);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+  --surface-0: rgba(12, 12, 14, 0.3);
+  --surface-1: rgba(20, 20, 22, 0.6);
+  --surface-2: rgba(28, 28, 32, 0.75);
+  --surface-glow: rgba(255, 109, 31, 0.15);
+  --surface-muted: rgba(148, 163, 184, 0.08);
+  --surface-overlay: rgba(18, 18, 20, 0.55);
   
-  /* Nye premium surface layers */
-  --surface-glass: rgba(255, 255, 255, 0.1);
-  --surface-glass-hover: rgba(255, 255, 255, 0.15);
-  --surface-elevated: rgba(30, 30, 35, 0.9);
+  /* Premium Surface Layers */
+  --surface-glass: rgba(255, 255, 255, 0.08);
+  --surface-glass-hover: rgba(255, 255, 255, 0.12);
+  --surface-elevated: rgba(30, 30, 35, 0.8);
   
-  /* Text farver */
-  --text-primary: #f9fafb;
-  --text-secondary: #d1d5db;
-  --text-tertiary: #9ca3af;
-  --text-muted: #6b7280;
+  /* Text Colors - Perfect Contrast */
+  --text-primary: #ffffff;
+  --text-secondary: #e5e7eb;
+  --text-tertiary: #d1d5db;
+  --text-muted: #9ca3af;
   
-  /* Balanced spacing - Elegant but compact */
-  --spacing-xs: 0.375rem;
+  /* Spacing - Steve Jobs Generous Whitespace - Even More Space */
+  --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 0.75rem;
   --spacing-lg: 1rem;
   --spacing-xl: 1.5rem;
   --spacing-2xl: 2rem;
-  --spacing-3xl: 3rem;
+  --spacing-3xl: 2.5rem;
+  --spacing-4xl: 3rem;
+  --spacing-5xl: 4rem;
   
   /* Border radius - Apple-inspired rounded */
   --radius-sm: 0.5rem;
@@ -84,38 +85,38 @@
   --radius-2xl: 2rem;
   --radius-full: 9999px;
   
-  /* Shadows - Ultra-modern multi-layer depth med forbedret realism */
-  --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(255, 255, 255, 0.04) inset;
-  --shadow-md: 0 8px 24px rgba(7, 11, 18, 0.35), 0 3px 6px rgba(7, 11, 18, 0.18), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
-  --shadow-lg: 0 16px 48px rgba(9, 11, 18, 0.45), 0 8px 16px rgba(9, 11, 18, 0.3), 0 2px 0 rgba(255, 255, 255, 0.08) inset;
-  --shadow-xl: 0 24px 64px rgba(9, 11, 18, 0.5), 0 12px 32px rgba(9, 11, 18, 0.4), 0 3px 0 rgba(255, 255, 255, 0.1) inset;
-  --shadow-2xl: 0 40px 96px rgba(4, 6, 12, 0.7), 0 24px 56px rgba(4, 6, 12, 0.55), 0 4px 0 rgba(255, 255, 255, 0.12) inset;
-  --shadow-3d: 0 24px 72px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15) inset, 0 -12px 24px rgba(0, 0, 0, 0.25) inset;
-  --shadow-neon: 0 0 24px rgba(255, 109, 31, 0.6), 0 0 48px rgba(255, 109, 31, 0.4), 0 12px 40px rgba(0, 0, 0, 0.4);
+  /* Shadows - Refined, Subtle Depth */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --shadow-3d: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   
-  /* Nye premium shadow variants */
-  --shadow-glass-premium: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.12) inset, 0 2px 0 rgba(255, 255, 255, 0.15) inset;
-  --shadow-card-hover: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2) inset, 0 4px 0 rgba(255, 255, 255, 0.2) inset;
+  /* Premium Shadow Variants */
+  --shadow-glass-premium: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  --shadow-card-hover: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   
-  /* Glow effects - Ultra-neon Gen Z with multiple layers */
-  --glow-orange: 0 0 20px rgba(255, 109, 31, 0.8), 0 0 40px rgba(255, 109, 31, 0.5), 0 0 80px rgba(255, 109, 31, 0.3), 0 0 120px rgba(255, 109, 31, 0.1);
-  --glow-blue: 0 0 20px rgba(94, 143, 255, 0.8), 0 0 40px rgba(94, 143, 255, 0.5), 0 0 80px rgba(94, 143, 255, 0.3);
-  --glow-purple: 0 0 20px rgba(167, 139, 250, 0.8), 0 0 40px rgba(167, 139, 250, 0.5), 0 0 80px rgba(167, 139, 250, 0.3);
-  --glow-green: 0 0 20px rgba(16, 245, 156, 0.8), 0 0 40px rgba(16, 245, 156, 0.5), 0 0 80px rgba(16, 245, 156, 0.3);
-  --glow-pink: 0 0 20px rgba(244, 114, 182, 0.8), 0 0 40px rgba(244, 114, 182, 0.5), 0 0 80px rgba(244, 114, 182, 0.3);
-  --glow-extreme: 0 0 30px rgba(255, 109, 31, 1), 0 0 60px rgba(255, 109, 31, 0.8), 0 0 100px rgba(255, 109, 31, 0.6), 0 0 150px rgba(255, 109, 31, 0.4);
+  /* Glow Effects - Subtle, Refined */
+  --glow-orange: 0 0 16px rgba(255, 109, 31, 0.4), 0 0 32px rgba(255, 109, 31, 0.2);
+  --glow-blue: 0 0 16px rgba(94, 143, 255, 0.4), 0 0 32px rgba(94, 143, 255, 0.2);
+  --glow-purple: 0 0 16px rgba(167, 139, 250, 0.4), 0 0 32px rgba(167, 139, 250, 0.2);
+  --glow-green: 0 0 16px rgba(16, 245, 156, 0.4), 0 0 32px rgba(16, 245, 156, 0.2);
+  --glow-pink: 0 0 16px rgba(244, 114, 182, 0.4), 0 0 32px rgba(244, 114, 182, 0.2);
+  --glow-extreme: 0 0 24px rgba(255, 109, 31, 0.6), 0 0 48px rgba(255, 109, 31, 0.3);
   
-  /* Transitions - Apple spring-based */
-  --transition-fast: 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-base: 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-slow: 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-bounce: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  --transition-smooth: 700ms cubic-bezier(0.23, 1, 0.32, 1);
-  --transition-spring: 520ms cubic-bezier(0.68, -0.6, 0.32, 1.6);
-  --transition-ripple: 450ms cubic-bezier(0.19, 1, 0.22, 1);
-  --transition-theme: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions - Apple Smooth, Refined Curves */
+  --transition-fast: 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-base: 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-slow: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-smooth: 500ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-spring: 400ms cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --transition-ripple: 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-theme: 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-apple: 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
   
-  /* Animation durations */
+  /* Animation Durations */
   --duration-instant: 100ms;
   --duration-fast: 200ms;
   --duration-normal: 300ms;
@@ -124,13 +125,13 @@
   --duration-slowest: 1000ms;
   --duration-loop: 2000ms;
   
-  /* Easing functions - Apple spring curves */
-  --ease-in-out-cubic: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Easing Functions - Apple Refined */
+  --ease-in-out-cubic: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-in-out-back: cubic-bezier(0.68, -0.6, 0.32, 1.6);
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --ease-apple: cubic-bezier(0.4, 0.0, 0.2, 1);
-  --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-apple: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-fluid: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
   
   /* Z-index layers */
@@ -142,34 +143,36 @@
   --z-popover: 50;
   --z-tooltip: 60;
   
-  /* Balanced Font sizes - Clean and readable */
-  --font-xs: 0.625rem;
-  --font-sm: 0.75rem;
-  --font-base: 0.875rem;
-  --font-lg: 1rem;
-  --font-xl: 1.125rem;
-  --font-2xl: 1.25rem;
-  --font-3xl: 1.5rem;
-  --font-4xl: 1.75rem;
-  --font-5xl: 2rem;
+  /* Typography - Steve Jobs SF Pro Display - Perfect Hierarchy */
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-base: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.25rem;
+  --font-2xl: 1.5rem;
+  --font-3xl: 1.875rem;
+  --font-4xl: 2.25rem;
+  --font-5xl: 3rem;
   
-  /* Font weights */
+  /* Font Weights - Steve Jobs Refined */
+  --font-light: 300;
   --font-normal: 400;
   --font-medium: 500;
   --font-semibold: 600;
   --font-bold: 700;
   --font-extrabold: 800;
   
-  /* Line heights */
-  --leading-tight: 1.25;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.75;
+  /* Line Heights - Steve Jobs Perfect Readability - More Generous */
+  --leading-tight: 1.15;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.85;
+  --leading-loose: 2.2;
   
-  /* Backdrop blur - Performance optimized */
-  --blur-sm: 8px;
-  --blur-md: 12px;
-  --blur-lg: 18px;
-  --blur-xl: 28px;
+  /* Backdrop Blur - Refined Frost */
+  --blur-sm: 10px;
+  --blur-md: 16px;
+  --blur-lg: 24px;
+  --blur-xl: 32px;
   
   /* Advanced shadows - Ultra depth */
   --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
@@ -179,18 +182,16 @@
   --shadow-glow-purple: 0 0 32px rgba(167, 139, 250, 0.6), 0 0 64px rgba(167, 139, 250, 0.3);
   --shadow-glow-green: 0 0 32px rgba(16, 245, 156, 0.6), 0 0 64px rgba(16, 245, 156, 0.3);
   
-  /* Gradient variabler - Ultra-vibrant Gen Z gradients */
-  --gradient-primary: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 25%, #8B5CF6 50%, #EC4899 75%, #FF6D1F 100%);
-  --gradient-secondary: linear-gradient(135deg, #5E8FFF 0%, #8FB3FF 50%, #A78BFA 100%);
-  --gradient-accent: linear-gradient(135deg, #EC4899 0%, #F9A8D4 50%, #FF8F57 100%);
-  --gradient-success: linear-gradient(135deg, #10F59C 0%, #5EF3C8 50%, #34D399 100%);
-  --gradient-rainbow: linear-gradient(135deg, #FF6D1F 0%, #5E8FFF 20%, #8B5CF6 40%, #EC4899 60%, #10F59C 80%, #FF6D1F 100%);
-  --gradient-neon: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 25%, #5E8FFF 50%, #A78BFA 75%, #EC4899 100%);
-  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.12) 100%);
-  --gradient-3d: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.05) 45%, rgba(0, 0, 0, 0.15) 100%);
-  --gradient-header: linear-gradient(90deg, rgba(255, 109, 31, 0.8), rgba(94, 143, 255, 0.8), rgba(167, 139, 250, 0.8));
-  --gradient-divider: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-  --gradient-divider-colored: linear-gradient(90deg, rgba(255, 109, 31, 0.0), rgba(255, 109, 31, 0.35), rgba(94, 143, 255, 0.35), rgba(167, 139, 250, 0.3), rgba(255, 109, 31, 0));
+  /* Gradients - Refined, Subtle */
+  --gradient-primary: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
+  --gradient-secondary: linear-gradient(135deg, #5E8FFF 0%, #8FB3FF 100%);
+  --gradient-accent: linear-gradient(135deg, #EC4899 0%, #F9A8D4 100%);
+  --gradient-success: linear-gradient(135deg, #10F59C 0%, #34D399 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+  --gradient-3d: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  --gradient-header: linear-gradient(90deg, rgba(255, 109, 31, 0.6), rgba(94, 143, 255, 0.6), rgba(167, 139, 250, 0.6));
+  --gradient-divider: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  --gradient-divider-colored: linear-gradient(90deg, rgba(255, 109, 31, 0), rgba(255, 109, 31, 0.3), rgba(94, 143, 255, 0.3), rgba(167, 139, 250, 0.25), rgba(255, 109, 31, 0));
   
   /* Compact Fluid typography - Optimized for density */
   --fluid-text-sm: clamp(0.625rem, 0.6rem + 0.2vw, 0.8rem);
@@ -200,11 +201,11 @@
   --fluid-text-2xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.75rem);
   --fluid-text-3xl: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
   
-  /* Layout metrics */
-  --container-max-width: 1220px;
-  --container-padding: clamp(1.25rem, 2vw, 2.5rem);
-  --section-spacing: clamp(2.5rem, 5vw, 4rem);
-  --section-spacing-tight: clamp(1.5rem, 3vw, 2.5rem);
+  /* Layout Metrics - Steve Jobs Generous Spacing - Even More */
+  --container-max-width: 1400px;
+  --container-padding: clamp(1rem, 2vw, 2rem);
+  --section-spacing: clamp(1rem, 2vw, 1.5rem);
+  --section-spacing-tight: clamp(0.75rem, 1.5vw, 1rem);
 
   /* Borders & outlines */
   --border-width-hairline: 1px;

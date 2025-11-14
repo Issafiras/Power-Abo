@@ -3,29 +3,23 @@
  * Genbrug disse klasser på tværs af komponenter
  */
 
-/* App Header - Optimized for smooth scrolling */
+/* App Header - Steve Jobs Optimized for smooth scrolling */
 .app-header {
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  padding: clamp(1.5rem, 4vw, 2.75rem) 0;
-  background: var(--surface-overlay);
-  border-bottom: 1.5px solid var(--glass-border);
-  /* Reduceret backdrop-filter for bedre scroll performance */
-  backdrop-filter: blur(var(--blur-sm)) saturate(120%);
-  -webkit-backdrop-filter: blur(var(--blur-sm)) saturate(120%);
-  /* Simplificeret box-shadow for bedre performance */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 0 rgba(255, 255, 255, 0.03) inset;
+  padding: clamp(2rem, 5vw, 3.5rem) 0;
+  background: rgba(0, 0, 0, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.15),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03);
   overflow-x: visible;
   overflow-y: visible;
-  /* GPU acceleration for smooth scrolling */
-  will-change: padding, transform;
   transform: translateZ(0);
-  transition:
-    padding var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: all var(--transition-apple);
 }
 
 .app-header::after {
@@ -48,9 +42,12 @@
 
 .app-header--compact {
   padding: clamp(0.75rem, 2vw, 1.25rem) 0;
-  background: color-mix(in srgb, var(--surface-1) 85%, transparent);
-  /* Simplificeret shadow for bedre performance */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   border-bottom-width: 1px;
 }
 
@@ -115,8 +112,8 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
-  min-height: 60px;
+  gap: clamp(2rem, 4vw, 4rem);
+  min-height: 80px;
   width: 100%;
   overflow: visible;
 }
@@ -141,42 +138,13 @@
 .app-header__kicker {
   margin: 0;
   font-size: var(--font-sm);
-  font-weight: var(--font-bold);
-  line-height: 1.6;
-  letter-spacing: 0.02em;
+  font-weight: var(--font-medium);
+  line-height: 1.65;
+  letter-spacing: -0.003em;
   white-space: nowrap;
-  background: linear-gradient(135deg, 
-    var(--color-orange) 0%, 
-    var(--color-orange-light) 25%,
-    var(--color-telenor) 50%,
-    var(--color-telmore) 75%,
-    var(--color-orange) 100%
-  );
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradientShift 4s ease infinite;
-  text-shadow: 0 2px 8px rgba(255, 109, 31, 0.3);
+  color: var(--text-secondary);
   position: relative;
-}
-
-.app-header__kicker::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    var(--color-orange) 0%,
-    var(--color-telenor) 50%,
-    var(--color-telmore) 100%
-  );
-  border-radius: var(--radius-full);
-  opacity: 0.6;
-  animation: gradientShift 3s ease infinite;
-  z-index: 1;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
 }
 
 @media (max-width: 1400px) {
@@ -305,12 +273,10 @@
   overflow: visible;
 }
 
-.app-header__actions .btn {
-  min-height: 46px;
-}
-
-.app-header__actions .btn.active,
-.app-header__actions .btn.is-active {
+.app-header__actions-primary .btn.active,
+.app-header__actions-secondary .btn.active,
+.app-header__actions-primary .btn.is-active,
+.app-header__actions-secondary .btn.is-active {
   background: var(--gradient-primary);
   color: #fff;
   box-shadow: var(--glow-orange), 0 4px 16px rgba(255, 109, 31, 0.4);
@@ -372,35 +338,42 @@
   transform: translateY(-1px);
 }
 
-/* Section shells */
+/* Section Shells - Steve Jobs Refined, Ultra Elegant */
 .section-shell {
-  border-radius: var(--radius-2xl);
-  background: var(--surface-overlay);
-  border: var(--border-width-thin) solid color-mix(in srgb, var(--glass-border) 80%, transparent);
-  box-shadow: var(--shadow-floating);
-  padding: clamp(1.5rem, 4vw, 2.75rem);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  padding: clamp(4rem, 8vw, 6rem);
   position: relative;
   overflow: hidden;
-  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-fast);
-  backdrop-filter: blur(var(--blur-lg)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(150%);
+  transition: all var(--transition-apple);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  margin-bottom: var(--spacing-xl);
 }
 
 .section-shell::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 60%);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
   opacity: 0;
-  transition: opacity var(--transition-slow);
-  pointer-events: none;
+  transition: opacity var(--transition-apple);
 }
 
 .section-shell:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: var(--shadow-2xl), 0 0 40px rgba(255, 109, 31, 0.15);
-  border-color: var(--glass-border-strong);
-  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .section-shell:hover::before {
@@ -410,8 +383,8 @@
 .section-divider {
   width: 100%;
   height: 1px;
-  margin: clamp(1.5rem, 3vw, 2.5rem) auto;
-  background: var(--gradient-divider);
+  margin: clamp(3rem, 5vw, 5rem) auto;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
   border-radius: var(--radius-full);
   position: relative;
   overflow: hidden;
@@ -432,32 +405,29 @@
 }
 
 .section-header {
-  margin-bottom: clamp(1.25rem, 3vw, 2rem);
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
 }
 
 .section-header__title {
-  margin: 0 0 var(--spacing-sm) 0;
-  font-family: 'Space Grotesk', var(--font-sans);
+  margin: 0 0 var(--spacing-xl) 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  font-size: clamp(var(--font-xl), 2.5vw, var(--font-3xl));
-  font-weight: var(--font-extrabold);
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--color-orange-light) 50%, var(--text-secondary) 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
-  animation: gradientShift 6s ease infinite;
-  text-shadow: 0 2px 8px rgba(255, 109, 31, 0.2);
+  gap: var(--spacing-lg);
+  font-size: clamp(var(--font-2xl), 2.5vw, var(--font-4xl));
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
 }
 
 .section-header__subtitle {
   margin: 0;
   color: var(--text-secondary);
-  font-size: clamp(var(--font-sm), 1.5vw, var(--font-base));
-  line-height: 1.6;
+  font-size: clamp(var(--font-base), 1.5vw, var(--font-lg));
+  line-height: 1.75;
+  font-weight: var(--font-normal);
+  letter-spacing: -0.005em;
 }
 
 .plans-section {
@@ -471,15 +441,15 @@
   border-style: dashed;
 }
 
-/* Footer */
+/* Footer - Steve Jobs Refined */
 .app-footer {
   position: relative;
   margin-top: auto;
-  padding: clamp(1.5rem, 3vw, 2.25rem) 0;
-  background: color-mix(in srgb, var(--surface-muted) 80%, transparent);
+  padding: clamp(3rem, 5vw, 5rem) 0;
+  background: color-mix(in srgb, var(--surface-muted) 60%, transparent);
   border-top: var(--border-width-hairline) solid var(--glass-border);
-  backdrop-filter: blur(var(--blur-md)) var(--backdrop-strength);
-  -webkit-backdrop-filter: blur(var(--blur-md)) var(--backdrop-strength);
+  backdrop-filter: blur(var(--blur-lg)) var(--backdrop-strength);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) var(--backdrop-strength);
   overflow: hidden;
 }
 
@@ -501,13 +471,13 @@
 }
 
 .app-footer__text {
-  max-width: 760px;
+  max-width: 800px;
   margin: 0 auto;
   color: var(--text-muted);
   font-size: var(--font-sm);
-  line-height: 1.65;
+  line-height: 1.75;
   display: grid;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
 .app-footer__text p {
@@ -541,8 +511,8 @@
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
 }
 
 .modal-actions .btn {
@@ -581,7 +551,8 @@
     width: min(360px, 70vw);
   }
 
-  .app-header__actions-group {
+  .app-header__actions-primary,
+  .app-header__actions-secondary {
     justify-content: center;
     width: 100%;
   }
@@ -624,17 +595,27 @@
     width: 100%;
   }
 
-  .app-header__actions-group {
+  .app-header__actions-primary {
+    width: 100%;
+  }
+
+  .app-header__actions-secondary {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--spacing-xs);
     width: 100%;
   }
 
-  .app-header__actions .btn {
-    min-height: 42px;
+  .app-header__actions-primary .btn {
+    min-height: 40px;
     font-size: var(--font-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    width: 100%;
+  }
+
+  .app-header__actions-secondary .btn {
+    min-height: 36px;
+    min-width: 36px;
   }
 
   .app-header__maps {
@@ -652,15 +633,6 @@
     padding: var(--spacing-xs) var(--spacing-sm);
   }
 
-  .app-header__badges {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .app-header__badges .badge {
-    font-size: 10px;
-    padding: 3px var(--spacing-xs);
-  }
 
   .section-shell {
     padding: clamp(1.25rem, 4vw, 1.75rem);
@@ -725,46 +697,45 @@
   }
 }
 
-/* Enhanced Glass card effect - Optimized for performance */
+/* Enhanced Glass Card - Steve Jobs Refined, Ultra Elegant */
 .glass-card {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.12) 0%, 
-    rgba(255, 255, 255, 0.06) 50%, 
-    rgba(255, 255, 255, 0.09) 100%
-  );
-  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(150%) brightness(1.1);
-  backdrop-filter: blur(var(--blur-md)) saturate(150%) brightness(1.1);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-glass-premium);
-  transition: all var(--transition-base);
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all var(--transition-apple);
   position: relative;
   overflow: hidden;
+  padding: var(--spacing-md);
 }
 
-/* Deaktiveret shimmer animation for bedre performance */
 .glass-card::before {
-  /* content: ''; */
-  display: none;
-}
-
-/* Deaktiveret gradient overlay for bedre performance */
-.glass-card::after {
-  /* content: ''; */
-  display: none;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-apple);
 }
 
 .glass-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: var(--shadow-card-hover),
-    0 0 40px rgba(255, 109, 31, 0.3),
-    0 0 60px rgba(255, 109, 31, 0.2);
-  border-color: rgba(255, 255, 255, 0.35);
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.16) 0%, 
-    rgba(255, 255, 255, 0.1) 50%, 
-    rgba(255, 255, 255, 0.14) 100%
-  );
+  transform: translateY(-1px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.glass-card:hover::before {
+  opacity: 1;
 }
 
 .glass-card-no-hover {
@@ -780,24 +751,25 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Premium Enhanced Buttons */
+/* Premium Buttons - Steve Jobs Refined, Ultra Elegant */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  font-size: var(--font-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-base);
   font-weight: var(--font-medium);
   border-radius: var(--radius-lg);
   border: none;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all var(--transition-apple);
   white-space: nowrap;
-  min-height: 44px; /* Balanced touch target */
+  min-height: 44px;
   position: relative;
   overflow: hidden;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.015em;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 
 .btn::before {
@@ -828,13 +800,13 @@
 }
 
 .btn-primary {
-  background: var(--gradient-primary);
-  background-size: 200% 200%;
+  background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
   color: white;
-  box-shadow: var(--glow-orange), 0 4px 16px rgba(255, 109, 31, 0.4);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  animation: gradientShift 4s ease infinite;
-  font-weight: var(--font-bold);
+  box-shadow: 
+    0 4px 16px rgba(255, 109, 31, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: var(--font-semibold);
   position: relative;
   overflow: hidden;
 }
@@ -846,8 +818,8 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s ease;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .btn-primary:hover:not(:disabled)::after {
@@ -855,20 +827,16 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-5px) scale(1.06) rotateX(4deg);
+  transform: translateY(-1px);
   box-shadow: 
-    var(--glow-extreme),
-    0 16px 56px rgba(255, 109, 31, 0.7),
-    0 0 0 2px rgba(255, 255, 255, 0.3);
-  background-position: 100% 50%;
-  filter: brightness(1.15) saturate(1.1);
-  will-change: transform;
-  border-color: rgba(255, 255, 255, 0.4);
+    0 4px 20px rgba(255, 109, 31, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  filter: brightness(1.03);
 }
 
 .btn-primary:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
-  transition: transform 100ms var(--ease-apple);
+  transform: translateY(0);
+  transition: transform 100ms cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .btn-secondary {
@@ -880,9 +848,9 @@
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .btn-secondary:active:not(:disabled) {
@@ -966,20 +934,16 @@
   box-shadow: 0 0 40px rgba(239, 68, 68, 0.6), 0 10px 30px rgba(239, 68, 68, 0.3);
 }
 
-/* Premium Button Variants */
+/* Premium Button Variants - Apple Style */
 .btn-premium {
-  background: var(--gradient-primary);
-  background-size: 200% 200%;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   position: relative;
   overflow: hidden;
   box-shadow: 
-    var(--glow-orange),
-    0 6px 24px rgba(255, 109, 31, 0.5),
-    inset 0 3px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.25);
-  animation: gradientShift 3s ease infinite;
-  font-weight: var(--font-bold);
+    0 6px 24px rgba(255, 109, 31, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  font-weight: var(--font-semibold);
 }
 
 .btn-premium::before {
@@ -992,10 +956,10 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.2),
     transparent
   );
-  transition: left 0.6s ease;
+  transition: left 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .btn-premium:hover:not(:disabled)::before {
@@ -1003,21 +967,16 @@
 }
 
 .btn-premium:hover:not(:disabled) {
-  transform: translateY(-6px) scale(1.1) rotateX(6deg);
+  transform: translateY(-2px);
   box-shadow: 
-    var(--glow-extreme),
-    0 20px 64px rgba(255, 109, 31, 0.9),
-    0 0 100px rgba(255, 109, 31, 0.7),
-    0 0 140px rgba(255, 109, 31, 0.4),
-    inset 0 4px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -4px 0 rgba(0, 0, 0, 0.3);
-  background-position: 100% 50%;
-  filter: brightness(1.2) saturate(1.15);
-  border-color: rgba(255, 255, 255, 0.5);
+    0 8px 32px rgba(255, 109, 31, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  filter: brightness(1.06);
 }
 
 .btn-premium:active:not(:disabled) {
-  transform: translateY(-1px) scale(0.98);
+  transform: translateY(0);
+  transition: transform 100ms cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* Glass Button Variant */
@@ -1163,7 +1122,7 @@
   transform: rotate(10deg) scale(1.1);
 }
 
-/* Premium Badge/Chip - Forbedret med bedre depth */
+/* Premium Badge/Chip - Apple Refined */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -1172,17 +1131,22 @@
   font-weight: var(--font-semibold);
   border-radius: var(--radius-md);
   white-space: nowrap;
-  transition: all var(--transition-base);
-  letter-spacing: 0.02em;
-  backdrop-filter: blur(var(--blur-md)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(150%);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all var(--transition-apple);
+  letter-spacing: -0.003em;
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
 }
 
 .badge:hover {
-  transform: scale(1.08) translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  filter: brightness(1.05);
 }
 
 .badge-tonal {
@@ -1243,60 +1207,50 @@
   border-color: rgba(59, 130, 246, 0.5);
 }
 
-/* Premium Input fields - Forbedret med bedre depth */
+/* Premium Input Fields - Steve Jobs Refined, Ultra Elegant */
 .input {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-sm);
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.12) 0%, 
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: var(--font-base);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
-  transition: all var(--transition-base);
-  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(180%);
-  backdrop-filter: blur(var(--blur-md)) saturate(180%);
-  min-height: 44px;
-  font-weight: var(--font-medium);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all var(--transition-apple);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  min-height: 52px;
+  font-weight: var(--font-normal);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  letter-spacing: -0.005em;
 }
 
 .input::placeholder {
   font-weight: var(--font-normal);
-  opacity: 0.6;
+  opacity: 0.4;
+  color: var(--text-muted);
+  letter-spacing: -0.003em;
 }
 
 .input:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.16) 0%, 
-    rgba(255, 255, 255, 0.1) 100%
-  );
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 
+    0 2px 16px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--color-orange);
+  border-color: #FF6D1F;
   box-shadow: 
-    0 0 0 4px rgba(255, 109, 31, 0.25), 
-    0 0 40px rgba(255, 109, 31, 0.4),
-    0 6px 24px rgba(0, 0, 0, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.12) 100%
-  );
-  transform: translateY(-3px) scale(1.03);
-  filter: brightness(1.05);
-}
-
-.input:focus::placeholder {
-  opacity: 0.4;
-  transform: translateX(4px);
+    0 0 0 2px rgba(255, 109, 31, 0.12),
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Checkbox */
@@ -1361,19 +1315,22 @@
   100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
-/* Tabs */
+/* Tabs - Apple Refined */
 .tabs {
   display: flex;
   gap: var(--spacing-xs);
   padding: var(--spacing-xs);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-xl);
-  -webkit-backdrop-filter: blur(var(--blur-md));
-  backdrop-filter: blur(var(--blur-md));
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
   overflow-x: auto;
   position: relative;
-  border: 0.5px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   scroll-behavior: smooth;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .tab {
@@ -1385,11 +1342,13 @@
   border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background var(--transition-base), color var(--transition-base), transform var(--transition-base);
+  transition: all var(--transition-apple);
   white-space: nowrap;
   min-height: 44px;
   position: relative;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  letter-spacing: -0.003em;
 }
 
 .tab::before {
@@ -1399,46 +1358,44 @@
   left: 50%;
   width: 0;
   height: 2px;
-  background: var(--color-orange);
+  background: #FF6D1F;
   transform: translateX(-50%);
-  transition: width var(--transition-base);
+  transition: width var(--transition-apple);
 }
 
 .tab:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   transform: translateY(-1px);
 }
 
 .tab:hover::before {
-  width: 80%;
+  width: 70%;
 }
 
 .tab-active {
-  background: linear-gradient(135deg, var(--color-orange), var(--color-orange-light));
+  background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
   color: white;
   box-shadow: 
-    0 6px 24px rgba(255, 107, 26, 0.5),
-    0 0 40px rgba(255, 107, 26, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transform: scale(1.03);
-  font-weight: var(--font-bold);
+    0 4px 16px rgba(255, 109, 31, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  transform: scale(1.02);
+  font-weight: var(--font-semibold);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .tab-active::before {
   width: 100%;
-  background: white;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.3);
+  height: 2px;
 }
 
 .tab-active:hover {
-  transform: scale(1.06);
+  transform: scale(1.03);
   box-shadow: 
-    0 8px 32px rgba(255, 107, 26, 0.6),
-    0 0 50px rgba(255, 107, 26, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.4);
-  filter: brightness(1.1);
+    0 6px 24px rgba(255, 109, 31, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  filter: brightness(1.05);
 }
 
 /* Divider */
@@ -1482,7 +1439,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-3xl);
+  padding: var(--spacing-xl);
   text-align: center;
   color: var(--text-tertiary);
   animation: fadeIn var(--duration-slow) var(--ease-in-out-cubic);
@@ -1490,7 +1447,7 @@
 
 .empty-state-icon {
   font-size: var(--font-5xl);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   opacity: 0.5;
   filter: grayscale(0.5);
   transition: all var(--transition-base);

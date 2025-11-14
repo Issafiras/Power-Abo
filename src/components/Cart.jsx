@@ -178,14 +178,14 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
 
       <style>{`
         .cart {
-          padding: var(--spacing-lg);
+          padding: var(--spacing-2xl);
         }
 
         .section-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: var(--spacing-lg);
+          margin-bottom: var(--spacing-2xl);
         }
 
         .section-header h2 {

@@ -356,6 +356,11 @@ function App() {
     setShowPresentation(prev => !prev);
   }, []);
 
+  // Close presentation
+  const handleClosePresentation = useCallback(() => {
+    setShowPresentation(false);
+  }, []);
+
   // Auto-select løsning handler
   const handleAutoSelectSolution = useCallback(() => {
     const availablePlans = plans;
@@ -500,8 +505,6 @@ function App() {
         onPresentationToggle={handlePresentationToggle}
         theme={theme}
         onThemeToggle={handleThemeToggle}
-        showCashDiscount={showCashDiscount}
-        onToggleCashDiscount={useCallback(() => setShowCashDiscount(prev => !prev), [])}
       />
 
       {/* Main content */}
@@ -594,17 +597,18 @@ function App() {
 
           <div className="section-divider" aria-hidden="true" />
 
-          {/* Bottom section: Cart & Comparison */}
+          {/* Bottom section: Cart and Comparison side by side */}
           <section className="section fade-in-up delay-200">
-            <div className="grid grid-cols-2 gap-lg">
-              <div className="section-shell section-shell--nest animate-list-item">
-                <Cart
-                  cartItems={cartItems}
-                  onUpdateQuantity={handleUpdateQuantity}
-                  onRemove={handleRemoveFromCart}
-                />
-              </div>
-              <div className="section-shell section-shell--nest animate-list-item delay-100">
+            <div className="section-shell section-shell--nest animate-list-item">
+              <div className="cart-comparison-grid">
+                <div className="cart-wrapper">
+                  <Cart
+                    cartItems={cartItems}
+                    onUpdateQuantity={handleUpdateQuantity}
+                    onRemove={handleRemoveFromCart}
+                  />
+                </div>
+                <div className="comparison-wrapper">
                 <ComparisonPanel
                   cartItems={cartItems}
                   selectedStreaming={selectedStreaming}
@@ -618,7 +622,9 @@ function App() {
                   autoAdjust={autoAdjust}
                   onAutoAdjustChange={setAutoAdjust}
                   showCashDiscount={showCashDiscount}
+                  onToggleCashDiscount={useCallback(() => setShowCashDiscount(prev => !prev), [])}
                 />
+                </div>
               </div>
             </div>
           </section>
@@ -627,14 +633,14 @@ function App() {
 
       {/* Presentation view */}
       {showPresentation && (
-        <Suspense fallback={<div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+        <Suspense fallback={<div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>Loading...</div>}>
           <PresentationView
             cartItems={cartItems}
             selectedStreaming={selectedStreaming}
             customerMobileCost={customerMobileCost}
             originalItemPrice={originalItemPrice}
             cashDiscount={cashDiscount}
-            onClose={useCallback(() => setShowPresentation(false), [])}
+            onClose={handleClosePresentation}
           />
         </Suspense>
       )}
@@ -658,11 +664,11 @@ function App() {
 
         .main-content {
           flex: 1;
-          padding: var(--spacing-lg) 0;
+          padding: var(--spacing-md) 0;
         }
 
         .plans-section {
-          padding: var(--spacing-lg);
+          padding: var(--spacing-md);
           transition: all var(--transition-smooth);
         }
 
@@ -671,7 +677,7 @@ function App() {
         }
 
         .section-header {
-          margin-bottom: var(--spacing-lg);
+          margin-bottom: var(--spacing-md);
         }
 
         .section-header h2 {
@@ -695,13 +701,36 @@ function App() {
           height: 100%;
         }
 
+        .cart-comparison-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--spacing-md);
+          align-items: start;
+        }
+
+        .cart-wrapper,
+        .comparison-wrapper {
+          width: 100%;
+        }
+
+        @media (max-width: 1200px) {
+          .cart-comparison-grid {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+          }
+        }
+
         @media (max-width: 900px) {
           .main-content {
-            padding: var(--spacing-lg) 0;
+            padding: var(--spacing-md) 0;
           }
 
           .plans-section {
-            padding: var(--spacing-lg);
+            padding: var(--spacing-md);
+          }
+
+          .cart-comparison-grid {
+            gap: var(--spacing-sm);
           }
         }
 

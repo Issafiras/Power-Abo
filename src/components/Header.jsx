@@ -10,8 +10,6 @@ export default function Header({
   onPresentationToggle, 
   theme, 
   onThemeToggle,
-  showCashDiscount,
-  onToggleCashDiscount,
   onSmartCalculatorToggle
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -28,7 +26,9 @@ export default function Header({
       // Ctrl+P: Presentation
       if (e.ctrlKey && e.key === 'p') {
         e.preventDefault();
-        onPresentationToggle();
+        if (onPresentationToggle) {
+          onPresentationToggle();
+        }
       }
       // Ctrl+T: Theme
       if (e.ctrlKey && e.key === 't') {
@@ -117,18 +117,7 @@ export default function Header({
 
       <div className="container app-header__grid">
         <div className="app-header__lead">
-          <p className="app-header__kicker">Sammenlign mobilabonnementer og streaming-tjenester</p>
-          <div className="app-header__badges">
-            <span className="badge badge-tonal">
-              🎯 Professionel værktøj
-            </span>
-            <span className="badge badge-tonal">
-              💡 Intelligent sammenligning
-            </span>
-            <span className="badge badge-tonal">
-              ⚡ Hurtig og præcis
-            </span>
-          </div>
+          <p className="app-header__kicker">Sammenlign mobilabonnementer og streaming</p>
         </div>
 
         <div className="app-header__logo">
@@ -142,54 +131,49 @@ export default function Header({
               />
             );
           })()}
-          <span className="app-header__logo-divider" />
         </div>
 
         <div className="app-header__actions">
-          <div className="app-header__actions-group">
+          <div className="app-header__actions-primary">
+            {onPresentationToggle && (
+              <button
+                onClick={onPresentationToggle}
+                className="btn btn-premium"
+                title="Vis præsentation (Ctrl+P)"
+              >
+                Præsentér
+              </button>
+            )}
+          </div>
+
+          <div className="app-header__actions-secondary">
             {onSmartCalculatorToggle && (
               <button
                 onClick={onSmartCalculatorToggle}
-                className="btn btn-glass btn-sm"
-                title="Åbn AI Anbefaling System"
+                className="btn btn-glass btn-icon"
+                title="AI Anbefaling"
+                aria-label="AI Anbefaling"
               >
-                🤖 AI Anbefaling
+                <span className="btn-icon-text">AI</span>
               </button>
             )}
 
             <button
-              onClick={onPresentationToggle}
-              className="btn btn-premium btn-lg"
-              title="Vis præsentation (Ctrl+P)"
-            >
-              📊 Præsentér
-            </button>
-          </div>
-
-          <div className="app-header__actions-group">
-            <button
-              onClick={onToggleCashDiscount}
-              className={`btn btn-glass btn-sm ${showCashDiscount ? 'is-active' : ''}`}
-              title="Vis/skjul kontant rabat"
-            >
-              💰 Kontant Rabat
-            </button>
-
-            <button
               onClick={onThemeToggle}
-              className="btn btn-icon btn-glass"
+              className="btn btn-glass btn-icon"
               title="Skift tema (Ctrl+T)"
               aria-label="Skift tema"
             >
-              {theme === 'dark' ? '☀️' : '🌙'}
+              {theme === 'dark' ? '☀' : '🌙'}
             </button>
 
             <button
               onClick={() => setShowConfirm(true)}
-              className="btn btn-gradient-orange btn-sm"
+              className="btn btn-glass btn-icon"
               title="Nulstil alt (Ctrl+R)"
+              aria-label="Nulstil"
             >
-              🔄 Nulstil
+              ↻
             </button>
           </div>
 
@@ -201,8 +185,7 @@ export default function Header({
               className="coverage-map-btn coverage-map-btn-telmore"
               title="Se Telmore dækningskort"
             >
-              <span className="btn-icon">📍</span>
-              <span className="btn-text">Telmore Dækning</span>
+              Telmore
             </a>
 
             <a
@@ -212,8 +195,7 @@ export default function Header({
               className="coverage-map-btn coverage-map-btn-telenor"
               title="Se Telenor/CBB dækningskort"
             >
-              <span className="btn-icon">📍</span>
-              <span className="btn-text">Telenor/CBB Dækning</span>
+              Telenor
             </a>
           </div>
         </div>

@@ -60,9 +60,30 @@ function StreamingSelector({
   };
 
   const handleNumberOfLinesChange = (e) => {
-    const value = parseInt(e.target.value, 10) || 1;
-    if (onNumberOfLinesChange) {
-      onNumberOfLinesChange(value);
+    const inputValue = e.target.value;
+    // Tillad tom værdi så brugeren kan slette
+    if (inputValue === '') {
+      if (onNumberOfLinesChange) {
+        onNumberOfLinesChange('');
+      }
+      return;
+    }
+    const value = parseInt(inputValue, 10);
+    // Kun opdater hvis det er et gyldigt tal
+    if (!isNaN(value) && value >= 1) {
+      if (onNumberOfLinesChange) {
+        onNumberOfLinesChange(value);
+      }
+    }
+  };
+
+  const handleNumberOfLinesBlur = (e) => {
+    // Når feltet mister fokus, sæt til 1 hvis det er tomt eller ugyldigt
+    const inputValue = e.target.value;
+    if (inputValue === '' || isNaN(parseInt(inputValue, 10)) || parseInt(inputValue, 10) < 1) {
+      if (onNumberOfLinesChange) {
+        onNumberOfLinesChange(1);
+      }
     }
   };
 
@@ -326,13 +347,14 @@ function StreamingSelector({
               type="number"
               className="input"
               placeholder="1"
-              value={numberOfLines || 1}
+              value={numberOfLines === '' ? '' : (numberOfLines || 1)}
               onChange={handleNumberOfLinesChange}
+              onBlur={handleNumberOfLinesBlur}
               min="1"
               max="20"
               step="1"
             />
-            <span className="info-suffix">linje{numberOfLines !== 1 ? 'r' : ''}</span>
+            <span className="info-suffix">linje{(numberOfLines || 1) !== 1 ? 'r' : ''}</span>
           </div>
         </div>
       )}
@@ -595,11 +617,11 @@ function StreamingSelector({
 
       <style>{`
         .streaming-selector {
-          padding: var(--spacing-lg);
+          padding: var(--spacing-2xl);
         }
 
         .section-header {
-          margin-bottom: var(--spacing-lg);
+          margin-bottom: var(--spacing-2xl);
         }
 
         .section-header h2 {

@@ -3,12 +3,13 @@
  * Sammenligner kundens situation med vores tilbud
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   formatCurrency,
   calculateCustomerTotal,
   calculateOurOfferTotal,
   calculateSavings,
+  calculateTotalEarnings,
   checkStreamingCoverageWithCBBMix,
   checkCBBMixCompatibility,
   autoAdjustCashDiscount
@@ -27,8 +28,23 @@ function ComparisonPanel({
   onCashDiscountLockedChange,
   autoAdjust,
   onAutoAdjustChange,
-  showCashDiscount
+  showCashDiscount,
+  onToggleCashDiscount
 }) {
+  const [showEarnings, setShowEarnings] = useState(false);
+
+  // F8 keyboard shortcut til at vise/skjule indtjening
+  useEffect(() => {
+    function handleKeyPress(e) {
+      if (e.key === 'F8') {
+        e.preventDefault();
+        setShowEarnings(prev => !prev);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
   // Beregn streaming coverage med CBB MIX support - memoized
   const streamingCoverage = useMemo(() => 
     checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming),
@@ -68,19 +84,28 @@ function ComparisonPanel({
     [cartItems, notIncludedStreamingCost, originalItemPrice]
   );
 
-  // Auto-adjust kontant rabat
+  // Beregn total indtjening - memoized (engangsindtjening, ikke løbende)
+  const totalEarnings = useMemo(() => {
+    return calculateTotalEarnings(cartItems); // Engangsindtjening
+  }, [cartItems]);
+
+  // Auto-adjust kontant rabat - Sælger-strategi: Giv noget af indtjeningen tilbage
+  // Bemærk: Indtjening er engangsindtjening, så vi skal konvertere til 6 måneder for sammenligning
   useEffect(() => {
     if (autoAdjust && !cashDiscountLocked && cartItems.length > 0) {
+      // Konverter engangsindtjening til 6 måneder for sammenligning (sælger-strategi)
+      const earningsForComparison = totalEarnings; // Engangsindtjening bruges direkte
       const neededDiscount = autoAdjustCashDiscount(
         customerTotals.sixMonth,
         ourOfferWithoutDiscount.sixMonth,
-        500
+        500,
+        earningsForComparison
       );
       if (neededDiscount !== (cashDiscount || 0)) {
         onCashDiscountChange(neededDiscount);
       }
     }
-  }, [autoAdjust, cashDiscountLocked, customerTotals.sixMonth, ourOfferWithoutDiscount.sixMonth, cartItems.length, cashDiscount, onCashDiscountChange]);
+  }, [autoAdjust, cashDiscountLocked, customerTotals.sixMonth, ourOfferWithoutDiscount.sixMonth, cartItems.length, cashDiscount, onCashDiscountChange, totalEarnings]);
 
   // Vores tilbud med kontant rabat - memoized
   const ourOfferTotals = useMemo(() => 
@@ -143,8 +168,24 @@ function ComparisonPanel({
   return (
     <div className="comparison-panel glass-card-no-hover fade-in-up">
       <div className="section-header">
-        <h2>📊 Sammenligning</h2>
-        <p className="text-secondary">6-måneders analyse</p>
+        <div className="section-header-top">
+          <div>
+            <h2>📊 Sammenligning</h2>
+            <p className="text-secondary">6-måneders analyse</p>
+          </div>
+          {onToggleCashDiscount && (
+            <button
+              className="cash-discount-toggle-btn"
+              onClick={onToggleCashDiscount}
+              aria-label={showCashDiscount ? 'Skjul kontant rabat' : 'Vis kontant rabat'}
+              title={showCashDiscount ? 'Skjul kontant rabat' : 'Vis kontant rabat'}
+            >
+              <span className={`cash-discount-toggle-icon ${showCashDiscount ? 'active' : ''}`}>
+                🔒
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Kontant rabat sektion (hvis vist) */}
@@ -175,7 +216,7 @@ function ComparisonPanel({
                     onChange={(e) => onAutoAdjustChange(e.target.checked)}
                     disabled={cashDiscountLocked}
                   />
-                  <span className="text-sm">🔄 Auto-justér (minimum 500 kr)</span>
+                  <span className="text-sm">🔄 Auto-justér (sælger-strategi)</span>
                 </label>
               </div>
             </div>
@@ -192,6 +233,7 @@ function ComparisonPanel({
               min="0"
               step="100"
             />
+            
           </div>
 
           <div className="divider"></div>
@@ -290,6 +332,12 @@ function ComparisonPanel({
         <div className="comparison-column offer animate-slide-in-right">
           <div className="column-header">
             <h3>💼 Vores Tilbud</h3>
+            {/* Diskret indtjening info - kun synlig når F8 er trykket */}
+            {showEarnings && totalEarnings > 0 && (
+              <div className="earnings-tooltip" title={`Indtjening: ${formatCurrency(totalEarnings)} (engangs)`}>
+                <span className="earnings-indicator">💰</span>
+              </div>
+            )}
           </div>
           <div className="column-content">
             <div className="amount-row">
@@ -342,6 +390,26 @@ function ComparisonPanel({
 
       <div className="divider"></div>
 
+      {/* Diskret indtjening info i bunden - kun synlig når F8 er trykket */}
+      {showEarnings && totalEarnings > 0 && (
+        <div className="earnings-footer">
+          <div className="earnings-footer-content">
+            <span className="earnings-label">Indtjening:</span>
+            <span className="earnings-value">{formatCurrency(totalEarnings)}</span>
+            {cashDiscount > 0 && (
+              <>
+                <span className="earnings-separator">|</span>
+                <span className="earnings-label">Rabat:</span>
+                <span className="earnings-value text-success">-{formatCurrency(cashDiscount)}</span>
+                <span className="earnings-separator">|</span>
+                <span className="earnings-label">Netto:</span>
+                <span className="earnings-value font-semibold">{formatCurrency(totalEarnings - cashDiscount)}</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Besparelse */}
       <div className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'} animate-bounce-in`}>
         <div className="savings-label">
@@ -358,16 +426,68 @@ function ComparisonPanel({
 
       <style>{`
         .comparison-panel {
-          padding: var(--spacing-lg);
+          padding: var(--spacing-2xl);
         }
 
         .section-header {
-          margin-bottom: var(--spacing-lg);
+          margin-bottom: var(--spacing-2xl);
+        }
+
+        .section-header-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: var(--spacing-md);
         }
 
         .section-header h2 {
           margin: 0;
           margin-bottom: var(--spacing-xs);
+        }
+
+        .cash-discount-toggle-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.5rem;
+          height: 2.5rem;
+          padding: 0;
+          border: 1px solid var(--glass-border);
+          background: var(--glass-bg);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          flex-shrink: 0;
+        }
+
+        .cash-discount-toggle-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.2);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .cash-discount-toggle-btn:active {
+          transform: translateY(0);
+        }
+
+        .cash-discount-toggle-icon {
+          font-size: 1.25rem;
+          line-height: 1;
+          opacity: 0.6;
+          transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          display: block;
+        }
+
+        .cash-discount-toggle-icon.active {
+          opacity: 1;
+          filter: brightness(1.2);
+        }
+
+        .cash-discount-toggle-btn:hover .cash-discount-toggle-icon {
+          opacity: 1;
         }
 
         .cash-discount-section {
@@ -396,6 +516,75 @@ function ComparisonPanel({
           font-size: var(--font-xl);
           font-weight: var(--font-bold);
           text-align: center;
+        }
+
+        .cash-discount-info {
+          margin-top: var(--spacing-md);
+          padding: var(--spacing-md);
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: var(--radius-md);
+        }
+
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--spacing-xs) 0;
+          font-size: var(--font-sm);
+        }
+
+        .info-row.highlight {
+          padding-top: var(--spacing-sm);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          margin-top: var(--spacing-xs);
+        }
+
+        .info-label {
+          color: var(--text-secondary);
+        }
+
+        .info-value {
+          color: var(--text-primary);
+          font-weight: var(--font-medium);
+        }
+
+        .earnings-footer {
+          margin-top: var(--spacing-md);
+          padding: var(--spacing-xs) var(--spacing-sm);
+          background: rgba(255, 255, 255, 0.02);
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: var(--radius-sm);
+          opacity: 0.5;
+          transition: opacity 0.2s ease;
+        }
+
+        .earnings-footer:hover {
+          opacity: 0.8;
+        }
+
+        .earnings-footer-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-sm);
+          font-size: var(--font-xs);
+          color: var(--text-muted);
+          flex-wrap: wrap;
+        }
+
+        .earnings-label {
+          font-weight: var(--font-normal);
+        }
+
+        .earnings-value {
+          font-weight: var(--font-medium);
+          color: var(--text-secondary);
+        }
+
+        .earnings-separator {
+          opacity: 0.3;
+          margin: 0 var(--spacing-xs);
         }
 
         .streaming-status {
@@ -459,11 +648,30 @@ function ComparisonPanel({
           padding: var(--spacing-md);
           text-align: center;
           border-bottom: 2px solid var(--glass-border);
+          position: relative;
         }
 
         .column-header h3 {
           margin: 0;
           font-size: var(--font-lg);
+        }
+
+        .earnings-tooltip {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          opacity: 0.4;
+          transition: opacity 0.2s ease;
+          cursor: help;
+        }
+
+        .earnings-tooltip:hover {
+          opacity: 0.8;
+        }
+
+        .earnings-indicator {
+          font-size: 0.875rem;
+          display: block;
         }
 
         .column-content {
@@ -616,6 +824,20 @@ function ComparisonPanel({
         @media (max-width: 900px) {
           .comparison-panel {
             padding: var(--spacing-lg);
+          }
+
+          .section-header-top {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .cash-discount-toggle-btn {
+            width: 2.25rem;
+            height: 2.25rem;
+          }
+
+          .cash-discount-toggle-icon {
+            font-size: 1.125rem;
           }
 
           .comparison-grid {

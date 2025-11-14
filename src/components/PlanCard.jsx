@@ -262,8 +262,8 @@ function PlanCard({
         .plan-card {
           display: flex;
           flex-direction: column;
-          padding: var(--spacing-xl);
-          gap: var(--spacing-md);
+          padding: var(--spacing-2xl);
+          gap: var(--spacing-lg);
           transition: all var(--transition-smooth);
           cursor: pointer;
           position: relative;
@@ -285,7 +285,7 @@ function PlanCard({
         }
 
         .plan-card:hover {
-          transform: translateY(-4px) scale(1.01);
+          transform: translateY(-2px);
           z-index: 10;
         }
 

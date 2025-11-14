@@ -223,21 +223,47 @@ export function calculateSavings(customerTotal, ourTotal) {
 
 /**
  * Auto-justér kontant rabat for minimum besparelse
+ * Sælger-strategi: Giv noget af indtjeningen tilbage som rabat for at overbevise kunden
  * @param {number} customerTotal - Kunde 6-måneders total
  * @param {number} ourTotalBeforeDiscount - Vores total før kontant rabat
  * @param {number} minimumSavings - Minimum ønsket besparelse (standard: 500)
+ * @param {number} totalEarnings - Total engangsindtjening fra løsningen (ikke løbende)
  * @returns {number} Nødvendig kontant rabat
  */
-export function autoAdjustCashDiscount(customerTotal, ourTotalBeforeDiscount, minimumSavings = 500) {
+export function autoAdjustCashDiscount(customerTotal, ourTotalBeforeDiscount, minimumSavings = 500, totalEarnings = 0) {
   const currentSavings = customerTotal - ourTotalBeforeDiscount;
   
+  // Hvis kunden allerede har god besparelse, ingen rabat nødvendig
   if (currentSavings >= minimumSavings) {
-    return 0; // Ingen rabat nødvendig
+    return 0;
   }
 
+  // Beregn hvor meget kunden betaler ekstra (negativ besparelse = mersalg)
+  const additionalCost = Math.max(0, -currentSavings);
+  
+  // Sælger-strategi: Hvis kunden betaler for meget mere, giv noget af indtjeningen tilbage
+  // Men vi skal beholde minimum 40% af indtjeningen (vi skal stadig tjene penge)
+  // Bemærk: Indtjening er engangsindtjening, så vi kan give op til 60% som rabat
+  const maxDiscountFromEarnings = Math.floor(totalEarnings * 0.6); // Maks 60% af engangsindtjening som rabat
+  
   // Beregn nødvendig rabat for at nå minimum besparelse
-  const neededDiscount = minimumSavings - currentSavings;
-  return Math.max(0, Math.ceil(neededDiscount / 100) * 100); // Rund op til nærmeste 100
+  const neededDiscountForSavings = minimumSavings - currentSavings;
+  
+  // Hvis kunden betaler mere end 300 kr ekstra, giv noget af indtjeningen tilbage
+  // Dette gør det mere attraktivt for kunden at skifte
+  let suggestedDiscount = 0;
+  
+  if (additionalCost > 300) {
+    // Giv op til 50% af den ekstra omkostning tilbage, men maksimalt 60% af indtjening
+    const discountFromCost = Math.floor(additionalCost * 0.5);
+    suggestedDiscount = Math.min(discountFromCost, maxDiscountFromEarnings);
+  }
+  
+  // Kombiner: Tag den højeste af de to (for at sikre minimum besparelse ELLER give rabat fra indtjening)
+  const finalDiscount = Math.max(neededDiscountForSavings, suggestedDiscount);
+  
+  // Rund op til nærmeste 100 kr (sælger-venligt beløb)
+  return Math.max(0, Math.ceil(finalDiscount / 100) * 100);
 }
 
 /**
@@ -416,6 +442,11 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     // ALTID ekskluder CBB planer
     if (plan.provider === 'cbb') return false;
     
+    // KRITISK: Ekskluder planer med negativ eller nul indtjening
+    // Vi skal kun vælge løsninger hvor vi tjener penge
+    const earnings = plan.earnings || 0;
+    if (earnings <= 0) return false;
+    
     // Ekskluder planer fra eksisterende brands
     if (excludedProviders && excludedProviders.length > 0) {
       const planProvider = plan.provider || '';
@@ -465,42 +496,71 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
   let bestEarnings = -Infinity;
   let bestExplanation = '';
   
+  // Maksimal tilladt mersalg (kunden må betale maksimalt 900 kr mere)
+  const MAX_ADDITIONAL_COST = 900; // 6 måneder
+  
   // Funktion til at beregne score baseret på indtjening og besparelse
+  // Prioriterer indtjening højere end besparelse
   const calculateScore = (savings, earnings) => {
-    // KRITISK: Besparelse skal ALTID være positiv (kunden må ikke betale mere)
-    if (savings < 0) {
-      return -Infinity; // Diskvalificer løsninger der er dyrere
+    // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
+    if (savings < -MAX_ADDITIONAL_COST) {
+      return -Infinity; // Diskvalificer løsninger der er for dyre
     }
-    // Prioriter indtjening højere end besparelse, men kun hvis besparelse er positiv
-    // Score = indtjening * 2 + besparelse
-    return (earnings * 2) + savings;
+    // KRITISK: Vi skal ALTID tjene penge
+    if (earnings <= 0) {
+      return -Infinity; // Diskvalificer løsninger uden indtjening
+    }
+    // Prioriter indtjening meget højere end besparelse
+    // Score = indtjening * 10 + besparelse (normaliseret)
+    // Dette sikrer at høj indtjening altid vinder, selv hvis kunden betaler lidt mere
+    return (earnings * 10) + savings;
   };
 
-  // Hvis ingen streaming-tjenester, find billigste plan der matcher mobiludgifter
+  // Hvis ingen streaming-tjenester, find plan med højeste indtjening
+  // Prioriter indtjening højere end pris - maksimer indtjening
   if (selectedStreaming.length === 0) {
-    const sortedPlans = [...mobilePlans].sort((a, b) => {
-      const priceA = calculateSixMonthPrice(a, 1);
-      const priceB = calculateSixMonthPrice(b, 1);
-      return priceA - priceB;
-    });
+    // Test alle planer og find den bedste baseret på score (indtjening prioriteret)
+    let bestPlanForNoStreaming = null;
+    let bestScoreForNoStreaming = -Infinity;
+    let bestSavingsForNoStreaming = 0;
+    let bestEarningsForNoStreaming = 0;
 
-    const bestPlan = sortedPlans[0];
-    const testCart = [{ plan: bestPlan, quantity: requiredLines, cbbMixEnabled: false, cbbMixCount: 0 }];
-    const ourTotal = calculateOurOfferTotal(testCart, 0, 0, originalItemPrice);
-    const savings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
-    const earnings = calculateTotalEarnings(testCart);
+    for (const plan of mobilePlans) {
+      if ((plan.earnings || 0) <= 0) continue; // Skip planer uden indtjening
+      
+      const testCart = [{ plan, quantity: requiredLines, cbbMixEnabled: false, cbbMixCount: 0 }];
+      const ourTotal = calculateOurOfferTotal(testCart, 0, 0, originalItemPrice);
+      const savings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
+      const earnings = calculateTotalEarnings(testCart);
+      
+      // Kun overvej hvis kunden maksimalt betaler 900 kr mere
+      if (savings >= -MAX_ADDITIONAL_COST && earnings > 0) {
+        const score = calculateScore(savings, earnings);
+        if (score > bestScoreForNoStreaming) {
+          bestScoreForNoStreaming = score;
+          bestPlanForNoStreaming = plan;
+          bestSavingsForNoStreaming = savings;
+          bestEarningsForNoStreaming = earnings;
+        }
+      }
+    }
 
-    return {
-      cartItems: testCart,
-      explanation: `Forslag: ${bestPlan.name} fra ${bestPlan.provider.toUpperCase()} (${requiredLines} linje${requiredLines > 1 ? 'r' : ''}) - ${savings >= 0 ? 'Besparelse' : 'Mersalg'}: ${formatCurrency(Math.abs(savings))} (Indtjening: ${formatCurrency(earnings)})`,
-      savings,
-      earnings
-    };
+    if (bestPlanForNoStreaming) {
+      const testCart = [{ plan: bestPlanForNoStreaming, quantity: requiredLines, cbbMixEnabled: false, cbbMixCount: 0 }];
+      const savingsText = bestSavingsForNoStreaming >= 0 
+        ? `Besparelse: ${formatCurrency(bestSavingsForNoStreaming)}` 
+        : `Mersalg: ${formatCurrency(Math.abs(bestSavingsForNoStreaming))}`;
+      return {
+        cartItems: testCart,
+        explanation: `Forslag: ${bestPlanForNoStreaming.name} fra ${bestPlanForNoStreaming.provider.toUpperCase()} (${requiredLines} linje${requiredLines > 1 ? 'r' : ''}) - ${savingsText} (Indtjening: ${formatCurrency(bestEarningsForNoStreaming)})`,
+        savings: bestSavingsForNoStreaming,
+        earnings: bestEarningsForNoStreaming
+      };
+    }
   }
 
   // Find voice-only planer (mobilabonnementer uden streaming)
-  // Sorteret efter pris (billigste først), derefter indtjening (højest først)
-  // Dette sikrer at vi finder billige planer først, men stadig prioriterer høj indtjening
+  // Sorteret efter indtjening (højest først) - maksimer indtjening
   const voiceOnlyPlans = mobilePlans
     .filter(plan => {
       // Skal ikke have streaming slots
@@ -513,17 +573,16 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
       return true;
     })
     .sort((a, b) => {
-      // Først: Sorter efter pris (billigste først) - dette sikrer vi finder billige løsninger
-      const priceA = calculateSixMonthPrice(a, 1);
-      const priceB = calculateSixMonthPrice(b, 1);
-      if (Math.abs(priceA - priceB) > 100) {
-        // Hvis prisforskel er mere end 100 kr, prioriter billigste
-        return priceA - priceB;
-      }
-      // Hvis priser er tæt på hinanden, prioriter høj indtjening
+      // Først: Prioriter høj indtjening (maksimer indtjening)
       const earningsA = a.earnings || 0;
       const earningsB = b.earnings || 0;
-      return earningsB - earningsA; // Højeste indtjening først
+      if (earningsB !== earningsA) {
+        return earningsB - earningsA; // Højeste indtjening først
+      }
+      // Hvis samme indtjening, vælg billigste (for kundens skyld)
+      const priceA = calculateSixMonthPrice(a, 1);
+      const priceB = calculateSixMonthPrice(b, 1);
+      return priceA - priceB;
     });
   
 
@@ -616,14 +675,18 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
           const reason = `${streamingPart}${voicePart}`;
 
           // Opdater hvis bedre score (prioriter indtjening)
-          // KRITISK: Besparelse skal ALTID være >= 0 (kunden må ikke betale mere)
+          // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
+          // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
           const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
           
-          if (score > currentBestScore && savings >= 0 && savings >= minSavings) {
+          if (score > currentBestScore && savings >= -MAX_ADDITIONAL_COST && savings >= minSavings && earnings > 0) {
             bestSavings = savings;
             bestEarnings = earnings;
             bestSolution = JSON.parse(JSON.stringify(testCart)); // Deep copy
-            bestExplanation = `${reason} - Dækker ${coverage.included.length}/${selectedStreaming.length} streaming-tjenester (Indtjening: ${formatCurrency(earnings)})`;
+            const savingsText = savings >= 0 
+              ? `Besparelse: ${formatCurrency(savings)}` 
+              : `Mersalg: ${formatCurrency(Math.abs(savings))}`;
+            bestExplanation = `${reason} - Dækker ${coverage.included.length}/${selectedStreaming.length} streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(earnings)})`;
           }
         }
       }
@@ -648,12 +711,16 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
 
     const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
     
-    // KRITISK: Besparelse skal ALTID være >= 0 (kunden må ikke betale mere)
-    if (score > currentBestScore && savings >= 0 && savings >= minSavings) {
+    // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
+    // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
+    if (score > currentBestScore && savings >= -MAX_ADDITIONAL_COST && savings >= minSavings && earnings > 0) {
       bestSavings = savings;
       bestEarnings = earnings;
       bestSolution = JSON.parse(JSON.stringify(testCart));
-      bestExplanation = `${cheapestPlan.name} (${requiredLines}x) - Ingen streaming-tjenester (Indtjening: ${formatCurrency(earnings)})`;
+      const savingsText = savings >= 0 
+        ? `Besparelse: ${formatCurrency(savings)}` 
+        : `Mersalg: ${formatCurrency(Math.abs(savings))}`;
+      bestExplanation = `${cheapestPlan.name} (${requiredLines}x) - Ingen streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(earnings)})`;
     }
   }
 
@@ -683,28 +750,38 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
 
       const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
       
-      // KRITISK: Besparelse skal ALTID være >= 0 (kunden må ikke betale mere)
-      if (score > currentBestScore && savings >= 0 && savings >= minSavings) {
+      // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
+      // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
+      if (score > currentBestScore && savings >= -MAX_ADDITIONAL_COST && savings >= minSavings && earnings > 0) {
         bestSavings = savings;
         bestEarnings = earnings;
         bestSolution = JSON.parse(JSON.stringify(testCart));
-        bestExplanation = `${plan.name} (${requiredLines}x) - Dækker ${coverage.included.length}/${selectedStreaming.length} streaming-tjenester (Indtjening: ${formatCurrency(earnings)})`;
+        const savingsText = savings >= 0 
+          ? `Besparelse: ${formatCurrency(savings)}` 
+          : `Mersalg: ${formatCurrency(Math.abs(savings))}`;
+        bestExplanation = `${plan.name} (${requiredLines}x) - Dækker ${coverage.included.length}/${selectedStreaming.length} streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(earnings)})`;
       }
     }
   }
 
-  // Hvis ingen god løsning fundet (med positiv besparelse), prøv at finde billigste planer
-  // Men kun hvis de giver positiv besparelse
-  if (!bestSolution || bestSavings < 0) {
-    // Sorter planer efter pris (billigste først) og prøv dem indtil vi finder en med positiv besparelse
+  // Hvis ingen god løsning fundet, prøv at finde planer med høj indtjening
+  // Sorter efter indtjening (højest først) for at maksimere indtjening
+  if (!bestSolution || bestSavings < -MAX_ADDITIONAL_COST) {
+    // Sorter planer efter indtjening (højest først) for at maksimere indtjening
     const sortedPlans = [...mobilePlans].sort((a, b) => {
+      const earningsA = a.earnings || 0;
+      const earningsB = b.earnings || 0;
+      if (earningsB !== earningsA) {
+        return earningsB - earningsA; // Højeste indtjening først
+      }
+      // Hvis samme indtjening, vælg billigste
       const priceA = calculateSixMonthPrice(a, 1);
       const priceB = calculateSixMonthPrice(b, 1);
       return priceA - priceB;
     });
     
-    // Prøv de billigste planer indtil vi finder en med positiv besparelse
-    for (const plan of sortedPlans.slice(0, 5)) {
+    // Prøv planer med høj indtjening indtil vi finder en der er acceptabel
+    for (const plan of sortedPlans.slice(0, 10)) {
       const testCart = [{
         plan,
         quantity: requiredLines,
@@ -715,26 +792,42 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
       const ourTotal = calculateOurOfferTotal(testCart, streamingCost, 0, originalItemPrice);
       const testSavings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
       const testEarnings = calculateTotalEarnings(testCart);
+      const testScore = calculateScore(testSavings, testEarnings);
       
-      // Kun accepter hvis besparelse er positiv
-      if (testSavings >= 0) {
-        bestSolution = testCart;
-        bestSavings = testSavings;
-        bestEarnings = testEarnings;
-        bestExplanation = `Forslag: ${plan.name} (${requiredLines}x) - Besparelse: ${formatCurrency(testSavings)} (Indtjening: ${formatCurrency(testEarnings)})`;
-        break; // Stop ved første løsning med positiv besparelse
+      // Accepter hvis kunden maksimalt betaler 900 kr mere OG indtjening er positiv
+      if (testSavings >= -MAX_ADDITIONAL_COST && testEarnings > 0) {
+        const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
+        if (testScore > currentBestScore) {
+          bestSolution = testCart;
+          bestSavings = testSavings;
+          bestEarnings = testEarnings;
+          const savingsText = testSavings >= 0 
+            ? `Besparelse: ${formatCurrency(testSavings)}` 
+            : `Mersalg: ${formatCurrency(Math.abs(testSavings))}`;
+          bestExplanation = `Forslag: ${plan.name} (${requiredLines}x) - ${savingsText} (Indtjening: ${formatCurrency(testEarnings)})`;
+        }
       }
     }
     
     // Hvis stadig ingen løsning, returner tom array
-    if (!bestSolution || bestSavings < 0) {
+    if (!bestSolution || bestSavings < -MAX_ADDITIONAL_COST || bestEarnings <= 0) {
       return {
         cartItems: [],
-        explanation: 'Kunne ikke finde en løsning der er billigere end kundens nuværende udgifter',
+        explanation: `Kunne ikke finde en løsning hvor kunden maksimalt betaler ${formatCurrency(MAX_ADDITIONAL_COST)} mere og der er positiv indtjening`,
         savings: 0,
         earnings: 0
       };
     }
+  }
+
+  // Final check: Sikre at løsningen har positiv indtjening før vi returnerer den
+  if (bestSolution && bestEarnings <= 0) {
+    return {
+      cartItems: [],
+      explanation: 'Ingen løsning med positiv indtjening fundet',
+      savings: 0,
+      earnings: 0
+    };
   }
 
   return {
