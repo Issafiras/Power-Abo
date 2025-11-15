@@ -15,7 +15,6 @@ const ComparisonPanel = lazy(() => import('./components/ComparisonPanel'));
 const Footer = lazy(() => import('./components/Footer'));
 const PresentationView = lazy(() => import('./components/PresentationView'));
 const HelpButton = lazy(() => import('./components/HelpButton'));
-const Breadcrumbs = lazy(() => import('./components/common/Breadcrumbs'));
 import { plans } from './data/plans';
 import { findBestSolution } from './utils/calculations';
 import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
@@ -80,9 +79,6 @@ function App() {
   const [eanSearchResults, setEanSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Current section for navigation
-  const [currentSection, setCurrentSection] = useState(null);
-
   // Debounce search query (300ms delay)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,52 +88,6 @@ function App() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Section detection for scroll progress and breadcrumbs
-  useEffect(() => {
-    let ticking = false;
-    const sections = [
-      { id: 'customer-situation', element: document.getElementById('customer-situation') },
-      { id: 'plans-section', element: document.getElementById('plans-section') },
-      { id: 'cart-section', element: document.getElementById('cart-section') },
-      { id: 'comparison-section', element: document.getElementById('comparison-section') }
-    ];
-
-    function detectCurrentSection() {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollPosition = window.scrollY + 150; // Offset for header
-
-          for (let i = sections.length - 1; i >= 0; i--) {
-            const section = sections[i];
-            if (section.element) {
-              const rect = section.element.getBoundingClientRect();
-              const elementTop = rect.top + window.scrollY;
-              
-              if (scrollPosition >= elementTop) {
-                setCurrentSection(section.id);
-                return;
-              }
-            }
-          }
-          
-          // Default to first section if none found
-          setCurrentSection('customer-situation');
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }
-
-    window.addEventListener('scroll', detectCurrentSection, { passive: true });
-    detectCurrentSection(); // Initial detection
-
-    return () => window.removeEventListener('scroll', detectCurrentSection);
-  }, []);
-
-  // Calculate if "Find løsning" button should be enabled
-  const canFindSolution = useMemo(() => {
-    return (selectedStreaming.length > 0 || customerMobileCost > 0) && numberOfLines > 0;
-  }, [selectedStreaming.length, customerMobileCost, numberOfLines]);
 
   // Calculate total cart count
   const cartCount = useMemo(() => {
@@ -552,19 +502,8 @@ function App() {
           onPresentationToggle={handlePresentationToggle}
           theme={theme}
           onThemeToggle={handleThemeToggle}
-          currentSection={currentSection}
           cartCount={cartCount}
           onCartClick={handleScrollToCart}
-          onFindSolutionClick={handleAutoSelectSolution}
-          canFindSolution={canFindSolution}
-        />
-      </Suspense>
-
-      {/* Breadcrumbs */}
-      <Suspense fallback={null}>
-        <Breadcrumbs 
-          currentSection={currentSection} 
-          onSectionClick={(sectionId) => setCurrentSection(sectionId)}
         />
       </Suspense>
 

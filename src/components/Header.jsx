@@ -5,7 +5,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Icon from './common/Icon';
-import ScrollProgress from './common/ScrollProgress';
 
 function Header({ 
   onReset, 
@@ -13,11 +12,8 @@ function Header({
   theme, 
   onThemeToggle,
   onSmartCalculatorToggle,
-  currentSection,
   cartCount = 0,
-  onCartClick,
-  onFindSolutionClick,
-  canFindSolution = false
+  onCartClick
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -66,14 +62,6 @@ function Header({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Section name mapping for display
-  const sectionNames = {
-    'customer-situation': 'Kundens Situation',
-    'plans-section': 'Abonnementer',
-    'comparison-section': 'Sammenligning'
-  };
-
-  const currentSectionName = currentSection ? sectionNames[currentSection] || null : null;
 
   const handleResetConfirm = () => {
     onReset();
@@ -82,9 +70,6 @@ function Header({
 
   return (
     <header className={`apple-header fade-in-down ${isCompact ? 'apple-header--compact' : ''}`}>
-      {/* Scroll progress bar */}
-      <ScrollProgress currentSection={currentSectionName} />
-
       {/* Ultra minimal background blur layer - Steve Jobs Perfection */}
       <div className="apple-header__backdrop" aria-hidden="true" />
 
@@ -144,46 +129,6 @@ function Header({
           })()}
         </div>
 
-          {/* Navigation Links - Apple Style Subtle */}
-          <div className="apple-header__nav-links">
-          {/* Quick Action: Find bedste løsning */}
-          {canFindSolution && onFindSolutionClick && (
-            <button
-              onClick={onFindSolutionClick}
-              className="apple-header__nav-link apple-header__nav-link--primary"
-              title="Find bedste løsning"
-              aria-label="Find bedste løsning"
-            >
-              <Icon name="rocket" size={16} className="icon-inline icon-spacing-xs" />
-              Find løsning
-            </button>
-          )}
-
-          {/* Cart badge */}
-          {cartCount > 0 && onCartClick && (
-            <button
-              onClick={onCartClick}
-              className="apple-header__nav-link apple-header__nav-link--cart"
-              title={`Kurv: ${cartCount} abonnementer`}
-              aria-label={`Kurv: ${cartCount} abonnementer`}
-            >
-              <Icon name="cart" size={16} className="icon-inline icon-spacing-xs" />
-              Kurv
-              <span className="cart-badge">{cartCount}</span>
-            </button>
-          )}
-
-          {onPresentationToggle && (
-            <button
-              onClick={onPresentationToggle}
-                className="apple-header__nav-link"
-              title="Vis præsentation (Ctrl+P)"
-              aria-label="Vis præsentation"
-            >
-                Præsentér
-            </button>
-          )}
-          </div>
 
           {/* Actions - Right Side Minimal */}
           <div className="apple-header__actions">
