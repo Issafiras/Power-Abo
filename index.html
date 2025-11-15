@@ -19,6 +19,11 @@
   
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  
+  <!-- Preload critical assets -->
+  <link rel="preload" href="%BASE_URL%power-logo-white.png" as="image" type="image/png" />
   
   <title>Power Calculator - Mobilabonnement Beregner</title>
   
@@ -74,7 +79,15 @@
 <body>
   <!-- Loading screen -->
   <div id="loading-screen">
-    <img src="%BASE_URL%power-logo-white.png?v=1" alt="Power Abonnement" class="loading-logo" />
+    <img 
+      src="%BASE_URL%power-logo-white.png?v=1" 
+      alt="Power Abonnement" 
+      class="loading-logo"
+      loading="eager"
+      width="200"
+      height="60"
+      decoding="async"
+    />
     <div class="loading-text">Power Calculator</div>
     <div class="loading-spinner">
       <span></span>

@@ -3,19 +3,19 @@
  * Håndterer global state og orkestrerer alle subkomponenter
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { toast } from './components/common/Toast';
-// Import komponenter direkte - lazy loading gør det langsommere
-import Header from './components/Header';
-import StreamingSelector from './components/StreamingSelector';
-import ProviderTabs from './components/ProviderTabs';
-import PlanCard from './components/PlanCard';
-import Cart from './components/Cart';
-import ComparisonPanel from './components/ComparisonPanel';
-import Footer from './components/Footer';
-import PresentationView from './components/PresentationView';
-import HelpButton from './components/HelpButton';
-import Breadcrumbs from './components/common/Breadcrumbs';
+// Lazy load tunge komponenter for bedre initial load performance
+const Header = lazy(() => import('./components/Header'));
+const StreamingSelector = lazy(() => import('./components/StreamingSelector'));
+const ProviderTabs = lazy(() => import('./components/ProviderTabs'));
+const PlanCard = lazy(() => import('./components/PlanCard'));
+const Cart = lazy(() => import('./components/Cart'));
+const ComparisonPanel = lazy(() => import('./components/ComparisonPanel'));
+const Footer = lazy(() => import('./components/Footer'));
+const PresentationView = lazy(() => import('./components/PresentationView'));
+const HelpButton = lazy(() => import('./components/HelpButton'));
+const Breadcrumbs = lazy(() => import('./components/common/Breadcrumbs'));
 import { plans } from './data/plans';
 import { findBestSolution } from './utils/calculations';
 import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
@@ -98,6 +98,7 @@ function App() {
     const sections = [
       { id: 'customer-situation', element: document.getElementById('customer-situation') },
       { id: 'plans-section', element: document.getElementById('plans-section') },
+      { id: 'cart-section', element: document.getElementById('cart-section') },
       { id: 'comparison-section', element: document.getElementById('comparison-section') }
     ];
 
@@ -527,29 +528,45 @@ function App() {
     return filtered;
   }, [activeProvider, debouncedSearchQuery]);
 
+  // Simple skeleton for header
+  const HeaderSkeleton = () => (
+    <div className="skeleton-header" style={{ height: '64px', marginBottom: 'var(--spacing-md)' }} />
+  );
+
+  // Simple skeleton for sections
+  const SectionSkeleton = () => (
+    <div className="skeleton-section">
+      <div className="skeleton" style={{ height: '200px', marginBottom: 'var(--spacing-md)' }} />
+    </div>
+  );
+
   return (
     <div className="app">
       {/* Accessibility helper */}
       <AccessibilityHelper />
 
       {/* Header */}
-      <Header
-        onReset={handleReset}
-        onPresentationToggle={handlePresentationToggle}
-        theme={theme}
-        onThemeToggle={handleThemeToggle}
-        currentSection={currentSection}
-        cartCount={cartCount}
-        onCartClick={handleScrollToCart}
-        onFindSolutionClick={handleAutoSelectSolution}
-        canFindSolution={canFindSolution}
-      />
+      <Suspense fallback={<HeaderSkeleton />}>
+        <Header
+          onReset={handleReset}
+          onPresentationToggle={handlePresentationToggle}
+          theme={theme}
+          onThemeToggle={handleThemeToggle}
+          currentSection={currentSection}
+          cartCount={cartCount}
+          onCartClick={handleScrollToCart}
+          onFindSolutionClick={handleAutoSelectSolution}
+          canFindSolution={canFindSolution}
+        />
+      </Suspense>
 
       {/* Breadcrumbs */}
-      <Breadcrumbs 
-        currentSection={currentSection} 
-        onSectionClick={(sectionId) => setCurrentSection(sectionId)}
-      />
+      <Suspense fallback={null}>
+        <Breadcrumbs 
+          currentSection={currentSection} 
+          onSectionClick={(sectionId) => setCurrentSection(sectionId)}
+        />
+      </Suspense>
 
       {/* Main content */}
       <main id="main-content" className="main-content" role="main" aria-label="Hovedindhold">
@@ -557,33 +574,35 @@ function App() {
           {/* Top section: Customer situation */}
           <section id="customer-situation" className="section">
             <div className="section-shell">
-              <StreamingSelector
-                selectedStreaming={selectedStreaming}
-                onStreamingToggle={handleStreamingToggle}
-                customerMobileCost={customerMobileCost}
-                onMobileCostChange={handleMobileCostChange}
-                numberOfLines={numberOfLines}
-                onNumberOfLinesChange={handleNumberOfLinesChange}
-                originalItemPrice={originalItemPrice}
-                onOriginalItemPriceChange={handleOriginalItemPriceChange}
-                onEANSearch={handleEANSearch}
-                isSearching={isSearching}
-                onAutoSelectSolution={handleAutoSelectSolution}
-                existingBrands={existingBrands}
-                onExistingBrandsChange={setExistingBrands}
-              />
+              <Suspense fallback={<SectionSkeleton />}>
+                <StreamingSelector
+                  selectedStreaming={selectedStreaming}
+                  onStreamingToggle={handleStreamingToggle}
+                  customerMobileCost={customerMobileCost}
+                  onMobileCostChange={handleMobileCostChange}
+                  numberOfLines={numberOfLines}
+                  onNumberOfLinesChange={handleNumberOfLinesChange}
+                  originalItemPrice={originalItemPrice}
+                  onOriginalItemPriceChange={handleOriginalItemPriceChange}
+                  onEANSearch={handleEANSearch}
+                  isSearching={isSearching}
+                  onAutoSelectSolution={handleAutoSelectSolution}
+                  existingBrands={existingBrands}
+                  onExistingBrandsChange={setExistingBrands}
+                />
+              </Suspense>
             </div>
           </section>
 
-          <div className="section-divider" aria-hidden="true" style={{ margin: 'var(--spacing-md) auto' }} />
+          <div className="section-divider divider" aria-hidden="true" />
 
           {/* Middle section: Provider selection & Plans */}
           <section id="plans-section" className="section">
             <div className="section-shell">
               <div className="plans-section">
                 <div className="section-header">
-                  <h2 className="section-header__title">
-                    <Icon name="smartphone" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                  <h2 className="section-header__title icon-with-text">
+                    <Icon name="smartphone" size={24} className="icon-inline icon-spacing-md" />
                     {COPY.titles.selectPlans}
                   </h2>
                   <p className="section-header__subtitle">
@@ -591,17 +610,19 @@ function App() {
                   </p>
                 </div>
 
-                <ProviderTabs
-                  activeProvider={activeProvider}
-                  onProviderChange={setActiveProvider}
-                  searchQuery={searchQuery}
-                  onSearch={setSearchQuery}
-                />
+                <Suspense fallback={<div className="skeleton" style={{ height: '60px', marginBottom: 'var(--spacing-md)' }} />}>
+                  <ProviderTabs
+                    activeProvider={activeProvider}
+                    onProviderChange={setActiveProvider}
+                    searchQuery={searchQuery}
+                    onSearch={setSearchQuery}
+                  />
+                </Suspense>
 
                 {/* Plans grid */}
                 {activeProvider === 'all' ? (
                   <div className="empty-state">
-                    <Icon name="smartphone" size={48} className="empty-state-icon pulse" style={{ opacity: 0.3 }} />
+                    <Icon name="smartphone" size={48} className="empty-state-icon opacity-30" />
                     <p className="text-lg font-semibold">{COPY.labels.selectProvider}</p>
                     <p className="text-secondary">
                       {COPY.labels.selectProviderHelp}
@@ -610,20 +631,21 @@ function App() {
                 ) : filteredPlans.length > 0 ? (
                   <div className="plans-grid grid grid-cols-3">
                     {filteredPlans.map((plan) => (
-                      <PlanCard
-                        key={plan.id}
-                        plan={plan}
-                        onAddToCart={handleAddToCart}
-                        onCBBMixToggle={handleCBBMixToggle}
-                        onCBBMixCountChange={handleCBBMixCountChange}
-                        cbbMixEnabled={cbbMixEnabled[plan.id] || false}
-                        cbbMixCount={cbbMixCount[plan.id] || 2}
-                      />
+                      <Suspense key={plan.id} fallback={<div className="skeleton" style={{ height: '400px' }} />}>
+                        <PlanCard
+                          plan={plan}
+                          onAddToCart={handleAddToCart}
+                          onCBBMixToggle={handleCBBMixToggle}
+                          onCBBMixCountChange={handleCBBMixCountChange}
+                          cbbMixEnabled={cbbMixEnabled[plan.id] || false}
+                          cbbMixCount={cbbMixCount[plan.id] || 2}
+                        />
+                      </Suspense>
                     ))}
                   </div>
                 ) : (
                   <div className="empty-state">
-                    <Icon name="search" size={48} className="empty-state-icon animate-empty-state" style={{ opacity: 0.3 }} />
+                    <Icon name="search" size={48} className="empty-state-icon opacity-30" />
                     <p className="text-lg font-semibold">{COPY.labels.noPlansFound}</p>
                     <p className="text-secondary">
                       {COPY.labels.noPlansFoundHelp}
@@ -634,39 +656,45 @@ function App() {
             </div>
           </section>
 
-          <div className="section-divider" aria-hidden="true" style={{ margin: 'var(--spacing-md) auto' }} />
+          <div className="section-divider divider" aria-hidden="true" />
 
-          {/* Bottom section: Cart and Comparison side by side */}
+          {/* Cart section */}
+          <section id="cart-section" className="section">
+            <div className="section-shell">
+              <Suspense fallback={<SectionSkeleton />}>
+                <Cart
+                  cartItems={cartItems}
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onRemove={handleRemoveFromCart}
+                />
+              </Suspense>
+            </div>
+          </section>
+
+          <div className="section-divider divider" aria-hidden="true" />
+
+          {/* Comparison section */}
           <section id="comparison-section" className="section">
-            <div className="section-shell section-shell--nest">
-              <div className="cart-comparison-grid">
-                <div className="cart-wrapper">
-                  <Cart
-                    cartItems={cartItems}
-                    onUpdateQuantity={handleUpdateQuantity}
-                    onRemove={handleRemoveFromCart}
-                  />
-                </div>
-                <div className="comparison-wrapper">
-                  <ComparisonPanel
-                    cartItems={cartItems}
-                    selectedStreaming={selectedStreaming}
-                    customerMobileCost={customerMobileCost}
-                    numberOfLines={numberOfLines}
-                    originalItemPrice={originalItemPrice}
-                    cashDiscount={cashDiscount}
-                    onCashDiscountChange={handleCashDiscountChange}
-                    cashDiscountLocked={cashDiscountLocked}
-                    onCashDiscountLockedChange={setCashDiscountLocked}
-                    autoAdjust={autoAdjust}
-                    onAutoAdjustChange={setAutoAdjust}
-                    showCashDiscount={showCashDiscount}
-                    onToggleCashDiscount={handleToggleCashDiscount}
-                    freeSetup={freeSetup}
-                    onFreeSetupChange={setFreeSetup}
-                  />
-                </div>
-              </div>
+            <div className="section-shell">
+              <Suspense fallback={<SectionSkeleton />}>
+                <ComparisonPanel
+                  cartItems={cartItems}
+                  selectedStreaming={selectedStreaming}
+                  customerMobileCost={customerMobileCost}
+                  numberOfLines={numberOfLines}
+                  originalItemPrice={originalItemPrice}
+                  cashDiscount={cashDiscount}
+                  onCashDiscountChange={handleCashDiscountChange}
+                  cashDiscountLocked={cashDiscountLocked}
+                  onCashDiscountLockedChange={setCashDiscountLocked}
+                  autoAdjust={autoAdjust}
+                  onAutoAdjustChange={setAutoAdjust}
+                  showCashDiscount={showCashDiscount}
+                  onToggleCashDiscount={handleToggleCashDiscount}
+                  freeSetup={freeSetup}
+                  onFreeSetupChange={setFreeSetup}
+                />
+              </Suspense>
             </div>
           </section>
         </div>
@@ -674,20 +702,29 @@ function App() {
 
       {/* Presentation view */}
       {showPresentation && (
-        <PresentationView
-          cartItems={cartItems}
-          selectedStreaming={selectedStreaming}
-          customerMobileCost={customerMobileCost}
-          originalItemPrice={originalItemPrice}
-          cashDiscount={cashDiscount}
-          freeSetup={freeSetup}
-          onClose={handleClosePresentation}
-          onReset={handleReset}
-        />
+        <Suspense fallback={<SectionSkeleton />}>
+          <PresentationView
+            cartItems={cartItems}
+            selectedStreaming={selectedStreaming}
+            customerMobileCost={customerMobileCost}
+            originalItemPrice={originalItemPrice}
+            cashDiscount={cashDiscount}
+            freeSetup={freeSetup}
+            onClose={handleClosePresentation}
+            onReset={handleReset}
+          />
+        </Suspense>
       )}
 
       {/* Footer */}
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
+
+      {/* Help Button - Floating guide button */}
+      <Suspense fallback={null}>
+        <HelpButton />
+      </Suspense>
 
       <style>{`
         .app {
@@ -702,35 +739,42 @@ function App() {
 
         .main-content {
           flex: 1;
-          padding: var(--spacing-md) 0;
-          padding-top: calc(120px + var(--spacing-md));
+          padding: var(--spacing-xl) 0;
+          padding-top: calc(120px + var(--spacing-xl));
           width: 100%;
           max-width: 100%;
         }
 
         .plans-section {
-          padding: var(--spacing-md);
+          padding: var(--spacing-xl);
         }
 
         .section-header {
-          margin-bottom: var(--spacing-md);
+          margin-bottom: var(--spacing-xl);
+        }
+
+        .section-header__title {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
         }
 
         .plans-grid {
-          margin-top: var(--spacing-md);
+          margin-top: var(--spacing-xl);
+          gap: var(--spacing-xl);
         }
 
         .cart-comparison-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: var(--spacing-lg);
+          gap: var(--spacing-2xl);
           align-items: start;
         }
 
         @media (min-width: 1200px) {
           .cart-comparison-grid {
             grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-xl);
+            gap: var(--spacing-2xl);
           }
         }
 
@@ -739,29 +783,64 @@ function App() {
           width: 100%;
         }
 
+        .section-divider {
+          margin: var(--spacing-xl) auto;
+          max-width: 200px;
+        }
+
         @media (max-width: 900px) {
           .main-content {
-            padding: var(--spacing-sm) 0;  /* Ultra minimal vertikal padding */
-            padding-top: calc(64px + var(--spacing-sm));
+            padding: var(--spacing-lg) 0;
+            padding-top: calc(64px + var(--spacing-lg));
           }
 
           .plans-section {
-            padding: var(--spacing-sm);  /* Ultra minimal padding */
+            padding: var(--spacing-lg);
           }
           
           .section-header {
-            margin-bottom: var(--spacing-sm) !important;
+            margin-bottom: var(--spacing-lg) !important;
+          }
+
+          .plans-grid {
+            gap: var(--spacing-lg);
           }
 
           .cart-comparison-grid {
-            gap: var(--spacing-sm);  /* Ultra minimal gap */
+            gap: var(--spacing-lg);
+          }
+
+          .section-divider {
+            margin: var(--spacing-lg) auto;
           }
         }
 
-      `}</style>
+        .skeleton-header,
+        .skeleton-section .skeleton {
+          background: linear-gradient(
+            120deg,
+            color-mix(in srgb, var(--glass-bg) 60%, transparent) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            color-mix(in srgb, var(--glass-bg) 60%, transparent) 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.5s ease-in-out infinite;
+          border-radius: var(--radius-md);
+        }
 
-      {/* Help Button - Floating guide button */}
-      <HelpButton />
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .skeleton-header,
+          .skeleton-section .skeleton {
+            animation: none;
+            background: var(--glass-bg);
+          }
+        }
+      `}</style>
     </div>
   );
 }

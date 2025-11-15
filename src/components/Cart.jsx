@@ -14,14 +14,14 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
       <div className="cart glass-card-no-hover fade-in-up">
         <div className="section-header">
         <h2>
-          <Icon name="cart" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+          <Icon name="cart" size={24} className="icon-inline icon-spacing-md" />
           Kurv
         </h2>
           <p className="text-secondary">{COPY.empty.noCartItems}</p>
         </div>
         
-        <div className="empty-state animate-scale-in">
-          <Icon name="cart" size={64} className="empty-state-icon animate-pulse" style={{ opacity: 0.3 }} aria-hidden="true" />
+        <div className="empty-state">
+          <Icon name="cart" size={64} className="empty-state-icon opacity-30" aria-hidden="true" />
           <p className="text-lg font-semibold">Kurven er tom</p>
           <p className="text-secondary">
             Vælg mobilabonnementer fra listen nedenfor.
@@ -60,10 +60,10 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
     <div className="cart glass-card-no-hover fade-in-up">
       <div className="section-header">
           <h2>
-            <Icon name="cart" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+            <Icon name="cart" size={24} className="icon-inline icon-spacing-md" />
             Kurv
           </h2>
-          <div className="cart-count badge badge-primary animate-pulse animate-pulse-glow" aria-label={`${cartItems.reduce((sum, item) => sum + item.quantity, 0)} abonnementer i kurv`}>
+          <div className="cart-count badge badge-primary" aria-label={`${cartItems.reduce((sum, item) => sum + item.quantity, 0)} abonnementer i kurv`}>
           {cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
           {' '}abonnement{cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 'er' : ''}
         </div>
@@ -82,7 +82,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
             >
               {/* Plan info */}
               <div className="cart-item-header">
-                <div className="cart-item-provider" style={{ color: item.plan.color }}>
+                <div className="cart-item-provider" style={{ color: item.plan.color || 'var(--color-orange)' }}>
                   {item.plan.provider.toUpperCase()}
                 </div>
                 <button
@@ -152,7 +152,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
                   <div className="cbb-mix-pricing">
                     <div className="price-line cbb-mix-line">
                       <span className="price-label">
-                        <Icon name="film" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                        <Icon name="film" size={16} className="icon-inline icon-spacing-xs" />
                         CBB MIX ({item.cbbMixCount} tjenester):
                       </span>
                       <span className="price-value">
@@ -257,7 +257,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
         }
 
         .cart-item.newly-added {
-          animation: newlyAddedPulse 0.6s ease-out, fade-in-up 0.6s var(--ease-out-back);
+          animation: fadeIn 0.3s ease-out;
           border-color: var(--color-success);
           box-shadow: 
             var(--shadow-xl), 
@@ -281,24 +281,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
           border-radius: var(--radius-sm);
           font-size: var(--font-xs);
           font-weight: var(--font-bold);
-          box-shadow: var(--glow-green);
-          animation: bounceIn var(--duration-slow) var(--ease-out-back);
           z-index: 10;
-        }
-
-        @keyframes newlyAddedPulse {
-          0% {
-            transform: scale(0.95);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
         }
 
         .cart-item-header {
@@ -363,7 +346,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
           transform: scale(1.1) translateZ(0);  /* Reduced rotation, GPU accelerated */
           background: var(--color-orange);
           color: white;
-          box-shadow: var(--glow-orange);
+          box-shadow: 0 8px 24px rgba(255, 109, 31, 0.4);
           filter: brightness(1.1);
         }
 

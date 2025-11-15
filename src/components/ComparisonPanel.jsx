@@ -18,13 +18,10 @@ import {
   checkCBBMixCompatibility,
   autoAdjustCashDiscount
 } from '../utils/calculations';
-import { getStreamingTotal } from '../data/streamingServices';
+import { getStreamingTotal, streamingServices as staticStreaming } from '../data/streamingServices';
 import Icon from './common/Icon';
 import COPY from '../constants/copy';
-import AnimatedCounter from './results/AnimatedCounter';
-import Tooltip from './common/Tooltip';
 import NumberDisplay from './common/NumberDisplay';
-import ComparisonChart from './results/ComparisonChart';
 
 function ComparisonPanel({
   cartItems,
@@ -175,8 +172,8 @@ function ComparisonPanel({
           <p className="text-secondary">{COPY.empty.noCartItems}</p>
         </div>
         
-        <div className="empty-state animate-scale-in">
-          <Icon name="chart" size={64} className="empty-state-icon animate-pulse" style={{ opacity: 0.3 }} aria-hidden="true" />
+        <div className="empty-state">
+          <Icon name="chart" size={64} className="empty-state-icon opacity-30" aria-hidden="true" />
           <p className="text-secondary">
             {COPY.empty.noData}
           </p>
@@ -212,7 +209,7 @@ function ComparisonPanel({
         <div className="section-header-top">
           <div>
             <h2>
-              <Icon name="chart" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+              <Icon name="chart" size={24} className="icon-inline icon-spacing-md" />
               {COPY.titles.comparison}
             </h2>
             <p className="text-secondary">{COPY.titles.comparisonSubtitle}</p>
@@ -240,7 +237,7 @@ function ComparisonPanel({
           <div className="cash-discount-section">
             <div className="cash-discount-header">
               <h3>
-                <Icon name="wallet" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                <Icon name="wallet" size={20} className="icon-inline icon-spacing-sm" />
                 {COPY.features.cashDiscount}
               </h3>
               <div className="cash-discount-controls">
@@ -253,7 +250,7 @@ function ComparisonPanel({
                     checked={cashDiscountLocked}
                     onChange={(e) => onCashDiscountLockedChange(e.target.checked)}
                   />
-                  <Icon name="lock" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                  <Icon name="lock" size={16} className="icon-inline icon-spacing-xs" />
                   <span className="text-sm">{COPY.features.cashDiscountLocked}</span>
                 </label>
                 <label className="checkbox-wrapper">
@@ -266,7 +263,7 @@ function ComparisonPanel({
                     onChange={(e) => onAutoAdjustChange(e.target.checked)}
                     disabled={cashDiscountLocked}
                   />
-                  <Icon name="refresh" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                  <Icon name="refresh" size={16} className="icon-inline icon-spacing-xs" />
                   <span className="text-sm">{COPY.features.autoAdjust}</span>
                 </label>
               </div>
@@ -291,197 +288,420 @@ function ComparisonPanel({
         </>
       )}
 
-      {/* Gratis oprettelse checkbox */}
-      {cartItems.length > 0 && (
-        <>
-          <div className="free-setup-section">
-            <label className="checkbox-wrapper">
-              <input
-                id="free-setup"
-                name="free-setup"
-                type="checkbox"
-                className="checkbox"
-                checked={freeSetup}
-                onChange={(e) => onFreeSetupChange(e.target.checked)}
-              />
-              <Icon name="gift" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-              <span className="text-sm">{COPY.features.freeSetup} (rabat: {formatCurrency(ourOfferTotals.setupFee)})</span>
-            </label>
-          </div>
+      {/* Detaljeret side-ved-side sammenligning */}
+      {/* Get streaming service names for display */}
+      {(() => {
+        const getStreamingServiceName = (serviceId) => {
+          const service = staticStreaming.find(s => s.id === serviceId);
+          return service ? service.name : serviceId;
+        };
 
-          <div className="divider"></div>
-        </>
-      )}
+        // Calculate savings percentage
+        const savingsPercentage = customerTotals.sixMonth > 0 
+          ? ((savings / customerTotals.sixMonth) * 100).toFixed(1)
+          : 0;
 
-      {/* Streaming status */}
-      {selectedStreaming.length > 0 && (
-        <>
-          <div className="streaming-status">
-            <h3>
-              <Icon name="tv" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-              {COPY.features.streamingStatus}
-            </h3>
-            {streamingCoverage.included.length > 0 && (
-              <div className="streaming-status-item covered">
-                <Icon name="check" size={18} className="status-icon" />
-                <span className="status-text">
-                  {streamingCoverage.included.length} tjeneste
-                  {streamingCoverage.included.length !== 1 ? 'r' : ''} inkluderet
-                  {cartItems.some(item => item.plan.streamingCount > 0) && ' (mix).'}
-                </span>
-              </div>
-            )}
-            {streamingCoverage.notIncluded.length > 0 && (
-              <div className="streaming-status-item not-covered">
-                <Icon name="plus" size={18} className="status-icon" />
-                <span className="status-text">
-                  {streamingCoverage.notIncluded.length} tjeneste
-                  {streamingCoverage.notIncluded.length !== 1 ? 'r' : ''} tillæg 
-                  ({formatCurrency(notIncludedStreamingCost)}/md.).
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="divider"></div>
-        </>
-      )}
-
-      {/* CBB MIX advarsel */}
-      {!cbbMixCompatibility.compatible && (
-        <>
-          <div className="cbb-mix-warning">
-            <Icon name="warning" size={32} className="warning-icon" />
-            <div className="warning-content">
-              <h4>CBB MIX Advarsel</h4>
-              <p>{cbbMixCompatibility.message}</p>
-            </div>
-          </div>
-          <div className="divider"></div>
-        </>
-      )}
-
-      {/* Sammenligning grid */}
-      <div className="comparison-grid">
-        {/* Kunde kolonne */}
-        <div className="comparison-column customer animate-slide-in-left">
-          <div className="column-header">
-            <h3>
-              <Icon name="user" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-              {COPY.labels.customerColumn}
-            </h3>
-          </div>
-          <div className="column-content">
-            <div className="amount-row">
-              <span className="amount-label">Mobil/md. {numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}:</span>
-              <NumberDisplay value={customerMobileCost || 0} size="lg" color="primary" suffix="/md." />
-            </div>
-            <div className="amount-row">
-              <span className="amount-label">Streaming/md.:</span>
-              <NumberDisplay value={streamingCost} size="lg" color="primary" suffix="/md." />
-            </div>
-            {originalItemPrice > 0 && (
-              <div className="amount-row">
-                <span className="amount-label">Varens pris:</span>
-                <NumberDisplay value={originalItemPrice} size="lg" color="primary" />
-              </div>
-            )}
-            <div className="amount-row total">
-              <span className="amount-label font-semibold">Total/md.:</span>
-              <NumberDisplay value={customerTotals.monthly} size="xl" color="orange" suffix="/md." />
-            </div>
-            <div className="amount-row six-month">
-              <span className="amount-label">6 måneder:</span>
-              <NumberDisplay value={customerTotals.sixMonth} size="4xl" color="orange" />
-            </div>
-          </div>
-        </div>
-
-        {/* VS */}
-        <div className="comparison-vs animate-scale-in">
-          <Icon name="zap" size={32} className="vs-icon animate-pulse animate-pulse-glow" />
-          <div className="vs-text">VS</div>
-        </div>
-
-        {/* Vores tilbud kolonne */}
-            <div className="comparison-column offer animate-slide-in-right">
-              <div className="column-header">
-                <h3>
-                  <Icon name="briefcase" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                  {COPY.labels.offerColumn}
-                </h3>
-                {/* Diskret indtjening info - kun synlig når F8 er trykket */}
-                {showEarnings && totalEarnings > 0 && (
-                  <div className="earnings-tooltip" title={`Indtjening: ${formatCurrency(totalEarnings)} (engangs)`}>
-                    <Icon name="wallet" size={14} className="earnings-indicator" />
+        return (
+          <div className="detailed-comparison">
+            {/* Top summary bar */}
+            <div className="comparison-summary-bar">
+              <div className="summary-item customer-summary">
+                <div className="summary-label">Kundens total</div>
+                <div className="summary-value">
+                  <NumberDisplay value={customerTotals.sixMonth} size="xl" color="orange" />
+                </div>
+                <div className="summary-period">6 måneder</div>
+                <div className="summary-monthly">
+                  <div className="monthly-label">
+                    <Icon name="smartphone" size={14} />
+                    <span>Pr. måned nu:</span>
                   </div>
-                )}
+                  <div className="monthly-value">
+                    <NumberDisplay value={customerTotals.monthly || customerTotals.sixMonth / 6} size="lg" color="orange" />
+                  </div>
+                </div>
               </div>
-          <div className="column-content">
-            <div className="amount-row">
-              <span className="amount-label">Abonnementer/md. (før kontant rabat):</span>
-              <NumberDisplay value={baseMonthlyPlansPrice} size="lg" color="primary" suffix="/md." />
+              
+              <div className="summary-vs">
+                <div className="vs-arrow-wrapper">
+                  <Icon name="arrowRight" size={32} className="vs-arrow" />
+                </div>
+                <div className="vs-savings">
+                  <div className="vs-savings-label">
+                    {isPositiveSavings ? 'Besparelse' : 'Forskel'}
+                  </div>
+                  <div className={`vs-savings-amount ${isPositiveSavings ? 'positive' : 'negative'}`}>
+                    <NumberDisplay 
+                      value={Math.abs(savings)} 
+                      size="2xl" 
+                      color={isPositiveSavings ? 'success' : 'danger'}
+                      prefix={isPositiveSavings ? '-' : '+'}
+                    />
+                  </div>
+                  {savingsPercentage !== 0 && (
+                    <div className="vs-savings-percentage">
+                      {Math.abs(savingsPercentage)}%
+                    </div>
+                  )}
+                  <div className="vs-monthly-savings">
+                    <Icon name="trendingDown" size={16} />
+                    <span>{formatCurrency(Math.abs(savings) / 6)}/md.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="summary-item offer-summary">
+                <div className="summary-label">Vores tilbud</div>
+                <div className="summary-value">
+                  <NumberDisplay value={ourOfferTotals.sixMonth} size="xl" color="success" />
+                </div>
+                <div className="summary-period">6 måneder</div>
+                <div className="summary-monthly">
+                  <div className="monthly-label">
+                    <Icon name="gift" size={14} />
+                    <span>Pr. måned hos os:</span>
+                  </div>
+                  <div className="monthly-value">
+                    <NumberDisplay value={ourOfferTotals.monthly || ourOfferTotals.sixMonth / 6} size="lg" color="success" />
+                  </div>
+                </div>
+              </div>
             </div>
-            {ourOfferTotals.telenorDiscount > 0 && (
-              <div className="amount-row discount">
-                <span className="amount-label">Telenor rabat:</span>
-                <NumberDisplay value={ourOfferTotals.telenorDiscount} size="lg" color="success" suffix="/md." prefix="-" />
+
+            <div className="comparison-grid">
+              {/* KUNDENS SITUATION */}
+              <div className="comparison-column customer-column">
+                <div className="column-header">
+                  <div className="column-icon-wrapper customer-icon">
+                    <Icon name="user" size={28} className="column-icon" />
+                  </div>
+                  <h3>Kundens situation</h3>
+                  <p className="column-subtitle">Hvad kunden betaler i dag</p>
+                  <div className="column-badge customer-badge">
+                    <Icon name="trendingDown" size={16} />
+                    <span>Nuværende udgift</span>
+                  </div>
+                </div>
+
+                <div className="comparison-content">
+                  {/* Mobilabonnementer */}
+                  {customerMobileCost > 0 && (
+        <div className="comparison-item">
+                      <div className="item-header">
+                        <Icon name="smartphone" size={18} className="item-icon" />
+                        <span className="item-title">Mobilabonnementer</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">{numberOfLines} {numberOfLines === 1 ? 'abonnement' : 'abonnementer'}</span>
+                          <span className="item-value">{formatCurrency(customerMobileCost)}/md.</span>
+                        </div>
+                        <div className="item-total">
+                          <span className="item-label">I 6 måneder:</span>
+                          <span className="item-value">{formatCurrency(customerMobileCost * 6)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Streaming-tjenester */}
+                  {streamingCost > 0 && (
+                    <div className="comparison-item">
+                      <div className="item-header">
+                        <Icon name="tv" size={18} className="item-icon" />
+                        <span className="item-title">Streaming-tjenester</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">{selectedStreaming.length} {selectedStreaming.length === 1 ? 'tjeneste' : 'tjenester'}</span>
+                          <span className="item-value">{formatCurrency(streamingCost)}/md.</span>
+                        </div>
+                        {selectedStreaming.length > 0 && (
+                          <div className="item-services">
+                            {selectedStreaming.map(serviceId => (
+                              <span key={serviceId} className="service-badge">
+                                {getStreamingServiceName(serviceId)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="item-total">
+                          <span className="item-label">I 6 måneder:</span>
+                          <span className="item-value">{formatCurrency(streamingCost * 6)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Vare (hvis relevant) */}
+                  {originalItemPrice > 0 && (
+                    <div className="comparison-item">
+                      <div className="item-header">
+                        <Icon name="shoppingBag" size={18} className="item-icon" />
+                        <span className="item-title">Vare/Produkt</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">Engangsbetaling</span>
+                          <span className="item-value">{formatCurrency(originalItemPrice)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Total for kunden */}
+                  <div className="comparison-total customer-total">
+                    <div className="total-background"></div>
+                    <div className="total-content">
+                      <div className="total-header">
+                        <Icon name="calculator" size={22} className="total-icon" />
+                        <span className="total-title">Kundens total</span>
+                      </div>
+                      <div className="total-value-large">
+          <NumberDisplay value={customerTotals.sixMonth} size="3xl" color="orange" />
+        </div>
+                      <div className="total-breakdown">
+                        <div className="breakdown-item">
+                          <span className="breakdown-label">Pr. måned:</span>
+                          <span className="breakdown-value">{formatCurrency(customerTotals.sixMonth / 6)}</span>
+                        </div>
+                      </div>
+                      <div className="total-period">over 6 måneder</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
-            {notIncludedStreamingCost > 0 && (
-              <div className="amount-row">
-                <span className="amount-label">Streaming tillæg:</span>
-                <NumberDisplay value={notIncludedStreamingCost} size="lg" color="primary" suffix="/md." />
+
+              {/* VORES TILBUD */}
+              <div className="comparison-column offer-column">
+                <div className="column-header">
+                  <div className="column-icon-wrapper offer-icon">
+                    <Icon name="gift" size={28} className="column-icon" />
+                  </div>
+                  <h3>Vores tilbud</h3>
+                  <p className="column-subtitle">Hvad vi kan tilbyde</p>
+                  <div className="column-badge offer-badge">
+                    <Icon name="checkCircle" size={16} />
+                    <span>Bedre værdi</span>
+                  </div>
+                </div>
+
+                <div className="comparison-content">
+                  {/* Abonnementer */}
+                  {cartItems.length > 0 && (
+        <div className="comparison-item">
+                      <div className="item-header">
+                        <Icon name="smartphone" size={18} className="item-icon" />
+                        <span className="item-title">Abonnementer</span>
+        </div>
+                      <div className="item-details">
+                        {cartItems.map((item, idx) => {
+                          const itemSixMonth = calculateSixMonthPrice(item.plan, item.quantity);
+                          const itemMonthly = calculateMonthlyPrice(item.plan, item.quantity);
+                          
+                          // Calculate CBB Mix cost if enabled
+                          let cbbMixCost = 0;
+                          if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount) {
+                            const mixPrice = calculateCBBMixPrice(item.plan, item.cbbMixCount);
+                            cbbMixCost = mixPrice * item.quantity * 6; // 6 months
+                          }
+
+                          return (
+                            <div key={idx} className="item-plan">
+                              <div className="item-line">
+                                <span className="item-label">
+                                  {item.plan.name}
+                                  {item.quantity > 1 && ` × ${item.quantity}`}
+                                  {item.plan.provider && (
+                                    <span className="provider-badge">{item.plan.provider.toUpperCase()}</span>
+                                  )}
+                                </span>
+                                <span className="item-value">{formatCurrency(itemMonthly)}/md.</span>
+      </div>
+                              {item.plan.introPrice && item.plan.introMonths && (
+                                <div className="item-intro">
+                                  {formatCurrency(item.plan.introPrice)}/md. i {item.plan.introMonths} {item.plan.introMonths === 1 ? 'måned' : 'måneder'}, derefter {formatCurrency(item.plan.price)}/md.
+                                </div>
+                              )}
+                              {cbbMixCost > 0 && (
+                                <div className="item-cbb-mix">
+                                  + CBB MIX ({item.cbbMixCount} tjenester): {formatCurrency(cbbMixCost / 6)}/md.
+                                </div>
+                              )}
+                              <div className="item-total">
+                                <span className="item-label">I 6 måneder:</span>
+                                <span className="item-value">{formatCurrency(itemSixMonth + cbbMixCost)}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {ourOfferTotals.telenorDiscount > 0 && (
+                          <div className="item-discount">
+                            <Icon name="users" size={16} className="discount-icon" />
+                            <span className="discount-text">Familie-rabat: -{formatCurrency(ourOfferTotals.telenorDiscount)}/md.</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Streaming inkluderet */}
+                  {streamingCoverage.included.length > 0 && (
+                    <div className="comparison-item streaming-included">
+                      <div className="item-header">
+                        <Icon name="checkCircle" size={18} className="item-icon success" />
+                        <span className="item-title">Streaming inkluderet</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">{streamingCoverage.included.length} {streamingCoverage.included.length === 1 ? 'tjeneste inkluderet' : 'tjenester inkluderet'}</span>
+                          <span className="item-value text-success">Gratis</span>
+                        </div>
+                        <div className="item-services">
+                          {streamingCoverage.included.map(serviceId => (
+                            <span key={serviceId} className="service-badge success">
+                              {getStreamingServiceName(serviceId)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Streaming tillæg */}
+                  {notIncludedStreamingCost > 0 && (
+                    <div className="comparison-item">
+                      <div className="item-header">
+                        <Icon name="tv" size={18} className="item-icon" />
+                        <span className="item-title">Streaming tillæg</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">{streamingCoverage.notIncluded.length} {streamingCoverage.notIncluded.length === 1 ? 'tjeneste' : 'tjenester'}</span>
+                          <span className="item-value">{formatCurrency(notIncludedStreamingCost)}/md.</span>
+                        </div>
+                        {streamingCoverage.notIncluded.length > 0 && (
+                          <div className="item-services">
+                            {streamingCoverage.notIncluded.map(serviceId => (
+                              <span key={serviceId} className="service-badge">
+                                {getStreamingServiceName(serviceId)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="item-total">
+                          <span className="item-label">I 6 måneder:</span>
+                          <span className="item-value">{formatCurrency(notIncludedStreamingCost * 6)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Vare (samme som kunden) */}
+                  {originalItemPrice > 0 && (
+                    <div className="comparison-item">
+                      <div className="item-header">
+                        <Icon name="shoppingBag" size={18} className="item-icon" />
+                        <span className="item-title">Vare/Produkt</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">Engangsbetaling</span>
+                          <span className="item-value">{formatCurrency(originalItemPrice)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Oprettelsesgebyr */}
+                  {ourOfferTotals.setupFee > 0 && !freeSetup && (
+                    <div className="comparison-item">
+                      <div className="item-header">
+                        <Icon name="settings" size={18} className="item-icon" />
+                        <span className="item-title">Oprettelsesgebyr</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">
+                            {cartItems.reduce((sum, item) => sum + item.quantity, 0)} {cartItems.reduce((sum, item) => sum + item.quantity, 0) === 1 ? 'abonnement' : 'abonnementer'}
+                          </span>
+                          <span className="item-value">{formatCurrency(ourOfferTotals.setupFee)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gratis oprettelse */}
+                  {freeSetup && ourOfferTotals.setupFeeDiscount > 0 && (
+                    <div className="comparison-item discount-item">
+                      <div className="item-header">
+                        <Icon name="checkCircle" size={18} className="item-icon success" />
+                        <span className="item-title">Gratis oprettelse</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">Rabat</span>
+                          <span className="item-value text-success">-{formatCurrency(ourOfferTotals.setupFeeDiscount)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Kontant rabat */}
+                  {cashDiscount > 0 && (
+                    <div className="comparison-item discount-item">
+                      <div className="item-header">
+                        <Icon name="wallet" size={18} className="item-icon success" />
+                        <span className="item-title">Kontant rabat</span>
+                      </div>
+                      <div className="item-details">
+                        <div className="item-line">
+                          <span className="item-label">Rabat</span>
+                          <span className="item-value text-success">-{formatCurrency(cashDiscount)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Total for vores tilbud */}
+                  <div className="comparison-total offer-total">
+                    <div className="total-background"></div>
+                    <div className="total-content">
+                      <div className="total-header">
+                        <Icon name="gift" size={22} className="total-icon" />
+                        <span className="total-title">Vores total</span>
+                      </div>
+                      <div className="total-value-large">
+                        <NumberDisplay value={ourOfferTotals.sixMonth} size="3xl" color="success" />
+                      </div>
+                      <div className="total-breakdown">
+                        <div className="breakdown-item">
+                          <span className="breakdown-label">Pr. måned:</span>
+                          <span className="breakdown-value">{formatCurrency(ourOfferTotals.sixMonth / 6)}</span>
+                        </div>
+                        {savings > 0 && (
+                          <div className="breakdown-item savings-breakdown">
+                            <Icon name="trendingDown" size={14} />
+                            <span className="breakdown-label">Besparelse:</span>
+                            <span className="breakdown-value success">{formatCurrency(savings / 6)}/md.</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="total-period">over 6 måneder</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
-            {originalItemPrice > 0 && (
-              <div className="amount-row">
-                <span className="amount-label">Varens pris:</span>
-                <NumberDisplay value={originalItemPrice} size="lg" color="primary" />
-              </div>
-            )}
-            {ourOfferTotals.setupFee > 0 && (
-              <div className="amount-row">
-                <span className="amount-label">Oprettelsesgebyr:</span>
-                <NumberDisplay value={ourOfferTotals.setupFee} size="lg" color="primary" />
-              </div>
-            )}
-            {freeSetup && ourOfferTotals.setupFeeDiscount > 0 && (
-              <div className="amount-row discount">
-                <span className="amount-label">Gratis oprettelse:</span>
-                <NumberDisplay value={ourOfferTotals.setupFeeDiscount} size="lg" color="success" prefix="-" />
-              </div>
-            )}
-            <div className="amount-row total">
-              <span className="amount-label font-semibold">Total/md.:</span>
-              <NumberDisplay value={ourOfferTotals.monthly} size="xl" color="orange" suffix="/md." />
-            </div>
-            <div className="amount-row six-month">
-              <span className="amount-label">6 måneder:</span>
-              <NumberDisplay value={ourOfferTotals.sixMonth} size="4xl" color="orange" />
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="divider"></div>
-
-      {/* Visuel sammenligning chart */}
-      {customerTotals.sixMonth > 0 && ourOfferTotals.sixMonth > 0 && (
-        <ComparisonChart 
-          customerTotal={customerTotals.sixMonth}
-          ourOfferTotal={ourOfferTotals.sixMonth}
-          savings={savings}
-        />
-      )}
-
-      <div className="divider"></div>
+        );
+      })()}
 
       {/* Detaljerede beregningsvisninger for sælgerne (kun synlig når F8 er trykket) */}
       {showEarnings && (
         <div className="calculation-details">
           <h4 className="calculation-details-title">
-            <Icon name="calculator" size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+            <Icon name="calculator" size={18} className="icon-inline icon-spacing-sm" />
             Beregningsdetaljer (for sælger)
           </h4>
           
@@ -648,18 +868,18 @@ function ComparisonPanel({
         <div className="savings-label">
           {isPositiveSavings ? (
             <>
-              <Icon name="checkCircle" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              <Icon name="checkCircle" size={20} className="icon-inline icon-spacing-sm" />
               {COPY.labels.savings}
             </>
           ) : (
             <>
-              <Icon name="warning" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              <Icon name="warning" size={20} className="icon-inline icon-spacing-sm" />
               {COPY.labels.mersalg}
             </>
           )}
         </div>
         <div 
-          className={`savings-amount ${isPositiveSavings ? 'animate-pulse-glow' : ''}`}
+          className="savings-amount"
         >
           <NumberDisplay 
             value={Math.abs(savings)} 
@@ -909,115 +1129,556 @@ function ComparisonPanel({
           font-size: var(--font-sm);
         }
 
+        /* Detaljeret sammenligning */
+        .detailed-comparison {
+          margin: var(--spacing-2xl) 0;
+        }
+
+        /* Top summary bar */
+        .comparison-summary-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--spacing-xl);
+          padding: var(--spacing-2xl);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+          border-radius: var(--radius-xl);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          margin-bottom: var(--spacing-2xl);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-item {
+          flex: 1;
+          text-align: center;
+          padding: var(--spacing-lg);
+          border-radius: var(--radius-lg);
+          transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+          transform: translateY(-2px);
+        }
+
+        .customer-summary {
+          background: rgba(255, 109, 31, 0.1);
+          border: 2px solid rgba(255, 109, 31, 0.3);
+        }
+
+        .offer-summary {
+          background: rgba(16, 185, 129, 0.1);
+          border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .summary-label {
+          font-size: var(--font-sm);
+          color: var(--text-secondary);
+          margin-bottom: var(--spacing-xs);
+          font-weight: var(--font-semibold);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .summary-value {
+          margin: var(--spacing-sm) 0;
+        }
+
+        .summary-period {
+          font-size: var(--font-xs);
+          color: var(--text-tertiary);
+          margin-top: var(--spacing-xs);
+        }
+
+        .summary-monthly {
+          margin-top: var(--spacing-md);
+          padding-top: var(--spacing-md);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .monthly-label {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-xs);
+          font-size: var(--font-xs);
+          color: var(--text-secondary);
+          margin-bottom: var(--spacing-xs);
+          font-weight: var(--font-medium);
+        }
+
+        .monthly-value {
+          font-weight: var(--font-bold);
+        }
+
+        .summary-vs {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--spacing-md);
+          padding: 0 var(--spacing-lg);
+          min-width: 200px;
+        }
+
+        .vs-arrow-wrapper {
+          padding: var(--spacing-md);
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .vs-arrow {
+          color: var(--text-primary);
+          opacity: 0.8;
+        }
+
+        .vs-savings {
+          text-align: center;
+        }
+
+        .vs-savings-label {
+          font-size: var(--font-xs);
+          color: var(--text-secondary);
+          margin-bottom: var(--spacing-xs);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          font-weight: var(--font-bold);
+        }
+
+        .vs-savings-amount {
+          margin: var(--spacing-xs) 0;
+        }
+
+        .vs-savings-percentage {
+          font-size: var(--font-lg);
+          font-weight: var(--font-bold);
+          color: var(--color-success);
+          margin-top: var(--spacing-xs);
+          padding: var(--spacing-xs) var(--spacing-sm);
+          background: rgba(16, 185, 129, 0.15);
+          border-radius: var(--radius-md);
+        }
+
+        .vs-savings-amount.negative .vs-savings-percentage {
+          color: var(--color-danger);
+          background: rgba(239, 68, 68, 0.15);
+        }
+
+        .vs-monthly-savings {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-xs);
+          margin-top: var(--spacing-sm);
+          padding: var(--spacing-xs) var(--spacing-sm);
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: var(--radius-md);
+          font-size: var(--font-sm);
+          font-weight: var(--font-semibold);
+          color: var(--text-primary);
+        }
+
+        .vs-monthly-savings span {
+          color: var(--color-success);
+        }
+
+        .vs-savings-amount.negative + .vs-monthly-savings span {
+          color: var(--color-danger);
+        }
+
         .comparison-grid {
           display: grid;
-          grid-template-columns: 1fr auto 1fr;
-          gap: var(--spacing-md);
+          grid-template-columns: 1fr 1fr;
+          gap: var(--spacing-2xl);
           align-items: start;
         }
 
         .comparison-column {
-          background: var(--glass-bg);
-          border-radius: var(--radius-lg);
-          border: 2px solid var(--glass-border);
-          overflow: hidden;
-          transition: all var(--transition-base);  /* Max 300ms */
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: var(--radius-xl);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: var(--spacing-2xl);
+          transition: all 0.3s ease;
         }
 
         .comparison-column:hover {
-          border-color: rgba(255, 255, 255, 0.3);
-          transform: translateY(-2px) translateZ(0);  /* Reduced motion, GPU accelerated */
-          box-shadow: var(--shadow-xl), 0 0 20px rgba(255, 107, 26, 0.1);
+          background: rgba(255, 255, 255, 0.04);
+          border-color: rgba(255, 255, 255, 0.15);
+          transform: translateY(-2px);
+        }
+
+        .customer-column {
+          border-left: 3px solid var(--color-orange);
+        }
+
+        .offer-column {
+          border-left: 3px solid var(--color-success);
         }
 
         .column-header {
-          padding: var(--spacing-sm) var(--spacing-md);
           text-align: center;
-          border-bottom: 2px solid var(--glass-border);
+          margin-bottom: var(--spacing-2xl);
+          padding-bottom: var(--spacing-xl);
+          border-bottom: 2px solid rgba(255, 255, 255, 0.1);
           position: relative;
         }
 
+        .column-icon-wrapper {
+          width: 64px;
+          height: 64px;
+          margin: 0 auto var(--spacing-md) auto;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          transition: all 0.3s ease;
+        }
+
+        .customer-icon {
+          background: linear-gradient(135deg, rgba(255, 109, 31, 0.2), rgba(255, 109, 31, 0.1));
+          border: 3px solid rgba(255, 109, 31, 0.4);
+        }
+
+        .offer-icon {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+          border: 3px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .comparison-column:hover .column-icon-wrapper {
+          transform: scale(1.1);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .column-icon {
+          opacity: 0.9;
+        }
+
         .column-header h3 {
-          margin: 0;
-          font-size: var(--font-lg);
+          margin: 0 0 var(--spacing-xs) 0;
+          font-size: var(--font-2xl);
+          font-weight: var(--font-bold);
         }
 
-        .earnings-tooltip {
-          position: absolute;
-          top: 0.5rem;
-          right: 0.5rem;
-          opacity: 0.4;
-          transition: opacity 0.2s ease;
-          cursor: help;
+        .column-subtitle {
+          margin: 0 0 var(--spacing-sm) 0;
+          color: var(--text-secondary);
+          font-size: var(--font-sm);
         }
 
-        .earnings-tooltip:hover {
+        .column-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+          padding: var(--spacing-xs) var(--spacing-md);
+          border-radius: var(--radius-full);
+          font-size: var(--font-xs);
+          font-weight: var(--font-semibold);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-top: var(--spacing-xs);
+        }
+
+        .customer-badge {
+          background: rgba(255, 109, 31, 0.15);
+          border: 1px solid rgba(255, 109, 31, 0.3);
+          color: var(--color-orange);
+        }
+
+        .offer-badge {
+          background: rgba(16, 185, 129, 0.15);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          color: var(--color-success);
+        }
+
+        .comparison-content {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-lg);
+        }
+
+        .comparison-item {
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-lg);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .comparison-item.streaming-included {
+          background: rgba(16, 185, 129, 0.1);
+          border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .comparison-item.discount-item {
+          background: rgba(16, 185, 129, 0.1);
+          border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .item-header {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          margin-bottom: var(--spacing-md);
+          padding-bottom: var(--spacing-sm);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .item-icon {
           opacity: 0.8;
         }
 
-        .earnings-indicator {
-          font-size: 0.875rem;
-          display: block;
+        .item-icon.success {
+          color: var(--color-success);
         }
 
-        .column-content {
-          padding: var(--spacing-md);
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-xs);
-        }
-
-        .amount-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 2px 0;
-        }
-
-        .amount-row.discount {
-          font-size: var(--font-sm);
-        }
-
-        .amount-row.total {
-          padding-top: var(--spacing-xs);
-          border-top: 1px solid var(--glass-border);
-          margin-top: var(--spacing-xs);
-        }
-
-        .amount-row.six-month {
-          padding: var(--spacing-sm);
-          background: rgba(255, 107, 26, 0.1);
-          border-radius: var(--radius-md);
-          margin-top: var(--spacing-xs);
-        }
-
-        .amount-label {
-          font-size: var(--font-sm);
-          color: var(--text-secondary);
-        }
-
-        .amount-value {
+        .item-title {
+          font-weight: var(--font-semibold);
           font-size: var(--font-base);
           color: var(--text-primary);
         }
 
-        .comparison-vs {
+        .item-details {
           display: flex;
           flex-direction: column;
+          gap: var(--spacing-sm);
+        }
+
+        .item-line {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: var(--spacing-md);
+        }
+
+        .item-label {
+          color: var(--text-secondary);
+          font-size: var(--font-sm);
+          flex: 1;
+        }
+
+        .item-value {
+          color: var(--text-primary);
+          font-weight: var(--font-semibold);
+          font-size: var(--font-base);
+          text-align: right;
+        }
+
+        .item-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: var(--spacing-xs);
+          padding-top: var(--spacing-sm);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          font-weight: var(--font-semibold);
+        }
+
+        .item-services {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-xs);
+          margin-top: var(--spacing-xs);
+        }
+
+        .service-badge {
+          display: inline-block;
+          padding: var(--spacing-xs) var(--spacing-sm);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-sm);
+          font-size: var(--font-xs);
+          color: var(--text-secondary);
+        }
+
+        .service-badge.success {
+          background: rgba(16, 185, 129, 0.15);
+          border-color: rgba(16, 185, 129, 0.3);
+          color: var(--color-success);
+        }
+
+        .item-plan {
+          margin-bottom: var(--spacing-md);
+          padding-bottom: var(--spacing-md);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .item-plan:last-child {
+          margin-bottom: 0;
+          padding-bottom: 0;
+          border-bottom: none;
+        }
+
+        .provider-badge {
+          display: inline-block;
+          margin-left: var(--spacing-xs);
+          padding: 2px var(--spacing-xs);
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-xs);
+          font-size: var(--font-xs);
+          font-weight: var(--font-bold);
+          text-transform: uppercase;
+        }
+
+        .item-intro {
+          font-size: var(--font-xs);
+          color: var(--text-secondary);
+          margin-top: var(--spacing-xs);
+          font-style: italic;
+        }
+
+        .item-cbb-mix {
+          font-size: var(--font-xs);
+          color: var(--text-secondary);
+          margin-top: var(--spacing-xs);
+        }
+
+        .item-discount {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+          padding: var(--spacing-sm);
+          background: rgba(16, 185, 129, 0.1);
+          border-radius: var(--radius-md);
+          margin-top: var(--spacing-sm);
+        }
+
+        .discount-icon {
+          color: var(--color-success);
+        }
+
+        .discount-text {
+          color: var(--color-success);
+          font-weight: var(--font-semibold);
+          font-size: var(--font-sm);
+        }
+
+        .comparison-total {
+          margin-top: var(--spacing-xl);
+          position: relative;
+          border-radius: var(--radius-xl);
+          overflow: hidden;
+          text-align: center;
+        }
+
+        .total-background {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          opacity: 0.1;
+          transition: opacity 0.3s ease;
+        }
+
+        .customer-total .total-background {
+          background: linear-gradient(135deg, rgba(255, 109, 31, 0.3), rgba(255, 109, 31, 0.1));
+          border: 3px solid rgba(255, 109, 31, 0.4);
+        }
+
+        .offer-total .total-background {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.1));
+          border: 3px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .comparison-total:hover .total-background {
+          opacity: 0.15;
+        }
+
+        .total-content {
+          position: relative;
+          z-index: 1;
+          padding: var(--spacing-2xl);
+        }
+
+        .total-header {
+          display: flex;
           align-items: center;
           justify-content: center;
+          gap: var(--spacing-sm);
+          margin-bottom: var(--spacing-lg);
+        }
+
+        .total-icon {
+          opacity: 0.9;
+        }
+
+        .total-title {
+          font-weight: var(--font-bold);
+          font-size: var(--font-lg);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .total-value-large {
+          margin: var(--spacing-lg) 0;
+        }
+
+        .total-breakdown {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-sm);
+          margin: var(--spacing-lg) 0;
+          padding: var(--spacing-md);
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: var(--radius-md);
+        }
+
+        .breakdown-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--spacing-md);
+          font-size: var(--font-sm);
+        }
+
+        .breakdown-item.savings-breakdown {
+          padding-top: var(--spacing-sm);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          margin-top: var(--spacing-xs);
+        }
+
+        .breakdown-item.savings-breakdown .breakdown-label {
+          display: flex;
+          align-items: center;
           gap: var(--spacing-xs);
-          padding-top: 2rem;
+          color: var(--color-success);
         }
 
-        .vs-icon {
-          font-size: var(--font-3xl);
+        .breakdown-label {
+          color: var(--text-secondary);
         }
 
-        .vs-text {
-          font-size: var(--font-xl);
-          font-weight: var(--font-extrabold);
-          color: var(--text-gradient);
+        .breakdown-value {
+          font-weight: var(--font-semibold);
+          color: var(--text-primary);
+        }
+
+        .breakdown-value.success {
+          color: var(--color-success);
+        }
+
+        .total-period {
+          color: var(--text-secondary);
+          font-size: var(--font-sm);
+          margin-top: var(--spacing-sm);
+          font-weight: var(--font-medium);
+        }
+
+        /* Simple comparison (fallback) */
+        .simple-comparison {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-xl);
+          margin: var(--spacing-xl) 0;
+        }
+
+        .comparison-label {
+          font-size: var(--font-sm);
+          color: var(--text-secondary);
+          margin-bottom: var(--spacing-md);
+          font-weight: var(--font-medium);
         }
 
         .savings-banner {
@@ -1038,37 +1699,18 @@ function ComparisonPanel({
           background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.15));
           border: 4px solid var(--color-success);
           box-shadow: 
-            var(--glow-green), 
             0 10px 40px rgba(16, 185, 129, 0.4),
             0 0 60px rgba(16, 185, 129, 0.2);
           position: relative;
         }
 
+        /* Fjernet pulse animation - Performance First */
         .savings-banner.positive::before {
-          content: '';
-          position: absolute;
-          inset: -2px;
-          background: linear-gradient(135deg, var(--color-success), rgba(16, 185, 129, 0.5));
-          border-radius: var(--radius-xl);
-          z-index: -1;
-          opacity: 0.3;
-          animation: savingsPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes savingsPulse {
-          0%, 100% {
-            opacity: 0.3;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.5;
-            transform: scale(1.02);
-          }
+          display: none; /* Fjernet animation layer */
         }
 
         .savings-banner.positive:hover {
           box-shadow: 
-            var(--glow-green), 
             0 20px 60px rgba(16, 185, 129, 0.6),
             0 0 80px rgba(16, 185, 129, 0.3);
         }
@@ -1119,21 +1761,6 @@ function ComparisonPanel({
           margin-bottom: var(--spacing-md);
         }
 
-        .savings-monthly {
-          margin-top: var(--spacing-md);
-          padding-top: var(--spacing-md);
-          border-top: 1px solid rgba(16, 185, 129, 0.3);
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-xs);
-          align-items: center;
-        }
-
-        .savings-monthly-label {
-          font-size: var(--font-sm);
-          color: var(--text-secondary);
-          font-weight: var(--font-medium);
-        }
 
         .cbb-mix-warning {
           display: flex;
@@ -1336,22 +1963,53 @@ function ComparisonPanel({
             font-size: 1.125rem;
           }
 
+          .detailed-comparison {
+            margin: var(--spacing-lg) 0;
+          }
+
+          .comparison-summary-bar {
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-lg);
+          }
+
+          .summary-vs {
+            padding: var(--spacing-md) 0;
+            min-width: 100%;
+          }
+
+          .vs-arrow-wrapper {
+            transform: rotate(90deg);
+          }
+
           .comparison-grid {
             grid-template-columns: 1fr;
-            gap: var(--spacing-md);
+            gap: var(--spacing-xl);
           }
 
-          .comparison-vs {
-            order: 2;
-            padding: var(--spacing-md) 0;
+          .comparison-column {
+            padding: var(--spacing-lg);
           }
 
-          .comparison-column.customer {
-            order: 1;
+          .column-header h3 {
+            font-size: var(--font-xl);
           }
 
-          .comparison-column.offer {
-            order: 3;
+          .comparison-item {
+            padding: var(--spacing-md);
+          }
+
+          .comparison-total {
+            padding: var(--spacing-lg);
+          }
+
+          .item-services {
+            gap: var(--spacing-xs);
+          }
+
+          .service-badge {
+            font-size: 10px;
+            padding: 3px var(--spacing-xs);
           }
 
           .savings-banner {

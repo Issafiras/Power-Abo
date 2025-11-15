@@ -134,6 +134,10 @@ function Header({
                 src={logoSrc}
                 alt="Power Abonnement"
                 className="apple-header__logo-image"
+                loading="eager"
+                width="200"
+                height="60"
+                decoding="async"
               />
                 </a>
             );
@@ -150,7 +154,7 @@ function Header({
               title="Find bedste løsning"
               aria-label="Find bedste løsning"
             >
-              <Icon name="rocket" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              <Icon name="rocket" size={16} className="icon-inline icon-spacing-xs" />
               Find løsning
             </button>
           )}
@@ -163,7 +167,7 @@ function Header({
               title={`Kurv: ${cartCount} abonnementer`}
               aria-label={`Kurv: ${cartCount} abonnementer`}
             >
-              <Icon name="cart" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              <Icon name="cart" size={16} className="icon-inline icon-spacing-xs" />
               Kurv
               <span className="cart-badge">{cartCount}</span>
             </button>

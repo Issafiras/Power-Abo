@@ -143,8 +143,8 @@ function PlanCard({
         // Eksisterende struktur for andre providers
         <>
           {/* Provider badge */}
-          <div className="plan-header" style={{ borderColor: brandColor }}>
-            <div className="plan-provider" style={{ color: brandColor }}>
+          <div className="plan-header" style={{ borderColor: brandColor || 'var(--color-orange)' }}>
+            <div className="plan-provider" style={{ color: brandColor || 'var(--color-orange)' }}>
               {plan.logo ? (
                 <img 
                   src={plan.logo} 
@@ -157,8 +157,8 @@ function PlanCard({
               )}
             </div>
             {plan.familyDiscount && (
-              <div className="badge badge-telenor animate-bounce-in">
-                <Icon name="users" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              <div className="badge badge-telenor">
+                <Icon name="users" size={16} className="icon-inline icon-spacing-xs" />
                 Familie
               </div>
             )}
@@ -166,7 +166,7 @@ function PlanCard({
 
           {/* Plan navn og data */}
           <div className="plan-title">
-            <h3 style={{ color: brandColor }}>{plan.name}</h3>
+            <h3 style={{ color: brandColor || 'var(--color-orange)' }}>{plan.name}</h3>
             <div className="plan-data">{plan.data}</div>
           </div>
 
@@ -175,7 +175,7 @@ function PlanCard({
             {hasIntroPrice ? (
               <>
                 <div className="price-intro">
-                  <span className="price-amount" style={{ color: brandColor }}>
+                  <span className="price-amount" style={{ color: brandColor || 'var(--color-orange)' }}>
                     {formatCurrency(plan.introPrice)}
                   </span>
                   <span className="price-period">/md.</span>
@@ -214,7 +214,7 @@ function PlanCard({
           {plan.streaming && plan.streaming.length > 0 && (
             <div className="plan-streaming">
               <div className="streaming-label">
-                <Icon name="tv" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                <Icon name="tv" size={16} className="icon-inline icon-spacing-xs" />
                 Inkluderer:
               </div>
               <div className="streaming-count badge badge-success">
@@ -239,13 +239,13 @@ function PlanCard({
                 onChange={(e) => onCBBMixToggle && onCBBMixToggle(plan.id, e.target.checked)}
                 className="mix-checkbox"
               />
-              <Icon name="film" size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              <Icon name="film" size={18} className="icon-inline icon-spacing-sm" />
               <span className="mix-toggle-text">Tilføj CBB MIX</span>
             </label>
           </div>
           
           {cbbMixEnabled && (
-            <Suspense fallback={<div style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>Loading...</div>}>
+            <Suspense fallback={<div className="skeleton" style={{ height: '100px', margin: 'var(--spacing-md)' }} />}>
               <CBBMixSelector
                 selectedCount={cbbMixCount}
                 onCountChange={(count) => onCBBMixCountChange && onCBBMixCountChange(plan.id, count)}
@@ -259,7 +259,7 @@ function PlanCard({
       {/* Add to cart knap */}
       <button
         onClick={() => onAddToCart(plan)}
-        className="btn btn-premium plan-add-btn plan-add-btn--pulse-glow"
+        className="btn btn-premium plan-add-btn"
         style={{ 
           background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)`,
           boxShadow: `0 0 20px ${brandColor}40`
@@ -449,20 +449,12 @@ function PlanCard({
           left: 100%;
         }
 
-        .plan-add-btn:hover,
-        .plan-add-btn--pulse-glow:hover {
-          transform: translateY(-6px) scale(1.05);
+        .plan-add-btn:hover {
+          transform: translateY(-4px) scale(1.02);
           box-shadow: 
-            var(--glow-extreme),
-            0 16px 56px rgba(255, 109, 31, 0.8),
-            0 0 80px rgba(255, 109, 31, 0.6),
-            0 0 120px rgba(255, 109, 31, 0.3);
-          filter: brightness(1.15);
-          animation: pulseGlow 2s ease-in-out infinite;
-        }
-        
-        .plan-add-btn--pulse-glow:hover {
-          animation: pulseGlow 1.5s ease-in-out infinite;
+            0 16px 56px rgba(255, 109, 31, 0.6),
+            0 0 60px rgba(255, 109, 31, 0.4);
+          filter: brightness(1.1);
         }
         
         .plan-add-btn:active {
@@ -471,17 +463,12 @@ function PlanCard({
         }
 
         .plan-add-btn:hover .cart-icon {
-          animation: cartBounce 0.6s ease-in-out;
+          transform: scale(1.1);
+          transition: transform var(--transition-fast);
         }
 
         .plan-add-btn:active .cart-icon {
-          transform: scale(1.2);
-        }
-
-        @keyframes cartBounce {
-          0%, 100% { transform: translateX(0) rotate(0deg); }
-          25% { transform: translateX(-2px) rotate(-5deg); }
-          75% { transform: translateX(2px) rotate(5deg); }
+          transform: scale(0.95);
         }
 
         .plan-add-btn .btn-text {

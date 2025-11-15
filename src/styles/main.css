@@ -615,51 +615,24 @@ a:hover {
   }
 }
 
-/* Enhanced Utility: Smooth reveal on scroll */
+/* Simplified reveal - Performance First */
 .reveal-on-scroll {
   opacity: 0;
-  transform: translateY(30px) scale(0.95);
-  transition: opacity var(--duration-slow) var(--ease-in-out-cubic),
-              transform var(--duration-slow) var(--ease-in-out-cubic);
+  transition: opacity 0.2s ease-out;
 }
 
 .reveal-on-scroll.is-visible {
   opacity: 1;
-  transform: translateY(0) scale(1);
 }
 
-/* Advanced reveal with stagger */
+/* Fjernet stagger reveal - for bedre performance */
 .reveal-stagger > * {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s var(--ease-in-out-cubic),
-              transform 0.6s var(--ease-in-out-cubic);
+  transition: opacity 0.2s ease-out;
 }
 
-.reveal-stagger.is-visible > *:nth-child(1) { 
-  opacity: 1; 
-  transform: translateY(0); 
-  transition-delay: 0ms;
-}
-.reveal-stagger.is-visible > *:nth-child(2) { 
-  opacity: 1; 
-  transform: translateY(0); 
-  transition-delay: 100ms;
-}
-.reveal-stagger.is-visible > *:nth-child(3) { 
-  opacity: 1; 
-  transform: translateY(0); 
-  transition-delay: 200ms;
-}
-.reveal-stagger.is-visible > *:nth-child(4) { 
-  opacity: 1; 
-  transform: translateY(0); 
-  transition-delay: 300ms;
-}
-.reveal-stagger.is-visible > *:nth-child(5) { 
-  opacity: 1; 
-  transform: translateY(0); 
-  transition-delay: 400ms;
+.reveal-stagger.is-visible > * {
+  opacity: 1;
 }
 
 /* Accessibility - WCAG AAA */
@@ -703,77 +676,16 @@ a:hover {
     0 0 32px rgba(255, 109, 31, 0.4);
 }
 
-/* Advanced Animations */
-@keyframes glow-pulse {
-  0%, 100% { 
-    box-shadow: 
-      0 0 24px rgba(255, 109, 31, 0.5),
-      0 0 48px rgba(255, 109, 31, 0.3),
-      0 0 72px rgba(255, 109, 31, 0.15);
-  }
-  50% { 
-    box-shadow: 
-      0 0 48px rgba(255, 109, 31, 0.9),
-      0 0 96px rgba(255, 109, 31, 0.6),
-      0 0 144px rgba(255, 109, 31, 0.3);
-  }
-}
+/* Simplified animations - Performance First */
+/* Fjernet tunge animationer: glow-pulse, floating, gradientShift, extremeGlow, rainbowBorder */
+/* Kun essentielle animationer bruges nu */
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.floating {
-  animation: float 3s ease-in-out infinite;
-}
-
-.glow-animation {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-/* Enhanced text gradient */
 .text-gradient {
   background: linear-gradient(135deg, var(--color-orange), var(--color-orange-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes extremeGlow {
-  0%, 100% {
-    box-shadow: 
-      0 0 32px rgba(255, 109, 31, 0.6),
-      0 0 64px rgba(255, 109, 31, 0.4),
-      0 0 96px rgba(255, 109, 31, 0.3),
-      0 0 128px rgba(255, 109, 31, 0.15);
-    filter: brightness(1);
-  }
-  50% {
-    box-shadow: 
-      0 0 64px rgba(255, 109, 31, 1),
-      0 0 128px rgba(255, 109, 31, 0.8),
-      0 0 192px rgba(255, 109, 31, 0.6),
-      0 0 256px rgba(255, 109, 31, 0.4),
-      0 0 320px rgba(255, 109, 31, 0.2);
-    filter: brightness(1.4);
-  }
-}
-
-@keyframes rainbowBorder {
-  0% { border-color: rgba(255, 107, 26, 0.8); }
-  25% { border-color: rgba(99, 102, 241, 0.8); }
-  50% { border-color: rgba(139, 92, 246, 0.8); }
-  75% { border-color: rgba(236, 72, 153, 0.8); }
-  100% { border-color: rgba(255, 107, 26, 0.8); }
+  /* Fjernet animation - statisk gradient for bedre performance */
 }
 
 /* Performance Optimization - GPU Acceleration (Sparse Usage) */
@@ -797,38 +709,14 @@ a:hover {
   contain: layout style paint;
 }
 
-/* Micro-interactions */
-@keyframes microBounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
+/* Simplified micro-interactions - Performance First */
 .btn:active {
-  animation: microBounce 0.2s ease;
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
-/* Advanced stagger animations */
-@keyframes slideInStagger {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.stagger-animation > * {
-  animation: slideInStagger 0.6s ease-out forwards;
-}
-
-.stagger-animation > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-animation > *:nth-child(2) { animation-delay: 100ms; }
-.stagger-animation > *:nth-child(3) { animation-delay: 200ms; }
-.stagger-animation > *:nth-child(4) { animation-delay: 300ms; }
-.stagger-animation > *:nth-child(5) { animation-delay: 400ms; }
-.stagger-animation > *:nth-child(6) { animation-delay: 500ms; }
+/* Fjernet stagger animations - for bedre performance */
+/* Brug simple fade-in i stedet */
 
 /* Focus trap for accessibility */
 .focus-trap {

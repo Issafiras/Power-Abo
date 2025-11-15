@@ -437,6 +437,82 @@
 .z-50 { z-index: 50; }
 .z-auto { z-index: auto; }
 
+/* Icon Utilities - Fjern inline styles */
+.icon-inline {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.icon-spacing-xs {
+  margin-right: 4px;
+}
+
+.icon-spacing-sm {
+  margin-right: var(--spacing-xs);
+}
+
+.icon-spacing-md {
+  margin-right: var(--spacing-sm);
+}
+
+.icon-spacing-lg {
+  margin-right: var(--spacing-md);
+}
+
+.icon-with-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  vertical-align: middle;
+}
+
+/* Simplified spacing for UI */
+.spacing-loose {
+  padding: var(--spacing-xl);
+  gap: var(--spacing-lg);
+}
+
+.spacing-normal {
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.spacing-tight {
+  padding: var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+/* Reduced boxes - more air */
+.card-minimal {
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  border: none;
+}
+
+.section-airy {
+  padding: var(--spacing-2xl) 0;
+  gap: var(--spacing-xl);
+}
+
+/* Spacing utilities */
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.flex {
+  display: flex;
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.opacity-30 {
+  opacity: 0.3;
+}
+
 /* Responsive Utilities */
 @media (max-width: 900px) {
   .sm\:hidden { display: none; }

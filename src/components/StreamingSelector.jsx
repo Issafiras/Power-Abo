@@ -351,7 +351,7 @@ function StreamingSelector({
       {onNumberOfLinesChange && (
         <div className="number-of-lines-input">
           <label htmlFor="number-of-lines" className="input-label">
-            <Icon name="smartphone" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+            <Icon name="smartphone" size={18} className="icon-inline icon-spacing-xs" />
             {COPY.labels.numberOfLines}
           </label>
           <div className="input-with-info">
@@ -377,10 +377,10 @@ function StreamingSelector({
       {onExistingBrandsChange && (
         <div className="existing-brands-input">
           <label className="input-label">
-            <Icon name="warning" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+            <Icon name="warning" size={18} className="icon-inline icon-spacing-xs" />
             {COPY.labels.existingBrands}
           </label>
-          <p className="input-help-text" style={{ marginBottom: 'var(--spacing-sm)' }}>
+          <p className="input-help-text mb-sm">
             {COPY.labels.existingBrandsHelp}
           </p>
           <div className="existing-brands-grid">
@@ -416,7 +416,7 @@ function StreamingSelector({
       {/* Mobil udgifter input */}
       <div className="mobile-cost-input">
           <label htmlFor="mobile-cost" className="input-label">
-          <Icon name="creditCard" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+          <Icon name="creditCard" size={18} className="icon-inline icon-spacing-xs" />
           {COPY.labels.mobileCost} {onNumberOfLinesChange && numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}
         </label>
         <div className="input-with-currency">
@@ -443,7 +443,7 @@ function StreamingSelector({
       {/* Varens pris inden rabat input */}
       <div className="original-item-price-input">
         <label htmlFor="original-item-price" className="input-label">
-          <Icon name="tag" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+          <Icon name="tag" size={18} className="icon-inline icon-spacing-xs" />
           {COPY.labels.originalItemPrice}
         </label>
         <div className="input-with-currency">
@@ -465,7 +465,7 @@ function StreamingSelector({
       {/* Produkt søgning */}
       <div className="ean-search-input">
         <label htmlFor="ean-search" className="input-label">
-          <Icon name="search" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+          <Icon name="search" size={18} className="icon-inline icon-spacing-xs" />
           {COPY.labels.eanSearch}
         </label>
         <form onSubmit={handleEANSearch} className="ean-search-form">
@@ -485,7 +485,7 @@ function StreamingSelector({
                 onClick={startScanner}
                 aria-label={COPY.cta.scanBarcode}
               >
-                <Icon name="camera" size={18} style={{ marginRight: 'var(--spacing-xs)' }} />
+                <Icon name="camera" size={18} className="icon-inline icon-spacing-xs" />
                 {COPY.cta.scan}
               </button>
             )}
@@ -508,8 +508,8 @@ function StreamingSelector({
           <div className="scanner-backdrop" role="dialog" aria-modal="true" aria-label="Stregkode scanner">
             <div className="scanner-modal">
               <div className="scanner-header">
-                <span><Icon name="camera" size={20} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />{COPY.cta.scanBarcode}</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <span className="icon-with-text"><Icon name="camera" size={20} className="icon-inline icon-spacing-xs" />{COPY.cta.scanBarcode}</span>
+                <div className="flex gap-sm">
                   {torchSupported && (
                     <button className="btn torch-btn" onClick={toggleTorch} aria-pressed={torchOn}>
                       {torchOn ? '🔦 Sluk' : '🔦 Tænd'}
@@ -609,7 +609,7 @@ function StreamingSelector({
               <div className="streaming-price">{formatCurrency(service.price)}/md.</div>
               {isSelected && (
                 <div 
-                  className="streaming-checkmark animate-pulse"
+                  className="streaming-checkmark"
                 >
                   <Icon name="checkCircle" size={28} color="var(--color-success)" />
                 </div>
@@ -720,11 +720,11 @@ function StreamingSelector({
             rgba(255, 109, 31, 0.15) 0%,
             transparent 70%
           );
-          animation: gentlePulse 4s ease-in-out infinite;
+          /* Fjernet animation - Performance First */
           pointer-events: none;
         }
 
-        @keyframes gentlePulse {
+        /* Fjernet gentlePulse animation - Performance First */
           0%, 100% { opacity: 0.3; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.1); }
         }
@@ -759,7 +759,7 @@ function StreamingSelector({
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          animation: gradientShift 3s ease infinite;
+          /* Fjernet animation - Performance First */
         }
 
         .auto-select-subtitle {
@@ -782,13 +782,13 @@ function StreamingSelector({
           gap: var(--spacing-md);
           background: linear-gradient(135deg, var(--color-orange), #ff8c42, var(--color-orange));
           background-size: 200% 200%;
-          box-shadow: var(--glow-orange), 0 8px 32px rgba(255, 109, 31, 0.4);
+          box-shadow: 0 8px 32px rgba(255, 109, 31, 0.4);
           transition: all var(--transition-base);
           position: relative;
           overflow: hidden;
           border: 2px solid rgba(255, 255, 255, 0.3);
           border-radius: var(--radius-lg);
-          animation: gradientShift 3s ease infinite;
+          /* Fjernet animation - Performance First */
           z-index: 1;
         }
 
@@ -811,13 +811,11 @@ function StreamingSelector({
         @keyframes autoSelectPulse {
           0%, 100% {
             box-shadow: 
-              var(--glow-orange), 
               0 8px 32px rgba(255, 109, 31, 0.4),
               0 0 0 0 rgba(255, 109, 31, 0.7);
           }
           50% {
             box-shadow: 
-              var(--glow-orange), 
               0 12px 48px rgba(255, 109, 31, 0.6),
               0 0 0 8px rgba(255, 109, 31, 0);
           }
@@ -856,8 +854,8 @@ function StreamingSelector({
 
         .auto-select-btn:hover:not(:disabled) {
           transform: translateY(-4px) scale(1.02);
-          box-shadow: var(--glow-extreme), 0 12px 48px rgba(255, 109, 31, 0.6);
-          animation: gradientShift 1.5s ease infinite, pulseGlow 2s ease-in-out infinite;
+          box-shadow: 0 12px 48px rgba(255, 109, 31, 0.6);
+          /* Fjernet animation - Performance First */
         }
 
         .auto-select-btn:active:not(:disabled) {
@@ -870,21 +868,13 @@ function StreamingSelector({
           animation: none;
         }
 
+        /* Fjernet animationer - Performance First */
         .auto-select-btn .btn-icon {
-          animation: pulseGlow 2s ease-in-out infinite;
+          transition: transform var(--transition-fast);
         }
 
-        .auto-select-btn--ready .btn-icon {
-          animation: pulseGlow 2s ease-in-out infinite, iconFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes iconFloat {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-4px);
-          }
+        .auto-select-btn:hover .btn-icon {
+          transform: scale(1.1);
         }
 
         .auto-select-btn .btn-text {
@@ -917,22 +907,7 @@ function StreamingSelector({
           font-style: normal;
         }
 
-        @keyframes pulseGlow {
-          0%, 100% {
-            transform: scale(1);
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-          }
-          50% {
-            transform: scale(1.15);
-            filter: drop-shadow(0 0 16px rgba(255, 255, 255, 1));
-          }
-        }
-
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
+        /* Fjernet tunge animationer - Performance First */
 
         /* Scan skjult som default (PC) */
         .scan-btn { display: none; }
@@ -1066,7 +1041,7 @@ function StreamingSelector({
             rgba(255, 109, 31, 0.15) 0%, 
             rgba(255, 109, 31, 0.08) 100%
           );
-          box-shadow: var(--glow-orange);
+          box-shadow: 0 8px 24px rgba(255, 109, 31, 0.4);
         }
 
         .existing-brand-name {
@@ -1089,7 +1064,7 @@ function StreamingSelector({
           justify-content: center;
           font-weight: var(--font-bold);
           font-size: var(--font-sm);
-          box-shadow: var(--glow-green);
+          box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
           padding: 2px;
         }
 
@@ -1152,13 +1127,13 @@ function StreamingSelector({
             rgba(255, 109, 31, 0.15) 0%, 
             rgba(255, 109, 31, 0.08) 100%
           );
-          box-shadow: var(--glow-orange);
+          box-shadow: 0 8px 24px rgba(255, 109, 31, 0.4);
           transform: scale(1.01) translateZ(0);  /* Subtle, GPU accelerated */
         }
 
         .streaming-card.selected:hover {
           transform: translateY(-3px) translateZ(0);  /* Reduced motion, GPU accelerated */
-          box-shadow: var(--glow-extreme);
+          box-shadow: 0 16px 48px rgba(255, 109, 31, 0.5);
         }
 
         .streaming-icon {
@@ -1185,11 +1160,7 @@ function StreamingSelector({
           filter: brightness(1.1);
         }
 
-        @keyframes iconPulse {
-          0% { transform: scale(1.05) rotate(5deg); }
-          50% { transform: scale(1.1) rotate(-2deg); }
-          100% { transform: scale(1.05) rotate(5deg); }
-        }
+        /* Fjernet iconPulse animation - Performance First */
 
         .streaming-card:hover .streaming-name {
           transform: translateY(-2px);
@@ -1248,7 +1219,7 @@ function StreamingSelector({
           align-items: center;
           justify-content: center;
           font-weight: var(--font-bold);
-          box-shadow: var(--glow-green), 0 0 15px rgba(16, 185, 129, 0.5);
+          box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4), 0 0 15px rgba(16, 185, 129, 0.5);
           animation: bounceIn var(--duration-slow) var(--ease-out-back), pulse 2s ease-in-out infinite;
           padding: 2px;
         }
