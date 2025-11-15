@@ -27,7 +27,7 @@ function setItem(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
-    console.error('Fejl ved lagring:', error);
+    // Silent fail - localStorage kan være fuld eller utilgængelig
   }
 }
 
@@ -42,7 +42,7 @@ function getItem(key, defaultValue = null) {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : defaultValue;
   } catch (error) {
-    console.error('Fejl ved hentning:', error);
+    // Return default value hvis parsing fejler
     return defaultValue;
   }
 }
@@ -55,7 +55,7 @@ function removeItem(key) {
   try {
     localStorage.removeItem(key);
   } catch (error) {
-    console.error('Fejl ved sletning:', error);
+    // Silent fail - localStorage kan være utilgængelig
   }
 }
 
@@ -203,15 +203,15 @@ export function importState(state) {
     return;
   }
 
-  if (Object.prototype.hasOwnProperty.call(state, 'cart')) saveCart(state.cart);
-  if (Object.prototype.hasOwnProperty.call(state, 'streaming')) saveSelectedStreaming(state.streaming);
+  if ('cart' in state) saveCart(state.cart);
+  if ('streaming' in state) saveSelectedStreaming(state.streaming);
   if (typeof state.mobileCost === 'number') saveCustomerMobileCost(state.mobileCost);
   if (typeof state.numberOfLines === 'number') saveNumberOfLines(state.numberOfLines);
   if (typeof state.originalItemPrice === 'number') saveOriginalItemPrice(state.originalItemPrice);
   if (typeof state.cashDiscount === 'number' || state.cashDiscount === null) saveCashDiscount(state.cashDiscount);
   if (typeof state.cashDiscountLocked === 'boolean') saveCashDiscountLocked(state.cashDiscountLocked);
   if (typeof state.autoAdjust === 'boolean') saveAutoAdjust(state.autoAdjust);
-  if (Object.prototype.hasOwnProperty.call(state, 'theme')) saveTheme(state.theme);
+  if ('theme' in state) saveTheme(state.theme);
   if (typeof state.showCashDiscount === 'boolean') saveShowCashDiscount(state.showCashDiscount);
   if (Array.isArray(state.existingBrands)) saveExistingBrands(state.existingBrands);
   if (typeof state.freeSetup === 'boolean') saveFreeSetup(state.freeSetup);

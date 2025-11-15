@@ -1,35 +1,81 @@
 /**
  * Beregningslogik for mobilabonnementer og streaming
- * Håndterer intro-priser, familie-rabatter, og totaler
+ * 
+ * Dette modul håndterer alle beregninger relateret til:
+ * - 6-måneders priser (inkl. intro-priser)
+ * - Månedlige priser (gennemsnitlige hvis intro-pris)
+ * - Telenor familie-rabatter
+ * - Total indtjening (engangsindtjening fra abonnementer)
+ * - Streaming coverage (hvad er inkluderet vs. ikke-inkluderet)
+ * - Kunde totaler (hvad kunden betaler nu)
+ * - Vores tilbud totaler (hvad kunden betaler med os)
+ * - Besparelse (forskellen mellem kunde og vores total)
+ * 
+ * BEREGNINGER ER GENNEMSKUELIGE FOR SÆLGERNE:
+ * - Alle funktioner har klare kommentarer
+ * - Eksempler vises i dokumentationen
+ * - Beregningslogik er skridt-for-skridt forklaret
  */
 
 
 // Konstanter
-export const SETUP_FEE_PER_LINE = 99; // Oprettelsesgebyr per mobilabonnement
+export const SETUP_FEE_PER_LINE = 99; // Oprettelsesgebyr per mobilabonnement (engangsbetaling)
 
 /**
  * Beregn 6-måneders pris for en plan med intro-pris håndtering
- * @param {Object} plan - Plan objekt
- * @param {number} quantity - Antal linjer
- * @returns {number} Total 6-måneders pris
+ * 
+ * EKSEMPEL (med intro-pris):
+ * - Plan: 299 kr/md, intro: 199 kr i 3 måneder
+ * - Antal linjer: 2
+ * - Beregning:
+ *   1) Intro total: 199 kr × 3 måneder × 2 linjer = 1.194 kr
+ *   2) Normal total: 299 kr × (6-3) måneder × 2 linjer = 1.794 kr
+ *   3) Total 6 måneder: 1.194 + 1.794 = 2.988 kr
+ * 
+ * EKSEMPEL (uden intro-pris):
+ * - Plan: 299 kr/md
+ * - Antal linjer: 2
+ * - Beregning: 299 kr × 6 måneder × 2 linjer = 3.588 kr
+ * 
+ * @param {Object} plan - Plan objekt med price, introPrice (valgfri), introMonths (valgfri)
+ * @param {number} quantity - Antal linjer/abonnementer
+ * @returns {number} Total 6-måneders pris for alle linjer
  */
 export function calculateSixMonthPrice(plan, quantity = 1) {
   if (!plan) return 0;
 
-  // Hvis der er intro-pris
+  // Hvis der er intro-pris (fx 199 kr i 3 måneder, derefter 299 kr)
   if (plan.introPrice && plan.introMonths) {
+    // Step 1: Beregn intro-pris for intro-perioden
     const introTotal = plan.introPrice * plan.introMonths * quantity;
+    
+    // Step 2: Beregn normal pris for resterende måneder
     const remainingMonths = 6 - plan.introMonths;
     const normalTotal = plan.price * remainingMonths * quantity;
+    
+    // Step 3: Total = intro + normal
     return introTotal + normalTotal;
   }
 
-  // Normal pris
+  // Normal pris (ingen intro-pris): pris × 6 måneder × antal linjer
   return plan.price * 6 * quantity;
 }
 
 /**
  * Beregn månedlig pris for en plan (gennemsnit over 6 måneder hvis intro-pris)
+ * 
+ * Dette giver den gennemsnitlige månedlige pris over 6 måneder.
+ * Hvis der er intro-pris, tager vi gennemsnittet af hele 6-måneders perioden.
+ * 
+ * EKSEMPEL (med intro-pris):
+ * - 6-måneders total: 2.988 kr
+ * - Gennemsnit/md: 2.988 kr / 6 = 498 kr/md
+ * 
+ * EKSEMPEL (uden intro-pris):
+ * - Plan: 299 kr/md
+ * - Antal linjer: 2
+ * - Resultat: 299 kr × 2 = 598 kr/md
+ * 
  * @param {Object} plan - Plan objekt
  * @param {number} quantity - Antal linjer
  * @returns {number} Gennemsnitlig månedlig pris
@@ -37,28 +83,46 @@ export function calculateSixMonthPrice(plan, quantity = 1) {
 export function calculateMonthlyPrice(plan, quantity = 1) {
   if (!plan) return 0;
 
+  // Hvis intro-pris: beregn gennemsnit over 6 måneder
   if (plan.introPrice && plan.introMonths) {
     const sixMonthTotal = calculateSixMonthPrice(plan, quantity);
-    return sixMonthTotal / 6;
+    return sixMonthTotal / 6; // Gennemsnitlig månedlig pris
   }
 
+  // Normal pris: bare månedlig pris × antal linjer
   return plan.price * quantity;
 }
 
 /**
  * Beregn Telenor familie-rabat
- * @param {Array} cartItems - Array af kurv-items
- * @returns {number} Total månedlig rabat
+ * 
+ * Telenor tilbyder 50 kr/md rabat pr. ekstra linje (fra 2. linje og opefter).
+ * 
+ * RABAT LOGIK:
+ * - 1 linje: Ingen rabat (0 kr/md)
+ * - 2 linjer: (2-1) × 50 = 50 kr/md rabat
+ * - 3 linjer: (3-1) × 50 = 100 kr/md rabat
+ * - 4 linjer: (4-1) × 50 = 150 kr/md rabat
+ * - osv.
+ * 
+ * EKSEMPEL:
+ * - 3 Telenor abonnementer med familyDiscount
+ * - Beregning: (3 - 1) × 50 = 100 kr/md rabat
+ * - Over 6 måneder: 100 kr × 6 = 600 kr rabat
+ * 
+ * @param {Array} cartItems - Array af kurv-items, hvor hvert item har { plan: { provider, familyDiscount }, quantity }
+ * @returns {number} Total månedlig rabat i kr
  */
 export function calculateTelenorFamilyDiscount(cartItems) {
   if (!cartItems || cartItems.length === 0) return 0;
 
-  // Tæl antal Telenor-linjer
+  // Step 1: Tæl antal Telenor-linjer med familyDiscount
   const telenorLines = cartItems
     .filter(item => item.plan.provider === 'telenor' && item.plan.familyDiscount)
     .reduce((total, item) => total + item.quantity, 0);
 
-  // Rabat = (antal_linjer - 1) × 50 kr/md
+  // Step 2: Beregn rabat = (antal_linjer - 1) × 50 kr/md
+  // Første linje giver ingen rabat, hver ekstra linje giver 50 kr/md
   if (telenorLines <= 1) return 0;
   return (telenorLines - 1) * 50;
 }
@@ -113,26 +177,11 @@ export function checkStreamingCoverage(cartItems, selectedStreaming) {
     }
   });
 
-  // Debug log
-  console.log('🔍 Debug checkStreamingCoverage:');
-  console.log('Selected streaming:', selectedStreaming);
-  console.log('Included streaming from plans:', Array.from(includedStreaming));
-  console.log('Total streaming slots available:', totalStreamingSlots);
-  console.log('Cart items:', cartItems.map(item => ({ 
-    name: item.plan.name, 
-    streaming: item.plan.streaming,
-    streamingCount: item.plan.streamingCount,
-    quantity: item.quantity
-  })));
-
   // Hvis der er streaming slots tilgængelige (mix-system)
   if (totalStreamingSlots > 0) {
     // Tag de første N streaming-tjenester (hvor N = totalStreamingSlots)
     const included = selectedStreaming.slice(0, totalStreamingSlots);
     const notIncluded = selectedStreaming.slice(totalStreamingSlots);
-    
-    console.log('Mix system - Included:', included);
-    console.log('Mix system - Not included:', notIncluded);
     
     return { included, notIncluded };
   }
@@ -141,21 +190,37 @@ export function checkStreamingCoverage(cartItems, selectedStreaming) {
   const included = selectedStreaming.filter(id => includedStreaming.has(id));
   const notIncluded = selectedStreaming.filter(id => !includedStreaming.has(id));
 
-  console.log('Specific streaming - Included:', included);
-  console.log('Specific streaming - Not included:', notIncluded);
-
   return { included, notIncluded };
 }
 
 /**
- * Beregn kunde totaler
- * @param {number} currentMobileCost - Nuværende mobiludgifter pr. måned
+ * Beregn kunde totaler (hvad kunden betaler nu)
+ * 
+ * Dette beregner hvad kunden betaler i deres nuværende situation.
+ * 
+ * BEREGNING:
+ * 1) Månedlig total = mobil + streaming
+ * 2) 6-måneders total = (månedlig × 6) + varens pris (engangsbetaling)
+ * 
+ * EKSEMPEL:
+ * - Mobil: 299 kr/md (total for alle linjer)
+ * - Streaming: 149 kr/md (Netflix 99 + Viaplay 50)
+ * - Varens pris: 1.000 kr (engangsbetaling)
+ * 
+ * Beregning:
+ * - Månedlig: 299 + 149 = 448 kr/md
+ * - 6 måneder: (448 × 6) + 1.000 = 2.688 + 1.000 = 3.688 kr
+ * 
+ * @param {number} currentMobileCost - Nuværende mobiludgifter pr. måned (TOTAL for alle linjer)
  * @param {number} streamingCost - Total streaming-udgifter pr. måned
- * @param {number} originalItemPrice - Varens pris inden rabat (engangspris)
+ * @param {number} originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
  * @returns {Object} { monthly: number, sixMonth: number }
  */
 export function calculateCustomerTotal(currentMobileCost, streamingCost, originalItemPrice = 0) {
+  // Step 1: Månedlig total = mobil + streaming
   const monthly = (currentMobileCost || 0) + (streamingCost || 0);
+  
+  // Step 2: 6-måneders total = (månedlig × 6) + varens pris (engangsbetaling)
   return {
     monthly,
     sixMonth: (monthly * 6) + (originalItemPrice || 0)
@@ -163,30 +228,77 @@ export function calculateCustomerTotal(currentMobileCost, streamingCost, origina
 }
 
 /**
- * Beregn vores tilbud total
+ * Beregn vores tilbud total (hvad kunden betaler med os)
+ * 
+ * Dette er den komplette beregning af vores tilbud til kunden.
+ * Beregningen sker i flere trin for at være gennemskuelig:
+ * 
+ * BEREGNINGS TRIN (top-down):
+ * 
+ * 1) ABONNEMENT PRISER
+ *    - For hver plan: beregn 6-måneders pris (inkl. intro-priser)
+ *    - Tilføj CBB Mix pris hvis aktiv
+ *    - Sum = total abonnementer over 6 måneder
+ * 
+ * 2) FAMILIE RABAT
+ *    - Beregn Telenor familie-rabat (50 kr/md pr. ekstra linje)
+ *    - Træk rabat fra (6-måneders rabat = månedlig × 6)
+ * 
+ * 3) STREAMING TILLÆG
+ *    - Tilføj streaming-tjenester der IKKE er inkluderet
+ *    - Beregning: ikke-inkluderet streaming × 6 måneder
+ * 
+ * 4) KONTANT RABAT
+ *    - Træk kontant rabat fra (hvis aktiv)
+ * 
+ * 5) ENGANGSBETALINGER
+ *    - Tilføj varens pris (hvis relevant)
+ *    - Tilføj oprettelsesgebyr (99 kr pr. linje)
+ *    - Træk oprettelsesgebyr rabat fra (hvis gratis oprettelse)
+ * 
+ * EKSEMPEL:
+ * - 2× Telmore 299 kr/md planer
+ * - Netflix inkluderet, Viaplay 50 kr/md ikke-inkluderet
+ * - Ingen kontant rabat
+ * - Varens pris: 1.000 kr
+ * 
+ * Beregning:
+ * 1) Abonnementer: 299 kr × 6 × 2 = 3.588 kr
+ * 2) Familie-rabat: 0 kr (kun Telmore, ikke Telenor)
+ * 3) Streaming tillæg: 50 kr × 6 = 300 kr
+ * 4) Kontant rabat: 0 kr
+ * 5) Oprettelsesgebyr: 99 kr × 2 = 198 kr
+ * 6) Varens pris: 1.000 kr
+ * 
+ * Total: 3.588 + 300 + 198 + 1.000 = 5.086 kr (6 måneder)
+ * Månedlig: (3.588 + 300) / 6 = 648 kr/md
+ * 
  * @param {Array} cartItems - Array af kurv-items
- * @param {number} streamingCost - Ikke-inkluderet streaming-omkostning
- * @param {number} cashDiscount - Kontant rabat (valgfri)
- * @param {number} originalItemPrice - Varens pris inden rabat (engangspris)
- * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number }
+ * @param {number} streamingCost - Ikke-inkluderet streaming-omkostning pr. måned
+ * @param {number} cashDiscount - Kontant rabat (engangsrabat, valgfri)
+ * @param {number} originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
+ * @param {boolean} freeSetup - Om oprettelse er gratis (rabat på oprettelsesgebyr)
+ * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number, setupFee: number, setupFeeDiscount: number }
  */
 export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0, freeSetup = false) {
   if (!cartItems || cartItems.length === 0) {
     return { monthly: 0, sixMonth: 0, telenorDiscount: 0, setupFee: 0, setupFeeDiscount: 0 };
   }
 
+  // ===== TRIN 1: ABONNEMENT PRISER =====
   // Beregn totalt antal mobilabonnementer
   const totalLines = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   
-  // Beregn oprettelsesgebyr
+  // Beregn oprettelsesgebyr (99 kr pr. linje, engangsbetaling)
   const setupFee = totalLines * SETUP_FEE_PER_LINE;
-  const setupFeeDiscount = freeSetup ? setupFee : 0;
+  const setupFeeDiscount = freeSetup ? setupFee : 0; // Rabat hvis gratis oprettelse
 
   // Beregn 6-måneders total for alle planer (inkl. CBB Mix)
   const plansSixMonth = cartItems.reduce((total, item) => {
+    // Basis pris for planen (inkl. intro-priser)
     let itemTotal = calculateSixMonthPrice(item.plan, item.quantity);
     
-    // Tilføj CBB Mix pris hvis aktiv
+    // Tilføj CBB Mix pris hvis aktiv (månedlig pris × 6 måneder × antal linjer)
     if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount) {
       const mixPrice = calculateCBBMixPrice(item.plan, item.cbbMixCount);
       itemTotal += mixPrice * 6 * item.quantity; // 6 måneder
@@ -195,40 +307,63 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
     return total + itemTotal;
   }, 0);
 
-  // Beregn Telenor familie-rabat
+  // ===== TRIN 2: FAMILIE RABAT =====
+  // Beregn Telenor familie-rabat (månedlig)
   const telenorDiscount = calculateTelenorFamilyDiscount(cartItems);
-  const telenorDiscountSixMonth = telenorDiscount * 6;
+  const telenorDiscountSixMonth = telenorDiscount * 6; // Konverter til 6 måneder
 
   // Total efter familie-rabat
   const afterFamilyDiscount = plansSixMonth - telenorDiscountSixMonth;
 
-  // Tilføj ikke-inkluderet streaming
+  // ===== TRIN 3: STREAMING TILLÆG =====
+  // Tilføj ikke-inkluderet streaming (månedlig × 6)
   const streamingSixMonth = streamingCost * 6;
 
+  // ===== TRIN 4: KONTANT RABAT =====
   // Total før kontant rabat
   const beforeCashDiscount = afterFamilyDiscount + streamingSixMonth;
 
-  // Træk kontant rabat (kun hvis aktiv)
+  // Træk kontant rabat fra (engangsrabat, kun hvis aktiv)
   const afterCashDiscount = beforeCashDiscount - (cashDiscount || 0);
   
+  // ===== TRIN 5: ENGANGSBETALINGER =====
   // Tilføj varens pris og oprettelsesgebyr (engangsbetalinger)
   // Hvis gratis oprettelse, træk oprettelsesgebyret fra som rabat
   const sixMonth = afterCashDiscount + (originalItemPrice || 0) + setupFee - setupFeeDiscount;
 
   return {
-    monthly: afterCashDiscount / 6, // Monthly beregnes uden engangsbetalinger
+    monthly: afterCashDiscount / 6, // Månedlig beregnes uden engangsbetalinger (abonnementer + streaming - rabatter)
     sixMonth: Math.max(0, sixMonth), // Må ikke være negativ
-    telenorDiscount,
-    setupFee,
-    setupFeeDiscount
+    telenorDiscount, // Månedlig Telenor rabat (til visning)
+    setupFee, // Total oprettelsesgebyr
+    setupFeeDiscount // Rabat på oprettelsesgebyr (hvis gratis oprettelse)
   };
 }
 
 /**
- * Beregn besparelse
- * @param {number} customerTotal - Kunde 6-måneders total
- * @param {number} ourTotal - Vores 6-måneders total
- * @returns {number} Besparelse (positiv = godt, negativ = tab)
+ * Beregn besparelse (forskellen mellem kundens nuværende situation og vores tilbud)
+ * 
+ * BEREGNING:
+ * Besparelse = Kundens 6-måneders total - Vores 6-måneders total
+ * 
+ * RESULTAT:
+ * - Positivt tal = kunden sparer penge (godt!)
+ * - Negativt tal = kunden betaler mere (mersalg)
+ * - 0 = samme pris
+ * 
+ * EKSEMPEL:
+ * - Kundens total (6 måneder): 3.688 kr
+ * - Vores total (6 måneder): 5.086 kr
+ * - Besparelse: 3.688 - 5.086 = -1.398 kr (mersalg på 1.398 kr)
+ * 
+ * EKSEMPEL (besparelse):
+ * - Kundens total (6 måneder): 5.000 kr
+ * - Vores total (6 måneder): 4.000 kr
+ * - Besparelse: 5.000 - 4.000 = 1.000 kr (kunden sparer 1.000 kr)
+ * 
+ * @param {number} customerTotal - Kunde 6-måneders total (hvad de betaler nu)
+ * @param {number} ourTotal - Vores 6-måneders total (hvad de betaler med os)
+ * @returns {number} Besparelse i kr (positiv = besparelse, negativ = mersalg)
  */
 export function calculateSavings(customerTotal, ourTotal) {
   return customerTotal - ourTotal;

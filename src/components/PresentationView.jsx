@@ -9,9 +9,14 @@ import {
   calculateCustomerTotal,
   calculateOurOfferTotal,
   calculateSavings,
+  calculateMonthlyPrice,
+  calculateTelenorFamilyDiscount,
+  calculateCBBMixPrice,
   checkStreamingCoverage
 } from '../utils/calculations';
 import { getStreamingTotal, getServiceById } from '../data/streamingServices';
+import Icon from './common/Icon';
+import COPY from '../constants/copy';
 
 export default function PresentationView({
   cartItems,
@@ -20,7 +25,8 @@ export default function PresentationView({
   originalItemPrice,
   cashDiscount,
   freeSetup,
-  onClose
+  onClose,
+  onReset
 }) {
   const [animatedSavings, setAnimatedSavings] = useState(0);
 
@@ -39,6 +45,19 @@ export default function PresentationView({
   );
   const savings = calculateSavings(customerTotals.sixMonth, ourOfferTotals.sixMonth);
   const isPositiveSavings = savings > 0;
+
+  // Beregn faktisk månedlig abonnementspris (før kontant rabat, men efter familie-rabat)
+  const baseMonthlyPlansPrice = cartItems.reduce((total, item) => {
+    const planMonthly = calculateMonthlyPrice(item.plan, item.quantity);
+    
+    // Tilføj CBB Mix pris hvis aktiv (månedlig)
+    if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount) {
+      const mixPrice = calculateCBBMixPrice(item.plan, item.cbbMixCount);
+      return total + planMonthly + (mixPrice * item.quantity);
+    }
+    
+    return total + planMonthly;
+  }, 0) - calculateTelenorFamilyDiscount(cartItems);
 
   // Animér besparelse tal
   useEffect(() => {
@@ -63,7 +82,7 @@ export default function PresentationView({
     return () => clearInterval(timer);
   }, [savings]);
 
-  // Escape key to close
+  // Escape key to close, 'P' to toggle (handled in App.jsx)
   useEffect(() => {
     function handleEscape(e) {
       if (e.key === 'Escape') {
@@ -74,15 +93,42 @@ export default function PresentationView({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleNextCustomer = () => {
+    if (onReset) {
+      onReset();
+      onClose();
+    }
+  };
+
   return (
-    <div className="presentation-overlay" onClick={onClose}>
-      <div className="presentation-content" onClick={e => e.stopPropagation()}>
-        {/* Close button - Ultra Minimal Apple Style */}
-        <button onClick={onClose} className="btn-close" aria-label="Luk">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </button>
+    <div 
+      className="presentation-overlay" 
+      onClick={onClose}
+    >
+      <div 
+        className="presentation-content" 
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Action buttons - Print og Næste kunde */}
+        <div className="presentation-actions">
+          <button onClick={handlePrint} className="btn-action" aria-label="Print">
+            <Icon name="print" size={18} />
+            <span>Print</span>
+          </button>
+          {onReset && (
+            <button onClick={handleNextCustomer} className="btn-action" aria-label="Næste kunde">
+              <Icon name="users" size={18} />
+              <span>Næste kunde</span>
+            </button>
+          )}
+          <button onClick={onClose} className="btn-close" aria-label="Luk">
+            <Icon name="close" size={18} />
+          </button>
+        </div>
 
         {/* Main savings display - Steve Jobs Ultra Minimal */}
         <div className={`savings-hero ${isPositiveSavings ? 'positive' : 'negative'}`}>
@@ -136,8 +182,8 @@ export default function PresentationView({
             <div className="summary-subtitle">6 måneder</div>
             <div className="summary-details">
               <div className="detail-row">
-                <span className="detail-label">Abonnementer:</span>
-                <span className="detail-value">{formatCurrency(ourOfferTotals.monthly - (notIncludedStreamingCost || 0))}/md.</span>
+                <span className="detail-label">Abonnementer (før kontant rabat):</span>
+                <span className="detail-value">{formatCurrency(baseMonthlyPlansPrice)}/md.</span>
               </div>
               {ourOfferTotals.telenorDiscount > 0 && (
                 <div className="detail-row discount">
@@ -278,12 +324,11 @@ export default function PresentationView({
         {/* Footer info - Ultra Minimal */}
         <div className="presentation-footer">
           <div className="footer-text">
-            Tryk ESC for at lukke.
+            Tryk ESC for at lukke • Tryk P for at toggle præsentation
           </div>
         </div>
-      </div>
 
-      <style>{`
+        <style>{`
         /* Presentation Overlay - Steve Jobs Ultra Minimal */
         .presentation-overlay {
           position: fixed;
@@ -301,53 +346,87 @@ export default function PresentationView({
         }
 
         .presentation-content {
-          max-width: 900px;
+          max-width: 1200px;
           width: 100%;
           max-height: 100vh;
-          padding: clamp(1rem, 2vw, 1.5rem);
+          padding: clamp(2rem, 4vw, 3rem);
           display: flex;
           flex-direction: column;
-          gap: clamp(0.75rem, 1.5vw, 1.25rem);
+          gap: clamp(1.5rem, 3vw, 2.5rem);
           position: relative;
-          animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
         }
 
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        /* Action buttons - Print, Næste kunde, Close */
+        .presentation-actions {
+          position: absolute;
+          top: var(--spacing-md);
+          right: var(--spacing-md);
+          display: flex;
+          gap: var(--spacing-sm);
+          z-index: 10;
+        }
+
+        .btn-action {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+          padding: var(--spacing-sm) var(--spacing-md);
+          background: rgba(255, 255, 255, 0.05);
+          color: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-lg);
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          font-size: var(--font-sm);
+          font-weight: var(--font-medium);
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+          min-height: 44px;
+        }
+
+        .btn-action:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 1);
+          border-color: rgba(255, 255, 255, 0.2);
+          transform: translateY(-1px);
+        }
+
+        .btn-action:active {
+          transform: translateY(0);
+        }
+
+        .btn-action span {
+          font-size: var(--font-sm);
         }
 
         /* Close button - Ultra Minimal Apple Style */
         .btn-close {
-          position: absolute;
-          top: var(--spacing-sm);
-          right: var(--spacing-sm);
-          width: 32px;
-          height: 32px;
+          width: 44px;
+          height: 44px;
           border: none;
           background: rgba(255, 255, 255, 0.05);
           color: rgba(255, 255, 255, 0.6);
-          border-radius: 50%;
+          border-radius: var(--radius-lg);
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 10;
           border: 1px solid rgba(255, 255, 255, 0.1);
+          min-height: 44px;
         }
 
         .btn-close:hover {
           background: rgba(255, 255, 255, 0.1);
           color: rgba(255, 255, 255, 1);
           border-color: rgba(255, 255, 255, 0.2);
+          transform: translateY(-1px);
+        }
+
+        .btn-close:active {
+          transform: translateY(0);
         }
 
         /* Savings Hero - Steve Jobs Ultra Minimal Perfection */
@@ -358,12 +437,13 @@ export default function PresentationView({
         }
 
         .savings-amount {
-          font-size: clamp(2.5rem, 8vw, 5rem);
-          font-weight: 700;
+          font-size: clamp(4rem, 12vw, 8rem);
+          font-weight: 800;
           line-height: 1;
-          margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
-          letter-spacing: -0.05em;
+          margin-bottom: clamp(0.5rem, 1vw, 1rem);
+          letter-spacing: -0.06em;
           font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+          text-shadow: 0 0 40px rgba(52, 211, 153, 0.3);
         }
 
         .savings-hero.positive .savings-amount {
@@ -375,19 +455,19 @@ export default function PresentationView({
         }
 
         .savings-label {
-          font-size: clamp(0.625rem, 1vw, 0.75rem);
-          font-weight: 600;
-          letter-spacing: 0.15em;
+          font-size: clamp(0.875rem, 1.5vw, 1.25rem);
+          font-weight: 700;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          margin-bottom: clamp(0.125rem, 0.25vw, 0.25rem);
-          color: rgba(255, 255, 255, 0.6);
+          margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
+          color: rgba(255, 255, 255, 0.7);
           font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
         }
 
         .savings-period {
-          font-size: clamp(0.75rem, 1vw, 0.875rem);
-          color: rgba(255, 255, 255, 0.5);
-          font-weight: 400;
+          font-size: clamp(1rem, 1.5vw, 1.25rem);
+          color: rgba(255, 255, 255, 0.6);
+          font-weight: 500;
           letter-spacing: -0.01em;
         }
 
@@ -395,8 +475,8 @@ export default function PresentationView({
         .comparison-summary {
           display: grid;
           grid-template-columns: 1fr auto 1fr;
-          gap: clamp(0.5rem, 1vw, 1rem);
-          padding: clamp(0.75rem, 1.5vw, 1rem);
+          gap: clamp(1.5rem, 3vw, 3rem);
+          padding: clamp(1.5rem, 3vw, 2.5rem);
           background: rgba(255, 255, 255, 0.02);
           border-radius: var(--radius-2xl);
           backdrop-filter: blur(32px) saturate(180%);
@@ -409,21 +489,21 @@ export default function PresentationView({
         }
 
         .summary-label {
-          font-size: clamp(0.625rem, 0.9vw, 0.75rem);
-          font-weight: 600;
-          margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
-          color: rgba(255, 255, 255, 0.5);
-          letter-spacing: 0.1em;
+          font-size: clamp(0.75rem, 1.2vw, 1rem);
+          font-weight: 700;
+          margin-bottom: clamp(0.5rem, 1vw, 0.75rem);
+          color: rgba(255, 255, 255, 0.6);
+          letter-spacing: 0.15em;
           text-transform: uppercase;
           font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
         }
 
         .summary-amount {
-          font-size: clamp(1.25rem, 3vw, 2rem);
-          font-weight: 700;
-          margin-bottom: clamp(0.125rem, 0.25vw, 0.25rem);
-          color: rgba(255, 255, 255, 0.9);
-          letter-spacing: -0.03em;
+          font-size: clamp(2rem, 5vw, 3.5rem);
+          font-weight: 800;
+          margin-bottom: clamp(0.25rem, 0.5vw, 0.5rem);
+          color: rgba(255, 255, 255, 0.95);
+          letter-spacing: -0.04em;
           font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
         }
 
@@ -708,13 +788,14 @@ export default function PresentationView({
         /* Presentation Footer - Ultra Minimal */
         .presentation-footer {
           text-align: center;
-          padding-top: clamp(0.5rem, 1vw, 0.75rem);
+          padding-top: clamp(0.75rem, 1.5vw, 1.25rem);
           border-top: 1px solid rgba(255, 255, 255, 0.05);
+          margin-top: clamp(1rem, 2vw, 1.5rem);
         }
 
         .footer-text {
-          color: rgba(255, 255, 255, 0.3);
-          font-size: clamp(0.625rem, 0.8vw, 0.75rem);
+          color: rgba(255, 255, 255, 0.4);
+          font-size: clamp(0.75rem, 1vw, 0.875rem);
           font-weight: 400;
           letter-spacing: 0.05em;
           text-transform: uppercase;
@@ -772,6 +853,7 @@ export default function PresentationView({
           }
         }
       `}</style>
+      </div>
     </div>
   );
 }

@@ -3,9 +3,11 @@
  * Vælg antal CBB MIX tjenester (2-8)
  */
 
+import React from 'react';
 import { formatCurrency } from '../utils/calculations';
+import Icon from './common/Icon';
 
-export default function CBBMixSelector({ 
+function CBBMixSelector({ 
   selectedCount, 
   onCountChange, 
   cbbMixPricing,
@@ -24,7 +26,10 @@ export default function CBBMixSelector({
   return (
     <div className="cbb-mix-selector">
       <div className="mix-header">
-        <h4 className="mix-title">🎬 Vælg antal CBB MIX tjenester</h4>
+        <h4 className="mix-title">
+          <Icon name="film" size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+          Vælg antal CBB MIX tjenester
+        </h4>
         <p className="mix-description">
           Vælg mellem 2-8 streaming-tjenester til din CBB MIX pakke
         </p>
@@ -43,7 +48,9 @@ export default function CBBMixSelector({
               <span className="mix-price">{formatCurrency(option.price)}/md.</span>
             </div>
             {selectedCount === option.count && (
-              <div className="mix-check">✓</div>
+              <div className="mix-check">
+                <Icon name="checkCircle" size={20} color="var(--color-success)" />
+              </div>
             )}
           </button>
         ))}
@@ -65,3 +72,5 @@ export default function CBBMixSelector({
     </div>
   );
 }
+
+export default CBBMixSelector;

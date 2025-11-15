@@ -3,14 +3,21 @@
  * Elegant, minimalistisk og sofistikeret header med perfekt attention to detail
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import Icon from './common/Icon';
+import ScrollProgress from './common/ScrollProgress';
 
-export default function Header({ 
+function Header({ 
   onReset, 
   onPresentationToggle, 
   theme, 
   onThemeToggle,
-  onSmartCalculatorToggle
+  onSmartCalculatorToggle,
+  currentSection,
+  cartCount = 0,
+  onCartClick,
+  onFindSolutionClick,
+  canFindSolution = false
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -59,6 +66,15 @@ export default function Header({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Section name mapping for display
+  const sectionNames = {
+    'customer-situation': 'Kundens Situation',
+    'plans-section': 'Abonnementer',
+    'comparison-section': 'Sammenligning'
+  };
+
+  const currentSectionName = currentSection ? sectionNames[currentSection] || null : null;
+
   const handleResetConfirm = () => {
     onReset();
     setShowConfirm(false);
@@ -66,6 +82,9 @@ export default function Header({
 
   return (
     <header className={`apple-header fade-in-down ${isCompact ? 'apple-header--compact' : ''}`}>
+      {/* Scroll progress bar */}
+      <ScrollProgress currentSection={currentSectionName} />
+
       {/* Ultra minimal background blur layer - Steve Jobs Perfection */}
       <div className="apple-header__backdrop" aria-hidden="true" />
 
@@ -123,6 +142,33 @@ export default function Header({
 
           {/* Navigation Links - Apple Style Subtle */}
           <div className="apple-header__nav-links">
+          {/* Quick Action: Find bedste løsning */}
+          {canFindSolution && onFindSolutionClick && (
+            <button
+              onClick={onFindSolutionClick}
+              className="apple-header__nav-link apple-header__nav-link--primary"
+              title="Find bedste løsning"
+              aria-label="Find bedste løsning"
+            >
+              <Icon name="rocket" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              Find løsning
+            </button>
+          )}
+
+          {/* Cart badge */}
+          {cartCount > 0 && onCartClick && (
+            <button
+              onClick={onCartClick}
+              className="apple-header__nav-link apple-header__nav-link--cart"
+              title={`Kurv: ${cartCount} abonnementer`}
+              aria-label={`Kurv: ${cartCount} abonnementer`}
+            >
+              <Icon name="cart" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              Kurv
+              <span className="cart-badge">{cartCount}</span>
+            </button>
+          )}
+
           {onPresentationToggle && (
             <button
               onClick={onPresentationToggle}
@@ -154,7 +200,7 @@ export default function Header({
               title="Skift tema (Ctrl+T)"
               aria-label="Skift tema"
             >
-              {theme === 'dark' ? '☀' : '🌙'}
+              <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={20} />
             </button>
 
             <button
@@ -163,7 +209,7 @@ export default function Header({
               title="Nulstil alt (Ctrl+R)"
               aria-label="Nulstil"
             >
-              ↻
+              <Icon name="reset" size={20} />
             </button>
           </div>
         </div>
@@ -172,3 +218,4 @@ export default function Header({
   );
 }
 
+export default Header;

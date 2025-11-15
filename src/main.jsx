@@ -5,6 +5,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import { ToastContainer } from './components/common/Toast';
 import App from './App';
 import './styles/main.css';
 
@@ -43,7 +45,10 @@ if (typeof document !== 'undefined') {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <ToastContainer />
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

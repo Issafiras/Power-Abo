@@ -10,11 +10,21 @@ import {
   calculateOurOfferTotal,
   calculateSavings,
   calculateTotalEarnings,
+  calculateSixMonthPrice,
+  calculateMonthlyPrice,
+  calculateTelenorFamilyDiscount,
+  calculateCBBMixPrice,
   checkStreamingCoverageWithCBBMix,
   checkCBBMixCompatibility,
   autoAdjustCashDiscount
 } from '../utils/calculations';
 import { getStreamingTotal } from '../data/streamingServices';
+import Icon from './common/Icon';
+import COPY from '../constants/copy';
+import AnimatedCounter from './results/AnimatedCounter';
+import Tooltip from './common/Tooltip';
+import NumberDisplay from './common/NumberDisplay';
+import ComparisonChart from './results/ComparisonChart';
 
 function ComparisonPanel({
   cartItems,
@@ -130,21 +140,45 @@ function ComparisonPanel({
   
   const isPositiveSavings = savings > 0;
 
+  // Beregn faktisk månedlig abonnementspris (før kontant rabat, men efter familie-rabat)
+  // Dette er den korrekte månedlige pris for abonnementerne
+  const baseMonthlyPlansPrice = useMemo(() => {
+    if (!cartItems || cartItems.length === 0) return 0;
+    
+    // Sum af alle planers månedlige priser (inkl. intro-priser)
+    const plansMonthly = cartItems.reduce((total, item) => {
+      const planMonthly = calculateMonthlyPrice(item.plan, item.quantity);
+      
+      // Tilføj CBB Mix pris hvis aktiv (månedlig)
+      if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount) {
+        const mixPrice = calculateCBBMixPrice(item.plan, item.cbbMixCount);
+        return total + planMonthly + (mixPrice * item.quantity);
+      }
+      
+      return total + planMonthly;
+    }, 0);
+    
+    // Træk familie-rabat fra (da det er en del af abonnementsprisen)
+    const telenorDiscount = calculateTelenorFamilyDiscount(cartItems);
+    
+    return plansMonthly - telenorDiscount;
+  }, [cartItems]);
+
   if (cartItems.length === 0) {
     return (
       <div className="comparison-panel glass-card-no-hover fade-in-up">
         <div className="section-header">
           <h2>
-            <span role="img" aria-hidden="true">📊</span>
-            Sammenligning
+            <Icon name="chart" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+            {COPY.titles.comparison}
           </h2>
-          <p className="text-secondary">Tilføj abonnementer for at se sammenligning</p>
+          <p className="text-secondary">{COPY.empty.noCartItems}</p>
         </div>
         
         <div className="empty-state animate-scale-in">
-          <div className="empty-state-icon animate-pulse" aria-hidden="true">📊</div>
+          <Icon name="chart" size={64} className="empty-state-icon animate-pulse" style={{ opacity: 0.3 }} aria-hidden="true" />
           <p className="text-secondary">
-            Ingen data at sammenligne endnu
+            {COPY.empty.noData}
           </p>
         </div>
 
@@ -178,10 +212,10 @@ function ComparisonPanel({
         <div className="section-header-top">
           <div>
             <h2>
-              <span role="img" aria-hidden="true">📊</span>
-              Sammenligning
+              <Icon name="chart" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+              {COPY.titles.comparison}
             </h2>
-            <p className="text-secondary">6-måneders analyse</p>
+            <p className="text-secondary">{COPY.titles.comparisonSubtitle}</p>
           </div>
           {onToggleCashDiscount && (
             <button
@@ -190,9 +224,11 @@ function ComparisonPanel({
               aria-label={showCashDiscount ? 'Skjul kontant rabat' : 'Vis kontant rabat'}
               title={showCashDiscount ? 'Skjul kontant rabat' : 'Vis kontant rabat'}
             >
-              <span className={`cash-discount-toggle-icon ${showCashDiscount ? 'active' : ''}`}>
-                🔒
-              </span>
+              <Icon 
+                name="lock" 
+                size={20} 
+                className={`cash-discount-toggle-icon ${showCashDiscount ? 'active' : ''}`}
+              />
             </button>
           )}
         </div>
@@ -203,7 +239,10 @@ function ComparisonPanel({
         <>
           <div className="cash-discount-section">
             <div className="cash-discount-header">
-              <h3>💰 Kontant Rabat</h3>
+              <h3>
+                <Icon name="wallet" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                {COPY.features.cashDiscount}
+              </h3>
               <div className="cash-discount-controls">
                 <label className="checkbox-wrapper">
                   <input
@@ -214,7 +253,8 @@ function ComparisonPanel({
                     checked={cashDiscountLocked}
                     onChange={(e) => onCashDiscountLockedChange(e.target.checked)}
                   />
-                  <span className="text-sm">🔒 Låst</span>
+                  <Icon name="lock" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                  <span className="text-sm">{COPY.features.cashDiscountLocked}</span>
                 </label>
                 <label className="checkbox-wrapper">
                   <input
@@ -226,7 +266,8 @@ function ComparisonPanel({
                     onChange={(e) => onAutoAdjustChange(e.target.checked)}
                     disabled={cashDiscountLocked}
                   />
-                  <span className="text-sm">🔄 Auto-justér (sælger-strategi)</span>
+                  <Icon name="refresh" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                  <span className="text-sm">{COPY.features.autoAdjust}</span>
                 </label>
               </div>
             </div>
@@ -263,7 +304,8 @@ function ComparisonPanel({
                 checked={freeSetup}
                 onChange={(e) => onFreeSetupChange(e.target.checked)}
               />
-              <span className="text-sm">🎁 Gratis oprettelse (rabat: {formatCurrency(ourOfferTotals.setupFee)})</span>
+              <Icon name="gift" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              <span className="text-sm">{COPY.features.freeSetup} (rabat: {formatCurrency(ourOfferTotals.setupFee)})</span>
             </label>
           </div>
 
@@ -275,10 +317,13 @@ function ComparisonPanel({
       {selectedStreaming.length > 0 && (
         <>
           <div className="streaming-status">
-            <h3>📺 Streaming Status</h3>
+            <h3>
+              <Icon name="tv" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              {COPY.features.streamingStatus}
+            </h3>
             {streamingCoverage.included.length > 0 && (
               <div className="streaming-status-item covered">
-                <span className="status-icon">✓</span>
+                <Icon name="check" size={18} className="status-icon" />
                 <span className="status-text">
                   {streamingCoverage.included.length} tjeneste
                   {streamingCoverage.included.length !== 1 ? 'r' : ''} inkluderet
@@ -288,7 +333,7 @@ function ComparisonPanel({
             )}
             {streamingCoverage.notIncluded.length > 0 && (
               <div className="streaming-status-item not-covered">
-                <span className="status-icon">+</span>
+                <Icon name="plus" size={18} className="status-icon" />
                 <span className="status-text">
                   {streamingCoverage.notIncluded.length} tjeneste
                   {streamingCoverage.notIncluded.length !== 1 ? 'r' : ''} tillæg 
@@ -306,7 +351,7 @@ function ComparisonPanel({
       {!cbbMixCompatibility.compatible && (
         <>
           <div className="cbb-mix-warning">
-            <div className="warning-icon">⚠️</div>
+            <Icon name="warning" size={32} className="warning-icon" />
             <div className="warning-content">
               <h4>CBB MIX Advarsel</h4>
               <p>{cbbMixCompatibility.message}</p>
@@ -321,111 +366,258 @@ function ComparisonPanel({
         {/* Kunde kolonne */}
         <div className="comparison-column customer animate-slide-in-left">
           <div className="column-header">
-            <h3>👤 Kunden</h3>
+            <h3>
+              <Icon name="user" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              {COPY.labels.customerColumn}
+            </h3>
           </div>
           <div className="column-content">
             <div className="amount-row">
               <span className="amount-label">Mobil/md. {numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}:</span>
-              <span className="amount-value">{formatCurrency(customerMobileCost || 0)}</span>
+              <NumberDisplay value={customerMobileCost || 0} size="lg" color="primary" suffix="/md." />
             </div>
             <div className="amount-row">
               <span className="amount-label">Streaming/md.:</span>
-              <span className="amount-value">{formatCurrency(streamingCost)}</span>
+              <NumberDisplay value={streamingCost} size="lg" color="primary" suffix="/md." />
             </div>
             {originalItemPrice > 0 && (
               <div className="amount-row">
                 <span className="amount-label">Varens pris:</span>
-                <span className="amount-value">{formatCurrency(originalItemPrice)}</span>
+                <NumberDisplay value={originalItemPrice} size="lg" color="primary" />
               </div>
             )}
             <div className="amount-row total">
               <span className="amount-label font-semibold">Total/md.:</span>
-              <span className="amount-value font-bold">
-                {formatCurrency(customerTotals.monthly)}
-              </span>
+              <NumberDisplay value={customerTotals.monthly} size="xl" color="orange" suffix="/md." />
             </div>
             <div className="amount-row six-month">
               <span className="amount-label">6 måneder:</span>
-              <span className="amount-value text-2xl font-extrabold">
-                {formatCurrency(customerTotals.sixMonth)}
-              </span>
+              <NumberDisplay value={customerTotals.sixMonth} size="4xl" color="orange" />
             </div>
           </div>
         </div>
 
         {/* VS */}
         <div className="comparison-vs animate-scale-in">
-          <div className="vs-icon animate-pulse animate-pulse-glow">⚡</div>
+          <Icon name="zap" size={32} className="vs-icon animate-pulse animate-pulse-glow" />
           <div className="vs-text">VS</div>
         </div>
 
         {/* Vores tilbud kolonne */}
-        <div className="comparison-column offer animate-slide-in-right">
-          <div className="column-header">
-            <h3>💼 Vores Tilbud</h3>
-            {/* Diskret indtjening info - kun synlig når F8 er trykket */}
-            {showEarnings && totalEarnings > 0 && (
-              <div className="earnings-tooltip" title={`Indtjening: ${formatCurrency(totalEarnings)} (engangs)`}>
-                <span className="earnings-indicator">💰</span>
+            <div className="comparison-column offer animate-slide-in-right">
+              <div className="column-header">
+                <h3>
+                  <Icon name="briefcase" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                  {COPY.labels.offerColumn}
+                </h3>
+                {/* Diskret indtjening info - kun synlig når F8 er trykket */}
+                {showEarnings && totalEarnings > 0 && (
+                  <div className="earnings-tooltip" title={`Indtjening: ${formatCurrency(totalEarnings)} (engangs)`}>
+                    <Icon name="wallet" size={14} className="earnings-indicator" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
           <div className="column-content">
             <div className="amount-row">
-              <span className="amount-label">Abonnementer/md.:</span>
-              <span className="amount-value">
-                {formatCurrency(ourOfferTotals.monthly - (notIncludedStreamingCost || 0))}
-              </span>
+              <span className="amount-label">Abonnementer/md. (før kontant rabat):</span>
+              <NumberDisplay value={baseMonthlyPlansPrice} size="lg" color="primary" suffix="/md." />
             </div>
             {ourOfferTotals.telenorDiscount > 0 && (
               <div className="amount-row discount">
                 <span className="amount-label">Telenor rabat:</span>
-                <span className="amount-value text-success">
-                  -{formatCurrency(ourOfferTotals.telenorDiscount)}/md.
-                </span>
+                <NumberDisplay value={ourOfferTotals.telenorDiscount} size="lg" color="success" suffix="/md." prefix="-" />
               </div>
             )}
             {notIncludedStreamingCost > 0 && (
               <div className="amount-row">
                 <span className="amount-label">Streaming tillæg:</span>
-                <span className="amount-value">{formatCurrency(notIncludedStreamingCost)}/md.</span>
+                <NumberDisplay value={notIncludedStreamingCost} size="lg" color="primary" suffix="/md." />
               </div>
             )}
             {originalItemPrice > 0 && (
               <div className="amount-row">
                 <span className="amount-label">Varens pris:</span>
-                <span className="amount-value">{formatCurrency(originalItemPrice)}</span>
+                <NumberDisplay value={originalItemPrice} size="lg" color="primary" />
               </div>
             )}
             {ourOfferTotals.setupFee > 0 && (
               <div className="amount-row">
                 <span className="amount-label">Oprettelsesgebyr:</span>
-                <span className="amount-value">{formatCurrency(ourOfferTotals.setupFee)}</span>
+                <NumberDisplay value={ourOfferTotals.setupFee} size="lg" color="primary" />
               </div>
             )}
             {freeSetup && ourOfferTotals.setupFeeDiscount > 0 && (
               <div className="amount-row discount">
                 <span className="amount-label">Gratis oprettelse:</span>
-                <span className="amount-value text-success">
-                  -{formatCurrency(ourOfferTotals.setupFeeDiscount)}
-                </span>
+                <NumberDisplay value={ourOfferTotals.setupFeeDiscount} size="lg" color="success" prefix="-" />
               </div>
             )}
             <div className="amount-row total">
               <span className="amount-label font-semibold">Total/md.:</span>
-              <span className="amount-value font-bold">
-                {formatCurrency(ourOfferTotals.monthly)}
-              </span>
+              <NumberDisplay value={ourOfferTotals.monthly} size="xl" color="orange" suffix="/md." />
             </div>
             <div className="amount-row six-month">
               <span className="amount-label">6 måneder:</span>
-              <span className="amount-value text-2xl font-extrabold">
-                {formatCurrency(ourOfferTotals.sixMonth)}
-              </span>
+              <NumberDisplay value={ourOfferTotals.sixMonth} size="4xl" color="orange" />
             </div>
           </div>
         </div>
       </div>
+
+      <div className="divider"></div>
+
+      {/* Visuel sammenligning chart */}
+      {customerTotals.sixMonth > 0 && ourOfferTotals.sixMonth > 0 && (
+        <ComparisonChart 
+          customerTotal={customerTotals.sixMonth}
+          ourOfferTotal={ourOfferTotals.sixMonth}
+          savings={savings}
+        />
+      )}
+
+      <div className="divider"></div>
+
+      {/* Detaljerede beregningsvisninger for sælgerne (kun synlig når F8 er trykket) */}
+      {showEarnings && (
+        <div className="calculation-details">
+          <h4 className="calculation-details-title">
+            <Icon name="calculator" size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+            Beregningsdetaljer (for sælger)
+          </h4>
+          
+          <div className="calculation-section">
+            <div className="calculation-subtitle">Vores tilbud - beregning trin for trin:</div>
+            
+            {/* Trin 1: Abonnementer */}
+            <div className="calculation-step">
+              <div className="step-number">1</div>
+              <div className="step-content">
+                <div className="step-label">Abonnementer (6 måneder):</div>
+                <div className="step-items">
+                  {cartItems.map((item, idx) => {
+                    const itemTotal = calculateSixMonthPrice(item.plan, item.quantity);
+                    // Vis beregning med intro-pris hvis relevant
+                    let calculationText = '';
+                    if (item.plan.introPrice && item.plan.introMonths) {
+                      const introTotal = item.plan.introPrice * item.plan.introMonths * item.quantity;
+                      const remainingMonths = 6 - item.plan.introMonths;
+                      const normalTotal = item.plan.price * remainingMonths * item.quantity;
+                      calculationText = `${formatCurrency(item.plan.introPrice)} × ${item.plan.introMonths}m + ${formatCurrency(item.plan.price)} × ${remainingMonths}m × ${item.quantity}`;
+                    } else {
+                      calculationText = `${formatCurrency(item.plan.price)}/md × 6 × ${item.quantity}`;
+                    }
+                    return (
+                      <div key={idx} className="step-item">
+                        <span className="step-item-label">{item.plan.name} ({item.quantity}x):</span>
+                        <span className="step-item-value">{calculationText} = {formatCurrency(itemTotal)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Trin 2: Familie-rabat */}
+            {ourOfferTotals.telenorDiscount > 0 && (
+              <div className="calculation-step">
+                <div className="step-number">2</div>
+                <div className="step-content">
+                  <div className="step-label">Telenor familie-rabat:</div>
+                  <div className="step-explanation">
+                    {formatCurrency(ourOfferTotals.telenorDiscount)}/md × 6 = {formatCurrency(ourOfferTotals.telenorDiscount * 6)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Trin 3: Streaming tillæg */}
+            {notIncludedStreamingCost > 0 && (
+              <div className="calculation-step">
+                <div className="step-number">3</div>
+                <div className="step-content">
+                  <div className="step-label">Streaming tillæg:</div>
+                  <div className="step-explanation">
+                    {formatCurrency(notIncludedStreamingCost)}/md × 6 = {formatCurrency(notIncludedStreamingCost * 6)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Trin 4: Kontant rabat */}
+            {cashDiscount > 0 && (
+              <div className="calculation-step discount">
+                <div className="step-number">4</div>
+                <div className="step-content">
+                  <div className="step-label">Kontant rabat:</div>
+                  <div className="step-explanation text-success">
+                    -{formatCurrency(cashDiscount)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Trin 5: Engangsbetalinger */}
+            {(originalItemPrice > 0 || ourOfferTotals.setupFee > 0) && (
+              <div className="calculation-step">
+                <div className="step-number">5</div>
+                <div className="step-content">
+                  <div className="step-label">Engangsbetalinger:</div>
+                  <div className="step-items">
+                    {originalItemPrice > 0 && (
+                      <div className="step-item">
+                        <span className="step-item-label">Varens pris:</span>
+                        <span className="step-item-value">{formatCurrency(originalItemPrice)}</span>
+                      </div>
+                    )}
+                    {ourOfferTotals.setupFee > 0 && (
+                      <div className="step-item">
+                        <span className="step-item-label">Oprettelsesgebyr:</span>
+                        <span className="step-item-value">
+                          {cartItems.reduce((sum, item) => sum + item.quantity, 0)} × {formatCurrency(99)} = {formatCurrency(ourOfferTotals.setupFee)}
+                        </span>
+                      </div>
+                    )}
+                    {freeSetup && ourOfferTotals.setupFeeDiscount > 0 && (
+                      <div className="step-item discount">
+                        <span className="step-item-label">Gratis oprettelse:</span>
+                        <span className="step-item-value text-success">-{formatCurrency(ourOfferTotals.setupFeeDiscount)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Total */}
+            <div className="calculation-total">
+              <div className="total-label">Total (6 måneder):</div>
+              <div className="total-value">{formatCurrency(ourOfferTotals.sixMonth)}</div>
+            </div>
+          </div>
+
+          {/* Besparelse beregning */}
+          <div className="calculation-section">
+            <div className="calculation-subtitle">Besparelse - beregning:</div>
+            <div className="savings-calculation">
+              <div className="savings-line">
+                <span>Kundens total (6 måneder):</span>
+                <span>{formatCurrency(customerTotals.sixMonth)}</span>
+              </div>
+              <div className="savings-line">
+                <span>Vores total (6 måneder):</span>
+                <span>{formatCurrency(ourOfferTotals.sixMonth)}</span>
+              </div>
+              <div className="savings-line total">
+                <span>Besparelse:</span>
+                <span className={isPositiveSavings ? 'text-success' : 'text-danger'}>
+                  {formatCurrency(savings)}
+                  {isPositiveSavings ? ' (kunden sparer)' : ' (mersalg)'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="divider"></div>
 
@@ -450,17 +642,46 @@ function ComparisonPanel({
       )}
 
       {/* Besparelse */}
-      <div className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'} animate-bounce-in`}>
+      <div 
+        className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'}`}
+      >
         <div className="savings-label">
-          {isPositiveSavings ? '✅ Besparelse' : '⚠️ Mersalg'}
+          {isPositiveSavings ? (
+            <>
+              <Icon name="checkCircle" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              {COPY.labels.savings}
+            </>
+          ) : (
+            <>
+              <Icon name="warning" size={20} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              {COPY.labels.mersalg}
+            </>
+          )}
         </div>
-        <div className={`savings-amount ${isPositiveSavings ? 'animate-pulse-glow' : ''}`}>
-          {isPositiveSavings ? '' : '-'}
-          {formatCurrency(Math.abs(savings))}
+        <div 
+          className={`savings-amount ${isPositiveSavings ? 'animate-pulse-glow' : ''}`}
+        >
+          <NumberDisplay 
+            value={Math.abs(savings)} 
+            size="5xl" 
+            color={isPositiveSavings ? 'success' : 'danger'}
+            prefix={isPositiveSavings ? '' : '-'}
+          />
         </div>
         <div className="savings-subtitle">
-          over 6 måneder.
+          {COPY.labels.over6Months}
         </div>
+        {isPositiveSavings && savings > 0 && (
+          <div className="savings-monthly">
+            <span className="savings-monthly-label">Besparelse pr. måned:</span>
+            <NumberDisplay 
+              value={Math.abs(savings) / 6} 
+              size="xl" 
+              color="success"
+              suffix="/md."
+            />
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -691,7 +912,7 @@ function ComparisonPanel({
         .comparison-grid {
           display: grid;
           grid-template-columns: 1fr auto 1fr;
-          gap: var(--spacing-lg);
+          gap: var(--spacing-md);
           align-items: start;
         }
 
@@ -710,7 +931,7 @@ function ComparisonPanel({
         }
 
         .column-header {
-          padding: var(--spacing-md);
+          padding: var(--spacing-sm) var(--spacing-md);
           text-align: center;
           border-bottom: 2px solid var(--glass-border);
           position: relative;
@@ -740,17 +961,17 @@ function ComparisonPanel({
         }
 
         .column-content {
-          padding: var(--spacing-lg);
+          padding: var(--spacing-md);
           display: flex;
           flex-direction: column;
-          gap: var(--spacing-sm);
+          gap: var(--spacing-xs);
         }
 
         .amount-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: var(--spacing-xs) 0;
+          padding: 2px 0;
         }
 
         .amount-row.discount {
@@ -758,16 +979,16 @@ function ComparisonPanel({
         }
 
         .amount-row.total {
-          padding-top: var(--spacing-sm);
+          padding-top: var(--spacing-xs);
           border-top: 1px solid var(--glass-border);
           margin-top: var(--spacing-xs);
         }
 
         .amount-row.six-month {
-          padding: var(--spacing-md);
+          padding: var(--spacing-sm);
           background: rgba(255, 107, 26, 0.1);
           border-radius: var(--radius-md);
-          margin-top: var(--spacing-sm);
+          margin-top: var(--spacing-xs);
         }
 
         .amount-label {
@@ -786,7 +1007,7 @@ function ComparisonPanel({
           align-items: center;
           justify-content: center;
           gap: var(--spacing-xs);
-          padding-top: 3rem;
+          padding-top: 2rem;
         }
 
         .vs-icon {
@@ -800,26 +1021,56 @@ function ComparisonPanel({
         }
 
         .savings-banner {
-          padding: var(--spacing-2xl);
+          padding: var(--spacing-3xl) var(--spacing-2xl);
           border-radius: var(--radius-xl);
           text-align: center;
           position: relative;
           overflow: hidden;
-          transition: all var(--transition-base);  /* Max 300ms */
+          transition: all var(--transition-base);
+          margin: var(--spacing-xl) 0;
         }
 
         .savings-banner:hover {
-          transform: scale(1.01) translateZ(0);  /* Subtle, GPU accelerated */
+          transform: scale(1.02) translateZ(0);
         }
 
         .savings-banner.positive {
-          background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
-          border: 3px solid var(--color-success);
-          box-shadow: var(--glow-green), 0 10px 40px rgba(16, 185, 129, 0.3);
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.15));
+          border: 4px solid var(--color-success);
+          box-shadow: 
+            var(--glow-green), 
+            0 10px 40px rgba(16, 185, 129, 0.4),
+            0 0 60px rgba(16, 185, 129, 0.2);
+          position: relative;
+        }
+
+        .savings-banner.positive::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          background: linear-gradient(135deg, var(--color-success), rgba(16, 185, 129, 0.5));
+          border-radius: var(--radius-xl);
+          z-index: -1;
+          opacity: 0.3;
+          animation: savingsPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes savingsPulse {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.02);
+          }
         }
 
         .savings-banner.positive:hover {
-          box-shadow: var(--glow-green), 0 20px 60px rgba(16, 185, 129, 0.4);
+          box-shadow: 
+            var(--glow-green), 
+            0 20px 60px rgba(16, 185, 129, 0.6),
+            0 0 80px rgba(16, 185, 129, 0.3);
         }
 
         .savings-banner.negative {
@@ -833,20 +1084,29 @@ function ComparisonPanel({
         }
 
         .savings-label {
-          font-size: var(--font-xl);
+          font-size: var(--font-2xl);
           font-weight: var(--font-bold);
-          margin-bottom: var(--spacing-sm);
+          margin-bottom: var(--spacing-md);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .savings-amount {
           font-size: var(--font-5xl);
           font-weight: var(--font-extrabold);
           line-height: 1;
-          margin-bottom: var(--spacing-sm);
+          margin-bottom: var(--spacing-md);
+        }
+
+        @media (min-width: 901px) {
+          .savings-amount {
+            font-size: calc(var(--font-5xl) * 1.2);
+          }
         }
 
         .savings-banner.positive .savings-amount {
           color: var(--color-success);
+          text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
         }
 
         .savings-banner.negative .savings-amount {
@@ -854,8 +1114,25 @@ function ComparisonPanel({
         }
 
         .savings-subtitle {
-          font-size: var(--font-base);
+          font-size: var(--font-lg);
           color: var(--text-secondary);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .savings-monthly {
+          margin-top: var(--spacing-md);
+          padding-top: var(--spacing-md);
+          border-top: 1px solid rgba(16, 185, 129, 0.3);
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-xs);
+          align-items: center;
+        }
+
+        .savings-monthly-label {
+          font-size: var(--font-sm);
+          color: var(--text-secondary);
+          font-weight: var(--font-medium);
         }
 
         .cbb-mix-warning {
@@ -884,6 +1161,160 @@ function ComparisonPanel({
           margin: 0;
           color: var(--text-secondary);
           font-size: var(--font-sm);
+        }
+
+        /* Beregningsdetaljer - for sælgerne */
+        .calculation-details {
+          margin: var(--spacing-lg) 0;
+          padding: var(--spacing-lg);
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-lg);
+        }
+
+        .calculation-details-title {
+          margin: 0 0 var(--spacing-md) 0;
+          font-size: var(--font-lg);
+          font-weight: var(--font-semibold);
+          color: var(--text-primary);
+          display: flex;
+          align-items: center;
+        }
+
+        .calculation-section {
+          margin-bottom: var(--spacing-lg);
+        }
+
+        .calculation-section:last-child {
+          margin-bottom: 0;
+        }
+
+        .calculation-subtitle {
+          font-size: var(--font-sm);
+          font-weight: var(--font-semibold);
+          color: var(--text-secondary);
+          margin-bottom: var(--spacing-md);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .calculation-step {
+          display: flex;
+          gap: var(--spacing-md);
+          margin-bottom: var(--spacing-md);
+          padding: var(--spacing-md);
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: var(--radius-md);
+          border-left: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .calculation-step.discount {
+          border-left-color: var(--color-success);
+        }
+
+        .step-number {
+          width: 2rem;
+          height: 2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 50%;
+          font-weight: var(--font-bold);
+          font-size: var(--font-sm);
+          flex-shrink: 0;
+        }
+
+        .step-content {
+          flex: 1;
+        }
+
+        .step-label {
+          font-weight: var(--font-semibold);
+          color: var(--text-primary);
+          margin-bottom: var(--spacing-xs);
+          font-size: var(--font-sm);
+        }
+
+        .step-explanation {
+          color: var(--text-secondary);
+          font-size: var(--font-sm);
+          font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+        }
+
+        .step-items {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-xs);
+        }
+
+        .step-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--spacing-xs) 0;
+          font-size: var(--font-sm);
+        }
+
+        .step-item.discount {
+          color: var(--color-success);
+        }
+
+        .step-item-label {
+          color: var(--text-secondary);
+        }
+
+        .step-item-value {
+          color: var(--text-primary);
+          font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+          font-weight: var(--font-medium);
+        }
+
+        .calculation-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--spacing-md);
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: var(--radius-md);
+          border-top: 2px solid rgba(255, 255, 255, 0.2);
+          margin-top: var(--spacing-md);
+        }
+
+        .total-label {
+          font-weight: var(--font-bold);
+          font-size: var(--font-base);
+          color: var(--text-primary);
+        }
+
+        .total-value {
+          font-weight: var(--font-extrabold);
+          font-size: var(--font-xl);
+          color: var(--text-primary);
+        }
+
+        .savings-calculation {
+          padding: var(--spacing-md);
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: var(--radius-md);
+        }
+
+        .savings-line {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: var(--spacing-xs) 0;
+          font-size: var(--font-sm);
+          color: var(--text-secondary);
+        }
+
+        .savings-line.total {
+          padding-top: var(--spacing-sm);
+          margin-top: var(--spacing-xs);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          font-weight: var(--font-bold);
+          font-size: var(--font-base);
+          color: var(--text-primary);
         }
 
         @media (max-width: 900px) {
@@ -929,6 +1360,21 @@ function ComparisonPanel({
 
           .savings-amount {
             font-size: var(--font-4xl);
+          }
+
+          .calculation-details {
+            padding: var(--spacing-md);
+          }
+
+          .calculation-step {
+            flex-direction: column;
+            gap: var(--spacing-sm);
+          }
+
+          .step-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-xs);
           }
         }
       `}</style>

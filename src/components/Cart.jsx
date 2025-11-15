@@ -5,6 +5,8 @@
 
 import React from 'react';
 import { formatCurrency, calculateSixMonthPrice } from '../utils/calculations';
+import Icon from './common/Icon';
+import COPY from '../constants/copy';
 
 function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set() }) {
   if (cartItems.length === 0) {
@@ -12,14 +14,14 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
       <div className="cart glass-card-no-hover fade-in-up">
         <div className="section-header">
         <h2>
-          <span role="img" aria-hidden="true">🛒</span>
+          <Icon name="cart" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
           Kurv
         </h2>
-          <p className="text-secondary">Tilføj abonnementer for at se beregninger</p>
+          <p className="text-secondary">{COPY.empty.noCartItems}</p>
         </div>
         
         <div className="empty-state animate-scale-in">
-          <div className="empty-state-icon animate-pulse" aria-hidden="true">🛒</div>
+          <Icon name="cart" size={64} className="empty-state-icon animate-pulse" style={{ opacity: 0.3 }} aria-hidden="true" />
           <p className="text-lg font-semibold">Kurven er tom</p>
           <p className="text-secondary">
             Vælg mobilabonnementer fra listen nedenfor.
@@ -58,7 +60,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
     <div className="cart glass-card-no-hover fade-in-up">
       <div className="section-header">
           <h2>
-            <span role="img" aria-hidden="true">🛒</span>
+            <Icon name="cart" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
             Kurv
           </h2>
           <div className="cart-count badge badge-primary animate-pulse animate-pulse-glow" aria-label={`${cartItems.reduce((sum, item) => sum + item.quantity, 0)} abonnementer i kurv`}>
@@ -69,15 +71,14 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
 
       {/* Cart items */}
       <div className="cart-items">
-        {cartItems.map((item, index) => {
+        {cartItems.map((item) => {
           const sixMonthPrice = calculateSixMonthPrice(item.plan, item.quantity);
           const hasIntro = item.plan.introPrice && item.plan.introMonths;
           
           return (
             <div 
               key={item.plan.id} 
-              className={`cart-item animate-fade-in-up ${newlyAddedPlans.has(item.plan.id) ? 'newly-added' : ''}`}
-              style={{ animationDelay: `${index * 100}ms` }}
+              className={`cart-item ${newlyAddedPlans.has(item.plan.id) ? 'newly-added' : ''}`}
             >
               {/* Plan info */}
               <div className="cart-item-header">
@@ -150,7 +151,10 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
                 {item.cbbMixEnabled && item.cbbMixCount && (
                   <div className="cbb-mix-pricing">
                     <div className="price-line cbb-mix-line">
-                      <span className="price-label">🎬 CBB MIX ({item.cbbMixCount} tjenester):</span>
+                      <span className="price-label">
+                        <Icon name="film" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                        CBB MIX ({item.cbbMixCount} tjenester):
+                      </span>
                       <span className="price-value">
                         {formatCurrency((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * item.quantity)}/md.
                       </span>
@@ -267,7 +271,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
         }
 
         .cart-item.newly-added::after {
-          content: '✨ Ny';
+          content: 'Ny';
           position: absolute;
           top: var(--spacing-sm);
           right: var(--spacing-sm);

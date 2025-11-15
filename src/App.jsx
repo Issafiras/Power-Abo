@@ -3,7 +3,9 @@
  * Håndterer global state og orkestrerer alle subkomponenter
  */
 
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { toast } from './components/common/Toast';
+// Import komponenter direkte - lazy loading gør det langsommere
 import Header from './components/Header';
 import StreamingSelector from './components/StreamingSelector';
 import ProviderTabs from './components/ProviderTabs';
@@ -11,9 +13,9 @@ import PlanCard from './components/PlanCard';
 import Cart from './components/Cart';
 import ComparisonPanel from './components/ComparisonPanel';
 import Footer from './components/Footer';
-
-// Lazy load store komponenter
-const PresentationView = lazy(() => import('./components/PresentationView'));
+import PresentationView from './components/PresentationView';
+import HelpButton from './components/HelpButton';
+import Breadcrumbs from './components/common/Breadcrumbs';
 import { plans } from './data/plans';
 import { findBestSolution } from './utils/calculations';
 import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
@@ -45,6 +47,9 @@ import {
   resetAll
 } from './utils/storage';
 import { validatePrice, validateQuantity } from './utils/validators';
+import Icon from './components/common/Icon';
+import COPY from './constants/copy';
+import AccessibilityHelper from './components/common/AccessibilityHelper';
 
 function App() {
   // State
@@ -63,7 +68,6 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showPresentation, setShowPresentation] = useState(false);
-  const [toast, setToast] = useState(null);
   
   // CBB MIX state
   const [cbbMixEnabled, setCbbMixEnabled] = useState({});
@@ -76,6 +80,9 @@ function App() {
   const [eanSearchResults, setEanSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
+  // Current section for navigation
+  const [currentSection, setCurrentSection] = useState(null);
+
   // Debounce search query (300ms delay)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -84,6 +91,68 @@ function App() {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Section detection for scroll progress and breadcrumbs
+  useEffect(() => {
+    let ticking = false;
+    const sections = [
+      { id: 'customer-situation', element: document.getElementById('customer-situation') },
+      { id: 'plans-section', element: document.getElementById('plans-section') },
+      { id: 'comparison-section', element: document.getElementById('comparison-section') }
+    ];
+
+    function detectCurrentSection() {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY + 150; // Offset for header
+
+          for (let i = sections.length - 1; i >= 0; i--) {
+            const section = sections[i];
+            if (section.element) {
+              const rect = section.element.getBoundingClientRect();
+              const elementTop = rect.top + window.scrollY;
+              
+              if (scrollPosition >= elementTop) {
+                setCurrentSection(section.id);
+                return;
+              }
+            }
+          }
+          
+          // Default to first section if none found
+          setCurrentSection('customer-situation');
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', detectCurrentSection, { passive: true });
+    detectCurrentSection(); // Initial detection
+
+    return () => window.removeEventListener('scroll', detectCurrentSection);
+  }, []);
+
+  // Calculate if "Find løsning" button should be enabled
+  const canFindSolution = useMemo(() => {
+    return (selectedStreaming.length > 0 || customerMobileCost > 0) && numberOfLines > 0;
+  }, [selectedStreaming.length, customerMobileCost, numberOfLines]);
+
+  // Calculate total cart count
+  const cartCount = useMemo(() => {
+    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [cartItems]);
+
+  // Scroll to cart handler
+  const handleScrollToCart = useCallback(() => {
+    const element = document.getElementById('comparison-section');
+    if (element) {
+      const headerHeight = 120;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - headerHeight - 16;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
+  }, []);
 
   // Load fra localStorage ved mount
   useEffect(() => {
@@ -136,76 +205,9 @@ function App() {
   }, [theme]);
 
 
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const handlePointerDown = (event) => {
-      const target = event.target.closest('.btn');
-      if (!target || !(target instanceof HTMLElement) || target.disabled) return;
-
-      const rect = target.getBoundingClientRect();
-      const rippleSize = Math.max(rect.width, rect.height) * 2;
-      const rippleX = event.clientX - rect.left;
-      const rippleY = event.clientY - rect.top;
-
-      target.style.setProperty('--ripple-size', `${rippleSize}px`);
-      target.style.setProperty('--ripple-x', `${rippleX}px`);
-      target.style.setProperty('--ripple-y', `${rippleY}px`);
-
-      target.classList.remove('is-rippling');
-      // Force reflow to allow retriggering animation
-      void target.offsetWidth;
-      target.classList.add('is-rippling');
-
-      const handleAnimationEnd = () => {
-        target.classList.remove('is-rippling');
-      };
-
-      target.addEventListener('animationend', handleAnimationEnd, { once: true });
-    };
-
-    const registerPointerListener = () => {
-      document.addEventListener('pointerdown', handlePointerDown);
-    };
-
-    const unregisterPointerListener = () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-    };
-
-    const handleMotionChange = (event) => {
-      if (event.matches) {
-        unregisterPointerListener();
-      } else {
-        registerPointerListener();
-      }
-    };
-
-    if (!prefersReducedMotion.matches) {
-      registerPointerListener();
-    }
-
-    if (prefersReducedMotion.addEventListener) {
-      prefersReducedMotion.addEventListener('change', handleMotionChange);
-    } else if (prefersReducedMotion.addListener) {
-      prefersReducedMotion.addListener(handleMotionChange);
-    }
-
-    return () => {
-      unregisterPointerListener();
-      if (prefersReducedMotion.removeEventListener) {
-        prefersReducedMotion.removeEventListener('change', handleMotionChange);
-      } else if (prefersReducedMotion.removeListener) {
-        prefersReducedMotion.removeListener(handleMotionChange);
-      }
-    };
-  }, []);
-
   // Toast handler
   const showToast = useCallback((message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+    toast(message, type);
   }, []);
 
   // Cart handlers
@@ -221,7 +223,7 @@ function App() {
           return prev;
         }
         
-        showToast(`${plan.name} opdateret i kurven`);
+        showToast(COPY.success.updatedInCart(plan.name));
         return prev.map(item =>
           item.plan.id === plan.id
             ? { ...item, quantity: validation.value }
@@ -235,7 +237,7 @@ function App() {
           cbbMixEnabled: plan.cbbMixAvailable ? (cbbMixEnabled[plan.id] || false) : false,
           cbbMixCount: plan.cbbMixAvailable ? (cbbMixCount[plan.id] || 2) : 0
         };
-        showToast(`${plan.name} tilføjet til kurven`);
+        showToast(COPY.success.addedToCart(plan.name));
         return [...prev, newItem];
       }
     });
@@ -245,7 +247,7 @@ function App() {
     setCartItems(prev => {
       const item = prev.find(item => item.plan.id === planId);
       if (item) {
-        showToast(`${item.plan.name} fjernet fra kurven`, 'error');
+        showToast(COPY.success.removedFromCart(item.plan.name), 'error');
       }
       return prev.filter(item => item.plan.id !== planId);
     });
@@ -350,7 +352,7 @@ function App() {
     setCbbMixEnabled({});
     setCbbMixCount({});
     setExistingBrands([]);
-    showToast('Alt nulstillet', 'success');
+      showToast(COPY.success.reset, 'success');
   }, [showToast]);
 
   // Theme toggle
@@ -363,9 +365,32 @@ function App() {
     setShowPresentation(prev => !prev);
   }, []);
 
+  // Keyboard shortcut: Press 'P' to toggle presentation
+  useEffect(() => {
+    function handleKeyPress(e) {
+      // Don't trigger if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+        return;
+      }
+      
+      if ((e.key === 'p' || e.key === 'P') && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        handlePresentationToggle();
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handlePresentationToggle]);
+
   // Close presentation
   const handleClosePresentation = useCallback(() => {
     setShowPresentation(false);
+  }, []);
+
+  // Toggle cash discount
+  const handleToggleCashDiscount = useCallback(() => {
+    setShowCashDiscount(prev => !prev);
   }, []);
 
   // Auto-select løsning handler
@@ -421,9 +446,9 @@ function App() {
       setCbbMixCount(newCbbMixCount);
       
       // Vis besked med forklaring
-      showToast(result.explanation, result.savings >= 0 ? 'success' : 'error');
+      showToast(COPY.success.foundSolution(result.explanation), result.savings >= 0 ? 'success' : 'error');
     } else {
-      showToast('Kunne ikke finde en løsning. Prøv at tilføje streaming-tjenester eller mobiludgifter.', 'error');
+      showToast(COPY.error.couldNotFindSolution, 'error');
     }
   }, [selectedStreaming, customerMobileCost, originalItemPrice, numberOfLines, existingBrands, showToast]);
 
@@ -436,21 +461,19 @@ function App() {
     if (searchResult.products && searchResult.products.length > 0) {
       const firstProduct = searchResult.products[0];
       const price = searchResult.prices[firstProduct.productId] || firstProduct.price || 'Ukendt pris';
-      showToast(`Fundet: ${firstProduct.title || firstProduct.name} - ${price} kr`, 'success');
+      showToast(COPY.success.searchSuccess(firstProduct.title || firstProduct.name, price), 'success');
       
       // Auto-fyld original item price hvis der er en pris
       if (typeof price === 'number' && price > 0) {
         setOriginalItemPrice(price);
-        console.log('💰 Pris sat i originalItemPrice:', price);
       }
     } else {
       // Fallback: Brug filterpris hvis min==max
       if (typeof searchResult.fallbackPrice === 'number' && searchResult.fallbackPrice > 0) {
         setOriginalItemPrice(searchResult.fallbackPrice);
-        showToast(`Pris fundet: ${searchResult.fallbackPrice} kr (via filter)`, 'success');
-        console.log('💰 Fallback pris sat i originalItemPrice:', searchResult.fallbackPrice);
+        showToast(COPY.success.priceFound(searchResult.fallbackPrice), 'success');
       } else {
-        showToast('Ingen produkter fundet for denne søgeterm', 'error');
+        showToast(COPY.error.noProductsFound, 'error');
       }
     }
     
@@ -506,20 +529,34 @@ function App() {
 
   return (
     <div className="app">
+      {/* Accessibility helper */}
+      <AccessibilityHelper />
+
       {/* Header */}
       <Header
         onReset={handleReset}
         onPresentationToggle={handlePresentationToggle}
         theme={theme}
         onThemeToggle={handleThemeToggle}
+        currentSection={currentSection}
+        cartCount={cartCount}
+        onCartClick={handleScrollToCart}
+        onFindSolutionClick={handleAutoSelectSolution}
+        canFindSolution={canFindSolution}
+      />
+
+      {/* Breadcrumbs */}
+      <Breadcrumbs 
+        currentSection={currentSection} 
+        onSectionClick={(sectionId) => setCurrentSection(sectionId)}
       />
 
       {/* Main content */}
-      <main className="main-content">
+      <main id="main-content" className="main-content" role="main" aria-label="Hovedindhold">
         <div className="container">
           {/* Top section: Customer situation */}
-          <section className="section fade-in-up">
-            <div className="section-shell animate-smooth-scale">
+          <section id="customer-situation" className="section">
+            <div className="section-shell">
               <StreamingSelector
                 selectedStreaming={selectedStreaming}
                 onStreamingToggle={handleStreamingToggle}
@@ -541,16 +578,16 @@ function App() {
           <div className="section-divider" aria-hidden="true" style={{ margin: 'var(--spacing-md) auto' }} />
 
           {/* Middle section: Provider selection & Plans */}
-          <section id="plans-section" className="section fade-in-up delay-100">
-            <div className="section-shell animate-smooth-scale">
+          <section id="plans-section" className="section">
+            <div className="section-shell">
               <div className="plans-section">
                 <div className="section-header">
                   <h2 className="section-header__title">
-                    <span role="img" aria-hidden="true">📱</span>
-                    Vælg Mobilabonnementer &amp; Bredbånd
+                    <Icon name="smartphone" size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                    {COPY.titles.selectPlans}
                   </h2>
                   <p className="section-header__subtitle">
-                    Vælg først operatør, derefter de abonnementer, som passer bedst til kunden.
+                    {COPY.titles.selectPlansSubtitle}
                   </p>
                 </div>
 
@@ -564,37 +601,32 @@ function App() {
                 {/* Plans grid */}
                 {activeProvider === 'all' ? (
                   <div className="empty-state">
-                    <div className="empty-state-icon pulse">👆</div>
-                    <p className="text-lg font-semibold">Vælg en operatør</p>
+                    <Icon name="smartphone" size={48} className="empty-state-icon pulse" style={{ opacity: 0.3 }} />
+                    <p className="text-lg font-semibold">{COPY.labels.selectProvider}</p>
                     <p className="text-secondary">
-                      Vælg Telmore, Telenor, CBB eller Bredbånd for at se tilgængelige abonnementer.
+                      {COPY.labels.selectProviderHelp}
                     </p>
                   </div>
                 ) : filteredPlans.length > 0 ? (
                   <div className="plans-grid grid grid-cols-3">
-                    {filteredPlans.map((plan, index) => (
-                      <div
+                    {filteredPlans.map((plan) => (
+                      <PlanCard
                         key={plan.id}
-                        className="stagger-item animate-list-item"
-                        style={{ animationDelay: `${index * 60}ms` }}
-                      >
-                        <PlanCard
-                          plan={plan}
-                          onAddToCart={handleAddToCart}
-                          onCBBMixToggle={handleCBBMixToggle}
-                          onCBBMixCountChange={handleCBBMixCountChange}
-                          cbbMixEnabled={cbbMixEnabled[plan.id] || false}
-                          cbbMixCount={cbbMixCount[plan.id] || 2}
-                        />
-                      </div>
+                        plan={plan}
+                        onAddToCart={handleAddToCart}
+                        onCBBMixToggle={handleCBBMixToggle}
+                        onCBBMixCountChange={handleCBBMixCountChange}
+                        cbbMixEnabled={cbbMixEnabled[plan.id] || false}
+                        cbbMixCount={cbbMixCount[plan.id] || 2}
+                      />
                     ))}
                   </div>
                 ) : (
                   <div className="empty-state">
-                    <div className="empty-state-icon animate-empty-state">🔍</div>
-                    <p className="text-lg font-semibold">Ingen abonnementer fundet</p>
+                    <Icon name="search" size={48} className="empty-state-icon animate-empty-state" style={{ opacity: 0.3 }} />
+                    <p className="text-lg font-semibold">{COPY.labels.noPlansFound}</p>
                     <p className="text-secondary">
-                      Prøv at ændre søgeordet.
+                      {COPY.labels.noPlansFoundHelp}
                     </p>
                   </div>
                 )}
@@ -605,8 +637,8 @@ function App() {
           <div className="section-divider" aria-hidden="true" style={{ margin: 'var(--spacing-md) auto' }} />
 
           {/* Bottom section: Cart and Comparison side by side */}
-          <section className="section fade-in-up delay-200">
-            <div className="section-shell section-shell--nest animate-list-item">
+          <section id="comparison-section" className="section">
+            <div className="section-shell section-shell--nest">
               <div className="cart-comparison-grid">
                 <div className="cart-wrapper">
                   <Cart
@@ -616,23 +648,23 @@ function App() {
                   />
                 </div>
                 <div className="comparison-wrapper">
-                <ComparisonPanel
-                  cartItems={cartItems}
-                  selectedStreaming={selectedStreaming}
-                  customerMobileCost={customerMobileCost}
-                  numberOfLines={numberOfLines}
-                  originalItemPrice={originalItemPrice}
-                  cashDiscount={cashDiscount}
-                  onCashDiscountChange={handleCashDiscountChange}
-                  cashDiscountLocked={cashDiscountLocked}
-                  onCashDiscountLockedChange={setCashDiscountLocked}
-                  autoAdjust={autoAdjust}
-                  onAutoAdjustChange={setAutoAdjust}
-                  showCashDiscount={showCashDiscount}
-                  onToggleCashDiscount={useCallback(() => setShowCashDiscount(prev => !prev), [])}
-                  freeSetup={freeSetup}
-                  onFreeSetupChange={setFreeSetup}
-                />
+                  <ComparisonPanel
+                    cartItems={cartItems}
+                    selectedStreaming={selectedStreaming}
+                    customerMobileCost={customerMobileCost}
+                    numberOfLines={numberOfLines}
+                    originalItemPrice={originalItemPrice}
+                    cashDiscount={cashDiscount}
+                    onCashDiscountChange={handleCashDiscountChange}
+                    cashDiscountLocked={cashDiscountLocked}
+                    onCashDiscountLockedChange={setCashDiscountLocked}
+                    autoAdjust={autoAdjust}
+                    onAutoAdjustChange={setAutoAdjust}
+                    showCashDiscount={showCashDiscount}
+                    onToggleCashDiscount={handleToggleCashDiscount}
+                    freeSetup={freeSetup}
+                    onFreeSetupChange={setFreeSetup}
+                  />
                 </div>
               </div>
             </div>
@@ -642,24 +674,16 @@ function App() {
 
       {/* Presentation view */}
       {showPresentation && (
-        <Suspense fallback={<div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--app-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>Loading...</div>}>
-          <PresentationView
-            cartItems={cartItems}
-            selectedStreaming={selectedStreaming}
-            customerMobileCost={customerMobileCost}
-            originalItemPrice={originalItemPrice}
-            cashDiscount={cashDiscount}
-            freeSetup={freeSetup}
-            onClose={handleClosePresentation}
-          />
-        </Suspense>
-      )}
-
-      {/* Toast notification */}
-      {toast && (
-        <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
-          {toast.message}
-        </div>
+        <PresentationView
+          cartItems={cartItems}
+          selectedStreaming={selectedStreaming}
+          customerMobileCost={customerMobileCost}
+          originalItemPrice={originalItemPrice}
+          cashDiscount={cashDiscount}
+          freeSetup={freeSetup}
+          onClose={handleClosePresentation}
+          onReset={handleReset}
+        />
       )}
 
       {/* Footer */}
@@ -686,55 +710,33 @@ function App() {
 
         .plans-section {
           padding: var(--spacing-md);
-          transition: all var(--transition-smooth);
-        }
-
-        .plans-section:hover {
-          border-color: rgba(255, 255, 255, 0.15);
         }
 
         .section-header {
           margin-bottom: var(--spacing-md);
         }
 
-        .section-header h2 {
-          margin-bottom: var(--spacing-sm);
-          animation: fadeInDown var(--duration-normal) var(--ease-in-out-cubic);
-        }
-
-        .section-header p {
-          animation: fadeIn var(--duration-slow) var(--ease-in-out-cubic);
-        }
-
         .plans-grid {
           margin-top: var(--spacing-md);
         }
 
-        .plans-grid .stagger-item {
-          height: 100%;
-        }
-
-        .plans-grid .stagger-item > * {
-          height: 100%;
-        }
-
         .cart-comparison-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: var(--spacing-md);
+          grid-template-columns: 1fr;
+          gap: var(--spacing-lg);
           align-items: start;
+        }
+
+        @media (min-width: 1200px) {
+          .cart-comparison-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xl);
+          }
         }
 
         .cart-wrapper,
         .comparison-wrapper {
           width: 100%;
-        }
-
-        @media (max-width: 1200px) {
-          .cart-comparison-grid {
-            grid-template-columns: 1fr;
-            gap: var(--spacing-md);
-          }
         }
 
         @media (max-width: 900px) {
@@ -757,6 +759,9 @@ function App() {
         }
 
       `}</style>
+
+      {/* Help Button - Floating guide button */}
+      <HelpButton />
     </div>
   );
 }

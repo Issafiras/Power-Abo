@@ -3,7 +3,9 @@
  * Perfekt minimalistisk design med elegant spacing og animationer
  */
 
-export default function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery }) {
+import React from 'react';
+
+function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery }) {
   const providers = [
     { id: 'all', name: 'Alle', icon: '📱' },
     { id: 'telmore', name: 'Telmore', icon: '🟠', logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png' },
@@ -31,15 +33,13 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
                     src={provider.logo} 
                     alt={provider.name}
                     className="tab-logo"
+                    loading="lazy"
                   />
                 ) : (
                   <span className="tab-icon">{provider.icon}</span>
                 )}
-                <span className="tab-name">{provider.name}</span>
+                <span className="tab-label">{provider.name}</span>
               </span>
-              {activeProvider === provider.id && (
-                <span className="tab-indicator" aria-hidden="true" />
-              )}
             </button>
           ))}
         </div>
@@ -77,6 +77,7 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         </div>
       )}
 
+      {/* Telmore Segment Controls */}
       {(activeProvider === 'telmore' || activeProvider === 'telmore-bredbånd') && (
         <div className="segment-control">
           <div className="segment-control-wrapper">
@@ -84,9 +85,9 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
               className={`segment-btn ${activeProvider === 'telmore' ? 'segment-btn-active' : ''}`}
               onClick={() => onProviderChange('telmore')}
               aria-pressed={activeProvider === 'telmore'}
-              aria-label="Vis Telmore mobil abonnementer"
+              aria-label="Vis Telmore privat abonnementer"
             >
-              <span>Mobil</span>
+              <span>Privat</span>
             </button>
             <button
               className={`segment-btn ${activeProvider === 'telmore-bredbånd' ? 'segment-btn-active' : ''}`}
@@ -146,55 +147,50 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         .provider-tabs-container {
           display: flex;
           flex-direction: column;
-          gap: 1.75rem;
-          width: 100%;
+          gap: var(--spacing-lg);
+          margin-bottom: var(--spacing-xl);
         }
 
-        /* Tabs Wrapper - Apple Perfect */
+        /* Tabs Wrapper - Apple Perfect Design */
         .tabs-wrapper {
-          position: relative;
           width: 100%;
         }
 
         .tabs {
           display: flex;
-          gap: 0.5rem;
-          background: rgba(255, 255, 255, 0.04);
+          gap: var(--spacing-xs);
+          background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 1rem;
-          padding: 0.375rem;
-          position: relative;
+          border-radius: var(--radius-xl);
+          padding: var(--spacing-xs);
           box-shadow: 
-            0 4px 24px rgba(0, 0, 0, 0.3),
+            0 2px 16px rgba(0, 0, 0, 0.25),
             inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
-        /* Individual Tab - Perfect Design */
         .tab {
-          position: relative;
           flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0.875rem 1.25rem;
-          border: none;
           background: transparent;
+          border: none;
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-md) var(--spacing-lg);
           color: var(--text-secondary);
-          font-size: 0.9375rem;
-          font-weight: 500;
-          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-          letter-spacing: -0.01em;
+          font-size: var(--font-sm);
+          font-weight: var(--font-medium);
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-          border-radius: 0.75rem;
+          transition: all var(--transition-base);
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+          letter-spacing: -0.01em;
+          position: relative;
           overflow: hidden;
           opacity: 0;
-          animation: tabFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;  /* Max 300ms */
+          transform: translateY(8px);
+          animation: fadeInUp 0.4s ease forwards;
         }
 
-        @keyframes tabFadeIn {
+        @keyframes fadeInUp {
           from {
             opacity: 0;
             transform: translateY(8px);
@@ -208,138 +204,114 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         .tab-content {
           display: flex;
           align-items: center;
-          gap: 0.625rem;
-          position: relative;
-          z-index: 2;
-        }
-
-        .tab-icon {
-          font-size: 1.125rem;
-          line-height: 1;
-          opacity: 0.8;
-          transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          justify-content: center;
+          gap: var(--spacing-sm);
         }
 
         .tab-logo {
-          width: 20px;
           height: 20px;
+          width: auto;
           object-fit: contain;
-          border-radius: 0.25rem;
-          opacity: 0.85;
-          transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          filter: brightness(0.8);
+          transition: filter var(--transition-fast);
         }
 
-        .tab-name {
-          font-weight: 500;
-          transition: color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        .tab-icon {
+          font-size: var(--font-lg);
         }
 
-        /* Active Tab - Perfect Highlight */
+        .tab-label {
+          font-weight: var(--font-medium);
+        }
+
+        .tab:hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: var(--text-primary);
+          transform: translateY(-1px);
+        }
+
+        .tab:hover .tab-logo {
+          filter: brightness(1);
+        }
+
+        .tab:active {
+          transform: translateY(0);
+        }
+
         .tab-active {
-          color: var(--text-primary);
+          background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
+          color: white;
+          box-shadow: 
+            0 4px 16px rgba(255, 109, 31, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          font-weight: var(--font-semibold);
+          transform: scale(1.01);
         }
 
-        .tab-active .tab-icon,
         .tab-active .tab-logo {
-          opacity: 1;
+          filter: brightness(1.2) contrast(1.1);
         }
 
-        .tab-indicator {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: linear-gradient(90deg, #FF6D1F 0%, #FF8F57 100%);
-          border-radius: 0 0 0.75rem 0.75rem;
-          animation: indicatorSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);  /* Max 300ms */
-          box-shadow: 0 0 12px rgba(255, 109, 31, 0.5);
+        .tab-active:hover {
+          background: linear-gradient(135deg, #FF8F57 0%, #FF6D1F 100%);
+          transform: translateY(-1px) scale(1.02);
+          box-shadow: 
+            0 6px 24px rgba(255, 109, 31, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+          filter: brightness(1.05);
         }
 
-        @keyframes indicatorSlide {
-          from {
-            opacity: 0;
-            transform: scaleX(0);
-          }
-          to {
-            opacity: 1;
-            transform: scaleX(1);
-          }
-        }
-
-        /* Hover State - Elegant */
-        .tab:hover:not(.tab-active) {
-          background: rgba(255, 255, 255, 0.06);
-          color: var(--text-primary);
-        }
-
-        .tab:hover:not(.tab-active) .tab-icon,
-        .tab:hover:not(.tab-active) .tab-logo {
-          opacity: 1;
-        }
-
-        /* Active Tab Background */
-        .tab-active::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: rgba(255, 255, 255, 0.08);
-          border-radius: 0.75rem;
-          opacity: 0;
-          transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-
-        .tab-active::before {
-          opacity: 1;
-        }
-
-        /* Segment Control - Apple Segmented Control Style */
+        /* Segment Control - Apple Refined */
         .segment-control {
-          width: 100%;
-          display: flex;
-          justify-content: flex-start;
+          margin-top: var(--spacing-md);
         }
 
         .segment-control-wrapper {
-          display: inline-flex;
-          background: rgba(255, 255, 255, 0.04);
+          display: flex;
+          gap: var(--spacing-xs);
+          background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 0.75rem;
-          padding: 0.25rem;
-          gap: 0.25rem;
-          box-shadow: 
-            0 2px 16px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-xs);
         }
 
         .segment-btn {
-          padding: 0.625rem 1.25rem;
-          border: none;
+          flex: 1;
           background: transparent;
+          border: none;
+          border-radius: var(--radius-md);
+          padding: var(--spacing-sm) var(--spacing-md);
           color: var(--text-secondary);
-          font-size: 0.875rem;
-          font-weight: 500;
-          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-          letter-spacing: -0.005em;
-          border-radius: 0.5rem;
+          font-size: var(--font-sm);
+          font-weight: var(--font-medium);
           cursor: pointer;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);  /* Max 300ms */
-          position: relative;
+          transition: all var(--transition-fast);
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
         }
 
-        .segment-btn:hover:not(.segment-btn-active) {
+        .segment-btn:hover {
+          background: rgba(255, 255, 255, 0.05);
           color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.04);
         }
 
         .segment-btn-active {
-          color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.12);
+          background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
+          color: white;
           box-shadow: 
-            0 2px 8px rgba(0, 0, 0, 0.2),
+            0 2px 8px rgba(255, 109, 31, 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          font-weight: var(--font-semibold);
+        }
+
+        .segment-btn-active:hover {
+          background: linear-gradient(135deg, #FF8F57 0%, #FF6D1F 100%);
+          box-shadow: 
+            0 4px 12px rgba(255, 109, 31, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+          filter: brightness(1.05);
         }
 
         /* Search Wrapper - Perfect Apple Input */
@@ -364,12 +336,13 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         }
 
         .search-container:focus-within {
-          border-color: rgba(255, 109, 31, 0.4);
+          border-color: #FF6D1F;
           background: rgba(255, 255, 255, 0.06);
           box-shadow: 
-            0 4px 24px rgba(0, 0, 0, 0.3),
-            0 0 0 3px rgba(255, 109, 31, 0.1),
+            0 4px 24px rgba(0, 0, 0, 0.35),
+            0 0 0 4px rgba(255, 109, 31, 0.2),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          transform: scale(1.01);
         }
 
         .search-icon {
@@ -405,73 +378,62 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
         }
 
         .search-clear {
-          margin-left: 0.75rem;
-          padding: 0.25rem;
-          border: none;
-          background: transparent;
-          color: var(--text-muted);
-          cursor: pointer;
+          width: 20px;
+          height: 20px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 0.375rem;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);  /* Max 300ms */
-          opacity: 0.7;
+          background: none;
+          border: none;
+          border-radius: var(--radius-sm);
+          color: var(--text-muted);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          margin-left: var(--spacing-sm);
+          padding: 0;
         }
 
         .search-clear:hover {
-          opacity: 1;
-          color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.06);
+          background: rgba(255, 255, 255, 0.1);
+          color: var(--text-secondary);
         }
 
-        /* Responsive - Perfect Mobile */
-        @media (max-width: 900px) {
-          .provider-tabs-container {
-            gap: 1.25rem;
-          }
+        .search-clear:active {
+          transform: scale(0.95);
+        }
 
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
           .tabs {
-            padding: 0.25rem;
-            gap: 0.375rem;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs);
           }
 
           .tab {
-            padding: 0.75rem 0.875rem;
-            font-size: 0.875rem;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--font-xs);
           }
 
           .tab-logo {
-            width: 18px;
-            height: 18px;
+            height: 16px;
           }
 
-          .tab-icon {
-            font-size: 1rem;
+          .segment-control-wrapper {
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs);
           }
 
           .segment-btn {
-            padding: 0.5rem 1rem;
-            font-size: 0.8125rem;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            font-size: var(--font-xs);
           }
 
           .search-container {
-            padding: 0.75rem 0.875rem;
+            padding: var(--spacing-sm) var(--spacing-md);
           }
 
           .search-input {
-            font-size: 0.875rem;
-          }
-        }
-
-        /* Reduced Motion */
-        @media (prefers-reduced-motion: reduce) {
-          .tab,
-          .tab-indicator,
-          .segment-btn,
-          .search-container {
-            animation: none !important;
-            transition: none !important;
+            font-size: var(--font-sm);
           }
         }
       `}</style>
@@ -479,3 +441,4 @@ export default function ProviderTabs({ activeProvider, onProviderChange, onSearc
   );
 }
 
+export default React.memo(ProviderTabs);

@@ -182,7 +182,6 @@ function getBestProxies() {
 function getCachedResult(url) {
   const cached = cache.get(url);
   if (cached && Date.now() - cached.timestamp < CONFIG.CACHE_DURATION) {
-    console.log('🚀 Cache hit for:', url);
     return cached.data;
   }
   return null;
@@ -243,7 +242,6 @@ async function tryProxyFast(proxyIndex, targetUrl, options) {
     
     if (response.ok) {
       updateProxyStats(proxyIndex, true, responseTime);
-      console.log(`⚡ ${proxyName} (${responseTime}ms)`);
       return { response, proxyIndex, responseTime };
     } else {
       updateProxyStats(proxyIndex, false, responseTime);
@@ -263,8 +261,6 @@ async function tryProxyFast(proxyIndex, targetUrl, options) {
  */
 async function testProxiesParallel(targetUrl, options) {
   const bestProxies = getBestProxies().slice(0, CONFIG.PARALLEL_PROXY_LIMIT);
-  
-  console.log(`🚀 Test ${bestProxies.length} proxyer parallelt`);
   
   const promises = bestProxies.map(({ index }) => 
     tryProxyFast(index, targetUrl, options)
@@ -323,8 +319,6 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
     
     return response;
   } catch (error) {
-    console.log(`⚠️ Parallelle proxyer fejlede, prøver sekventielt...`);
-    
     // Fallback til sekventiel testing
     const bestProxies = getBestProxies();
     
@@ -338,7 +332,6 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
         
         return response.response;
       } catch (proxyError) {
-        console.log(`❌ ${proxy.name} fejlede:`, proxyError.message);
         continue;
       }
     }
@@ -346,7 +339,6 @@ async function fetchWithProxyFallback(url, options = {}, attempt = 1) {
     // Hvis alle fejler, prøv retry med eksponentiel backoff
     if (attempt < CONFIG.MAX_RETRIES) {
       const backoff = CONFIG.BACKOFF_BASE * Math.pow(2, attempt - 1);
-      console.log(`⏳ Retry ${attempt}/${CONFIG.MAX_RETRIES} om ${backoff}ms...`);
       await new Promise(r => setTimeout(r, backoff));
       return fetchWithProxyFallback(url, options, attempt + 1);
     }
@@ -370,8 +362,6 @@ export function resetProxyCache() {
       });
     }
   });
-  
-  console.log('🔄 Proxy cache og statistikker nulstillet');
 }
 
 /**
@@ -399,7 +389,6 @@ export function getProxyStats() {
     };
   });
   
-  console.log('📊 Avancerede proxy-statistikker:', stats);
   return stats;
 }
 
@@ -417,13 +406,10 @@ export async function prefetchProxies() {
     }
   };
   
-  console.log('🚀 Prefetching proxyer for hurtigere første kald...');
-  
   try {
     await testProxiesParallel(testUrl, options);
-    console.log('✅ Proxy prefetch fuldført');
   } catch (error) {
-    console.log('⚠️ Proxy prefetch fejlede:', error.message);
+    // Silent fail for prefetch
   }
 }
 
@@ -439,7 +425,6 @@ async function fetchWithRetry(url, options = {}, attempt = 1) {
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
-    console.log(`🔄 API kald forsøg ${attempt}: ${url}`);
     
     const response = await fetch(url, {
       ...options,
@@ -453,13 +438,11 @@ async function fetchWithRetry(url, options = {}, attempt = 1) {
     });
 
     if (response.ok) {
-      console.log(`✅ API kald succesfuldt`);
       return response;
     } else {
       // Hvis det er en 429 eller 5xx fejl, prøv retry
       if ((response.status === 429 || response.status >= 500) && attempt < 3) {
         const backoff = [250, 750, 1750][attempt - 1];
-        console.log(`⏳ API returnerede ${response.status}, prøver igen om ${backoff}ms...`);
         await new Promise(r => setTimeout(r, backoff));
         return fetchWithRetry(url, options, attempt + 1);
       }
@@ -469,7 +452,6 @@ async function fetchWithRetry(url, options = {}, attempt = 1) {
   } catch (error) {
     if (attempt < 3 && !controller.signal.aborted) {
       const backoff = [250, 750, 1750][attempt - 1];
-      console.log(`⏳ Netværksfejl, prøver igen om ${backoff}ms...`);
       await new Promise(r => setTimeout(r, backoff));
       return fetchWithRetry(url, options, attempt + 1);
     }
@@ -486,9 +468,7 @@ async function fetchWithRetry(url, options = {}, attempt = 1) {
  */
 export async function searchProductsByEAN(searchTerm) {
   try {
-    console.log('🔍 Søger efter produkter med term:', searchTerm);
     const url = `${POWER_API_BASE}/productlists?q=${encodeURIComponent(searchTerm)}&size=10`;
-    console.log('📡 API URL:', url);
     
     const response = await fetchWithProxyFallback(url, {
       method: 'GET',
@@ -499,29 +479,14 @@ export async function searchProductsByEAN(searchTerm) {
       credentials: 'omit'
     });
     
-    console.log('📊 Response status:', response.status, response.statusText);
-    
     if (!response.ok) {
       throw new Error(`API fejl: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('✅ Søgeresultat:', {
-      totalCount: data.totalProductCount,
-      productsFound: data.products?.length || 0,
-      hasFilters: !!data.filters
-    });
-    
-    // Debug: Vis den fulde API response for at se strukturen
-    if (data.products && data.products.length > 0) {
-      console.log('🔍 Første produkt struktur:', data.products[0]);
-      console.log('🔑 Tilgængelige felter:', Object.keys(data.products[0]));
-    }
-    
     return data;
   } catch (error) {
-    console.error('❌ Fejl ved søgning efter produkter:', error);
-    
+    // Re-throw med brugervenlig fejlbesked
     if (error.message.includes('Alle proxy-tjenester fejlede')) {
       throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere.');
     } else if (error.message.includes('Failed to fetch')) {
@@ -541,18 +506,13 @@ export async function getProductPrices(productIds) {
   try {
     // Konverter array til komma-separeret string hvis nødvendigt
     const idsString = Array.isArray(productIds) ? productIds.join(',') : productIds;
-    
-    console.log('💰 Henter priser for produkt ID\'er:', productIds);
-    console.log('🔗 Konverteret til string:', idsString);
-    
+
     // Valider at der er produkt ID'er at søge efter
     if (!idsString || idsString.trim() === '') {
-      console.warn('⚠️ Ingen produkt ID\'er at søge efter');
       return {};
     }
     
     const url = `${POWER_API_BASE}/products/prices?ids=${idsString}`;
-    console.log('📡 Pris API URL:', url);
     
     const response = await fetchWithProxyFallback(url, {
       method: 'GET',
@@ -563,21 +523,14 @@ export async function getProductPrices(productIds) {
       credentials: 'omit'
     });
     
-    console.log('📊 Pris response status:', response.status, response.statusText);
-    
     if (!response.ok) {
       throw new Error(`API fejl: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('✅ Priser hentet:', {
-      priceCount: Object.keys(data).length,
-      prices: data
-    });
     return data;
   } catch (error) {
-    console.error('❌ Fejl ved hentning af priser:', error);
-    
+    // Re-throw med brugervenlig fejlbesked
     if (error.message.includes('Alle proxy-tjenester fejlede')) {
       throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere.');
     } else if (error.message.includes('Failed to fetch')) {
@@ -595,8 +548,6 @@ export async function getProductPrices(productIds) {
  */
 export async function searchProductsWithPrices(searchTerm) {
   try {
-    console.log('🚀 Starter kombineret søgning for term:', searchTerm);
-    
     // Først søg efter produkter
     const searchResult = await searchProductsByEAN(searchTerm);
 
@@ -639,14 +590,12 @@ export async function searchProductsWithPrices(searchTerm) {
     // Fallback: Hvis der ikke er produkter i svaret, men filters indeholder BasicPrice med min==max,
     // så brug dette tal som pris.
     if (!searchResult.products || searchResult.products.length === 0) {
-      console.log('🔍 Ingen produkter fundet, tjekker for fallback pris...');
       let fallbackPrice = null;
       if (Array.isArray(searchResult.filters)) {
         const priceFilter = searchResult.filters.find(f => f.attributeId === 'BasicPrice');
         if (priceFilter && typeof priceFilter.min === 'number' && typeof priceFilter.max === 'number') {
           if (priceFilter.min === priceFilter.max) {
             fallbackPrice = priceFilter.min;
-            console.log('💰 Fallback pris fundet:', fallbackPrice);
           }
         }
       }
@@ -655,34 +604,28 @@ export async function searchProductsWithPrices(searchTerm) {
         products: [],
         prices: {},
         totalCount: searchResult.totalProductCount || 0,
-        message: fallbackPrice != null 
+        message: fallbackPrice !== null 
           ? 'Pris fundet via filter (min=max)'
           : 'Ingen produkter fundet for denne søgeterm',
         fallbackPrice
       };
-      console.log('📋 Fallback resultat:', result);
       return result;
     }
-    
+
     // Hent produkt ID'er
     const productIds = searchResult.products.map(product => product.productId);
-    console.log('🆔 Produkt ID\'er fundet:', productIds);
-    
+
     // Kun hent priser hvis der er produkter
     let prices = {};
     if (productIds.length > 0) {
       searchResult.products.forEach(product => {
         const directPrice = extractDirectPrice(product);
-        if (directPrice != null) {
+        if (directPrice !== null) {
           prices[product.productId] = directPrice;
         }
       });
 
       const missingPriceIds = productIds.filter(productId => !(productId in prices));
-
-      if (missingPriceIds.length === 0) {
-        console.log('✅ Brugte direkte priser fra produktsøgningen – ekstra pris-kald er ikke nødvendigt');
-      }
 
       if (missingPriceIds.length > 0) {
         try {
@@ -691,35 +634,27 @@ export async function searchProductsWithPrices(searchTerm) {
             ...prices,
             ...fetchedPrices
           };
-          console.log('🧩 Kombinerede direkte produktpriser med API priser for manglende ID\'er');
         } catch (priceError) {
-          console.warn('⚠️ Kunne ikke hente priser, men produkter blev fundet:', priceError.message);
-          console.log('💡 Bruger priser direkte fra produktobjekter i stedet');
-
           // Fallback: Brug priser direkte fra produktobjekter
           searchResult.products.forEach(product => {
             const directPrice = extractDirectPrice(product);
-            if (directPrice != null) {
+            if (directPrice !== null) {
               prices[product.productId] = directPrice;
-              console.log(`💰 Pris fra produkt: ${product.productId} = ${directPrice}`);
             }
           });
         }
       }
     }
-    
+
     const finalResult = {
       products: searchResult.products,
       prices: prices,
       totalCount: searchResult.totalProductCount,
       message: `${searchResult.products.length} produkter fundet`
     };
-    console.log('🎯 Endeligt resultat:', finalResult);
     return finalResult;
   } catch (error) {
-    console.error('❌ Fejl ved kombineret søgning:', error);
-    
-    // Giv mere specifik fejlhåndtering
+    // Re-throw med brugervenlig fejlbesked
     if (error.message.includes('Alle proxy-tjenester fejlede')) {
       throw new Error('Alle CORS proxy-tjenester er utilgængelige. Prøv igen senere eller kontakt support.');
     } else if (error.message.includes('Failed to fetch')) {

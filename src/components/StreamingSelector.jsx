@@ -8,6 +8,9 @@ import { formatCurrency } from '../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../utils/powerApi';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { toast } from './common/Toast';
+import Icon from './common/Icon';
+import COPY from '../constants/copy';
 
 function StreamingSelector({ 
   selectedStreaming, 
@@ -95,7 +98,7 @@ function StreamingSelector({
     
     const validation = validateEAN(eanInput);
     if (!validation.valid) {
-      alert(validation.message);
+      toast.error(validation.message);
       return;
     }
     
@@ -107,7 +110,7 @@ function StreamingSelector({
       // Ryd input felt efter succesfuld søgning
       e.target.ean.value = '';
     } catch (error) {
-      alert(`Fejl ved søgning: ${error.message}`);
+      toast.error(`Fejl ved søgning: ${error.message}`);
     }
   };
 
@@ -196,7 +199,7 @@ function StreamingSelector({
         }
       });
     } catch (e) {
-      console.warn('ZXing fallback mislykkedes:', e);
+      // Silent fail - ZXing fallback fejlede, scanner vil ikke virke
     }
   };
 
@@ -326,14 +329,16 @@ function StreamingSelector({
   }, [showScanner]);
 
   return (
-    <div className="streaming-selector glass-card-no-hover fade-in-up">
+    <div 
+      className="streaming-selector glass-card-no-hover"
+    >
       <div className="section-header">
         <h2>
-          <span role="img" aria-hidden="true">📊</span>
-          Kundens Nuværende Situation
+          <Icon name="chart" size={24} className="section-header-icon" />
+          {COPY.titles.customerSituation}
         </h2>
         <p className="text-secondary">
-          Vælg kundens nuværende streaming-tjenester og mobiludgifter
+          {COPY.titles.customerSituationSubtitle}
         </p>
       </div>
       
@@ -346,7 +351,8 @@ function StreamingSelector({
       {onNumberOfLinesChange && (
         <div className="number-of-lines-input">
           <label htmlFor="number-of-lines" className="input-label">
-            📱 Antal mobilabonnementer.
+            <Icon name="smartphone" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+            {COPY.labels.numberOfLines}
           </label>
           <div className="input-with-info">
             <input
@@ -371,10 +377,11 @@ function StreamingSelector({
       {onExistingBrandsChange && (
         <div className="existing-brands-input">
           <label className="input-label">
-            🚫 Har kunden allerede abonnement hos?
+            <Icon name="warning" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+            {COPY.labels.existingBrands}
           </label>
           <p className="input-help-text" style={{ marginBottom: 'var(--spacing-sm)' }}>
-            Vælg brands, som kunden allerede har – disse vil blive ekskluderet fra automatisk løsning
+            {COPY.labels.existingBrandsHelp}
           </p>
           <div className="existing-brands-grid">
             {['Telmore', 'Telenor', 'CBB'].map((brand) => {
@@ -395,7 +402,9 @@ function StreamingSelector({
                 >
                   <span className="existing-brand-name">{brand}</span>
                   {isSelected && (
-                    <span className="existing-brand-checkmark bounce-in">✓</span>
+                    <span className="existing-brand-checkmark bounce-in">
+                      <Icon name="checkCircle" size={20} color="white" />
+                    </span>
                   )}
                 </button>
               );
@@ -407,7 +416,8 @@ function StreamingSelector({
       {/* Mobil udgifter input */}
       <div className="mobile-cost-input">
           <label htmlFor="mobile-cost" className="input-label">
-          💳 Nuværende månedlige mobiludgifter {onNumberOfLinesChange && numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}.
+          <Icon name="creditCard" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+          {COPY.labels.mobileCost} {onNumberOfLinesChange && numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}
         </label>
         <div className="input-with-currency">
           <input
@@ -433,7 +443,8 @@ function StreamingSelector({
       {/* Varens pris inden rabat input */}
       <div className="original-item-price-input">
         <label htmlFor="original-item-price" className="input-label">
-          🏷️ Varens pris inden rabat og besparelse.
+          <Icon name="tag" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+          {COPY.labels.originalItemPrice}
         </label>
         <div className="input-with-currency">
           <input
@@ -454,7 +465,8 @@ function StreamingSelector({
       {/* Produkt søgning */}
       <div className="ean-search-input">
         <label htmlFor="ean-search" className="input-label">
-          🔍 Søg vare efter navn, EAN eller mærke.
+          <Icon name="search" size={18} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+          {COPY.labels.eanSearch}
         </label>
         <form onSubmit={handleEANSearch} className="ean-search-form">
           <div className="input-with-button">
@@ -471,9 +483,10 @@ function StreamingSelector({
                 type="button"
                 className="btn scan-btn"
                 onClick={startScanner}
-                aria-label="Scan stregkode"
+                aria-label={COPY.cta.scanBarcode}
               >
-                📷 Scan
+                <Icon name="camera" size={18} style={{ marginRight: 'var(--spacing-xs)' }} />
+                {COPY.cta.scan}
               </button>
             )}
             <button 
@@ -481,12 +494,12 @@ function StreamingSelector({
               className="btn btn-primary ean-search-btn"
               disabled={isSearching}
             >
-              {isSearching ? 'Søger...' : 'Søg'}
+              {isSearching ? 'Søger...' : COPY.cta.search}
             </button>
           </div>
         </form>
         <p className="ean-help-text">
-          Søg efter produktnavn, mærke, EAN-kode eller beskrivelse.
+          {COPY.help.searchHelp}
         </p>
       </div>
 
@@ -495,7 +508,7 @@ function StreamingSelector({
           <div className="scanner-backdrop" role="dialog" aria-modal="true" aria-label="Stregkode scanner">
             <div className="scanner-modal">
               <div className="scanner-header">
-                <span>📷 Scan stregkode</span>
+                <span><Icon name="camera" size={20} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />{COPY.cta.scanBarcode}</span>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {torchSupported && (
                     <button className="btn torch-btn" onClick={toggleTorch} aria-pressed={torchOn}>
@@ -511,7 +524,12 @@ function StreamingSelector({
                 </div>
               )}
               <video ref={videoRef} className="scanner-video" playsInline muted />
-              {scanError && <div className="scanner-error">⚠️ {scanError}</div>}
+              {scanError && (
+                <div className="scanner-error">
+                  <Icon name="warning" size={20} style={{ marginRight: 'var(--spacing-xs)', verticalAlign: 'middle' }} />
+                  {scanError}
+                </div>
+              )}
               <div className="scanner-footer">
                 <button className="btn" onClick={stopScanner}>Annullér</button>
               </div>
@@ -526,26 +544,26 @@ function StreamingSelector({
         <div className="auto-select-section">
           <div className="auto-select-header">
             <div className="auto-select-icon-wrapper">
-              <span className="auto-select-icon">✨</span>
+              <Icon name="sparkles" size={48} className="auto-select-icon" />
             </div>
-            <h3 className="auto-select-title">Hurtig Løsning</h3>
+            <h3 className="auto-select-title">{COPY.titles.quickSolution}</h3>
             <p className="auto-select-subtitle">
-              Klik på knappen nedenfor, så finder systemet automatisk den bedste kombination af abonnementer.
+              {COPY.titles.quickSolutionSubtitle}
             </p>
           </div>
           <button
             onClick={onAutoSelectSolution}
-            className="btn btn-premium auto-select-btn"
+            className={`btn btn-premium auto-select-btn ${(selectedStreaming.length > 0 || customerMobileCost > 0) ? 'auto-select-btn--ready' : ''}`}
             disabled={!selectedStreaming.length && !customerMobileCost}
           >
-            <span className="btn-icon">🚀</span>
-            <span className="btn-text">Find Bedste Løsning Nu</span>
-            <span className="btn-arrow">→</span>
+            <Icon name="rocket" size={32} className="btn-icon" />
+            <span className="btn-text">{COPY.cta.findBestSolution}</span>
+            <Icon name="chevronRight" size={24} className="btn-arrow" />
           </button>
           {(!selectedStreaming.length && !customerMobileCost) && (
             <div className="auto-select-hint-wrapper">
               <p className="auto-select-hint">
-                💡 Vælg mindst én streaming-tjeneste nedenfor eller indtast mobiludgifter for at aktivere.
+                {COPY.help.activateAutoSelect}
               </p>
             </div>
           )}
@@ -563,9 +581,8 @@ function StreamingSelector({
             <button
               key={service.id}
               onClick={() => onStreamingToggle(service.id)}
-              className={`streaming-card glass-card stagger-item animate-fade-in-up ${isSelected ? 'selected' : ''}`}
+              className={`streaming-card glass-card ${isSelected ? 'selected' : ''}`}
               style={{ 
-                animationDelay: `${index * 50}ms`,
                 '--brand-color': service.color || 'var(--color-orange)',
                 '--brand-bg': service.bgColor || 'var(--glass-bg)'
               }}
@@ -591,7 +608,11 @@ function StreamingSelector({
               <div className="streaming-name">{service.name}</div>
               <div className="streaming-price">{formatCurrency(service.price)}/md.</div>
               {isSelected && (
-                <div className="streaming-checkmark animate-bounce-in animate-pulse">✓</div>
+                <div 
+                  className="streaming-checkmark animate-pulse"
+                >
+                  <Icon name="checkCircle" size={28} color="var(--color-success)" />
+                </div>
               )}
             </button>
           );
@@ -603,21 +624,21 @@ function StreamingSelector({
       {/* Totaler */}
       <div className="totals-summary">
         <div className="total-row">
-          <span className="total-label">Mobil pr. måned:</span>
+          <span className="total-label">{COPY.help.perMonth}:</span>
           <span className="total-value">{formatCurrency(customerMobileCost || 0)}</span>
         </div>
         <div className="total-row">
-          <span className="total-label">Streaming pr. måned:</span>
+          <span className="total-label">Streaming {COPY.help.perMonthShort}:</span>
           <span className="total-value">{formatCurrency(streamingTotal)}</span>
         </div>
         <div className="total-row highlight">
-          <span className="total-label font-bold">Total pr. måned:</span>
+          <span className="total-label font-bold">Total {COPY.help.perMonthShort}:</span>
           <span className="total-value font-bold text-2xl">
             {formatCurrency(monthlyTotal)}
           </span>
         </div>
         <div className="total-row six-month">
-          <span className="total-label">6-måneders total:</span>
+          <span className="total-label">{COPY.help.sixMonthTotal}:</span>
           <span className="total-value text-3xl font-extrabold text-gradient">
             {formatCurrency(sixMonthTotal)}
           </span>
@@ -719,9 +740,9 @@ function StreamingSelector({
         }
 
         .auto-select-icon {
-          font-size: var(--font-5xl);
           display: inline-block;
           animation: gentleFloat 3s ease-in-out infinite;
+          color: var(--color-orange);
         }
 
         @keyframes gentleFloat {
@@ -751,9 +772,10 @@ function StreamingSelector({
 
         .auto-select-btn {
           width: 100%;
-          padding: var(--spacing-lg) var(--spacing-xl);
+          padding: var(--spacing-xl) var(--spacing-2xl);
           font-size: var(--font-xl);
           font-weight: var(--font-extrabold);
+          min-height: 56px; /* Større på desktop */
           display: flex;
           align-items: center;
           justify-content: center;
@@ -761,13 +783,55 @@ function StreamingSelector({
           background: linear-gradient(135deg, var(--color-orange), #ff8c42, var(--color-orange));
           background-size: 200% 200%;
           box-shadow: var(--glow-orange), 0 8px 32px rgba(255, 109, 31, 0.4);
-          transition: all var(--transition-base);  /* Max 300ms */
+          transition: all var(--transition-base);
           position: relative;
           overflow: hidden;
           border: 2px solid rgba(255, 255, 255, 0.3);
           border-radius: var(--radius-lg);
           animation: gradientShift 3s ease infinite;
           z-index: 1;
+        }
+
+        /* Pulsing glow når data er klar */
+        .auto-select-btn--ready {
+          animation: gradientShift 3s ease infinite, autoSelectPulse 2s ease-in-out infinite;
+        }
+
+        .auto-select-btn--ready::after {
+          content: '';
+          position: absolute;
+          inset: -4px;
+          background: linear-gradient(135deg, var(--color-orange), rgba(255, 109, 31, 0.5));
+          border-radius: var(--radius-lg);
+          z-index: -1;
+          opacity: 0.5;
+          animation: autoSelectGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes autoSelectPulse {
+          0%, 100% {
+            box-shadow: 
+              var(--glow-orange), 
+              0 8px 32px rgba(255, 109, 31, 0.4),
+              0 0 0 0 rgba(255, 109, 31, 0.7);
+          }
+          50% {
+            box-shadow: 
+              var(--glow-orange), 
+              0 12px 48px rgba(255, 109, 31, 0.6),
+              0 0 0 8px rgba(255, 109, 31, 0);
+          }
+        }
+
+        @keyframes autoSelectGlow {
+          0%, 100% {
+            opacity: 0.5;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.02);
+          }
         }
 
         .auto-select-btn::before {
@@ -807,8 +871,20 @@ function StreamingSelector({
         }
 
         .auto-select-btn .btn-icon {
-          font-size: var(--font-3xl);
           animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        .auto-select-btn--ready .btn-icon {
+          animation: pulseGlow 2s ease-in-out infinite, iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
         }
 
         .auto-select-btn .btn-text {
@@ -816,7 +892,6 @@ function StreamingSelector({
         }
 
         .auto-select-btn .btn-arrow {
-          font-size: var(--font-2xl);
           transition: transform var(--transition-base);  /* Max 300ms */
           opacity: 0.9;
         }
@@ -1015,6 +1090,12 @@ function StreamingSelector({
           font-weight: var(--font-bold);
           font-size: var(--font-sm);
           box-shadow: var(--glow-green);
+          padding: 2px;
+        }
+
+        .section-header-icon {
+          margin-right: var(--spacing-xs);
+          vertical-align: middle;
         }
 
         .streaming-grid {
@@ -1169,6 +1250,7 @@ function StreamingSelector({
           font-weight: var(--font-bold);
           box-shadow: var(--glow-green), 0 0 15px rgba(16, 185, 129, 0.5);
           animation: bounceIn var(--duration-slow) var(--ease-out-back), pulse 2s ease-in-out infinite;
+          padding: 2px;
         }
 
         .totals-summary {

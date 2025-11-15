@@ -3,11 +3,11 @@
  * Viser en enkelt mobilplan med features og pris
  */
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { formatCurrency } from '../utils/calculations';
-
-// Lazy load CBBMixSelector
-const CBBMixSelector = lazy(() => import('./CBBMixSelector'));
+import Icon from './common/Icon';
+import COPY from '../constants/copy';
+import CBBMixSelector from './CBBMixSelector';
 
 function PlanCard({ 
   plan, 
@@ -22,7 +22,7 @@ function PlanCard({
 
   return (
     <div 
-      className={`plan-card glass-card animate-scale-in ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd' ? 'telenor-card' : ''} ${plan.provider === 'telmore' || plan.provider === 'telmore-bredbånd' ? 'telmore-card' : ''}`}
+      className={`plan-card glass-card ${plan.provider === 'cbb' ? 'cbb-card' : ''} ${plan.provider === 'telenor' || plan.provider === 'telenor-b2b' || plan.provider === 'telenor-bredbånd' ? 'telenor-card' : ''} ${plan.provider === 'telmore' || plan.provider === 'telmore-bredbånd' ? 'telmore-card' : ''}`}
       role="article"
       aria-label={`${plan.name} abonnement fra ${plan.provider}`}
     >
@@ -117,7 +117,7 @@ function PlanCard({
             {/* Kompakt familie-rabat badge */}
             {plan.familyDiscount && (
               <div className="telenor-family-discount-compact">
-                <span className="family-icon">👨‍👩‍👧‍👦</span>
+                <Icon name="users" size={18} className="family-icon" />
                 <span className="family-text">-50 kr./md. pr. ekstra abonnement</span>
               </div>
             )}
@@ -126,7 +126,7 @@ function PlanCard({
             <div className="subscription-features-grid">
               {plan.features.slice(0, 4).map((feature, index) => (
                 <div key={index} className="subscription-feature-item">
-                  <span className="feature-icon">✓</span>
+                  <Icon name="check" size={14} className="feature-icon" />
                   <span className="feature-text">{feature}</span>
                 </div>
               ))}
@@ -157,7 +157,10 @@ function PlanCard({
               )}
             </div>
             {plan.familyDiscount && (
-              <div className="badge badge-telenor animate-bounce-in">👨‍👩‍👧‍👦 Familie</div>
+              <div className="badge badge-telenor animate-bounce-in">
+                <Icon name="users" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                Familie
+              </div>
             )}
           </div>
 
@@ -210,7 +213,10 @@ function PlanCard({
           {/* Streaming (hvis inkluderet) */}
           {plan.streaming && plan.streaming.length > 0 && (
             <div className="plan-streaming">
-              <div className="streaming-label">📺 Inkluderer:</div>
+              <div className="streaming-label">
+                <Icon name="tv" size={16} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                Inkluderer:
+              </div>
               <div className="streaming-count badge badge-success">
                 {plan.streamingCount || plan.streaming.length} streaming-tjeneste
                 {(plan.streamingCount || plan.streaming.length) !== 1 ? 'r' : ''}
@@ -233,7 +239,8 @@ function PlanCard({
                 onChange={(e) => onCBBMixToggle && onCBBMixToggle(plan.id, e.target.checked)}
                 className="mix-checkbox"
               />
-              <span className="mix-toggle-text">🎬 Tilføj CBB MIX</span>
+              <Icon name="film" size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              <span className="mix-toggle-text">Tilføj CBB MIX</span>
             </label>
           </div>
           
@@ -259,8 +266,8 @@ function PlanCard({
         }}
         aria-label={`Tilføj ${plan.name} til kurv`}
       >
-        <span className="btn-text">Tilføj til kurv</span>
-        <span className="cart-icon" aria-hidden="true">🛒</span>
+        <span className="btn-text">{COPY.cta.addToCartOriginal}</span>
+        <Icon name="cart" size={20} className="cart-icon" aria-hidden="true" />
       </button>
 
       <style>{`
@@ -290,7 +297,7 @@ function PlanCard({
         }
 
         .plan-card:hover {
-          transform: translateY(-2px) translateZ(0);  /* GPU accelerated */
+          transform: translateY(-6px) scale(1.02) translateZ(0);  /* GPU accelerated lift */
           z-index: 10;
         }
 
@@ -352,7 +359,7 @@ function PlanCard({
         }
 
         .plan-card:hover .plan-pricing {
-          transform: scale(1.02) translateZ(0);  /* Reduced scale, GPU accelerated */
+          transform: scale(1.04) translateZ(0);  /* GPU accelerated scale */
         }
 
         .price-intro,
@@ -370,8 +377,8 @@ function PlanCard({
         }
 
         .plan-card:hover .price-amount {
-          transform: scale(1.05) translateZ(0);  /* Reduced scale, GPU accelerated */
-          text-shadow: 0 0 12px currentColor;  /* Subtle shadow */
+          transform: scale(1.08) translateZ(0);  /* GPU accelerated scale */
+          text-shadow: 0 0 20px currentColor, 0 0 40px rgba(255, 109, 31, 0.5);  /* Glow effect */
         }
 
         .price-period {
@@ -444,12 +451,13 @@ function PlanCard({
 
         .plan-add-btn:hover,
         .plan-add-btn--pulse-glow:hover {
-          transform: translateY(-2px) scale(1.02);
+          transform: translateY(-6px) scale(1.05);
           box-shadow: 
             var(--glow-extreme),
-            0 12px 40px rgba(255, 109, 31, 0.6),
-            0 0 60px rgba(255, 109, 31, 0.4);
-          filter: brightness(1.1);
+            0 16px 56px rgba(255, 109, 31, 0.8),
+            0 0 80px rgba(255, 109, 31, 0.6),
+            0 0 120px rgba(255, 109, 31, 0.3);
+          filter: brightness(1.15);
           animation: pulseGlow 2s ease-in-out infinite;
         }
         
