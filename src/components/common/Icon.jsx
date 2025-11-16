@@ -1,147 +1,114 @@
 /**
- * Icon komponent - Wrapper for lucide-react ikoner
- * Erstat emojis med professionelle ikoner
+ * Simpel Icon komponent uden eksterne dependencies.
+ * Drop-in replacement for tidligere lucide-react baseret ikon-system
+ * (for at undgå runtime-fejlen omkring React.forwardRef i vendor bundlen).
  */
 
-import {
-  Smartphone,
-  CreditCard,
-  Tag,
-  Search,
-  Camera,
-  Rocket,
-  Sparkles,
-  Wallet,
-  Lock,
-  Unlock,
-  RefreshCw,
-  Gift,
-  Tv,
-  Check,
-  Plus,
-  AlertTriangle,
-  User,
-  Briefcase,
-  Zap,
-  CheckCircle2,
-  Sun,
-  Moon,
-  RotateCcw,
-  ShoppingCart,
-  Film,
-  Users,
-  Info,
-  Presentation,
-  Printer,
-  ChevronRight,
-  ChevronLeft,
-  BarChart3,
-  X,
-  ScanLine,
-  Flashlight,
-  FlashlightOff,
-  Book,
-  HelpCircle,
-  Star,
-  TrendingDown,
-  Settings
-} from 'lucide-react';
+import React from 'react';
 
-const iconMap = {
+// Letvægts mapping: vi bruger Unicode-symboler som grafiske ikoner.
+// Navnene matcher de tidligere ikon-navne, så resten af koden kan være uændret.
+const glyphMap = {
   // Mobil og abonnementer
-  smartphone: Smartphone,
-  mobile: Smartphone,
-  phone: Smartphone,
-  
+  smartphone: '📱',
+  mobile: '📱',
+  phone: '📱',
+
   // Finans
-  creditCard: CreditCard,
-  wallet: Wallet,
-  money: Wallet,
-  
+  creditCard: '💳',
+  wallet: '👛',
+  money: '💰',
+
   // Priser og produkter
-  tag: Tag,
-  price: Tag,
-  
-  // Søgning
-  search: Search,
-  scan: ScanLine,
-  camera: Camera,
-  
+  tag: '🏷️',
+  price: '🏷️',
+
+  // Søgning / scan
+  search: '🔍',
+  scan: '📷',
+  camera: '📷',
+
   // Actions
-  rocket: Rocket,
-  sparkles: Sparkles,
-  lock: Lock,
-  unlock: Unlock,
-  refresh: RefreshCw,
-  reset: RotateCcw,
-  gift: Gift,
-  
+  rocket: '🚀',
+  sparkles: '✨',
+  lock: '🔒',
+  unlock: '🔓',
+  refresh: '🔄',
+  reset: '↺',
+  gift: '🎁',
+
   // Streaming og media
-  tv: Tv,
-  streaming: Tv,
-  film: Film,
-  
+  tv: '📺',
+  streaming: '📺',
+  film: '🎬',
+
   // Status
-  check: Check,
-  checkCircle: CheckCircle2,
-  plus: Plus,
-  warning: AlertTriangle,
-  error: AlertTriangle,
-  
+  check: '✔️',
+  checkCircle: '✅',
+  plus: '+',
+  warning: '⚠️',
+  error: '⚠️',
+
   // Personer
-  user: User,
-  customer: User,
-  users: Users,
-  family: Users,
-  
+  user: '👤',
+  customer: '👤',
+  users: '👥',
+  family: '👨‍👩‍👧‍👦',
+
   // Business
-  briefcase: Briefcase,
-  offer: Briefcase,
-  
-  // UI
-  zap: Zap,
-  lightning: Zap,
-  sun: Sun,
-  moon: Moon,
-  cart: ShoppingCart,
-  info: Info,
-  presentation: Presentation,
-  print: Printer,
-  chevronRight: ChevronRight,
-  chevronLeft: ChevronLeft,
-  arrowRight: ChevronRight,
-  arrowLeft: ChevronLeft,
-  chart: BarChart3,
-  analytics: BarChart3,
-  close: X,
-  x: X,
-  torch: Flashlight,
-  torchOff: FlashlightOff,
-  book: Book,
-  helpCircle: HelpCircle,
-  help: HelpCircle,
-  star: Star,
-  trendingDown: TrendingDown,
-  settings: Settings
+  briefcase: '💼',
+  offer: '💼',
+
+  // UI / diverse
+  zap: '⚡',
+  lightning: '⚡',
+  sun: '☀️',
+  moon: '🌙',
+  cart: '🛒',
+  info: 'ℹ️',
+  presentation: '🖥️',
+  print: '🖨️',
+  chevronRight: '›',
+  chevronLeft: '‹',
+  arrowRight: '→',
+  arrowLeft: '←',
+  chart: '📊',
+  analytics: '📈',
+  close: '✕',
+  x: '✕',
+  torch: '🔦',
+  torchOff: '🚫',
+  book: '📘',
+  helpCircle: '❓',
+  help: '❓',
+  star: '★',
+  trendingDown: '📉',
+  settings: '⚙️',
 };
 
 export default function Icon({ name, size = 20, className = '', style = {}, ...props }) {
-  const IconComponent = iconMap[name];
-  
-  if (!IconComponent) {
-    // Return null for unknown icons - silent fail
-    return null;
-  }
-  
+  const glyph = glyphMap[name] || '●';
+
+  const mergedStyle = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: typeof size === 'number' ? `${size}px` : size,
+    lineHeight: 1,
+    // Bevar evt. custom styles
+    ...style,
+  };
+
   return (
-    <IconComponent 
-      size={size} 
+    <span
+      aria-hidden="true"
       className={className}
-      style={style}
+      style={mergedStyle}
       {...props}
-    />
+    >
+      {glyph}
+    </span>
   );
 }
 
-export { iconMap };
 
