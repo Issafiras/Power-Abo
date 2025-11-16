@@ -1,9 +1,9 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
-export default defineConfig(() => {
-  return {
+// Standard Vite-konfiguration uden manuel chunk-splitting
+// (for at undgå fejl i vendor-bundles, f.eks. med React/forwardRef)
+export default defineConfig({
   base: '/Power-Abo/',
   plugins: [react()],
   server: {
@@ -32,8 +32,8 @@ export default defineConfig(() => {
             proxyRes.headers['Access-Control-Allow-Credentials'] = 'false';
           });
         },
-      }
-    }
+      },
+    },
   },
   build: {
     outDir: 'dist',
@@ -41,48 +41,8 @@ export default defineConfig(() => {
     minify: 'esbuild',
     cssMinify: true,
     cssCodeSplit: true,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          // React vendor chunk
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'react-vendor';
-          }
-          // Large component chunks
-          if (id.includes('components/StreamingSelector')) {
-            return 'streaming-selector';
-          }
-          if (id.includes('components/ComparisonPanel')) {
-            return 'comparison-panel';
-          }
-          if (id.includes('components/Cart')) {
-            return 'cart';
-          }
-          if (id.includes('components/PlanCard')) {
-            return 'plan-card';
-          }
-          // Other vendor chunks
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
-        chunkSizeWarningLimit: 1000,
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-            return `assets/images/[name]-[hash][extname]`;
-          }
-          if (/woff2?|eot|ttf|otf/i.test(ext)) {
-            return `assets/fonts/[name]-[hash][extname]`;
-          }
-          return `assets/[name]-[hash][extname]`;
-        }
-      }
-    },
-    // Performance optimizations
     target: 'es2015',
-    chunkSizeWarningLimit: 1000
-  }
-}})
+    chunkSizeWarningLimit: 1000,
+  },
+});
 
