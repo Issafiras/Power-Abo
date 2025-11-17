@@ -3,7 +3,7 @@
  * Viser en enkelt mobilplan med features og pris
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { formatCurrency } from '../utils/calculations';
 import Icon from './common/Icon';
 import COPY from '../constants/copy';

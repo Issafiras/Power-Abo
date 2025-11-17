@@ -9,28 +9,31 @@ import Icon from './Icon';
 describe('Icon', () => {
   it('should render an icon', () => {
     const { container } = render(<Icon name="close" />);
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
+    const span = container.querySelector('span');
+    expect(span).toBeInTheDocument();
+    expect(span).toHaveTextContent('✕');
   });
 
   it('should apply custom size', () => {
     const { container } = render(<Icon name="close" size={24} />);
-    const svg = container.querySelector('svg');
-    expect(svg).toHaveAttribute('width', '24');
-    expect(svg).toHaveAttribute('height', '24');
+    const span = container.querySelector('span');
+    expect(span).toBeInTheDocument();
+    expect(span).toHaveStyle({ fontSize: '24px' });
   });
 
   it('should apply custom className', () => {
     const { container } = render(<Icon name="close" className="custom-class" />);
-    const svg = container.querySelector('svg');
-    expect(svg).toHaveClass('custom-class');
+    const span = container.querySelector('span');
+    expect(span).toBeInTheDocument();
+    expect(span).toHaveClass('custom-class');
   });
 
-  it('should return null for unknown icon names', () => {
+  it('should return fallback icon for unknown icon names', () => {
     const { container } = render(<Icon name="unknown-icon" />);
-    const svg = container.querySelector('svg');
-    // Icon component returns null for unknown icons
-    expect(svg).toBeNull();
+    const span = container.querySelector('span');
+    // Icon component returns a span with fallback glyph '●' for unknown icons
+    expect(span).toBeInTheDocument();
+    expect(span).toHaveTextContent('●');
   });
 });
 

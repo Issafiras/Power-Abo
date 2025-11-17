@@ -3,7 +3,7 @@
  * Simpel count-up animation uden framer-motion
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function AnimatedCounter({ 
   value, 
@@ -14,10 +14,11 @@ export default function AnimatedCounter({
   className = ''
 }) {
   const [displayValue, setDisplayValue] = useState(0);
+  const displayValueRef = useRef(0);
 
   useEffect(() => {
     let startTime = null;
-    const startValue = displayValue;
+    const startValue = displayValueRef.current;
     const endValue = value;
 
     function animate(currentTime) {
@@ -28,11 +29,13 @@ export default function AnimatedCounter({
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = startValue + (endValue - startValue) * eased;
       
+      displayValueRef.current = current;
       setDisplayValue(current);
       
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
+        displayValueRef.current = endValue;
         setDisplayValue(endValue);
       }
     }

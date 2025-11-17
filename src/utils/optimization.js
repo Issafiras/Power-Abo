@@ -47,14 +47,6 @@ export function useThrottle(callback, delay = 300) {
 }
 
 /**
- * Memoized callback factory
- * Wraps a callback in useCallback with proper dependencies
- */
-export function createMemoizedCallback(callback, deps = []) {
-  return useCallback(callback, deps);
-}
-
-/**
  * Virtual scrolling helper
  * Calculates visible items for large lists
  */

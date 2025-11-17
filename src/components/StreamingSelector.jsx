@@ -119,11 +119,15 @@ function StreamingSelector({
     scanningRef.current = false;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     if (zxingReaderRef.current) {
-      try { zxingReaderRef.current.reset(); } catch {}
+      try { zxingReaderRef.current.reset(); } catch {
+        // Ignorer fejl ved reset - reader kan allerede være lukket
+      }
       zxingReaderRef.current = null;
     }
     if (videoRef.current) {
-      try { videoRef.current.pause(); } catch {}
+      try { videoRef.current.pause(); } catch {
+        // Ignorer fejl ved pause - video kan allerede være stoppet
+      }
       videoRef.current.srcObject = null;
     }
     if (streamRef.current) {
@@ -186,7 +190,9 @@ function StreamingSelector({
         ];
         hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
         reader.hints = hints;
-      } catch {}
+      } catch {
+        // Ignorer fejl ved indstilling af hints - fortsæt uden
+      }
 
       await reader.decodeFromVideoDevice(undefined, videoRef.current, async (result, err) => {
         if (!scanningRef.current) return;
@@ -223,13 +229,21 @@ function StreamingSelector({
       try {
         const caps = videoTrack && videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
         if (caps && typeof caps.torch === 'boolean') setTorchSupported(true);
-      } catch {}
+      } catch {
+        // Ignorer fejl ved hentning af capabilities - torch understøttes ikke
+      }
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         // iOS kræver playsInline for at undgå fullscreen
-        try { videoRef.current.setAttribute('playsinline', 'true'); } catch {}
-        try { videoRef.current.setAttribute('muted', 'true'); } catch {}
-        try { videoRef.current.muted = true; } catch {}
+        try { videoRef.current.setAttribute('playsinline', 'true'); } catch {
+          // Ignorer fejl ved indstilling af playsinline attribut
+        }
+        try { videoRef.current.setAttribute('muted', 'true'); } catch {
+          // Ignorer fejl ved indstilling af muted attribut
+        }
+        try { videoRef.current.muted = true; } catch {
+          // Ignorer fejl ved indstilling af muted property
+        }
         await videoRef.current.play();
         // Vent på metadata før vi scanner, så har vi korrekte dimensioner
         if (videoRef.current.readyState < 2) {
@@ -263,7 +277,9 @@ function StreamingSelector({
           await startZxingFallback();
           return;
         }
-      } catch {}
+      } catch {
+        // Ignorer fejl ved tjek af understøttede formater - brug fallback
+      }
       if (!detectorRef.current) {
         detectorRef.current = new window.BarcodeDetector({ formats: ['ean-13', 'ean-8', 'upc-e', 'upc-a', 'code-128'] });
       }
@@ -285,7 +301,9 @@ function StreamingSelector({
             await onDetectedCode(code);
             return;
           }
-        } catch {}
+        } catch {
+          // Ignorer fejl ved detection - fortsæt scanning
+        }
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
@@ -310,7 +328,9 @@ function StreamingSelector({
       const newVal = !torchOn;
       await track.applyConstraints({ advanced: [{ torch: newVal }] });
       setTorchOn(newVal);
-    } catch {}
+    } catch {
+      // Ignorer fejl ved indstilling af torch - funktion understøttes ikke
+    }
   };
 
   useEffect(() => {

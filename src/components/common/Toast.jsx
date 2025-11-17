@@ -29,6 +29,7 @@ function removeToast(id) {
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function toast(message, type = 'success') {
   addToast(message, type);
 }

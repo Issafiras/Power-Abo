@@ -3,6 +3,7 @@
  * Configurerer test environment med nødvendige mocks og utilities
  */
 
+/* eslint-env node */
 import '@testing-library/jest-dom';
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';

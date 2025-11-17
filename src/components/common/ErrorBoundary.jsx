@@ -20,10 +20,10 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     // Log fejlen kun i development mode
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
-    // TODO: I production, send til error reporting service (fx Sentry)
+    // I production, send til error reporting service (fx Sentry) når implementeret
     this.setState({
       error,
       errorInfo
@@ -52,7 +52,7 @@ class ErrorBoundary extends React.Component {
               Der opstod en uventet fejl. Lad os finde en løsning sammen.
             </p>
             
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <details className="error-boundary-details">
                 <summary className="error-boundary-summary">Tekniske detaljer (kun i development)</summary>
                 <pre className="error-boundary-pre">
