@@ -11,7 +11,8 @@ import {
   calculateSavings,
   calculateTelenorFamilyDiscount,
   checkStreamingCoverage,
-  calculateSixMonthPrice
+  calculateSixMonthPrice,
+  findBestSolution
 } from './calculations';
 
 describe('formatCurrency', () => {
@@ -128,14 +129,12 @@ describe('calculateOurOfferTotal', () => {
     const notIncludedStreamingCost = 0;
     const cashDiscount = null;
     const originalItemPrice = 0;
-    const freeSetup = false;
 
     const result = calculateOurOfferTotal(
       cartItems,
       notIncludedStreamingCost,
       cashDiscount,
-      originalItemPrice,
-      freeSetup
+      originalItemPrice
     );
 
     expect(result.monthly).toBeGreaterThan(0);
@@ -152,47 +151,19 @@ describe('calculateOurOfferTotal', () => {
       cartItems,
       0,
       cashDiscount,
-      0,
-      false
+      0
     );
 
     const resultWithoutDiscount = calculateOurOfferTotal(
       cartItems,
       0,
       null,
-      0,
-      false
+      0
     );
 
     expect(resultWithDiscount.monthly).toBeLessThan(resultWithoutDiscount.monthly);
   });
 
-  it('should handle free setup', () => {
-    const cartItems = [
-      { plan: { price: 299 }, quantity: 1 }
-    ];
-
-    const resultWithSetup = calculateOurOfferTotal(
-      cartItems,
-      0,
-      null,
-      0,
-      true
-    );
-
-    const resultWithoutSetup = calculateOurOfferTotal(
-      cartItems,
-      0,
-      null,
-      0,
-      false
-    );
-
-    // Free setup should have setupFeeDiscount equal to setupFee
-    expect(resultWithSetup.setupFeeDiscount).toBe(resultWithSetup.setupFee);
-    expect(resultWithoutSetup.setupFeeDiscount).toBe(0);
-    expect(resultWithSetup.sixMonth).toBeLessThan(resultWithoutSetup.sixMonth);
-  });
 });
 
 describe('calculateSavings', () => {
@@ -274,6 +245,78 @@ describe('checkStreamingCoverage', () => {
 
     const result = checkStreamingCoverage(cartItems, selectedStreaming);
     expect(result.notIncluded).toContain('netflix');
+  });
+});
+
+describe('findBestSolution - streaming match prioritization', () => {
+  it('should prioritize plan with 2 streaming slots when 2 streaming services are selected', () => {
+    // Opret test planer: en med 2 streaming slots og en med 3 streaming slots
+    // Planen med 3 har højere indtjening for at teste at præcis match stadig prioriteres
+    const availablePlans = [
+      {
+        id: 'test-2-streaming',
+        provider: 'telmore',
+        name: 'Test 2 Streaming',
+        price: 299,
+        earnings: 1000, // Lavere indtjening
+        streamingCount: 2,
+        features: []
+      },
+      {
+        id: 'test-3-streaming',
+        provider: 'telmore',
+        name: 'Test 3 Streaming',
+        price: 399,
+        earnings: 1500, // Højere indtjening
+        streamingCount: 3,
+        features: []
+      },
+      {
+        id: 'test-voice-only',
+        provider: 'telmore',
+        name: 'Test Voice Only',
+        price: 199,
+        earnings: 800,
+        streamingCount: 0,
+        features: []
+      }
+    ];
+
+    const selectedStreaming = ['netflix', 'viaplay']; // 2 streaming-tjenester
+    const customerMobileCost = 299;
+    const originalItemPrice = 0;
+    
+    const getStreamingPrice = (id) => {
+      const prices = { netflix: 99, viaplay: 50 };
+      return prices[id] || 0;
+    };
+
+    const result = findBestSolution(
+      availablePlans,
+      selectedStreaming,
+      customerMobileCost,
+      originalItemPrice,
+      getStreamingPrice,
+      {
+        requiredLines: 1,
+        maxLines: 5,
+        excludedProviders: []
+      }
+    );
+
+    // Verificer at resultatet indeholder planen med 2 streaming slots
+    expect(result.cartItems).toBeDefined();
+    expect(result.cartItems.length).toBeGreaterThan(0);
+    
+    // Find den valgte streaming plan
+    const streamingPlan = result.cartItems.find(item => 
+      item.plan.streamingCount && item.plan.streamingCount > 0
+    );
+    
+    // Verificer at den valgte plan har præcis 2 streaming slots
+    expect(streamingPlan).toBeDefined();
+    expect(streamingPlan.plan.streamingCount).toBe(2);
+    expect(streamingPlan.plan.id).toBe('test-2-streaming');
   });
 });
 

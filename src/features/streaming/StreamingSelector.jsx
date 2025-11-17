@@ -3,14 +3,14 @@
  * Multi-select grid af streaming-tjenester
  */
 
-import { streamingServices as staticStreaming } from '../data/streamingServices';
-import { formatCurrency } from '../utils/calculations';
-import { searchProductsWithPrices, validateEAN } from '../utils/powerApi';
+import { streamingServices as staticStreaming } from '../../data/streamingServices';
+import { formatCurrency } from '../../utils/calculations';
+import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { toast } from './common/Toast';
-import Icon from './common/Icon';
-import COPY from '../constants/copy';
+import { toast } from '../../components/common/Toast';
+import Icon from '../../components/common/Icon';
+import COPY from '../../constants/copy';
 
 function StreamingSelector({ 
   selectedStreaming, 

@@ -19,7 +19,7 @@
 
 
 // Konstanter
-export const SETUP_FEE_PER_LINE = 99; // Oprettelsesgebyr per mobilabonnement (engangsbetaling)
+// Oprettelsesgebyr er fjernet
 
 /**
  * Beregn 6-måneders pris for en plan med intro-pris håndtering
@@ -253,8 +253,6 @@ export function calculateCustomerTotal(currentMobileCost, streamingCost, origina
  * 
  * 5) ENGANGSBETALINGER
  *    - Tilføj varens pris (hvis relevant)
- *    - Tilføj oprettelsesgebyr (99 kr pr. linje)
- *    - Træk oprettelsesgebyr rabat fra (hvis gratis oprettelse)
  * 
  * EKSEMPEL:
  * - 2× Telmore 299 kr/md planer
@@ -267,31 +265,23 @@ export function calculateCustomerTotal(currentMobileCost, streamingCost, origina
  * 2) Familie-rabat: 0 kr (kun Telmore, ikke Telenor)
  * 3) Streaming tillæg: 50 kr × 6 = 300 kr
  * 4) Kontant rabat: 0 kr
- * 5) Oprettelsesgebyr: 99 kr × 2 = 198 kr
- * 6) Varens pris: 1.000 kr
+ * 5) Varens pris: 1.000 kr
  * 
- * Total: 3.588 + 300 + 198 + 1.000 = 5.086 kr (6 måneder)
+ * Total: 3.588 + 300 + 1.000 = 4.888 kr (6 måneder)
  * Månedlig: (3.588 + 300) / 6 = 648 kr/md
  * 
  * @param {Array} cartItems - Array af kurv-items
  * @param {number} streamingCost - Ikke-inkluderet streaming-omkostning pr. måned
  * @param {number} cashDiscount - Kontant rabat (engangsrabat, valgfri)
  * @param {number} originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
- * @param {boolean} freeSetup - Om oprettelse er gratis (rabat på oprettelsesgebyr)
- * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number, setupFee: number, setupFeeDiscount: number }
+ * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number }
  */
-export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0, freeSetup = false) {
+export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0) {
   if (!cartItems || cartItems.length === 0) {
-    return { monthly: 0, sixMonth: 0, telenorDiscount: 0, setupFee: 0, setupFeeDiscount: 0 };
+    return { monthly: 0, sixMonth: 0, telenorDiscount: 0 };
   }
 
   // ===== TRIN 1: ABONNEMENT PRISER =====
-  // Beregn totalt antal mobilabonnementer
-  const totalLines = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  
-  // Beregn oprettelsesgebyr (99 kr pr. linje, engangsbetaling)
-  const setupFee = totalLines * SETUP_FEE_PER_LINE;
-  const setupFeeDiscount = freeSetup ? setupFee : 0; // Rabat hvis gratis oprettelse
 
   // Beregn 6-måneders total for alle planer (inkl. CBB Mix)
   const plansSixMonth = cartItems.reduce((total, item) => {
@@ -327,16 +317,13 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
   const afterCashDiscount = beforeCashDiscount - (cashDiscount || 0);
   
   // ===== TRIN 5: ENGANGSBETALINGER =====
-  // Tilføj varens pris og oprettelsesgebyr (engangsbetalinger)
-  // Hvis gratis oprettelse, træk oprettelsesgebyret fra som rabat
-  const sixMonth = afterCashDiscount + (originalItemPrice || 0) + setupFee - setupFeeDiscount;
+  // Tilføj varens pris (engangsbetaling)
+  const sixMonth = afterCashDiscount + (originalItemPrice || 0);
 
   return {
     monthly: afterCashDiscount / 6, // Månedlig beregnes uden engangsbetalinger (abonnementer + streaming - rabatter)
     sixMonth: Math.max(0, sixMonth), // Må ikke være negativ
-    telenorDiscount, // Månedlig Telenor rabat (til visning)
-    setupFee, // Total oprettelsesgebyr
-    setupFeeDiscount // Rabat på oprettelsesgebyr (hvis gratis oprettelse)
+    telenorDiscount // Månedlig Telenor rabat (til visning)
   };
 }
 
@@ -435,6 +422,33 @@ export function formatCurrency(amount) {
  */
 export function formatNumber(num) {
   return new Intl.NumberFormat('da-DK').format(num);
+}
+
+/**
+ * Beregn måned-for-måned pris for en plan (inkl. intro-pris transition)
+ * @param {Object} plan - Plan objekt
+ * @param {number} quantity - Antal linjer
+ * @returns {Array<number>} Array med priser for hver måned (6 måneder)
+ */
+export function calculateMonthlyBreakdown(plan, quantity = 1) {
+  if (!plan) return [0, 0, 0, 0, 0, 0];
+  
+  const monthlyPrices = [];
+  
+  for (let month = 1; month <= 6; month++) {
+    let price;
+    
+    // Hvis der er intro-pris og vi stadig er i intro-perioden
+    if (plan.introPrice && plan.introMonths && month <= plan.introMonths) {
+      price = plan.introPrice * quantity;
+    } else {
+      price = plan.price * quantity;
+    }
+    
+    monthlyPrices.push(price);
+  }
+  
+  return monthlyPrices;
 }
 
 /**
@@ -559,6 +573,19 @@ export function checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming) {
 }
 
 /**
+ * Tjek om alle planer i en kurv kommer fra samme operatør
+ * @param {Array} cartItems - Array af kurv-items
+ * @returns {boolean} True hvis alle planer har samme provider, ellers false
+ */
+function hasSameProvider(cartItems) {
+  if (!cartItems || cartItems.length === 0) return true;
+  if (cartItems.length === 1) return true;
+  
+  const firstProvider = cartItems[0].plan.provider;
+  return cartItems.every(item => item.plan.provider === firstProvider);
+}
+
+/**
  * Find den bedste automatiske løsning for kunden
  * @param {Array} availablePlans - Alle tilgængelige planer
  * @param {Array} selectedStreaming - Valgte streaming-tjenester
@@ -569,22 +596,85 @@ export function checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming) {
  * @returns {Object} { cartItems: Array, explanation: string, savings: number, earnings: number }
  */
 export function findBestSolution(availablePlans, selectedStreaming = [], customerMobileCost = 0, originalItemPrice = 0, getStreamingPrice = null, options = {}) {
-  const numberOfLines = options.requiredLines || 1;
+  // ===== INPUT VALIDERING =====
+  // Valider availablePlans
+  if (!Array.isArray(availablePlans) || availablePlans.length === 0) {
+    return {
+      cartItems: [],
+      explanation: 'Ingen tilgængelige planer fundet',
+      savings: 0,
+      earnings: 0
+    };
+  }
+
+  // Valider selectedStreaming
+  if (!Array.isArray(selectedStreaming)) {
+    selectedStreaming = [];
+  }
+
+  // Valider getStreamingPrice - skal være funktion eller null
+  if (getStreamingPrice !== null && typeof getStreamingPrice !== 'function') {
+    getStreamingPrice = null;
+  }
+
+  // Valider options
+  if (!options || typeof options !== 'object') {
+    options = {};
+  }
+
+  // Valider og normaliser options værdier
+  const numberOfLines = Number.isInteger(options.requiredLines) && options.requiredLines > 0 
+    ? options.requiredLines 
+    : 1;
+  
   const {
     maxPlansToConsider = 3, // Maks antal forskellige planer at overveje
     preferSavings = true, // Prioriter besparelse over indtjening
     minSavings = -Infinity, // Minimum besparelse krævet
     maxLines = 5, // Maks antal linjer totalt
-    requiredLines = 1, // Påkrævet antal linjer
+    requiredLines = numberOfLines, // Påkrævet antal linjer
     excludedProviders = [] // Array af provider navne der skal ekskluderes (fx ['telmore', 'telenor', 'cbb'])
   } = options;
 
+  // Valider at requiredLines er et gyldigt tal
+  const validRequiredLines = Number.isInteger(requiredLines) && requiredLines > 0 && requiredLines <= 20
+    ? requiredLines 
+    : 1;
+  
+  // Valider at maxLines er et gyldigt tal
+  const validMaxLines = Number.isInteger(maxLines) && maxLines > 0 && maxLines <= 20
+    ? maxLines 
+    : 5;
+
+  // Valider at excludedProviders er et array
+  const validExcludedProviders = Array.isArray(excludedProviders) ? excludedProviders : [];
+
+  // Valider numeriske input
+  const validCustomerMobileCost = Number.isFinite(customerMobileCost) && customerMobileCost >= 0
+    ? customerMobileCost 
+    : 0;
+  
+  const validOriginalItemPrice = Number.isFinite(originalItemPrice) && originalItemPrice >= 0
+    ? originalItemPrice 
+    : 0;
+
+  // Valider minSavings
+  const validMinSavings = Number.isFinite(minSavings) ? minSavings : -Infinity;
+
   // Filtrer planer - ekskluder business planer og bredbånd hvis ikke relevant
   const today = new Date();
+  if (!Number.isFinite(today.getTime())) {
+    // Hvis dato er ugyldig, brug nuværende dato
+    today = new Date();
+  }
   today.setHours(0, 0, 0, 0);
   
   const mobilePlans = availablePlans.filter(plan => {
-    if (plan.business) return false;
+    // Defensive check: Plan skal være et objekt
+    if (!plan || typeof plan !== 'object') return false;
+    
+    // Defensive checks for plan properties
+    if (plan.business === true) return false;
     if (plan.type === 'broadband') return false;
     
     // ALTID ekskluder CBB planer
@@ -592,13 +682,14 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     
     // KRITISK: Ekskluder planer med negativ eller nul indtjening
     // Vi skal kun vælge løsninger hvor vi tjener penge
-    const earnings = plan.earnings || 0;
+    const earnings = (plan.earnings != null && Number.isFinite(plan.earnings)) ? plan.earnings : 0;
     if (earnings <= 0) return false;
     
     // Ekskluder planer fra eksisterende brands
-    if (excludedProviders && excludedProviders.length > 0) {
-      const planProvider = plan.provider || '';
-      const isExcluded = excludedProviders.some(excluded => {
+    if (validExcludedProviders && validExcludedProviders.length > 0) {
+      const planProvider = (plan.provider && typeof plan.provider === 'string') ? plan.provider : '';
+      const isExcluded = validExcludedProviders.some(excluded => {
+        if (!excluded || typeof excluded !== 'string') return false;
         // Match både eksakt og med variante navne (fx 'telenor' matcher 'telenor-bredbånd')
         return planProvider.toLowerCase() === excluded.toLowerCase() ||
                planProvider.toLowerCase().startsWith(excluded.toLowerCase() + '-');
@@ -608,18 +699,32 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
       }
     }
     
-    // Tjek expiresAt
-    if (plan.expiresAt) {
-      const expiresAtDate = new Date(plan.expiresAt);
-      expiresAtDate.setHours(23, 59, 59, 999);
-      if (today > expiresAtDate) return false;
+    // Tjek expiresAt - defensive date handling
+    if (plan.expiresAt != null) {
+      try {
+        const expiresAtDate = new Date(plan.expiresAt);
+        if (Number.isFinite(expiresAtDate.getTime())) {
+          expiresAtDate.setHours(23, 59, 59, 999);
+          if (today > expiresAtDate) return false;
+        }
+      } catch (e) {
+        // Hvis dato er ugyldig, ekskluder planen for sikkerheds skyld
+        return false;
+      }
     }
     
-    // Tjek availableFrom
-    if (plan.availableFrom) {
-      const availableFromDate = new Date(plan.availableFrom);
-      availableFromDate.setHours(0, 0, 0, 0);
-      if (today < availableFromDate) return false;
+    // Tjek availableFrom - defensive date handling
+    if (plan.availableFrom != null) {
+      try {
+        const availableFromDate = new Date(plan.availableFrom);
+        if (Number.isFinite(availableFromDate.getTime())) {
+          availableFromDate.setHours(0, 0, 0, 0);
+          if (today < availableFromDate) return false;
+        }
+      } catch (e) {
+        // Hvis dato er ugyldig, ekskluder planen for sikkerheds skyld
+        return false;
+      }
     }
     
     return true;
@@ -635,14 +740,52 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
 
   // Beregn streaming-pris hvis funktion er givet
   const getPrice = getStreamingPrice || ((id) => 100); // Fallback til 100 kr
-  const streamingCost = selectedStreaming.reduce((sum, id) => sum + getPrice(id), 0);
+  
+  // Sikre array operation - valider selectedStreaming før reduce
+  let streamingCost = 0;
+  if (Array.isArray(selectedStreaming) && selectedStreaming.length > 0) {
+    try {
+      streamingCost = selectedStreaming.reduce((sum, id) => {
+        if (id == null) return sum;
+        const price = getPrice(id);
+        const validPrice = Number.isFinite(price) && price >= 0 ? price : 0;
+        const newSum = sum + validPrice;
+        // Valider at sum ikke bliver ugyldig
+        return Number.isFinite(newSum) ? newSum : sum;
+      }, 0);
+      // Sikre at streamingCost er et gyldigt tal
+      if (!Number.isFinite(streamingCost) || streamingCost < 0) {
+        streamingCost = 0;
+      }
+    } catch (e) {
+      // Hvis reduce fejler, brug 0
+      streamingCost = 0;
+    }
+  }
+  
   // Kundens mobiludgifter er allerede totalt (ikke pr. linje)
-  const customerTotal = calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice);
+  const customerTotal = calculateCustomerTotal(validCustomerMobileCost, streamingCost, validOriginalItemPrice);
+  
+  // Valider customerTotal resultat
+  if (!customerTotal || typeof customerTotal !== 'object') {
+    return {
+      cartItems: [],
+      explanation: 'Fejl ved beregning af kundens total',
+      savings: 0,
+      earnings: 0
+    };
+  }
+  
+  // Valider at customerTotal har gyldige tal
+  const validCustomerSixMonth = Number.isFinite(customerTotal.sixMonth) && customerTotal.sixMonth >= 0
+    ? customerTotal.sixMonth 
+    : 0;
 
   let bestSolution = null;
   let bestSavings = -Infinity;
   let bestEarnings = -Infinity;
   let bestExplanation = '';
+  let bestScore = -Infinity; // Gem den bedste score inkl. bonus
   
   // Maksimal tilladt mersalg (kunden må betale maksimalt 900 kr mere)
   const MAX_ADDITIONAL_COST = 900; // 6 måneder
@@ -650,18 +793,24 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
   // Funktion til at beregne score baseret på indtjening og besparelse
   // Prioriterer indtjening højere end besparelse
   const calculateScore = (savings, earnings) => {
+    // Valider input
+    const validSavings = Number.isFinite(savings) ? savings : -Infinity;
+    const validEarnings = Number.isFinite(earnings) ? earnings : 0;
+    
     // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
-    if (savings < -MAX_ADDITIONAL_COST) {
+    if (validSavings < -MAX_ADDITIONAL_COST) {
       return -Infinity; // Diskvalificer løsninger der er for dyre
     }
     // KRITISK: Vi skal ALTID tjene penge
-    if (earnings <= 0) {
+    if (validEarnings <= 0) {
       return -Infinity; // Diskvalificer løsninger uden indtjening
     }
     // Prioriter indtjening meget højere end besparelse
     // Score = indtjening * 10 + besparelse (normaliseret)
     // Dette sikrer at høj indtjening altid vinder, selv hvis kunden betaler lidt mere
-    return (earnings * 10) + savings;
+    const score = (validEarnings * 10) + validSavings;
+    // Valider at score er et gyldigt tal
+    return Number.isFinite(score) ? score : -Infinity;
   };
 
   // Hvis ingen streaming-tjenester, find plan med højeste indtjening
@@ -674,33 +823,58 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     let bestEarningsForNoStreaming = 0;
 
     for (const plan of mobilePlans) {
-      if ((plan.earnings || 0) <= 0) continue; // Skip planer uden indtjening
+      // Defensive check
+      if (!plan || typeof plan !== 'object') continue;
       
-      const testCart = [{ plan, quantity: requiredLines, cbbMixEnabled: false, cbbMixCount: 0 }];
-      const ourTotal = calculateOurOfferTotal(testCart, 0, 0, originalItemPrice);
-      const savings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
-      const earnings = calculateTotalEarnings(testCart);
+      const planEarnings = (plan.earnings != null && Number.isFinite(plan.earnings)) ? plan.earnings : 0;
+      if (planEarnings <= 0) continue; // Skip planer uden indtjening
       
-      // Kun overvej hvis kunden maksimalt betaler 900 kr mere
-      if (savings >= -MAX_ADDITIONAL_COST && earnings > 0) {
-        const score = calculateScore(savings, earnings);
-        if (score > bestScoreForNoStreaming) {
-          bestScoreForNoStreaming = score;
-          bestPlanForNoStreaming = plan;
-          bestSavingsForNoStreaming = savings;
-          bestEarningsForNoStreaming = earnings;
+      try {
+        const testCart = [{ plan, quantity: validRequiredLines, cbbMixEnabled: false, cbbMixCount: 0 }];
+        const ourTotal = calculateOurOfferTotal(testCart, 0, 0, validOriginalItemPrice);
+        
+        // Valider ourTotal
+        if (!ourTotal || typeof ourTotal !== 'object') continue;
+        const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) && ourTotal.sixMonth >= 0
+          ? ourTotal.sixMonth 
+          : 0;
+        
+        const savings = calculateSavings(validCustomerSixMonth, validOurSixMonth);
+        const earnings = calculateTotalEarnings(testCart);
+        
+        // Valider beregninger
+        const validSavings = Number.isFinite(savings) ? savings : -Infinity;
+        const validEarnings = Number.isFinite(earnings) && earnings > 0 ? earnings : 0;
+        
+        // Kun overvej hvis kunden maksimalt betaler 900 kr mere
+        if (validSavings >= -MAX_ADDITIONAL_COST && validEarnings > 0) {
+          const score = calculateScore(validSavings, validEarnings);
+          if (Number.isFinite(score) && score > bestScoreForNoStreaming) {
+            bestScoreForNoStreaming = score;
+            bestPlanForNoStreaming = plan;
+            bestSavingsForNoStreaming = validSavings;
+            bestEarningsForNoStreaming = validEarnings;
+          }
         }
+      } catch (e) {
+        // Skip denne plan hvis beregning fejler
+        continue;
       }
     }
 
     if (bestPlanForNoStreaming) {
-      const testCart = [{ plan: bestPlanForNoStreaming, quantity: requiredLines, cbbMixEnabled: false, cbbMixCount: 0 }];
+      const planName = bestPlanForNoStreaming.name || 'Ukendt plan';
+      const planProvider = (bestPlanForNoStreaming.provider && typeof bestPlanForNoStreaming.provider === 'string')
+        ? bestPlanForNoStreaming.provider.toUpperCase()
+        : 'UKENDT';
+      
+      const testCart = [{ plan: bestPlanForNoStreaming, quantity: validRequiredLines, cbbMixEnabled: false, cbbMixCount: 0 }];
       const savingsText = bestSavingsForNoStreaming >= 0 
         ? `Besparelse: ${formatCurrency(bestSavingsForNoStreaming)}` 
         : `Mersalg: ${formatCurrency(Math.abs(bestSavingsForNoStreaming))}`;
       return {
         cartItems: testCart,
-        explanation: `Forslag: ${bestPlanForNoStreaming.name} fra ${bestPlanForNoStreaming.provider.toUpperCase()} (${requiredLines} linje${requiredLines > 1 ? 'r' : ''}) - ${savingsText} (Indtjening: ${formatCurrency(bestEarningsForNoStreaming)})`,
+        explanation: `Forslag: ${planName} fra ${planProvider} (${validRequiredLines} linje${validRequiredLines > 1 ? 'r' : ''}) - ${savingsText} (Indtjening: ${formatCurrency(bestEarningsForNoStreaming)})`,
         savings: bestSavingsForNoStreaming,
         earnings: bestEarningsForNoStreaming
       };
@@ -711,254 +885,556 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
   // Sorteret efter indtjening (højest først) - maksimer indtjening
   const voiceOnlyPlans = mobilePlans
     .filter(plan => {
+      // Defensive check
+      if (!plan || typeof plan !== 'object') return false;
+      
       // Skal ikke have streaming slots
-      if (plan.streamingCount > 0) return false;
+      if (plan.streamingCount != null && Number.isFinite(plan.streamingCount) && plan.streamingCount > 0) return false;
       // Skal ikke have specifikke streaming-tjenester
-      if (plan.streaming && plan.streaming.length > 0) return false;
+      if (Array.isArray(plan.streaming) && plan.streaming.length > 0) return false;
       // Skal ikke have CBB Mix
-      if (plan.cbbMixAvailable) return false;
+      if (plan.cbbMixAvailable === true) return false;
       // Alt andet er voice-only (inkl. Fri Data planer)
       return true;
     })
     .sort((a, b) => {
-      // Først: Prioriter høj indtjening (maksimer indtjening)
-      const earningsA = a.earnings || 0;
-      const earningsB = b.earnings || 0;
-      if (earningsB !== earningsA) {
-        return earningsB - earningsA; // Højeste indtjening først
+      try {
+        // Først: Prioriter høj indtjening (maksimer indtjening)
+        const earningsA = (a.earnings != null && Number.isFinite(a.earnings)) ? a.earnings : 0;
+        const earningsB = (b.earnings != null && Number.isFinite(b.earnings)) ? b.earnings : 0;
+        if (earningsB !== earningsA) {
+          return earningsB - earningsA; // Højeste indtjening først
+        }
+        // Hvis samme indtjening, vælg billigste (for kundens skyld)
+        const priceA = calculateSixMonthPrice(a, 1);
+        const priceB = calculateSixMonthPrice(b, 1);
+        const validPriceA = Number.isFinite(priceA) ? priceA : Infinity;
+        const validPriceB = Number.isFinite(priceB) ? priceB : Infinity;
+        return validPriceA - validPriceB;
+      } catch (e) {
+        return 0; // Hvis sortering fejler, behold rækkefølge
       }
-      // Hvis samme indtjening, vælg billigste (for kundens skyld)
-      const priceA = calculateSixMonthPrice(a, 1);
-      const priceB = calculateSixMonthPrice(b, 1);
-      return priceA - priceB;
     });
   
 
   // Find planer med streaming coverage
-  const plansWithStreaming = mobilePlans.filter(plan => 
-    plan.streamingCount > 0 || 
-    (plan.streaming && plan.streaming.length > 0) ||
-    plan.cbbMixAvailable
-  );
+  const plansWithStreaming = mobilePlans.filter(plan => {
+    if (!plan || typeof plan !== 'object') return false;
+    return (plan.streamingCount != null && Number.isFinite(plan.streamingCount) && plan.streamingCount > 0) || 
+           (Array.isArray(plan.streaming) && plan.streaming.length > 0) ||
+           plan.cbbMixAvailable === true;
+  });
 
-  // Sorter streaming-planer efter indtjening (højest først)
+  // Sorter streaming-planer: først præcis match, derefter tættest match, til sidst indtjening
   const sortedStreamingPlans = [...plansWithStreaming].sort((a, b) => {
-    const earningsA = a.earnings || 0;
-    const earningsB = b.earnings || 0;
-    if (earningsB !== earningsA) {
-      return earningsB - earningsA; // Højeste indtjening først
+    try {
+      // Hent streamingCount for hver plan
+      const streamingCountA = (a.streamingCount != null && Number.isFinite(a.streamingCount)) 
+        ? a.streamingCount 
+        : (a.cbbMixAvailable === true ? Math.min(selectedStreaming.length, 8) : 0);
+      const streamingCountB = (b.streamingCount != null && Number.isFinite(b.streamingCount)) 
+        ? b.streamingCount 
+        : (b.cbbMixAvailable === true ? Math.min(selectedStreaming.length, 8) : 0);
+      
+      const selectedCount = selectedStreaming.length;
+      
+      // Prioritering 1: Præcis match (streamingCount === selectedCount)
+      const isExactMatchA = streamingCountA === selectedCount;
+      const isExactMatchB = streamingCountB === selectedCount;
+      
+      if (isExactMatchA && !isExactMatchB) {
+        return -1; // A er præcis match, B er ikke
+      }
+      if (!isExactMatchA && isExactMatchB) {
+        return 1; // B er præcis match, A er ikke
+      }
+      
+      // Prioritering 2: Planer med streamingCount <= selectedCount prioriteres over dem med streamingCount > selectedCount
+      const isWithinLimitA = streamingCountA <= selectedCount;
+      const isWithinLimitB = streamingCountB <= selectedCount;
+      
+      if (isWithinLimitA && !isWithinLimitB) {
+        return -1; // A er inden for grænsen, B er over
+      }
+      if (!isWithinLimitA && isWithinLimitB) {
+        return 1; // B er inden for grænsen, A er over
+      }
+      
+      // Prioritering 3: Tættest match (streamingCount tættest på selectedCount)
+      // Hvis begge er inden for grænsen eller begge er over, prioriter tættest match
+      if (!isExactMatchA && !isExactMatchB) {
+        // For planer inden for grænsen: mindre afstand er bedre
+        // For planer over grænsen: mindre overskridelse er bedre
+        if (isWithinLimitA && isWithinLimitB) {
+          // Begge er inden for grænsen - tættest på selectedCount er bedst
+          const distanceA = selectedCount - streamingCountA;
+          const distanceB = selectedCount - streamingCountB;
+          if (distanceA !== distanceB) {
+            return distanceA - distanceB; // Mindre afstand er bedre
+          }
+        } else {
+          // Begge er over grænsen - mindre overskridelse er bedre
+          const overshootA = streamingCountA - selectedCount;
+          const overshootB = streamingCountB - selectedCount;
+          if (overshootA !== overshootB) {
+            return overshootA - overshootB; // Mindre overskridelse er bedre
+          }
+        }
+      }
+      
+      // Prioritering 4: Indtjening (højest først)
+      const earningsA = (a.earnings != null && Number.isFinite(a.earnings)) ? a.earnings : 0;
+      const earningsB = (b.earnings != null && Number.isFinite(b.earnings)) ? b.earnings : 0;
+      if (earningsB !== earningsA) {
+        return earningsB - earningsA; // Højeste indtjening først
+      }
+      
+      // Prioritering 5: Hvis samme indtjening, vælg billigste
+      const priceA = calculateSixMonthPrice(a, 1);
+      const priceB = calculateSixMonthPrice(b, 1);
+      const validPriceA = Number.isFinite(priceA) ? priceA : Infinity;
+      const validPriceB = Number.isFinite(priceB) ? priceB : Infinity;
+      return validPriceA - validPriceB;
+    } catch (e) {
+      return 0; // Hvis sortering fejler, behold rækkefølge
     }
-    // Hvis samme indtjening, vælg billigste
-    return calculateSixMonthPrice(a, 1) - calculateSixMonthPrice(b, 1);
   });
 
 
   // Strategi 1: En plan med streaming + voice-only planer til resten
   if (selectedStreaming.length > 0 && sortedStreamingPlans.length > 0 && voiceOnlyPlans.length > 0) {
     for (const streamingPlan of sortedStreamingPlans.slice(0, 5)) {
+      // Defensive check
+      if (!streamingPlan || typeof streamingPlan !== 'object') continue;
+      
       let streamingLinesNeeded = 1;
       let streamingSlotsAvailable = 0;
       
-      // Beregn hvor mange linjer der skal bruges til streaming
-      if (streamingPlan.streamingCount > 0) {
-        streamingSlotsAvailable = streamingPlan.streamingCount;
-        streamingLinesNeeded = Math.ceil(selectedStreaming.length / streamingSlotsAvailable);
-      } else if (streamingPlan.cbbMixAvailable) {
-        // CBB Mix kan dække op til 8 tjenester på 1 linje
-        streamingLinesNeeded = 1;
-        streamingSlotsAvailable = Math.min(selectedStreaming.length, 8);
-      } else {
-        continue; // Skip planer uden streaming slots
-      }
-      
-      // Hvis vi har flere linjer end nødvendigt til streaming, brug voice-only til resten
-      const remainingLines = requiredLines - streamingLinesNeeded;
-      
-      if (remainingLines >= 0 && streamingLinesNeeded <= maxLines) {
-        // Prøv forskellige voice-only planer for at finde den bedste kombination
-        // Test de første 5 voice-only planer (sorteret efter indtjening)
-        const voicePlansToTest = voiceOnlyPlans.slice(0, 5);
+      try {
+        // Beregn hvor mange linjer der skal bruges til streaming
+        const streamingCount = (streamingPlan.streamingCount != null && Number.isFinite(streamingPlan.streamingCount))
+          ? streamingPlan.streamingCount 
+          : 0;
         
-        for (const voicePlan of voicePlansToTest) {
-          const testCart = [];
-          
-          // Tilføj streaming plan
-          if (streamingPlan.cbbMixAvailable) {
-            testCart.push({
-              plan: streamingPlan,
-              quantity: streamingLinesNeeded,
-              cbbMixEnabled: true,
-              cbbMixCount: Math.min(selectedStreaming.length, 8)
-            });
-          } else {
-            testCart.push({
-              plan: streamingPlan,
-              quantity: streamingLinesNeeded,
-              cbbMixEnabled: false,
-              cbbMixCount: 0
-            });
+        if (streamingCount > 0) {
+          streamingSlotsAvailable = streamingCount;
+          streamingLinesNeeded = Math.ceil(selectedStreaming.length / streamingSlotsAvailable);
+          // Valider at streamingLinesNeeded er et gyldigt tal
+          if (!Number.isFinite(streamingLinesNeeded) || streamingLinesNeeded < 1) {
+            streamingLinesNeeded = 1;
           }
+        } else if (streamingPlan.cbbMixAvailable === true) {
+          // CBB Mix kan dække op til 8 tjenester på 1 linje
+          streamingLinesNeeded = 1;
+          streamingSlotsAvailable = Math.min(selectedStreaming.length, 8);
+        } else {
+          continue; // Skip planer uden streaming slots
+        }
+        
+        // Hvis vi har flere linjer end nødvendigt til streaming, brug voice-only til resten
+        const remainingLines = validRequiredLines - streamingLinesNeeded;
+        
+        if (remainingLines >= 0 && streamingLinesNeeded <= validMaxLines) {
+          // Filtrer voice-only planer til kun at inkludere dem fra samme operatør som streaming-planen
+          // Dette sikrer at vi kun kombinerer planer fra samme operatør
+          const streamingProvider = (streamingPlan.provider && typeof streamingPlan.provider === 'string')
+            ? streamingPlan.provider 
+            : '';
           
-          // Tilføj voice-only planer til resten
-          if (remainingLines > 0) {
-            testCart.push({
-              plan: voicePlan,
-              quantity: remainingLines,
-              cbbMixEnabled: false,
-              cbbMixCount: 0
-            });
-          }
+          const voicePlansFromSameProvider = voiceOnlyPlans.filter(plan => {
+            if (!plan || typeof plan !== 'object') return false;
+            const planProvider = (plan.provider && typeof plan.provider === 'string') ? plan.provider : '';
+            return planProvider === streamingProvider;
+          });
           
-          const coverage = checkStreamingCoverageWithCBBMix(testCart, selectedStreaming);
-          const notIncludedCost = coverage.notIncluded.reduce((sum, id) => sum + getPrice(id), 0);
-          const ourTotal = calculateOurOfferTotal(testCart, notIncludedCost, 0, originalItemPrice);
-          const savings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
-          const earnings = calculateTotalEarnings(testCart);
-          const score = calculateScore(savings, earnings);
+          // Prøv forskellige voice-only planer for at finde den bedste kombination
+          // Test de første 5 voice-only planer fra samme operatør (sorteret efter indtjening)
+          const voicePlansToTest = voicePlansFromSameProvider.slice(0, 5);
+          
+          for (const voicePlan of voicePlansToTest) {
+            // Defensive check
+            if (!voicePlan || typeof voicePlan !== 'object') continue;
+            
+            try {
+              const testCart = [];
+              
+              // Tilføj streaming plan
+              if (streamingPlan.cbbMixAvailable === true) {
+                const cbbMixCount = Math.min(selectedStreaming.length, 8);
+                testCart.push({
+                  plan: streamingPlan,
+                  quantity: streamingLinesNeeded,
+                  cbbMixEnabled: true,
+                  cbbMixCount: Number.isFinite(cbbMixCount) ? cbbMixCount : 2
+                });
+              } else {
+                testCart.push({
+                  plan: streamingPlan,
+                  quantity: streamingLinesNeeded,
+                  cbbMixEnabled: false,
+                  cbbMixCount: 0
+                });
+              }
+              
+              // Tilføj voice-only planer til resten
+              if (remainingLines > 0) {
+                testCart.push({
+                  plan: voicePlan,
+                  quantity: remainingLines,
+                  cbbMixEnabled: false,
+                  cbbMixCount: 0
+                });
+              }
+              
+              // Valider at alle planer kommer fra samme operatør
+              if (!hasSameProvider(testCart)) {
+                continue; // Skip hvis ikke samme operatør
+              }
+              
+              const coverage = checkStreamingCoverageWithCBBMix(testCart, selectedStreaming);
+              
+              // Sikre array operation for notIncluded
+              let notIncludedCost = 0;
+              if (Array.isArray(coverage.notIncluded) && coverage.notIncluded.length > 0) {
+                try {
+                  notIncludedCost = coverage.notIncluded.reduce((sum, id) => {
+                    if (id == null) return sum;
+                    const price = getPrice(id);
+                    const validPrice = Number.isFinite(price) && price >= 0 ? price : 0;
+                    const newSum = sum + validPrice;
+                    return Number.isFinite(newSum) ? newSum : sum;
+                  }, 0);
+                  if (!Number.isFinite(notIncludedCost) || notIncludedCost < 0) {
+                    notIncludedCost = 0;
+                  }
+                } catch (e) {
+                  notIncludedCost = 0;
+                }
+              }
+              
+              const ourTotal = calculateOurOfferTotal(testCart, notIncludedCost, 0, validOriginalItemPrice);
+              
+              // Valider ourTotal
+              if (!ourTotal || typeof ourTotal !== 'object') continue;
+              const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) && ourTotal.sixMonth >= 0
+                ? ourTotal.sixMonth 
+                : 0;
+              
+              const savings = calculateSavings(validCustomerSixMonth, validOurSixMonth);
+              const earnings = calculateTotalEarnings(testCart);
+              
+              // Valider beregninger
+              const validSavings = Number.isFinite(savings) ? savings : -Infinity;
+              const validEarnings = Number.isFinite(earnings) && earnings > 0 ? earnings : 0;
+              
+              // Tjek om streaming plan har præcis match med antal valgte streaming-tjenester
+              const streamingCount = (streamingPlan.streamingCount != null && Number.isFinite(streamingPlan.streamingCount))
+                ? streamingPlan.streamingCount 
+                : (streamingPlan.cbbMixAvailable === true ? Math.min(selectedStreaming.length, 8) : 0);
+              const isExactStreamingMatch = streamingCount === selectedStreaming.length;
+              
+              // Beregn score med bonus for præcis match
+              let score = calculateScore(validSavings, validEarnings);
+              if (isExactStreamingMatch && Number.isFinite(score)) {
+                // Tilføj stor bonus for præcis match (svarer til 5000 kr ekstra indtjening)
+                score += 50000;
+              }
 
-          const streamingPart = streamingPlan.cbbMixAvailable 
-            ? `${streamingPlan.name} med CBB MIX (${Math.min(selectedStreaming.length, 8)} tjenester)`
-            : `${streamingPlan.name} (${streamingLinesNeeded}x)`;
-          const voicePart = remainingLines > 0 ? ` + ${voicePlan.name} (${remainingLines}x)` : '';
-          const reason = `${streamingPart}${voicePart}`;
+              const streamingPlanName = streamingPlan.name || 'Ukendt plan';
+              const voicePlanName = voicePlan.name || 'Ukendt plan';
+              
+              const streamingPart = streamingPlan.cbbMixAvailable === true
+                ? `${streamingPlanName} med CBB MIX (${Math.min(selectedStreaming.length, 8)} tjenester)`
+                : `${streamingPlanName} (${streamingLinesNeeded}x)`;
+              const voicePart = remainingLines > 0 ? ` + ${voicePlanName} (${remainingLines}x)` : '';
+              const reason = `${streamingPart}${voicePart}`;
 
-          // Opdater hvis bedre score (prioriter indtjening)
-          // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
-          // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
-          const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
-          
-          if (score > currentBestScore && savings >= -MAX_ADDITIONAL_COST && savings >= minSavings && earnings > 0) {
-            bestSavings = savings;
-            bestEarnings = earnings;
-            bestSolution = JSON.parse(JSON.stringify(testCart)); // Deep copy
-            const savingsText = savings >= 0 
-              ? `Besparelse: ${formatCurrency(savings)}` 
-              : `Mersalg: ${formatCurrency(Math.abs(savings))}`;
-            bestExplanation = `${reason} - Dækker ${coverage.included.length}/${selectedStreaming.length} streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(earnings)})`;
+              // Opdater hvis bedre score (prioriter indtjening)
+              // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
+              // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
+              
+              if (Number.isFinite(score) && score > bestScore && validSavings >= -MAX_ADDITIONAL_COST && validSavings >= validMinSavings && validEarnings > 0) {
+                bestSavings = validSavings;
+                bestEarnings = validEarnings;
+                bestScore = score; // Opdater bedste score inkl. bonus
+                
+                // Forbedret deep copy med error handling
+                try {
+                  bestSolution = JSON.parse(JSON.stringify(testCart));
+                  // Valider at deep copy virkede
+                  if (!Array.isArray(bestSolution)) {
+                    bestSolution = testCart.map(item => ({ ...item }));
+                  }
+                } catch (e) {
+                  // Hvis JSON deep copy fejler, brug shallow copy
+                  bestSolution = testCart.map(item => ({ ...item }));
+                }
+                
+                const savingsText = validSavings >= 0 
+                  ? `Besparelse: ${formatCurrency(validSavings)}` 
+                  : `Mersalg: ${formatCurrency(Math.abs(validSavings))}`;
+                const includedCount = Array.isArray(coverage.included) ? coverage.included.length : 0;
+                bestExplanation = `${reason} - Dækker ${includedCount}/${selectedStreaming.length} streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(validEarnings)})`;
+              }
+            } catch (e) {
+              // Skip denne kombination hvis beregning fejler
+              continue;
+            }
           }
         }
+      } catch (e) {
+        // Skip denne plan hvis beregning fejler
+        continue;
       }
     }
   }
 
   // Strategi 2: Hvis ingen streaming-tjenester, brug kun billigste voice-only planer
   if (selectedStreaming.length === 0 && voiceOnlyPlans.length > 0) {
-    
-    const cheapestPlan = voiceOnlyPlans[0];
-    const testCart = [{
-      plan: cheapestPlan,
-      quantity: requiredLines,
-      cbbMixEnabled: false,
-      cbbMixCount: 0
-    }];
-    
-    const ourTotal = calculateOurOfferTotal(testCart, 0, 0, originalItemPrice);
-    const savings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
-    const earnings = calculateTotalEarnings(testCart);
-    const score = calculateScore(savings, earnings);
+    try {
+      const cheapestPlan = voiceOnlyPlans[0];
+      
+      // Defensive check
+      if (!cheapestPlan || typeof cheapestPlan !== 'object') {
+        // Skip hvis plan er ugyldig
+      } else {
+        const testCart = [{
+          plan: cheapestPlan,
+          quantity: validRequiredLines,
+          cbbMixEnabled: false,
+          cbbMixCount: 0
+        }];
+        
+        const ourTotal = calculateOurOfferTotal(testCart, 0, 0, validOriginalItemPrice);
+        
+        // Valider ourTotal
+        if (ourTotal && typeof ourTotal === 'object') {
+          const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) && ourTotal.sixMonth >= 0
+            ? ourTotal.sixMonth 
+            : 0;
+          
+          const savings = calculateSavings(validCustomerSixMonth, validOurSixMonth);
+          const earnings = calculateTotalEarnings(testCart);
+          
+          // Valider beregninger
+          const validSavings = Number.isFinite(savings) ? savings : -Infinity;
+          const validEarnings = Number.isFinite(earnings) && earnings > 0 ? earnings : 0;
+          
+          const score = calculateScore(validSavings, validEarnings);
 
-    const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
-    
-    // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
-    // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
-    if (score > currentBestScore && savings >= -MAX_ADDITIONAL_COST && savings >= minSavings && earnings > 0) {
-      bestSavings = savings;
-      bestEarnings = earnings;
-      bestSolution = JSON.parse(JSON.stringify(testCart));
-      const savingsText = savings >= 0 
-        ? `Besparelse: ${formatCurrency(savings)}` 
-        : `Mersalg: ${formatCurrency(Math.abs(savings))}`;
-      bestExplanation = `${cheapestPlan.name} (${requiredLines}x) - Ingen streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(earnings)})`;
+          // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
+          // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
+          if (Number.isFinite(score) && score > bestScore && validSavings >= -MAX_ADDITIONAL_COST && validSavings >= validMinSavings && validEarnings > 0) {
+            bestSavings = validSavings;
+            bestEarnings = validEarnings;
+            bestScore = score; // Opdater bedste score
+            
+            // Forbedret deep copy
+            try {
+              bestSolution = JSON.parse(JSON.stringify(testCart));
+              if (!Array.isArray(bestSolution)) {
+                bestSolution = testCart.map(item => ({ ...item }));
+              }
+            } catch (e) {
+              bestSolution = testCart.map(item => ({ ...item }));
+            }
+            
+            const planName = cheapestPlan.name || 'Ukendt plan';
+            const savingsText = validSavings >= 0 
+              ? `Besparelse: ${formatCurrency(validSavings)}` 
+              : `Mersalg: ${formatCurrency(Math.abs(validSavings))}`;
+            bestExplanation = `${planName} (${validRequiredLines}x) - Ingen streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(validEarnings)})`;
+          }
+        }
+      }
+    } catch (e) {
+      // Skip hvis beregning fejler
     }
   }
 
   // Strategi 3: Fallback - hvis ingen voice-only planer, brug billigste planer generelt
   if (!bestSolution && mobilePlans.length > 0) {
-    
-    const sortedPlans = [...mobilePlans].sort((a, b) => 
-      calculateSixMonthPrice(a, 1) - calculateSixMonthPrice(b, 1)
-    );
-    
-    // Prøv forskellige kombinationer af billige planer
-    for (let i = 0; i < Math.min(sortedPlans.length, 3); i++) {
-      const plan = sortedPlans[i];
-      const testCart = [{
-        plan,
-        quantity: requiredLines,
-        cbbMixEnabled: false,
-        cbbMixCount: 0
-      }];
+    try {
+      const sortedPlans = [...mobilePlans].sort((a, b) => {
+        try {
+          const priceA = calculateSixMonthPrice(a, 1);
+          const priceB = calculateSixMonthPrice(b, 1);
+          const validPriceA = Number.isFinite(priceA) ? priceA : Infinity;
+          const validPriceB = Number.isFinite(priceB) ? priceB : Infinity;
+          return validPriceA - validPriceB;
+        } catch (e) {
+          return 0;
+        }
+      });
       
-      const coverage = checkStreamingCoverageWithCBBMix(testCart, selectedStreaming);
-      const notIncludedCost = coverage.notIncluded.reduce((sum, id) => sum + getPrice(id), 0);
-      const ourTotal = calculateOurOfferTotal(testCart, notIncludedCost, 0, originalItemPrice);
-      const savings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
-      const earnings = calculateTotalEarnings(testCart);
-      const score = calculateScore(savings, earnings);
+      // Prøv forskellige kombinationer af billige planer
+      for (let i = 0; i < Math.min(sortedPlans.length, 3); i++) {
+        const plan = sortedPlans[i];
+        
+        // Defensive check
+        if (!plan || typeof plan !== 'object') continue;
+        
+        try {
+          const testCart = [{
+            plan,
+            quantity: validRequiredLines,
+            cbbMixEnabled: false,
+            cbbMixCount: 0
+          }];
+          
+          const coverage = checkStreamingCoverageWithCBBMix(testCart, selectedStreaming);
+          
+          // Sikre array operation for notIncluded
+          let notIncludedCost = 0;
+          if (Array.isArray(coverage.notIncluded) && coverage.notIncluded.length > 0) {
+            try {
+              notIncludedCost = coverage.notIncluded.reduce((sum, id) => {
+                if (id == null) return sum;
+                const price = getPrice(id);
+                const validPrice = Number.isFinite(price) && price >= 0 ? price : 0;
+                const newSum = sum + validPrice;
+                return Number.isFinite(newSum) ? newSum : sum;
+              }, 0);
+              if (!Number.isFinite(notIncludedCost) || notIncludedCost < 0) {
+                notIncludedCost = 0;
+              }
+            } catch (e) {
+              notIncludedCost = 0;
+            }
+          }
+          
+          const ourTotal = calculateOurOfferTotal(testCart, notIncludedCost, 0, validOriginalItemPrice);
+          
+          // Valider ourTotal
+          if (!ourTotal || typeof ourTotal !== 'object') continue;
+          const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) && ourTotal.sixMonth >= 0
+            ? ourTotal.sixMonth 
+            : 0;
+          
+          const savings = calculateSavings(validCustomerSixMonth, validOurSixMonth);
+          const earnings = calculateTotalEarnings(testCart);
+          
+          // Valider beregninger
+          const validSavings = Number.isFinite(savings) ? savings : -Infinity;
+          const validEarnings = Number.isFinite(earnings) && earnings > 0 ? earnings : 0;
+          
+          const score = calculateScore(validSavings, validEarnings);
 
-      const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
-      
-      // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
-      // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
-      if (score > currentBestScore && savings >= -MAX_ADDITIONAL_COST && savings >= minSavings && earnings > 0) {
-        bestSavings = savings;
-        bestEarnings = earnings;
-        bestSolution = JSON.parse(JSON.stringify(testCart));
-        const savingsText = savings >= 0 
-          ? `Besparelse: ${formatCurrency(savings)}` 
-          : `Mersalg: ${formatCurrency(Math.abs(savings))}`;
-        bestExplanation = `${plan.name} (${requiredLines}x) - Dækker ${coverage.included.length}/${selectedStreaming.length} streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(earnings)})`;
+          // KRITISK: Kunden må maksimalt betale 900 kr mere (savings >= -900)
+          // KRITISK: Total indtjening skal ALTID være positiv (vi skal tjene penge)
+          if (Number.isFinite(score) && score > bestScore && validSavings >= -MAX_ADDITIONAL_COST && validSavings >= validMinSavings && validEarnings > 0) {
+            bestSavings = validSavings;
+            bestEarnings = validEarnings;
+            bestScore = score; // Opdater bedste score
+            
+            // Forbedret deep copy
+            try {
+              bestSolution = JSON.parse(JSON.stringify(testCart));
+              if (!Array.isArray(bestSolution)) {
+                bestSolution = testCart.map(item => ({ ...item }));
+              }
+            } catch (e) {
+              bestSolution = testCart.map(item => ({ ...item }));
+            }
+            
+            const planName = plan.name || 'Ukendt plan';
+            const savingsText = validSavings >= 0 
+              ? `Besparelse: ${formatCurrency(validSavings)}` 
+              : `Mersalg: ${formatCurrency(Math.abs(validSavings))}`;
+            const includedCount = Array.isArray(coverage.included) ? coverage.included.length : 0;
+            bestExplanation = `${planName} (${validRequiredLines}x) - Dækker ${includedCount}/${selectedStreaming.length} streaming-tjenester (${savingsText}, Indtjening: ${formatCurrency(validEarnings)})`;
+          }
+        } catch (e) {
+          // Skip denne plan hvis beregning fejler
+          continue;
+        }
       }
+    } catch (e) {
+      // Skip hvis sortering fejler
     }
   }
 
   // Hvis ingen god løsning fundet, prøv at finde planer med høj indtjening
   // Sorter efter indtjening (højest først) for at maksimere indtjening
-  if (!bestSolution || bestSavings < -MAX_ADDITIONAL_COST) {
-    // Sorter planer efter indtjening (højest først) for at maksimere indtjening
-    const sortedPlans = [...mobilePlans].sort((a, b) => {
-      const earningsA = a.earnings || 0;
-      const earningsB = b.earnings || 0;
-      if (earningsB !== earningsA) {
-        return earningsB - earningsA; // Højeste indtjening først
-      }
-      // Hvis samme indtjening, vælg billigste
-      const priceA = calculateSixMonthPrice(a, 1);
-      const priceB = calculateSixMonthPrice(b, 1);
-      return priceA - priceB;
-    });
-    
-    // Prøv planer med høj indtjening indtil vi finder en der er acceptabel
-    for (const plan of sortedPlans.slice(0, 10)) {
-      const testCart = [{
-        plan,
-        quantity: requiredLines,
-        cbbMixEnabled: false,
-        cbbMixCount: 0
-      }];
+  if (!bestSolution || (!Number.isFinite(bestSavings) || bestSavings < -MAX_ADDITIONAL_COST)) {
+    try {
+      // Sorter planer efter indtjening (højest først) for at maksimere indtjening
+      const sortedPlans = [...mobilePlans].sort((a, b) => {
+        try {
+          const earningsA = (a.earnings != null && Number.isFinite(a.earnings)) ? a.earnings : 0;
+          const earningsB = (b.earnings != null && Number.isFinite(b.earnings)) ? b.earnings : 0;
+          if (earningsB !== earningsA) {
+            return earningsB - earningsA; // Højeste indtjening først
+          }
+          // Hvis samme indtjening, vælg billigste
+          const priceA = calculateSixMonthPrice(a, 1);
+          const priceB = calculateSixMonthPrice(b, 1);
+          const validPriceA = Number.isFinite(priceA) ? priceA : Infinity;
+          const validPriceB = Number.isFinite(priceB) ? priceB : Infinity;
+          return validPriceA - validPriceB;
+        } catch (e) {
+          return 0;
+        }
+      });
       
-      const ourTotal = calculateOurOfferTotal(testCart, streamingCost, 0, originalItemPrice);
-      const testSavings = calculateSavings(customerTotal.sixMonth, ourTotal.sixMonth);
-      const testEarnings = calculateTotalEarnings(testCart);
-      const testScore = calculateScore(testSavings, testEarnings);
-      
-      // Accepter hvis kunden maksimalt betaler 900 kr mere OG indtjening er positiv
-      if (testSavings >= -MAX_ADDITIONAL_COST && testEarnings > 0) {
-        const currentBestScore = bestSolution ? calculateScore(bestSavings, bestEarnings) : -Infinity;
-        if (testScore > currentBestScore) {
-          bestSolution = testCart;
-          bestSavings = testSavings;
-          bestEarnings = testEarnings;
-          const savingsText = testSavings >= 0 
-            ? `Besparelse: ${formatCurrency(testSavings)}` 
-            : `Mersalg: ${formatCurrency(Math.abs(testSavings))}`;
-          bestExplanation = `Forslag: ${plan.name} (${requiredLines}x) - ${savingsText} (Indtjening: ${formatCurrency(testEarnings)})`;
+      // Prøv planer med høj indtjening indtil vi finder en der er acceptabel
+      for (const plan of sortedPlans.slice(0, 10)) {
+        // Defensive check
+        if (!plan || typeof plan !== 'object') continue;
+        
+        try {
+          const testCart = [{
+            plan,
+            quantity: validRequiredLines,
+            cbbMixEnabled: false,
+            cbbMixCount: 0
+          }];
+          
+          const ourTotal = calculateOurOfferTotal(testCart, streamingCost, 0, validOriginalItemPrice);
+          
+          // Valider ourTotal
+          if (!ourTotal || typeof ourTotal !== 'object') continue;
+          const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) && ourTotal.sixMonth >= 0
+            ? ourTotal.sixMonth 
+            : 0;
+          
+          const testSavings = calculateSavings(validCustomerSixMonth, validOurSixMonth);
+          const testEarnings = calculateTotalEarnings(testCart);
+          
+          // Valider beregninger
+          const validTestSavings = Number.isFinite(testSavings) ? testSavings : -Infinity;
+          const validTestEarnings = Number.isFinite(testEarnings) && testEarnings > 0 ? testEarnings : 0;
+          
+          const testScore = calculateScore(validTestSavings, validTestEarnings);
+          
+          // Accepter hvis kunden maksimalt betaler 900 kr mere OG indtjening er positiv
+          if (validTestSavings >= -MAX_ADDITIONAL_COST && validTestEarnings > 0) {
+            if (Number.isFinite(testScore) && testScore > bestScore) {
+              bestSolution = testCart.map(item => ({ ...item })); // Shallow copy
+              bestSavings = validTestSavings;
+              bestEarnings = validTestEarnings;
+              bestScore = testScore; // Opdater bedste score
+              const planName = plan.name || 'Ukendt plan';
+              const savingsText = validTestSavings >= 0 
+                ? `Besparelse: ${formatCurrency(validTestSavings)}` 
+                : `Mersalg: ${formatCurrency(Math.abs(validTestSavings))}`;
+              bestExplanation = `Forslag: ${planName} (${validRequiredLines}x) - ${savingsText} (Indtjening: ${formatCurrency(validTestEarnings)})`;
+            }
+          }
+        } catch (e) {
+          // Skip denne plan hvis beregning fejler
+          continue;
         }
       }
+    } catch (e) {
+      // Skip hvis sortering fejler
     }
     
     // Hvis stadig ingen løsning, returner tom array
-    if (!bestSolution || bestSavings < -MAX_ADDITIONAL_COST || bestEarnings <= 0) {
+    const validBestSavings = Number.isFinite(bestSavings) ? bestSavings : -Infinity;
+    const validBestEarnings = Number.isFinite(bestEarnings) ? bestEarnings : 0;
+    
+    if (!bestSolution || validBestSavings < -MAX_ADDITIONAL_COST || validBestEarnings <= 0) {
       return {
         cartItems: [],
         explanation: `Kunne ikke finde en løsning hvor kunden maksimalt betaler ${formatCurrency(MAX_ADDITIONAL_COST)} mere og der er positiv indtjening`,
@@ -968,8 +1444,10 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     }
   }
 
+  // ===== VALIDER RESULTAT FØR RETURNERING =====
   // Final check: Sikre at løsningen har positiv indtjening før vi returnerer den
-  if (bestSolution && bestEarnings <= 0) {
+  const finalBestEarnings = Number.isFinite(bestEarnings) ? bestEarnings : 0;
+  if (bestSolution && finalBestEarnings <= 0) {
     return {
       cartItems: [],
       explanation: 'Ingen løsning med positiv indtjening fundet',
@@ -978,11 +1456,39 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     };
   }
 
+  // Final check: Sikre at alle planer i løsningen kommer fra samme operatør
+  if (bestSolution && !hasSameProvider(bestSolution)) {
+    return {
+      cartItems: [],
+      explanation: 'Ingen løsning med samme operatør fundet',
+      savings: 0,
+      earnings: 0
+    };
+  }
+
+  // Valider at cartItems er et array og har gyldige items
+  let validCartItems = [];
+  if (Array.isArray(bestSolution)) {
+    validCartItems = bestSolution.filter(item => {
+      if (!item || typeof item !== 'object') return false;
+      if (!item.plan || typeof item.plan !== 'object') return false;
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) return false;
+      return true;
+    });
+  }
+
+  // Valider at savings og earnings er gyldige tal
+  const finalSavings = Number.isFinite(bestSavings) ? bestSavings : 0;
+  const finalEarnings = Number.isFinite(bestEarnings) ? bestEarnings : 0;
+  const finalExplanation = (bestExplanation && typeof bestExplanation === 'string') 
+    ? bestExplanation 
+    : 'Ingen løsning fundet';
+
   return {
-    cartItems: bestSolution || [],
-    explanation: bestExplanation || 'Ingen løsning fundet',
-    savings: bestSavings || 0,
-    earnings: bestEarnings || 0
+    cartItems: validCartItems,
+    explanation: finalExplanation,
+    savings: finalSavings,
+    earnings: finalEarnings
   };
 }
 

@@ -1,6 +1,6 @@
 /**
- * Simpel Toast komponent - erstatter react-hot-toast
- * Ultra let og hurtig
+ * Forbedret Toast komponent - erstatter react-hot-toast
+ * Ultra let og hurtig med forbedret API og funktionalitet
  */
 
 import { useState, useEffect } from 'react';
@@ -9,30 +9,76 @@ import Icon from './Icon';
 let toastId = 0;
 const toasts = [];
 const listeners = new Set();
+const timeouts = new Map();
 
-function addToast(message, type = 'success') {
+function addToast(message, type = 'success', duration = 3000) {
   const id = toastId++;
-  const toast = { id, message, type };
+  const toast = { id, message, type, isRemoving: false };
   toasts.push(toast);
   listeners.forEach(listener => listener([...toasts]));
   
-  setTimeout(() => {
+  // Gem timeout ID så vi kan annullere den hvis toast lukkes manuelt
+  const timeoutId = setTimeout(() => {
     removeToast(id);
-  }, 3000);
+  }, duration);
+  timeouts.set(id, timeoutId);
+  
+  return id;
 }
 
 function removeToast(id) {
   const index = toasts.findIndex(t => t.id === id);
   if (index !== -1) {
-    toasts.splice(index, 1);
+    // Marker toast som fjernes for fade-out animation
+    toasts[index].isRemoving = true;
     listeners.forEach(listener => listener([...toasts]));
+    
+    // Annuller timeout hvis den stadig kører
+    const timeoutId = timeouts.get(id);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeouts.delete(id);
+    }
+    
+    // Fjern toast efter fade-out animation
+    setTimeout(() => {
+      const removeIndex = toasts.findIndex(t => t.id === id);
+      if (removeIndex !== -1) {
+        toasts.splice(removeIndex, 1);
+        listeners.forEach(listener => listener([...toasts]));
+      }
+    }, 300); // Match fade-out animation duration
   }
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function toast(message, type = 'success') {
-  addToast(message, type);
+function getIconName(type) {
+  switch (type) {
+    case 'error':
+      return 'warning';
+    case 'warning':
+      return 'warning';
+    case 'info':
+      return 'info';
+    case 'success':
+    default:
+      return 'check';
+  }
 }
+
+// Hovedfunktion med bagudkompatibilitet
+function toastFunction(message, type = 'success') {
+  return addToast(message, type);
+}
+
+// Nye convenience metoder
+toastFunction.success = (message, duration) => addToast(message, 'success', duration);
+toastFunction.error = (message, duration) => addToast(message, 'error', duration);
+toastFunction.warning = (message, duration) => addToast(message, 'warning', duration);
+toastFunction.info = (message, duration) => addToast(message, 'info', duration);
+
+// Export toast funktionen
+// eslint-disable-next-line react-refresh/only-export-components
+export const toast = toastFunction;
 
 export function ToastContainer() {
   const [currentToasts, setCurrentToasts] = useState([]);
@@ -48,78 +94,24 @@ export function ToastContainer() {
 
   return (
     <div className="toast-container" aria-live="polite" aria-atomic="true">
-      {currentToasts.map(({ id, message, type }) => (
+      {currentToasts.map(({ id, message, type, isRemoving }) => (
         <div
           key={id}
-          className={`toast toast-${type}`}
+          className={`toast toast-${type} ${isRemoving ? 'toast-removing' : ''}`}
           role="alert"
         >
-          <Icon name={type === 'error' ? 'alert-circle' : 'check'} size={20} />
-          <span>{message}</span>
+          <Icon name={getIconName(type)} size={20} className="toast-icon" />
+          <span className="toast-message">{message}</span>
+          <button
+            className="toast-close"
+            onClick={() => removeToast(id)}
+            aria-label="Luk besked"
+            type="button"
+          >
+            <Icon name="close" size={16} />
+          </button>
         </div>
       ))}
-      <style>{`
-        .toast-container {
-          position: fixed;
-          bottom: 24px;
-          right: 24px;
-          z-index: 10000;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          pointer-events: none;
-        }
-
-        .toast {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          background: var(--glass-bg);
-          color: var(--text-primary);
-          border: 1px solid var(--glass-border);
-          border-radius: var(--radius-lg);
-          backdrop-filter: blur(12px);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-          font-size: var(--font-base);
-          font-weight: var(--font-medium);
-          max-width: 400px;
-          pointer-events: auto;
-          animation: toastSlideIn 0.2s ease-out;
-        }
-
-        .toast-success {
-          border-color: var(--color-success);
-        }
-
-        .toast-error {
-          border-color: var(--color-danger);
-        }
-
-        @keyframes toastSlideIn {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @media (max-width: 900px) {
-          .toast-container {
-            bottom: 16px;
-            right: 16px;
-            left: 16px;
-          }
-
-          .toast {
-            max-width: 100%;
-          }
-        }
-      `}</style>
     </div>
   );
 }
-

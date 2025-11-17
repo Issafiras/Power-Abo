@@ -4,10 +4,10 @@
  */
 
 import React, { Suspense } from 'react';
-import { formatCurrency } from '../utils/calculations';
-import Icon from './common/Icon';
-import COPY from '../constants/copy';
-import CBBMixSelector from './CBBMixSelector';
+import { formatCurrency } from '../../utils/calculations';
+import Icon from '../../components/common/Icon';
+import COPY from '../../constants/copy';
+import CBBMixSelector from '../../components/CBBMixSelector';
 
 function PlanCard({ 
   plan, 
@@ -274,8 +274,8 @@ function PlanCard({
         .plan-card {
           display: flex;
           flex-direction: column;
-          padding: var(--spacing-2xl);
-          gap: var(--spacing-lg);
+          padding: var(--spacing-lg);
+          gap: var(--spacing-md);
           transition: all var(--transition-base);  /* Max 300ms */
           cursor: pointer;
           position: relative;
@@ -343,7 +343,8 @@ function PlanCard({
 
         .plan-title h3 {
           margin: 0;
-          font-size: var(--font-2xl);
+          font-size: var(--font-xl);
+          line-height: var(--leading-tight);
         }
 
         .plan-data {
@@ -353,7 +354,7 @@ function PlanCard({
         }
 
         .plan-pricing {
-          padding: var(--spacing-md) 0;
+          padding: var(--spacing-sm) 0;
           position: relative;
           transition: all var(--transition-base);
         }
@@ -402,6 +403,7 @@ function PlanCard({
           display: flex;
           flex-wrap: wrap;
           gap: var(--spacing-xs);
+          margin-top: var(--spacing-xs);
         }
 
         .plan-streaming {

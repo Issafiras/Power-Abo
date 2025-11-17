@@ -34,6 +34,7 @@ const glyphMap = {
   lock: '🔒',
   unlock: '🔓',
   refresh: '🔄',
+  'refresh-cw': '🔄',
   reset: '↺',
   gift: '🎁',
 
@@ -65,6 +66,7 @@ const glyphMap = {
   sun: '☀️',
   moon: '🌙',
   cart: '🛒',
+  'shopping-cart': '🛒',
   info: 'ℹ️',
   presentation: '🖥️',
   print: '🖨️',
@@ -84,6 +86,8 @@ const glyphMap = {
   star: '★',
   trendingDown: '📉',
   settings: '⚙️',
+  loader: '⏳',
+  'loader-2': '⏳',
 };
 
 export default function Icon({ name, size = 20, className = '', style = {}, ...props }) {

@@ -1,0 +1,493 @@
+/**
+ * AppContext - Central state management med Context API og reducer pattern
+ * Konsoliderer al app state i én provider for at eliminere prop drilling
+ */
+
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import {
+  saveCart,
+  loadCart,
+  saveSelectedStreaming,
+  loadSelectedStreaming,
+  saveCustomerMobileCost,
+  loadCustomerMobileCost,
+  saveNumberOfLines,
+  loadNumberOfLines,
+  saveOriginalItemPrice,
+  loadOriginalItemPrice,
+  saveCashDiscount,
+  loadCashDiscount,
+  saveCashDiscountLocked,
+  loadCashDiscountLocked,
+  saveAutoAdjust,
+  loadAutoAdjust,
+  saveTheme,
+  loadTheme,
+  saveShowCashDiscount,
+  loadShowCashDiscount,
+  saveExistingBrands,
+  loadExistingBrands,
+  saveFreeSetup,
+  loadFreeSetup,
+  resetAll as resetStorage
+} from '../utils/storage';
+
+// Initial state
+const initialState = {
+  cart: {
+    items: [],
+    count: 0
+  },
+  customer: {
+    mobileCost: 0,
+    numberOfLines: 1,
+    originalItemPrice: 0,
+    existingBrands: []
+  },
+  streaming: {
+    selected: [],
+    total: 0
+  },
+  settings: {
+    theme: 'dark',
+    cashDiscount: null,
+    cashDiscountLocked: false,
+    autoAdjust: false,
+    showCashDiscount: false,
+    freeSetup: false
+  },
+  ui: {
+    activeProvider: 'all',
+    searchQuery: '',
+    debouncedSearchQuery: '',
+    showPresentation: false,
+    cbbMixEnabled: {},
+    cbbMixCount: {},
+    eanSearchResults: null,
+    isSearching: false
+  }
+};
+
+// Action types
+const ActionTypes = {
+  // Cart actions
+  ADD_TO_CART: 'ADD_TO_CART',
+  REMOVE_FROM_CART: 'REMOVE_FROM_CART',
+  UPDATE_QUANTITY: 'UPDATE_QUANTITY',
+  SET_CART: 'SET_CART',
+  CLEAR_CART: 'CLEAR_CART',
+  
+  // Customer actions
+  SET_MOBILE_COST: 'SET_MOBILE_COST',
+  SET_NUMBER_OF_LINES: 'SET_NUMBER_OF_LINES',
+  SET_ORIGINAL_ITEM_PRICE: 'SET_ORIGINAL_ITEM_PRICE',
+  SET_EXISTING_BRANDS: 'SET_EXISTING_BRANDS',
+  
+  // Streaming actions
+  TOGGLE_STREAMING: 'TOGGLE_STREAMING',
+  SET_STREAMING: 'SET_STREAMING',
+  CLEAR_STREAMING: 'CLEAR_STREAMING',
+  
+  // Settings actions
+  SET_THEME: 'SET_THEME',
+  SET_CASH_DISCOUNT: 'SET_CASH_DISCOUNT',
+  SET_CASH_DISCOUNT_LOCKED: 'SET_CASH_DISCOUNT_LOCKED',
+  SET_AUTO_ADJUST: 'SET_AUTO_ADJUST',
+  SET_SHOW_CASH_DISCOUNT: 'SET_SHOW_CASH_DISCOUNT',
+  TOGGLE_CASH_DISCOUNT: 'TOGGLE_CASH_DISCOUNT',
+  SET_FREE_SETUP: 'SET_FREE_SETUP',
+  
+  // UI actions
+  SET_ACTIVE_PROVIDER: 'SET_ACTIVE_PROVIDER',
+  SET_SEARCH_QUERY: 'SET_SEARCH_QUERY',
+  SET_DEBOUNCED_SEARCH_QUERY: 'SET_DEBOUNCED_SEARCH_QUERY',
+  SET_SHOW_PRESENTATION: 'SET_SHOW_PRESENTATION',
+  TOGGLE_PRESENTATION: 'TOGGLE_PRESENTATION',
+  SET_CBB_MIX_ENABLED: 'SET_CBB_MIX_ENABLED',
+  SET_CBB_MIX_COUNT: 'SET_CBB_MIX_COUNT',
+  SET_EAN_SEARCH_RESULTS: 'SET_EAN_SEARCH_RESULTS',
+  SET_IS_SEARCHING: 'SET_IS_SEARCHING',
+  
+  // Reset
+  RESET_ALL: 'RESET_ALL',
+  
+  // Load from storage
+  LOAD_STATE: 'LOAD_STATE'
+};
+
+// Reducer
+function appReducer(state, action) {
+  switch (action.type) {
+    // Cart actions
+    case ActionTypes.ADD_TO_CART: {
+      const { plan, cbbMixEnabled, cbbMixCount } = action.payload;
+      const existingItem = state.cart.items.find(item => item.plan.id === plan.id);
+      
+      let newItems;
+      if (existingItem) {
+        newItems = state.cart.items.map(item =>
+          item.plan.id === plan.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        newItems = [...state.cart.items, {
+          plan,
+          quantity: 1,
+          cbbMixEnabled: plan.cbbMixAvailable ? (cbbMixEnabled || false) : false,
+          cbbMixCount: plan.cbbMixAvailable ? (cbbMixCount || 2) : 0
+        }];
+      }
+      
+      const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
+      return {
+        ...state,
+        cart: { items: newItems, count }
+      };
+    }
+    
+    case ActionTypes.REMOVE_FROM_CART: {
+      const newItems = state.cart.items.filter(item => item.plan.id !== action.payload);
+      const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
+      return {
+        ...state,
+        cart: { items: newItems, count }
+      };
+    }
+    
+    case ActionTypes.UPDATE_QUANTITY: {
+      const { planId, quantity } = action.payload;
+      if (quantity === 0) {
+        return appReducer(state, { type: ActionTypes.REMOVE_FROM_CART, payload: planId });
+      }
+      const newItems = state.cart.items.map(item =>
+        item.plan.id === planId
+          ? { ...item, quantity }
+          : item
+      );
+      const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
+      return {
+        ...state,
+        cart: { items: newItems, count }
+      };
+    }
+    
+    case ActionTypes.SET_CART: {
+      const items = action.payload;
+      const count = items.reduce((sum, item) => sum + item.quantity, 0);
+      return {
+        ...state,
+        cart: { items, count }
+      };
+    }
+    
+    case ActionTypes.CLEAR_CART:
+      return {
+        ...state,
+        cart: { items: [], count: 0 }
+      };
+    
+    // Customer actions
+    case ActionTypes.SET_MOBILE_COST:
+      return {
+        ...state,
+        customer: { ...state.customer, mobileCost: action.payload }
+      };
+    
+    case ActionTypes.SET_NUMBER_OF_LINES:
+      return {
+        ...state,
+        customer: { ...state.customer, numberOfLines: action.payload }
+      };
+    
+    case ActionTypes.SET_ORIGINAL_ITEM_PRICE:
+      return {
+        ...state,
+        customer: { ...state.customer, originalItemPrice: action.payload }
+      };
+    
+    case ActionTypes.SET_EXISTING_BRANDS:
+      return {
+        ...state,
+        customer: { ...state.customer, existingBrands: action.payload }
+      };
+    
+    // Streaming actions
+    case ActionTypes.TOGGLE_STREAMING: {
+      const serviceId = action.payload;
+      const selected = state.streaming.selected.includes(serviceId)
+        ? state.streaming.selected.filter(id => id !== serviceId)
+        : [...state.streaming.selected, serviceId];
+      return {
+        ...state,
+        streaming: { ...state.streaming, selected }
+      };
+    }
+    
+    case ActionTypes.SET_STREAMING:
+      return {
+        ...state,
+        streaming: { ...state.streaming, selected: action.payload }
+      };
+    
+    case ActionTypes.CLEAR_STREAMING:
+      return {
+        ...state,
+        streaming: { selected: [], total: 0 }
+      };
+    
+    // Settings actions
+    case ActionTypes.SET_THEME:
+      return {
+        ...state,
+        settings: { ...state.settings, theme: action.payload }
+      };
+    
+    case ActionTypes.SET_CASH_DISCOUNT:
+      return {
+        ...state,
+        settings: { ...state.settings, cashDiscount: action.payload }
+      };
+    
+    case ActionTypes.SET_CASH_DISCOUNT_LOCKED:
+      return {
+        ...state,
+        settings: { ...state.settings, cashDiscountLocked: action.payload }
+      };
+    
+    case ActionTypes.SET_AUTO_ADJUST:
+      return {
+        ...state,
+        settings: { ...state.settings, autoAdjust: action.payload }
+      };
+    
+    case ActionTypes.SET_SHOW_CASH_DISCOUNT:
+      return {
+        ...state,
+        settings: { ...state.settings, showCashDiscount: action.payload }
+      };
+    
+    case ActionTypes.TOGGLE_CASH_DISCOUNT:
+      return {
+        ...state,
+        settings: { ...state.settings, showCashDiscount: !state.settings.showCashDiscount }
+      };
+    
+    case ActionTypes.SET_FREE_SETUP:
+      return {
+        ...state,
+        settings: { ...state.settings, freeSetup: action.payload }
+      };
+    
+    // UI actions
+    case ActionTypes.SET_ACTIVE_PROVIDER:
+      return {
+        ...state,
+        ui: { ...state.ui, activeProvider: action.payload }
+      };
+    
+    case ActionTypes.SET_SEARCH_QUERY:
+      return {
+        ...state,
+        ui: { ...state.ui, searchQuery: action.payload }
+      };
+    
+    case ActionTypes.SET_DEBOUNCED_SEARCH_QUERY:
+      return {
+        ...state,
+        ui: { ...state.ui, debouncedSearchQuery: action.payload }
+      };
+    
+    case ActionTypes.SET_SHOW_PRESENTATION:
+      return {
+        ...state,
+        ui: { ...state.ui, showPresentation: action.payload }
+      };
+    
+    case ActionTypes.TOGGLE_PRESENTATION:
+      return {
+        ...state,
+        ui: { ...state.ui, showPresentation: !state.ui.showPresentation }
+      };
+    
+    case ActionTypes.SET_CBB_MIX_ENABLED: {
+      const { planId, enabled } = action.payload;
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          cbbMixEnabled: { ...state.ui.cbbMixEnabled, [planId]: enabled }
+        }
+      };
+    }
+    
+    case ActionTypes.SET_CBB_MIX_COUNT: {
+      const { planId, count } = action.payload;
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          cbbMixCount: { ...state.ui.cbbMixCount, [planId]: count }
+        }
+      };
+    }
+    
+    case ActionTypes.SET_EAN_SEARCH_RESULTS:
+      return {
+        ...state,
+        ui: { ...state.ui, eanSearchResults: action.payload }
+      };
+    
+    case ActionTypes.SET_IS_SEARCHING:
+      return {
+        ...state,
+        ui: { ...state.ui, isSearching: action.payload }
+      };
+    
+    // Reset
+    case ActionTypes.RESET_ALL:
+      return initialState;
+    
+    // Load state
+    case ActionTypes.LOAD_STATE:
+      return action.payload;
+    
+    default:
+      return state;
+  }
+}
+
+// Context
+const AppContext = createContext(null);
+
+// Provider component
+export function AppProvider({ children }) {
+  const [state, dispatch] = useReducer(appReducer, initialState);
+  
+  // Load state from localStorage on mount
+  useEffect(() => {
+    const savedState = {
+      cart: {
+        items: loadCart(),
+        count: 0
+      },
+      customer: {
+        mobileCost: loadCustomerMobileCost(),
+        numberOfLines: loadNumberOfLines(),
+        originalItemPrice: loadOriginalItemPrice(),
+        existingBrands: loadExistingBrands()
+      },
+      streaming: {
+        selected: loadSelectedStreaming(),
+        total: 0
+      },
+      settings: {
+        theme: loadTheme(),
+        cashDiscount: loadCashDiscount(),
+        cashDiscountLocked: loadCashDiscountLocked(),
+        autoAdjust: loadAutoAdjust(),
+        showCashDiscount: loadShowCashDiscount(),
+        freeSetup: loadFreeSetup()
+      },
+      ui: {
+        activeProvider: 'all',
+        searchQuery: '',
+        debouncedSearchQuery: '',
+        showPresentation: false,
+        cbbMixEnabled: {},
+        cbbMixCount: {},
+        eanSearchResults: null,
+        isSearching: false
+      }
+    };
+    
+    // Calculate cart count
+    savedState.cart.count = savedState.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    
+    dispatch({ type: ActionTypes.LOAD_STATE, payload: savedState });
+    
+    // Set theme on document
+    document.documentElement.setAttribute('data-theme', savedState.settings.theme);
+  }, []);
+  
+  // Persist state to localStorage
+  useEffect(() => {
+    if (state.cart.items) {
+      saveCart(state.cart.items);
+    }
+  }, [state.cart.items]);
+  
+  useEffect(() => {
+    saveSelectedStreaming(state.streaming.selected);
+  }, [state.streaming.selected]);
+  
+  useEffect(() => {
+    saveCustomerMobileCost(state.customer.mobileCost);
+  }, [state.customer.mobileCost]);
+  
+  useEffect(() => {
+    saveNumberOfLines(state.customer.numberOfLines);
+  }, [state.customer.numberOfLines]);
+  
+  useEffect(() => {
+    saveOriginalItemPrice(state.customer.originalItemPrice);
+  }, [state.customer.originalItemPrice]);
+  
+  useEffect(() => {
+    saveExistingBrands(state.customer.existingBrands);
+  }, [state.customer.existingBrands]);
+  
+  useEffect(() => {
+    saveCashDiscount(state.settings.cashDiscount);
+  }, [state.settings.cashDiscount]);
+  
+  useEffect(() => {
+    saveCashDiscountLocked(state.settings.cashDiscountLocked);
+  }, [state.settings.cashDiscountLocked]);
+  
+  useEffect(() => {
+    saveAutoAdjust(state.settings.autoAdjust);
+  }, [state.settings.autoAdjust]);
+  
+  useEffect(() => {
+    saveShowCashDiscount(state.settings.showCashDiscount);
+  }, [state.settings.showCashDiscount]);
+  
+  useEffect(() => {
+    saveFreeSetup(state.settings.freeSetup);
+  }, [state.settings.freeSetup]);
+  
+  useEffect(() => {
+    saveTheme(state.settings.theme);
+    document.documentElement.setAttribute('data-theme', state.settings.theme);
+  }, [state.settings.theme]);
+  
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch({ type: ActionTypes.SET_DEBOUNCED_SEARCH_QUERY, payload: state.ui.searchQuery });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [state.ui.searchQuery]);
+  
+  const value = {
+    state,
+    dispatch,
+    ActionTypes
+  };
+  
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+// Hook to access context
+export function useAppContext() {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext must be used within AppProvider');
+  }
+  return context;
+}
+
+// Export ActionTypes for use in components
+export { ActionTypes };
+

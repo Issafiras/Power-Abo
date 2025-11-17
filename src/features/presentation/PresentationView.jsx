@@ -13,10 +13,10 @@ import {
   calculateTelenorFamilyDiscount,
   calculateCBBMixPrice,
   checkStreamingCoverage
-} from '../utils/calculations';
-import { getStreamingTotal, getServiceById } from '../data/streamingServices';
-import Icon from './common/Icon';
-import COPY from '../constants/copy';
+} from '../../utils/calculations';
+import { getStreamingTotal, getServiceById } from '../../data/streamingServices';
+import Icon from '../../components/common/Icon';
+import COPY from '../../constants/copy';
 
 export default function PresentationView({
   cartItems,
@@ -24,7 +24,6 @@ export default function PresentationView({
   customerMobileCost,
   originalItemPrice,
   cashDiscount,
-  freeSetup,
   onClose,
   onReset
 }) {
@@ -40,8 +39,7 @@ export default function PresentationView({
     cartItems,
     notIncludedStreamingCost,
     cashDiscount,
-    originalItemPrice,
-    freeSetup
+    originalItemPrice
   );
   const savings = calculateSavings(customerTotals.sixMonth, ourOfferTotals.sixMonth);
   const isPositiveSavings = savings > 0;
@@ -201,18 +199,6 @@ export default function PresentationView({
                 <div className="detail-row">
                   <span className="detail-label">Varens pris:</span>
                   <span className="detail-value">{formatCurrency(originalItemPrice)}</span>
-                </div>
-              )}
-              {ourOfferTotals.setupFee > 0 && (
-                <div className="detail-row">
-                  <span className="detail-label">Oprettelsesgebyr:</span>
-                  <span className="detail-value">{formatCurrency(ourOfferTotals.setupFee)}</span>
-                </div>
-              )}
-              {freeSetup && ourOfferTotals.setupFeeDiscount > 0 && (
-                <div className="detail-row discount">
-                  <span className="detail-label">Gratis oprettelse:</span>
-                  <span className="detail-value text-success">-{formatCurrency(ourOfferTotals.setupFeeDiscount)}</span>
                 </div>
               )}
               <div className="detail-row total">

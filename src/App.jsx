@@ -1,97 +1,32 @@
 /**
  * App.jsx - Hovedkomponent
- * Håndterer global state og orkestrerer alle subkomponenter
+ * Bruger Context API for state management og orkestrerer alle subkomponenter
  */
 
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { toast } from './components/common/Toast';
+import { useMemo, useCallback, lazy, Suspense, useEffect } from 'react';
+import { useAppState } from './hooks/useAppState';
+import { useAppActions } from './hooks/useAppActions';
 // Lazy load tunge komponenter for bedre initial load performance
-const Header = lazy(() => import('./components/Header'));
-const StreamingSelector = lazy(() => import('./components/StreamingSelector'));
-const ProviderTabs = lazy(() => import('./components/ProviderTabs'));
-const PlanCard = lazy(() => import('./components/PlanCard'));
-const Cart = lazy(() => import('./components/Cart'));
-const ComparisonPanel = lazy(() => import('./components/ComparisonPanel'));
-const Footer = lazy(() => import('./components/Footer'));
-const PresentationView = lazy(() => import('./components/PresentationView'));
+const Header = lazy(() => import('./components/layout/Header'));
+const StreamingSelector = lazy(() => import('./features/streaming/StreamingSelector'));
+const ProviderTabs = lazy(() => import('./features/plans/ProviderTabs'));
+const PlanCard = lazy(() => import('./features/plans/PlanCard'));
+const Cart = lazy(() => import('./features/cart/Cart'));
+const ComparisonPanel = lazy(() => import('./features/comparison/ComparisonPanel'));
+const Footer = lazy(() => import('./components/layout/Footer'));
+const PresentationView = lazy(() => import('./features/presentation/PresentationView'));
 import { plans } from './data/plans';
 import { findBestSolution } from './utils/calculations';
 import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
-import {
-  saveCart,
-  loadCart,
-  saveSelectedStreaming,
-  loadSelectedStreaming,
-  saveCustomerMobileCost,
-  loadCustomerMobileCost,
-  saveNumberOfLines,
-  loadNumberOfLines,
-  saveOriginalItemPrice,
-  loadOriginalItemPrice,
-  saveCashDiscount,
-  loadCashDiscount,
-  saveCashDiscountLocked,
-  loadCashDiscountLocked,
-  saveAutoAdjust,
-  loadAutoAdjust,
-  saveTheme,
-  loadTheme,
-  saveShowCashDiscount,
-  loadShowCashDiscount,
-  saveExistingBrands,
-  loadExistingBrands,
-  saveFreeSetup,
-  loadFreeSetup,
-  resetAll
-} from './utils/storage';
-import { validatePrice, validateQuantity } from './utils/validators';
+import { toast } from './components/common/Toast';
 import Icon from './components/common/Icon';
 import COPY from './constants/copy';
 import AccessibilityHelper from './components/common/AccessibilityHelper';
 
 function App() {
-  // State
-  const [cartItems, setCartItems] = useState([]);
-  const [selectedStreaming, setSelectedStreaming] = useState([]);
-  const [customerMobileCost, setCustomerMobileCost] = useState(0);
-  const [numberOfLines, setNumberOfLines] = useState(1);
-  const [originalItemPrice, setOriginalItemPrice] = useState(0);
-  const [cashDiscount, setCashDiscount] = useState(null);
-  const [cashDiscountLocked, setCashDiscountLocked] = useState(false);
-  const [autoAdjust, setAutoAdjust] = useState(false);
-  const [theme, setTheme] = useState('dark');
-  const [showCashDiscount, setShowCashDiscount] = useState(false);
-  const [freeSetup, setFreeSetup] = useState(false);
-  const [activeProvider, setActiveProvider] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [showPresentation, setShowPresentation] = useState(false);
-  
-  // CBB MIX state
-  const [cbbMixEnabled, setCbbMixEnabled] = useState({});
-  const [cbbMixCount, setCbbMixCount] = useState({});
-  
-  // Eksisterende brands state
-  const [existingBrands, setExistingBrands] = useState([]);
-
-  // EAN søgning state
-  const [eanSearchResults, setEanSearchResults] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
-
-  // Debounce search query (300ms delay)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-
-  // Calculate total cart count
-  const cartCount = useMemo(() => {
-    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  }, [cartItems]);
+  // Get state from Context
+  const state = useAppState();
+  const actions = useAppActions();
 
   // Scroll to cart handler
   const handleScrollToCart = useCallback(() => {
@@ -104,338 +39,189 @@ function App() {
     }
   }, []);
 
-  // Load fra localStorage ved mount
-  useEffect(() => {
-    const savedCart = loadCart();
-    const savedStreaming = loadSelectedStreaming();
-    const savedMobileCost = loadCustomerMobileCost();
-    const savedNumberOfLines = loadNumberOfLines();
-    const savedOriginalItemPrice = loadOriginalItemPrice();
-    const savedCashDiscount = loadCashDiscount();
-    const savedCashDiscountLocked = loadCashDiscountLocked();
-    const savedAutoAdjust = loadAutoAdjust();
-    const savedTheme = loadTheme();
-    const savedShowCashDiscount = loadShowCashDiscount();
-    const savedExistingBrands = loadExistingBrands();
-    const savedFreeSetup = loadFreeSetup();
-
-    setCartItems(savedCart);
-    setSelectedStreaming(savedStreaming);
-    setCustomerMobileCost(savedMobileCost);
-    setNumberOfLines(savedNumberOfLines);
-    setOriginalItemPrice(savedOriginalItemPrice);
-    setCashDiscount(savedCashDiscount);
-    setCashDiscountLocked(savedCashDiscountLocked);
-    setAutoAdjust(savedAutoAdjust);
-    setTheme(savedTheme);
-    setShowCashDiscount(savedShowCashDiscount);
-    setExistingBrands(savedExistingBrands);
-    setFreeSetup(savedFreeSetup);
-  }, []);
-
-  // Batch localStorage operations - gem alle state ændringer i én operation
-  useEffect(() => {
-    saveCart(cartItems);
-    saveSelectedStreaming(selectedStreaming);
-    saveCustomerMobileCost(customerMobileCost);
-    saveNumberOfLines(numberOfLines);
-    saveOriginalItemPrice(originalItemPrice);
-    saveCashDiscount(cashDiscount);
-    saveCashDiscountLocked(cashDiscountLocked);
-    saveAutoAdjust(autoAdjust);
-    saveShowCashDiscount(showCashDiscount);
-    saveExistingBrands(existingBrands);
-    saveFreeSetup(freeSetup);
-  }, [cartItems, selectedStreaming, customerMobileCost, numberOfLines, originalItemPrice, cashDiscount, cashDiscountLocked, autoAdjust, showCashDiscount, existingBrands, freeSetup]);
-
-  // Theme skal også opdatere DOM - separat useEffect
-  useEffect(() => {
-    saveTheme(theme);
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-
-  // Toast handler
-  const showToast = useCallback((message, type = 'success') => {
-    toast(message, type);
-  }, []);
-
-  // Cart handlers
+  // Cart handlers - wrapped for compatibility
   const handleAddToCart = useCallback((plan) => {
-    setCartItems(prev => {
-      const existingItem = prev.find(item => item.plan.id === plan.id);
-      
-      if (existingItem) {
-        // Opdater quantity
-        const validation = validateQuantity(existingItem.quantity + 1);
-        if (!validation.valid) {
-          showToast(validation.error, 'error');
-          return prev;
-        }
-        
-        showToast(COPY.success.updatedInCart(plan.name));
-        return prev.map(item =>
-          item.plan.id === plan.id
-            ? { ...item, quantity: validation.value }
-            : item
-        );
-      } else {
-        // Tilføj ny med CBB Mix data hvis tilgængelig
-        const newItem = { 
-          plan, 
-          quantity: 1,
-          cbbMixEnabled: plan.cbbMixAvailable ? (cbbMixEnabled[plan.id] || false) : false,
-          cbbMixCount: plan.cbbMixAvailable ? (cbbMixCount[plan.id] || 2) : 0
-        };
-        showToast(COPY.success.addedToCart(plan.name));
-        return [...prev, newItem];
-      }
-    });
-  }, [cbbMixEnabled, cbbMixCount, showToast]);
+    actions.addToCart(
+      plan,
+      state.cbbMixEnabled[plan.id] || false,
+      state.cbbMixCount[plan.id] || 2
+    );
+  }, [actions, state.cbbMixEnabled, state.cbbMixCount]);
 
   const handleRemoveFromCart = useCallback((planId) => {
-    setCartItems(prev => {
-      const item = prev.find(item => item.plan.id === planId);
-      if (item) {
-        showToast(COPY.success.removedFromCart(item.plan.name), 'error');
-      }
-      return prev.filter(item => item.plan.id !== planId);
-    });
-  }, [showToast]);
+    const item = state.cartItems.find(item => item.plan.id === planId);
+    actions.removeFromCart(planId, item?.plan.name);
+  }, [actions, state.cartItems]);
 
   const handleUpdateQuantity = useCallback((planId, newQuantity) => {
-    const validation = validateQuantity(newQuantity);
-    if (!validation.valid) {
-      showToast(validation.error, 'error');
-      return;
-    }
-
-    if (validation.value === 0) {
-      handleRemoveFromCart(planId);
-      return;
-    }
-
-    setCartItems(prev => prev.map(item =>
-      item.plan.id === planId
-        ? { ...item, quantity: validation.value }
-        : item
-    ));
-  }, [handleRemoveFromCart, showToast]);
-
-  // Streaming handlers
-  const handleStreamingToggle = useCallback((serviceId) => {
-    setSelectedStreaming(prev => 
-      prev.includes(serviceId)
-        ? prev.filter(id => id !== serviceId)
-        : [...prev, serviceId]
-    );
-  }, []);
-
-  // Mobile cost handler
-  const handleMobileCostChange = useCallback((value) => {
-    const validation = validatePrice(value);
-    if (validation.valid) {
-      setCustomerMobileCost(validation.value);
-    }
-  }, []);
-
-  // Number of lines handler
-  const handleNumberOfLinesChange = useCallback((value) => {
-    const validation = validateQuantity(value);
-    if (validation.valid) {
-      setNumberOfLines(validation.value);
-    }
-  }, []);
-
-  // Original item price handler
-  const handleOriginalItemPriceChange = useCallback((value) => {
-    const validation = validatePrice(value);
-    if (validation.valid) {
-      setOriginalItemPrice(validation.value);
-    }
-  }, []);
-
-  // Cash discount handler
-  const handleCashDiscountChange = useCallback((value) => {
-    const validation = validatePrice(value);
-    if (validation.valid) {
-      setCashDiscount(validation.value);
-    }
-  }, []);
-
-  // CBB MIX handlers
-  const handleCBBMixToggle = useCallback((planId, enabled) => {
-    setCbbMixEnabled(prev => ({
-      ...prev,
-      [planId]: enabled
-    }));
-    
-    if (!enabled) {
-      setCbbMixCount(prev => ({
-        ...prev,
-        [planId]: 2 // Reset to default
-      }));
-    }
-  }, []);
-
-  const handleCBBMixCountChange = useCallback((planId, count) => {
-    setCbbMixCount(prev => ({
-      ...prev,
-      [planId]: count
-    }));
-  }, []);
-
-  // Reset handler
-  const handleReset = useCallback(() => {
-    resetAll();
-    setCartItems([]);
-    setSelectedStreaming([]);
-    setCustomerMobileCost(0);
-    setNumberOfLines(1);
-    setOriginalItemPrice(0);
-    setCashDiscount(null);
-    setCashDiscountLocked(false);
-    setFreeSetup(false);
-    setAutoAdjust(false);
-    setActiveProvider('all');
-    setSearchQuery('');
-    setCbbMixEnabled({});
-    setCbbMixCount({});
-    setExistingBrands([]);
-      showToast(COPY.success.reset, 'success');
-  }, [showToast]);
-
-  // Theme toggle
-  const handleThemeToggle = useCallback(() => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  }, []);
-
-  // Presentation toggle
-  const handlePresentationToggle = useCallback(() => {
-    setShowPresentation(prev => !prev);
-  }, []);
-
-  // Keyboard shortcut: Press 'P' to toggle presentation
-  useEffect(() => {
-    function handleKeyPress(e) {
-      // Don't trigger if user is typing in an input
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
-        return;
-      }
-      
-      if ((e.key === 'p' || e.key === 'P') && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        handlePresentationToggle();
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handlePresentationToggle]);
-
-  // Close presentation
-  const handleClosePresentation = useCallback(() => {
-    setShowPresentation(false);
-  }, []);
-
-  // Toggle cash discount
-  const handleToggleCashDiscount = useCallback(() => {
-    setShowCashDiscount(prev => !prev);
-  }, []);
+    actions.updateQuantity(planId, newQuantity);
+  }, [actions]);
 
   // Auto-select løsning handler
   const handleAutoSelectSolution = useCallback(() => {
-    const availablePlans = plans;
-    const availableStreaming = staticStreaming;
-    
-    // Funktion til at hente streaming-pris
-    const getStreamingPrice = (serviceId) => {
-      const service = availableStreaming.find(s => s.id === serviceId) || getServiceById(serviceId);
-      return service ? (service.price || 0) : 0;
-    };
-    
-    // Find bedste løsning - brug numberOfLines som maksimum
-    // Ekskluder planer fra eksisterende brands
-    // ALTID ekskluder CBB
-    const excludedProviders = ['cbb', ...existingBrands.map(brand => {
-      // Konverter brand navn til provider format
-      if (brand === 'Telmore') return 'telmore';
-      if (brand === 'Telenor') return 'telenor';
-      if (brand === 'CBB') return 'cbb';
-      return brand.toLowerCase();
-    })];
-    
-    const result = findBestSolution(
-      availablePlans,
-      selectedStreaming,
-      customerMobileCost,
-      originalItemPrice,
-      getStreamingPrice,
-      {
-        maxLines: numberOfLines || 5,
-        minSavings: -Infinity,
-        requiredLines: numberOfLines || 1,
-        excludedProviders: excludedProviders
+    try {
+      const availablePlans = plans;
+      const availableStreaming = staticStreaming;
+      
+      // Valider input
+      if (!Array.isArray(availablePlans) || availablePlans.length === 0) {
+        toast(COPY.error.couldNotFindSolution, 'error');
+        return;
       }
-    );
-    
-    if (result.cartItems && result.cartItems.length > 0) {
-      // Opdater kurven med den fundne løsning
-      setCartItems(result.cartItems);
       
-      // Opdater CBB Mix indstillinger hvis nødvendigt
-      const newCbbMixEnabled = {};
-      const newCbbMixCount = {};
-      result.cartItems.forEach(item => {
-        if (item.cbbMixEnabled) {
-          newCbbMixEnabled[item.plan.id] = true;
-          newCbbMixCount[item.plan.id] = item.cbbMixCount || 2;
+      // Funktion til at hente streaming-pris med defensive checks
+      const getStreamingPrice = (serviceId) => {
+        try {
+          if (serviceId == null) return 0;
+          const service = availableStreaming.find(s => s && s.id === serviceId) || getServiceById(serviceId);
+          if (!service || typeof service !== 'object') return 0;
+          const price = service.price;
+          return (price != null && Number.isFinite(price) && price >= 0) ? price : 0;
+        } catch (e) {
+          return 0;
         }
-      });
-      setCbbMixEnabled(newCbbMixEnabled);
-      setCbbMixCount(newCbbMixCount);
+      };
       
-      // Vis besked med forklaring
-      showToast(COPY.success.foundSolution(result.explanation), result.savings >= 0 ? 'success' : 'error');
-    } else {
-      showToast(COPY.error.couldNotFindSolution, 'error');
+      // Find bedste løsning - brug numberOfLines som maksimum
+      // Ekskluder planer fra eksisterende brands
+      // ALTID ekskluder CBB
+      const excludedProviders = ['cbb'];
+      
+      // Sikre array operation for existingBrands
+      if (Array.isArray(state.existingBrands)) {
+        state.existingBrands.forEach(brand => {
+          if (brand && typeof brand === 'string') {
+            // Konverter brand navn til provider format
+            if (brand === 'Telmore') excludedProviders.push('telmore');
+            else if (brand === 'Telenor') excludedProviders.push('telenor');
+            else if (brand === 'CBB') excludedProviders.push('cbb');
+            else excludedProviders.push(brand.toLowerCase());
+          }
+        });
+      }
+      
+      // Valider state værdier før brug
+      const validNumberOfLines = Number.isInteger(state.numberOfLines) && state.numberOfLines > 0 && state.numberOfLines <= 20
+        ? state.numberOfLines 
+        : 1;
+      
+      const validCustomerMobileCost = Number.isFinite(state.customerMobileCost) && state.customerMobileCost >= 0
+        ? state.customerMobileCost 
+        : 0;
+      
+      const validOriginalItemPrice = Number.isFinite(state.originalItemPrice) && state.originalItemPrice >= 0
+        ? state.originalItemPrice 
+        : 0;
+      
+      const validSelectedStreaming = Array.isArray(state.selectedStreaming) ? state.selectedStreaming : [];
+      
+      const result = findBestSolution(
+        availablePlans,
+        validSelectedStreaming,
+        validCustomerMobileCost,
+        validOriginalItemPrice,
+        getStreamingPrice,
+        {
+          maxLines: validNumberOfLines,
+          minSavings: -Infinity,
+          requiredLines: validNumberOfLines,
+          excludedProviders: excludedProviders
+        }
+      );
+      
+      // Valider resultat før brug
+      if (!result || typeof result !== 'object') {
+        toast(COPY.error.couldNotFindSolution, 'error');
+        return;
+      }
+      
+      // Valider at cartItems er et array
+      if (Array.isArray(result.cartItems) && result.cartItems.length > 0) {
+        // Valider at alle cart items har påkrævede properties
+        const validCartItems = result.cartItems.filter(item => {
+          if (!item || typeof item !== 'object') return false;
+          if (!item.plan || typeof item.plan !== 'object') return false;
+          if (!item.plan.id) return false;
+          if (!Number.isInteger(item.quantity) || item.quantity < 1) return false;
+          return true;
+        });
+        
+        if (validCartItems.length === 0) {
+          toast(COPY.error.couldNotFindSolution, 'error');
+          return;
+        }
+        
+        // Ryd kurv først
+        actions.clearCart();
+        
+        // Sæt hele cart på én gang
+        actions.setCart(validCartItems);
+        
+        // Opdater CBB Mix indstillinger hvis nødvendigt
+        validCartItems.forEach(item => {
+          try {
+            if (item.cbbMixEnabled === true && item.plan && item.plan.id) {
+              const mixCount = (item.cbbMixCount != null && Number.isInteger(item.cbbMixCount) && item.cbbMixCount >= 2 && item.cbbMixCount <= 8)
+                ? item.cbbMixCount 
+                : 2;
+              actions.setCBBMixEnabled(item.plan.id, true);
+              actions.setCBBMixCount(item.plan.id, mixCount);
+            }
+          } catch (e) {
+            // Skip hvis der er fejl ved opdatering af CBB Mix
+          }
+        });
+        
+        // Vis besked med forklaring
+        const validSavings = Number.isFinite(result.savings) ? result.savings : 0;
+        const explanation = (result.explanation && typeof result.explanation === 'string') 
+          ? result.explanation 
+          : 'Løsning fundet';
+        toast(COPY.success.foundSolution(explanation), validSavings >= 0 ? 'success' : 'error');
+      } else {
+        toast(COPY.error.couldNotFindSolution, 'error');
+      }
+    } catch (error) {
+      // Håndter fejl gracefully
+      console.error('Fejl ved automatisk valg af løsning:', error);
+      toast(COPY.error.couldNotFindSolution, 'error');
     }
-  }, [selectedStreaming, customerMobileCost, originalItemPrice, numberOfLines, existingBrands, showToast]);
+  }, [state.selectedStreaming, state.customerMobileCost, state.originalItemPrice, state.numberOfLines, state.existingBrands, actions]);
 
   // EAN søgning handler
   const handleEANSearch = useCallback(async (searchResult) => {
-    setIsSearching(true);
-    setEanSearchResults(searchResult);
+    actions.setIsSearching(true);
+    actions.setEanSearchResults(searchResult);
     
     // Hvis der er fundet produkter, vis dem i en toast
     if (searchResult.products && searchResult.products.length > 0) {
       const firstProduct = searchResult.products[0];
       const price = searchResult.prices[firstProduct.productId] || firstProduct.price || 'Ukendt pris';
-      showToast(COPY.success.searchSuccess(firstProduct.title || firstProduct.name, price), 'success');
+      toast(COPY.success.searchSuccess(firstProduct.title || firstProduct.name, price), 'success');
       
       // Auto-fyld original item price hvis der er en pris
       if (typeof price === 'number' && price > 0) {
-        setOriginalItemPrice(price);
+        actions.setOriginalItemPrice(price);
       }
     } else {
       // Fallback: Brug filterpris hvis min==max
       if (typeof searchResult.fallbackPrice === 'number' && searchResult.fallbackPrice > 0) {
-        setOriginalItemPrice(searchResult.fallbackPrice);
-        showToast(COPY.success.priceFound(searchResult.fallbackPrice), 'success');
+        actions.setOriginalItemPrice(searchResult.fallbackPrice);
+        toast(COPY.success.priceFound(searchResult.fallbackPrice), 'success');
       } else {
-        showToast(COPY.error.noProductsFound, 'error');
+        toast(COPY.error.noProductsFound, 'error');
       }
     }
     
-    setIsSearching(false);
-  }, [showToast]);
+    actions.setIsSearching(false);
+  }, [actions]);
 
   // Filtrerede planer - memoized for performance (bruger debounced search query)
   const filteredPlans = useMemo(() => {
     const source = plans;
-    let filtered = activeProvider === 'all'
+    let filtered = state.activeProvider === 'all'
       ? source
-      : source.filter(p => p.provider === activeProvider);
+      : source.filter(p => p.provider === state.activeProvider);
 
     // Filtrer baseret på datoer (availableFrom og expiresAt)
     const today = new Date();
@@ -463,8 +249,8 @@ function App() {
       return true;
     });
 
-    if (debouncedSearchQuery.trim()) {
-      const q = debouncedSearchQuery.toLowerCase();
+    if (state.debouncedSearchQuery.trim()) {
+      const q = state.debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter(plan => (
         (plan.name || '').toLowerCase().includes(q) ||
         (plan.data || '').toLowerCase().includes(q) ||
@@ -475,7 +261,25 @@ function App() {
     }
 
     return filtered;
-  }, [activeProvider, debouncedSearchQuery]);
+  }, [state.activeProvider, state.debouncedSearchQuery]);
+
+  // Keyboard shortcut: Press 'P' to toggle presentation
+  useEffect(() => {
+    function handleKeyPress(e) {
+      // Don't trigger if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+        return;
+      }
+      
+      if ((e.key === 'p' || e.key === 'P') && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        actions.togglePresentation();
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [actions]);
 
   // Simple skeleton for header
   const HeaderSkeleton = () => (
@@ -497,11 +301,11 @@ function App() {
       {/* Header */}
       <Suspense fallback={<HeaderSkeleton />}>
         <Header
-          onReset={handleReset}
-          onPresentationToggle={handlePresentationToggle}
-          theme={theme}
-          onThemeToggle={handleThemeToggle}
-          cartCount={cartCount}
+          onReset={actions.resetAll}
+          onPresentationToggle={actions.togglePresentation}
+          theme={state.theme}
+          onThemeToggle={() => actions.toggleTheme(state.theme)}
+          cartCount={state.cartCount}
           onCartClick={handleScrollToCart}
         />
       </Suspense>
@@ -514,19 +318,19 @@ function App() {
             <div className="section-shell">
               <Suspense fallback={<SectionSkeleton />}>
                 <StreamingSelector
-                  selectedStreaming={selectedStreaming}
-                  onStreamingToggle={handleStreamingToggle}
-                  customerMobileCost={customerMobileCost}
-                  onMobileCostChange={handleMobileCostChange}
-                  numberOfLines={numberOfLines}
-                  onNumberOfLinesChange={handleNumberOfLinesChange}
-                  originalItemPrice={originalItemPrice}
-                  onOriginalItemPriceChange={handleOriginalItemPriceChange}
+                  selectedStreaming={state.selectedStreaming}
+                  onStreamingToggle={actions.toggleStreaming}
+                  customerMobileCost={state.customerMobileCost}
+                  onMobileCostChange={actions.setMobileCost}
+                  numberOfLines={state.numberOfLines}
+                  onNumberOfLinesChange={actions.setNumberOfLines}
+                  originalItemPrice={state.originalItemPrice}
+                  onOriginalItemPriceChange={actions.setOriginalItemPrice}
                   onEANSearch={handleEANSearch}
-                  isSearching={isSearching}
+                  isSearching={state.isSearching}
                   onAutoSelectSolution={handleAutoSelectSolution}
-                  existingBrands={existingBrands}
-                  onExistingBrandsChange={setExistingBrands}
+                  existingBrands={state.existingBrands}
+                  onExistingBrandsChange={actions.setExistingBrands}
                 />
               </Suspense>
             </div>
@@ -550,15 +354,15 @@ function App() {
 
                 <Suspense fallback={<div className="skeleton" style={{ height: '60px', marginBottom: 'var(--spacing-md)' }} />}>
                   <ProviderTabs
-                    activeProvider={activeProvider}
-                    onProviderChange={setActiveProvider}
-                    searchQuery={searchQuery}
-                    onSearch={setSearchQuery}
+                    activeProvider={state.activeProvider}
+                    onProviderChange={actions.setActiveProvider}
+                    searchQuery={state.searchQuery}
+                    onSearch={actions.setSearchQuery}
                   />
                 </Suspense>
 
                 {/* Plans grid */}
-                {activeProvider === 'all' ? (
+                {state.activeProvider === 'all' ? (
                   <div className="empty-state">
                     <Icon name="smartphone" size={48} className="empty-state-icon opacity-30" />
                     <p className="text-lg font-semibold">{COPY.labels.selectProvider}</p>
@@ -573,10 +377,10 @@ function App() {
                         <PlanCard
                           plan={plan}
                           onAddToCart={handleAddToCart}
-                          onCBBMixToggle={handleCBBMixToggle}
-                          onCBBMixCountChange={handleCBBMixCountChange}
-                          cbbMixEnabled={cbbMixEnabled[plan.id] || false}
-                          cbbMixCount={cbbMixCount[plan.id] || 2}
+                          onCBBMixToggle={actions.setCBBMixEnabled}
+                          onCBBMixCountChange={actions.setCBBMixCount}
+                          cbbMixEnabled={state.cbbMixEnabled[plan.id] || false}
+                          cbbMixCount={state.cbbMixCount[plan.id] || 2}
                         />
                       </Suspense>
                     ))}
@@ -601,7 +405,7 @@ function App() {
             <div className="section-shell">
               <Suspense fallback={<SectionSkeleton />}>
                 <Cart
-                  cartItems={cartItems}
+                  cartItems={state.cartItems}
                   onUpdateQuantity={handleUpdateQuantity}
                   onRemove={handleRemoveFromCart}
                 />
@@ -616,21 +420,19 @@ function App() {
             <div className="section-shell">
               <Suspense fallback={<SectionSkeleton />}>
                 <ComparisonPanel
-                  cartItems={cartItems}
-                  selectedStreaming={selectedStreaming}
-                  customerMobileCost={customerMobileCost}
-                  numberOfLines={numberOfLines}
-                  originalItemPrice={originalItemPrice}
-                  cashDiscount={cashDiscount}
-                  onCashDiscountChange={handleCashDiscountChange}
-                  cashDiscountLocked={cashDiscountLocked}
-                  onCashDiscountLockedChange={setCashDiscountLocked}
-                  autoAdjust={autoAdjust}
-                  onAutoAdjustChange={setAutoAdjust}
-                  showCashDiscount={showCashDiscount}
-                  onToggleCashDiscount={handleToggleCashDiscount}
-                  freeSetup={freeSetup}
-                  onFreeSetupChange={setFreeSetup}
+                  cartItems={state.cartItems}
+                  selectedStreaming={state.selectedStreaming}
+                  customerMobileCost={state.customerMobileCost}
+                  numberOfLines={state.numberOfLines}
+                  originalItemPrice={state.originalItemPrice}
+                  cashDiscount={state.cashDiscount}
+                  onCashDiscountChange={actions.setCashDiscount}
+                  cashDiscountLocked={state.cashDiscountLocked}
+                  onCashDiscountLockedChange={actions.setCashDiscountLocked}
+                  autoAdjust={state.autoAdjust}
+                  onAutoAdjustChange={actions.setAutoAdjust}
+                  showCashDiscount={state.showCashDiscount}
+                  onToggleCashDiscount={actions.toggleCashDiscount}
                 />
               </Suspense>
             </div>
@@ -639,17 +441,16 @@ function App() {
       </main>
 
       {/* Presentation view */}
-      {showPresentation && (
+      {state.showPresentation && (
         <Suspense fallback={<SectionSkeleton />}>
           <PresentationView
-            cartItems={cartItems}
-            selectedStreaming={selectedStreaming}
-            customerMobileCost={customerMobileCost}
-            originalItemPrice={originalItemPrice}
-            cashDiscount={cashDiscount}
-            freeSetup={freeSetup}
-            onClose={handleClosePresentation}
-            onReset={handleReset}
+            cartItems={state.cartItems}
+            selectedStreaming={state.selectedStreaming}
+            customerMobileCost={state.customerMobileCost}
+            originalItemPrice={state.originalItemPrice}
+            cashDiscount={state.cashDiscount}
+            onClose={() => actions.setShowPresentation(false)}
+            onReset={actions.resetAll}
           />
         </Suspense>
       )}
@@ -672,42 +473,43 @@ function App() {
 
         .main-content {
           flex: 1;
-          padding: var(--spacing-xl) 0;
-          padding-top: calc(120px + var(--spacing-xl));
+          padding: var(--spacing-lg) 0;
+          padding-top: calc(120px + var(--spacing-lg));
           width: 100%;
           max-width: 100%;
         }
 
         .plans-section {
-          padding: var(--spacing-xl);
+          padding: var(--spacing-md);
         }
 
         .section-header {
-          margin-bottom: var(--spacing-xl);
+          margin-bottom: var(--spacing-md);
         }
 
         .section-header__title {
           display: flex;
           align-items: center;
           gap: var(--spacing-sm);
+          font-size: var(--font-2xl);
         }
 
         .plans-grid {
-          margin-top: var(--spacing-xl);
-          gap: var(--spacing-xl);
+          margin-top: var(--spacing-md);
+          gap: var(--spacing-md);
         }
 
         .cart-comparison-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: var(--spacing-2xl);
+          gap: var(--spacing-lg);
           align-items: start;
         }
 
         @media (min-width: 1200px) {
           .cart-comparison-grid {
             grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-2xl);
+            gap: var(--spacing-lg);
           }
         }
 
@@ -717,7 +519,7 @@ function App() {
         }
 
         .section-divider {
-          margin: var(--spacing-xl) auto;
+          margin: var(--spacing-lg) auto;
           max-width: 200px;
         }
 
@@ -728,15 +530,15 @@ function App() {
           }
 
           .plans-section {
-            padding: var(--spacing-lg);
+            padding: var(--spacing-md);
           }
           
           .section-header {
-            margin-bottom: var(--spacing-lg) !important;
+            margin-bottom: var(--spacing-md) !important;
           }
 
           .plans-grid {
-            gap: var(--spacing-lg);
+            gap: var(--spacing-md);
           }
 
           .cart-comparison-grid {
@@ -779,4 +581,3 @@ function App() {
 }
 
 export default App;
-

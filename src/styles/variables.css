@@ -4,7 +4,19 @@
  */
 
 :root {
-  /* Brand Colors - Vibrant Palette */
+  /* Primary Gradient - Modern Bold (#6366F1 → #8B5CF6) */
+  --color-primary: #6366F1;
+  --color-primary-light: #818CF8;
+  --color-primary-dark: #4F46E5;
+  --color-primary-glow: rgba(99, 102, 241, 0.6);
+  
+  /* Secondary Gradient - Bold Accent */
+  --color-secondary: #8B5CF6;
+  --color-secondary-light: #A78BFA;
+  --color-secondary-dark: #7C3AED;
+  --color-secondary-glow: rgba(139, 92, 246, 0.6);
+  
+  /* Brand Colors - Updated with Modern Palette */
   --color-orange: #FF6D1F;
   --color-orange-light: #FF9F7A;
   --color-orange-dark: #FF4500;
@@ -24,18 +36,27 @@
   --color-cbb-bg: #FEF3C7;
   --color-cbb-glow: rgba(244, 114, 182, 0.6);
   
-  /* Status Colors - Refined, Subtle */
+  /* Status Colors - Clearer, More Vibrant */
   --color-success: #10B981;
   --color-success-light: #34D399;
   --color-success-dark: #059669;
   --color-success-teal: #10B981;
+  --color-success-glow: rgba(16, 185, 129, 0.5);
   
-  --color-danger: #F87171;
-  --color-danger-light: #FCA5A5;
+  --color-danger: #EF4444;
+  --color-danger-light: #F87171;
   --color-danger-dark: #DC2626;
+  --color-danger-glow: rgba(239, 68, 68, 0.5);
   
-  --color-warning: #FBBF24;
-  --color-info: #60A5FA;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FBBF24;
+  --color-warning-dark: #D97706;
+  --color-warning-glow: rgba(245, 158, 11, 0.5);
+  
+  --color-info: #3B82F6;
+  --color-info-light: #60A5FA;
+  --color-info-dark: #2563EB;
+  --color-info-glow: rgba(59, 130, 246, 0.5);
   
   /* Dark Theme - Pure, Deep, Apple-Inspired - Ultra Minimal */
   --bg-primary: #000000;
@@ -80,16 +101,32 @@
   --neutral-800: #262626;
   --neutral-900: #171717;
   
-  /* Spacing - Mathematical 8px Base Scale (Golden Ratio where relevant) */
-  --spacing-xs: 0.5rem;     /* 8px */
-  --spacing-sm: 0.75rem;    /* 12px */
-  --spacing-md: 1rem;       /* 16px */
-  --spacing-lg: 1.5rem;     /* 24px */
-  --spacing-xl: 2rem;       /* 32px */
-  --spacing-2xl: 3rem;      /* 48px */
-  --spacing-3xl: 4rem;      /* 64px */
-  --spacing-4xl: 6rem;      /* 96px */
-  --spacing-5xl: 8rem;      /* 128px */
+  /* Spacing - Strict 8px Base Grid System */
+  --spacing-0: 0;            /* 0px */
+  --spacing-1: 0.25rem;      /* 4px */
+  --spacing-2: 0.5rem;       /* 8px - base unit */
+  --spacing-3: 0.75rem;      /* 12px */
+  --spacing-4: 1rem;         /* 16px */
+  --spacing-5: 1.25rem;      /* 20px */
+  --spacing-6: 1.5rem;       /* 24px */
+  --spacing-8: 2rem;         /* 32px */
+  --spacing-10: 2.5rem;      /* 40px */
+  --spacing-12: 3rem;        /* 48px */
+  --spacing-16: 4rem;         /* 64px */
+  --spacing-20: 5rem;        /* 80px */
+  --spacing-24: 6rem;        /* 96px */
+  --spacing-32: 8rem;        /* 128px */
+  
+  /* Legacy spacing aliases for backward compatibility */
+  --spacing-xs: var(--spacing-2);    /* 8px */
+  --spacing-sm: var(--spacing-3);    /* 12px */
+  --spacing-md: var(--spacing-4);    /* 16px */
+  --spacing-lg: var(--spacing-6);    /* 24px */
+  --spacing-xl: var(--spacing-8);    /* 32px */
+  --spacing-2xl: var(--spacing-12);  /* 48px */
+  --spacing-3xl: var(--spacing-16);  /* 64px */
+  --spacing-4xl: var(--spacing-24);  /* 96px */
+  --spacing-5xl: var(--spacing-32);  /* 128px */
   
   /* Border radius - Mathematical Harmony (8px multiples) */
   --radius-sm: 0.5rem;      /* 8px */
@@ -126,24 +163,26 @@
   --font-family-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
   --font-family-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   
-  /* Font Sizes - Strengere Hierarchy med Tydelige Forskelle */
-  --font-xs: 0.6875rem;      /* 11px - Very small text */
-  --font-sm: 0.875rem;       /* 14px - Small text (opdateret fra 12px) */
-  --font-base: 1rem;         /* 16px - Body text (opdateret fra 14px) */
-  --font-lg: 1.125rem;       /* 18px - Large body */
-  --font-xl: 1.25rem;        /* 20px - Extra large */
-  --font-2xl: 1.5rem;        /* 24px - H3 heading (opdateret fra 22px) */
-  --font-3xl: 2rem;          /* 32px - H2 heading (opdateret fra 26px) */
-  --font-4xl: 2.5rem;        /* 40px - Extra large heading */
-  --font-5xl: 3rem;          /* 48px - H1 heading (opdateret fra 40px) */
+  /* Font Sizes - Enhanced Hierarchy with Larger Differences */
+  --font-xs: 0.75rem;        /* 12px - Very small text */
+  --font-sm: 0.875rem;       /* 14px - Small text */
+  --font-base: 1rem;         /* 16px - Body text */
+  --font-lg: 1.25rem;        /* 20px - Large body (increased from 18px) */
+  --font-xl: 1.5rem;         /* 24px - Extra large (increased from 20px) */
+  --font-2xl: 1.875rem;      /* 30px - H3 heading (increased from 24px) */
+  --font-3xl: 2.25rem;       /* 36px - H2 heading (increased from 32px) */
+  --font-4xl: 3rem;          /* 48px - Extra large heading (increased from 40px) */
+  --font-5xl: 3.75rem;       /* 60px - H1 heading (increased from 48px) */
+  --font-6xl: 4.5rem;        /* 72px - Hero heading (new) */
   
-  /* Font Weights - Større Forskelle for Tydeligt Hierarki */
+  /* Font Weights - Enhanced Differences for Clear Hierarchy */
   --font-light: 300;
   --font-normal: 400;
   --font-medium: 500;
   --font-semibold: 600;      /* For subheadings */
   --font-bold: 700;          /* For important headings */
   --font-extrabold: 800;     /* For hero headings */
+  --font-black: 900;         /* For maximum emphasis (new) */
   
   /* Letter Spacing - Tuning for Bedre Læsbarhed */
   --letter-spacing-tighter: -0.05em;  /* For store headings */
@@ -175,16 +214,17 @@
   --shadow-glow-purple: 0 0 32px rgba(167, 139, 250, 0.6), 0 0 64px rgba(167, 139, 250, 0.3);
   --shadow-glow-green: 0 0 32px rgba(16, 245, 156, 0.6), 0 0 64px rgba(16, 245, 156, 0.3);
   
-  /* Gradients - Vibrant & Modern */
-  --gradient-primary: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 50%, #FFB380 100%);
+  /* Gradients - Modern Bold (#6366F1 → #8B5CF6) */
+  --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A78BFA 100%);
+  --gradient-primary-reverse: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
   --gradient-secondary: linear-gradient(135deg, #5E8FFF 0%, #7BA3FF 50%, #A8C8FF 100%);
   --gradient-accent: linear-gradient(135deg, #EC4899 0%, #F472B6 50%, #F9A8D4 100%);
   --gradient-success: linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 100%);
   --gradient-3d: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 100%);
-  --gradient-header: linear-gradient(90deg, rgba(255, 109, 31, 0.8), rgba(94, 143, 255, 0.8), rgba(167, 139, 250, 0.8), rgba(244, 114, 182, 0.8));
+  --gradient-header: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(139, 92, 246, 0.8), rgba(94, 143, 255, 0.8), rgba(167, 139, 250, 0.8));
   --gradient-divider: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  --gradient-divider-colored: linear-gradient(90deg, rgba(255, 109, 31, 0), rgba(255, 109, 31, 0.5), rgba(94, 143, 255, 0.5), rgba(167, 139, 250, 0.4), rgba(244, 114, 182, 0.3), rgba(255, 109, 31, 0));
+  --gradient-divider-colored: linear-gradient(90deg, rgba(99, 102, 241, 0), rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.5), rgba(94, 143, 255, 0.4), rgba(167, 139, 250, 0.3), rgba(99, 102, 241, 0));
   
   /* Compact Fluid typography - Optimized for density */
   --fluid-text-sm: clamp(0.5625rem, 0.5rem + 0.15vw, 0.6875rem);

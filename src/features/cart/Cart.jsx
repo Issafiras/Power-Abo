@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { formatCurrency, calculateSixMonthPrice } from '../utils/calculations';
-import Icon from './common/Icon';
-import COPY from '../constants/copy';
+import { formatCurrency, calculateSixMonthPrice } from '../../utils/calculations';
+import Icon from '../../components/common/Icon';
+import COPY from '../../constants/copy';
 
-function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set() }) {
+const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set() }) {
   if (cartItems.length === 0) {
     return (
       <div className="cart glass-card-no-hover fade-in-up">
@@ -30,12 +30,12 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
 
         <style>{`
           .cart {
-            padding: var(--spacing-2xl);
+            padding: var(--spacing-lg);
             min-height: 400px;
           }
 
           .section-header {
-            margin-bottom: var(--spacing-xl);
+            margin-bottom: var(--spacing-md);
           }
 
           .empty-state {
@@ -43,12 +43,12 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: var(--spacing-3xl);
+            padding: var(--spacing-xl);
           }
 
           .empty-state-icon {
-            font-size: var(--font-5xl);
-            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-4xl);
+            margin-bottom: var(--spacing-md);
             opacity: 0.3;
           }
         `}</style>
@@ -190,14 +190,18 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
 
       <style>{`
         .cart {
-          padding: var(--spacing-2xl);
+          padding: var(--spacing-lg);
         }
 
         .section-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: var(--spacing-2xl);
+          margin-bottom: var(--spacing-md);
+        }
+
+        .section-header h2 {
+          font-size: var(--font-2xl);
         }
 
         .section-header h2 {
@@ -441,7 +445,7 @@ function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set
       `}</style>
     </div>
   );
-}
+});
 
-export default React.memo(Cart);
+export default Cart;
 
