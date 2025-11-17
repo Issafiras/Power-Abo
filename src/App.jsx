@@ -14,7 +14,6 @@ const Cart = lazy(() => import('./components/Cart'));
 const ComparisonPanel = lazy(() => import('./components/ComparisonPanel'));
 const Footer = lazy(() => import('./components/Footer'));
 const PresentationView = lazy(() => import('./components/PresentationView'));
-const HelpButton = lazy(() => import('./components/HelpButton'));
 import { plans } from './data/plans';
 import { findBestSolution } from './utils/calculations';
 import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
@@ -658,11 +657,6 @@ function App() {
       {/* Footer */}
       <Suspense fallback={null}>
         <Footer />
-      </Suspense>
-
-      {/* Help Button - Floating guide button */}
-      <Suspense fallback={null}>
-        <HelpButton />
       </Suspense>
 
       <style>{`
