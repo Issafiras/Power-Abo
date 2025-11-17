@@ -1,9 +1,11 @@
 /**
  * App.jsx - Hovedkomponent
- * Håndterer global state og orkestrerer alle subkomponenter
+ * Tim Cook Rebuild: Refactored til at bruge Context API for state management
+ * Reduceret fra 782 linjer til ~400 linjer gennem bedre separation of concerns
  */
 
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useApp } from './contexts/AppContext';
 import { toast } from './components/common/Toast';
 // Lazy load tunge komponenter for bedre initial load performance
 const Header = lazy(() => import('./components/Header'));
@@ -17,66 +19,58 @@ const PresentationView = lazy(() => import('./components/PresentationView'));
 import { plans } from './data/plans';
 import { findBestSolution } from './utils/calculations';
 import { getServiceById, streamingServices as staticStreaming } from './data/streamingServices';
-import {
-  saveCart,
-  loadCart,
-  saveSelectedStreaming,
-  loadSelectedStreaming,
-  saveCustomerMobileCost,
-  loadCustomerMobileCost,
-  saveNumberOfLines,
-  loadNumberOfLines,
-  saveOriginalItemPrice,
-  loadOriginalItemPrice,
-  saveCashDiscount,
-  loadCashDiscount,
-  saveCashDiscountLocked,
-  loadCashDiscountLocked,
-  saveAutoAdjust,
-  loadAutoAdjust,
-  saveTheme,
-  loadTheme,
-  saveShowCashDiscount,
-  loadShowCashDiscount,
-  saveExistingBrands,
-  loadExistingBrands,
-  saveFreeSetup,
-  loadFreeSetup,
-  resetAll
-} from './utils/storage';
-import { validatePrice, validateQuantity } from './utils/validators';
 import Icon from './components/common/Icon';
 import COPY from './constants/copy';
 import AccessibilityHelper from './components/common/AccessibilityHelper';
 
 function App() {
-  // State
-  const [cartItems, setCartItems] = useState([]);
-  const [selectedStreaming, setSelectedStreaming] = useState([]);
-  const [customerMobileCost, setCustomerMobileCost] = useState(0);
-  const [numberOfLines, setNumberOfLines] = useState(1);
-  const [originalItemPrice, setOriginalItemPrice] = useState(0);
-  const [cashDiscount, setCashDiscount] = useState(null);
-  const [cashDiscountLocked, setCashDiscountLocked] = useState(false);
-  const [autoAdjust, setAutoAdjust] = useState(false);
-  const [theme, setTheme] = useState('dark');
-  const [showCashDiscount, setShowCashDiscount] = useState(false);
-  const [freeSetup, setFreeSetup] = useState(false);
-  const [activeProvider, setActiveProvider] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [showPresentation, setShowPresentation] = useState(false);
-  
-  // CBB MIX state
-  const [cbbMixEnabled, setCbbMixEnabled] = useState({});
-  const [cbbMixCount, setCbbMixCount] = useState({});
-  
-  // Eksisterende brands state
-  const [existingBrands, setExistingBrands] = useState([]);
-
-  // EAN søgning state
-  const [eanSearchResults, setEanSearchResults] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
+  // Use centralized state management via Context API
+  const {
+    cartItems,
+    selectedStreaming,
+    customerMobileCost,
+    numberOfLines,
+    originalItemPrice,
+    cashDiscount,
+    cashDiscountLocked,
+    autoAdjust,
+    theme,
+    showCashDiscount,
+    freeSetup,
+    activeProvider,
+    searchQuery,
+    debouncedSearchQuery,
+    showPresentation,
+    cbbMixEnabled,
+    cbbMixCount,
+    existingBrands,
+    eanSearchResults,
+    isSearching,
+    // Actions
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    toggleStreaming,
+    setMobileCost,
+    setNumberOfLines: setNumberOfLinesAction,
+    setOriginalItemPrice,
+    setCashDiscount: setCashDiscountAction,
+    setCashDiscountLocked,
+    setAutoAdjust,
+    setTheme,
+    toggleCashDiscount,
+    setFreeSetup,
+    setActiveProvider,
+    setSearchQuery,
+    setDebouncedSearchQuery,
+    togglePresentation,
+    setCbbMixEnabled,
+    setCbbMixCount,
+    setExistingBrands,
+    setEanSearchResults,
+    setIsSearching,
+    resetAll
+  } = useApp();
 
   // Debounce search query (300ms delay)
   useEffect(() => {
@@ -85,7 +79,7 @@ function App() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, setDebouncedSearchQuery]);
 
 
   // Calculate total cart count
@@ -104,53 +98,8 @@ function App() {
     }
   }, []);
 
-  // Load fra localStorage ved mount
+  // Theme skal opdatere DOM
   useEffect(() => {
-    const savedCart = loadCart();
-    const savedStreaming = loadSelectedStreaming();
-    const savedMobileCost = loadCustomerMobileCost();
-    const savedNumberOfLines = loadNumberOfLines();
-    const savedOriginalItemPrice = loadOriginalItemPrice();
-    const savedCashDiscount = loadCashDiscount();
-    const savedCashDiscountLocked = loadCashDiscountLocked();
-    const savedAutoAdjust = loadAutoAdjust();
-    const savedTheme = loadTheme();
-    const savedShowCashDiscount = loadShowCashDiscount();
-    const savedExistingBrands = loadExistingBrands();
-    const savedFreeSetup = loadFreeSetup();
-
-    setCartItems(savedCart);
-    setSelectedStreaming(savedStreaming);
-    setCustomerMobileCost(savedMobileCost);
-    setNumberOfLines(savedNumberOfLines);
-    setOriginalItemPrice(savedOriginalItemPrice);
-    setCashDiscount(savedCashDiscount);
-    setCashDiscountLocked(savedCashDiscountLocked);
-    setAutoAdjust(savedAutoAdjust);
-    setTheme(savedTheme);
-    setShowCashDiscount(savedShowCashDiscount);
-    setExistingBrands(savedExistingBrands);
-    setFreeSetup(savedFreeSetup);
-  }, []);
-
-  // Batch localStorage operations - gem alle state ændringer i én operation
-  useEffect(() => {
-    saveCart(cartItems);
-    saveSelectedStreaming(selectedStreaming);
-    saveCustomerMobileCost(customerMobileCost);
-    saveNumberOfLines(numberOfLines);
-    saveOriginalItemPrice(originalItemPrice);
-    saveCashDiscount(cashDiscount);
-    saveCashDiscountLocked(cashDiscountLocked);
-    saveAutoAdjust(autoAdjust);
-    saveShowCashDiscount(showCashDiscount);
-    saveExistingBrands(existingBrands);
-    saveFreeSetup(freeSetup);
-  }, [cartItems, selectedStreaming, customerMobileCost, numberOfLines, originalItemPrice, cashDiscount, cashDiscountLocked, autoAdjust, showCashDiscount, existingBrands, freeSetup]);
-
-  // Theme skal også opdatere DOM - separat useEffect
-  useEffect(() => {
-    saveTheme(theme);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
@@ -160,50 +109,35 @@ function App() {
     toast(message, type);
   }, []);
 
-  // Cart handlers
+  // Cart handlers - wrapped for toast notifications
   const handleAddToCart = useCallback((plan) => {
-    setCartItems(prev => {
-      const existingItem = prev.find(item => item.plan.id === plan.id);
-      
-      if (existingItem) {
-        // Opdater quantity
-        const validation = validateQuantity(existingItem.quantity + 1);
-        if (!validation.valid) {
-          showToast(validation.error, 'error');
-          return prev;
-        }
-        
-        showToast(COPY.success.updatedInCart(plan.name));
-        return prev.map(item =>
-          item.plan.id === plan.id
-            ? { ...item, quantity: validation.value }
-            : item
-        );
-      } else {
-        // Tilføj ny med CBB Mix data hvis tilgængelig
-        const newItem = { 
-          plan, 
-          quantity: 1,
-          cbbMixEnabled: plan.cbbMixAvailable ? (cbbMixEnabled[plan.id] || false) : false,
-          cbbMixCount: plan.cbbMixAvailable ? (cbbMixCount[plan.id] || 2) : 0
-        };
-        showToast(COPY.success.addedToCart(plan.name));
-        return [...prev, newItem];
+    const existingItem = cartItems.find(item => item.plan.id === plan.id);
+    
+    if (existingItem) {
+      const { validateQuantity } = require('./utils/validators');
+      const validation = validateQuantity(existingItem.quantity + 1);
+      if (!validation.valid) {
+        showToast(validation.error, 'error');
+        return;
       }
-    });
-  }, [cbbMixEnabled, cbbMixCount, showToast]);
+      showToast(COPY.success.updatedInCart(plan.name));
+      updateQuantity(plan.id, existingItem.quantity + 1);
+    } else {
+      addToCart(plan, cbbMixEnabled[plan.id] || false, cbbMixCount[plan.id] || 2);
+      showToast(COPY.success.addedToCart(plan.name));
+    }
+  }, [cartItems, cbbMixEnabled, cbbMixCount, addToCart, updateQuantity, showToast]);
 
   const handleRemoveFromCart = useCallback((planId) => {
-    setCartItems(prev => {
-      const item = prev.find(item => item.plan.id === planId);
-      if (item) {
-        showToast(COPY.success.removedFromCart(item.plan.name), 'error');
-      }
-      return prev.filter(item => item.plan.id !== planId);
-    });
-  }, [showToast]);
+    const item = cartItems.find(item => item.plan.id === planId);
+    if (item) {
+      showToast(COPY.success.removedFromCart(item.plan.name), 'error');
+    }
+    removeFromCart(planId);
+  }, [cartItems, removeFromCart, showToast]);
 
   const handleUpdateQuantity = useCallback((planId, newQuantity) => {
+    const { validateQuantity } = require('./utils/validators');
     const validation = validateQuantity(newQuantity);
     if (!validation.valid) {
       showToast(validation.error, 'error');
@@ -215,105 +149,14 @@ function App() {
       return;
     }
 
-    setCartItems(prev => prev.map(item =>
-      item.plan.id === planId
-        ? { ...item, quantity: validation.value }
-        : item
-    ));
-  }, [handleRemoveFromCart, showToast]);
-
-  // Streaming handlers
-  const handleStreamingToggle = useCallback((serviceId) => {
-    setSelectedStreaming(prev => 
-      prev.includes(serviceId)
-        ? prev.filter(id => id !== serviceId)
-        : [...prev, serviceId]
-    );
-  }, []);
-
-  // Mobile cost handler
-  const handleMobileCostChange = useCallback((value) => {
-    const validation = validatePrice(value);
-    if (validation.valid) {
-      setCustomerMobileCost(validation.value);
-    }
-  }, []);
-
-  // Number of lines handler
-  const handleNumberOfLinesChange = useCallback((value) => {
-    const validation = validateQuantity(value);
-    if (validation.valid) {
-      setNumberOfLines(validation.value);
-    }
-  }, []);
-
-  // Original item price handler
-  const handleOriginalItemPriceChange = useCallback((value) => {
-    const validation = validatePrice(value);
-    if (validation.valid) {
-      setOriginalItemPrice(validation.value);
-    }
-  }, []);
-
-  // Cash discount handler
-  const handleCashDiscountChange = useCallback((value) => {
-    const validation = validatePrice(value);
-    if (validation.valid) {
-      setCashDiscount(validation.value);
-    }
-  }, []);
-
-  // CBB MIX handlers
-  const handleCBBMixToggle = useCallback((planId, enabled) => {
-    setCbbMixEnabled(prev => ({
-      ...prev,
-      [planId]: enabled
-    }));
-    
-    if (!enabled) {
-      setCbbMixCount(prev => ({
-        ...prev,
-        [planId]: 2 // Reset to default
-      }));
-    }
-  }, []);
-
-  const handleCBBMixCountChange = useCallback((planId, count) => {
-    setCbbMixCount(prev => ({
-      ...prev,
-      [planId]: count
-    }));
-  }, []);
+    updateQuantity(planId, validation.value);
+  }, [updateQuantity, handleRemoveFromCart, showToast]);
 
   // Reset handler
   const handleReset = useCallback(() => {
     resetAll();
-    setCartItems([]);
-    setSelectedStreaming([]);
-    setCustomerMobileCost(0);
-    setNumberOfLines(1);
-    setOriginalItemPrice(0);
-    setCashDiscount(null);
-    setCashDiscountLocked(false);
-    setFreeSetup(false);
-    setAutoAdjust(false);
-    setActiveProvider('all');
-    setSearchQuery('');
-    setCbbMixEnabled({});
-    setCbbMixCount({});
-    setExistingBrands([]);
-      showToast(COPY.success.reset, 'success');
-  }, [showToast]);
-
-  // Theme toggle
-  const handleThemeToggle = useCallback(() => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  }, []);
-
-  // Presentation toggle
-  const handlePresentationToggle = useCallback(() => {
-    setShowPresentation(prev => !prev);
-  }, []);
+    showToast(COPY.success.reset, 'success');
+  }, [resetAll, showToast]);
 
   // Keyboard shortcut: Press 'P' to toggle presentation
   useEffect(() => {
@@ -325,23 +168,20 @@ function App() {
       
       if ((e.key === 'p' || e.key === 'P') && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        handlePresentationToggle();
+        togglePresentation();
       }
     }
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handlePresentationToggle]);
+  }, [togglePresentation]);
 
   // Close presentation
   const handleClosePresentation = useCallback(() => {
-    setShowPresentation(false);
-  }, []);
-
-  // Toggle cash discount
-  const handleToggleCashDiscount = useCallback(() => {
-    setShowCashDiscount(prev => !prev);
-  }, []);
+    if (showPresentation) {
+      togglePresentation();
+    }
+  }, [showPresentation, togglePresentation]);
 
   // Auto-select løsning handler
   const handleAutoSelectSolution = useCallback(() => {
@@ -380,27 +220,29 @@ function App() {
     );
     
     if (result.cartItems && result.cartItems.length > 0) {
-      // Opdater kurven med den fundne løsning
-      setCartItems(result.cartItems);
-      
-      // Opdater CBB Mix indstillinger hvis nødvendigt
-      const newCbbMixEnabled = {};
-      const newCbbMixCount = {};
+      // Clear existing cart and add new items
+      cartItems.forEach(item => removeFromCart(item.plan.id));
       result.cartItems.forEach(item => {
-        if (item.cbbMixEnabled) {
-          newCbbMixEnabled[item.plan.id] = true;
-          newCbbMixCount[item.plan.id] = item.cbbMixCount || 2;
+        addToCart(item.plan, item.cbbMixEnabled || false, item.cbbMixCount || 2);
+        if (item.quantity > 1) {
+          updateQuantity(item.plan.id, item.quantity);
         }
       });
-      setCbbMixEnabled(newCbbMixEnabled);
-      setCbbMixCount(newCbbMixCount);
+      
+      // Opdater CBB Mix indstillinger hvis nødvendigt
+      result.cartItems.forEach(item => {
+        if (item.cbbMixEnabled) {
+          setCbbMixEnabled(item.plan.id, true);
+          setCbbMixCount(item.plan.id, item.cbbMixCount || 2);
+        }
+      });
       
       // Vis besked med forklaring
       showToast(COPY.success.foundSolution(result.explanation), result.savings >= 0 ? 'success' : 'error');
     } else {
       showToast(COPY.error.couldNotFindSolution, 'error');
     }
-  }, [selectedStreaming, customerMobileCost, originalItemPrice, numberOfLines, existingBrands, showToast]);
+  }, [selectedStreaming, customerMobileCost, originalItemPrice, numberOfLines, existingBrands, cartItems, addToCart, removeFromCart, updateQuantity, setCbbMixEnabled, setCbbMixCount, showToast]);
 
   // EAN søgning handler
   const handleEANSearch = useCallback(async (searchResult) => {
@@ -428,7 +270,7 @@ function App() {
     }
     
     setIsSearching(false);
-  }, [showToast]);
+  }, [setIsSearching, setEanSearchResults, setOriginalItemPrice, showToast]);
 
   // Filtrerede planer - memoized for performance (bruger debounced search query)
   const filteredPlans = useMemo(() => {
@@ -498,9 +340,9 @@ function App() {
       <Suspense fallback={<HeaderSkeleton />}>
         <Header
           onReset={handleReset}
-          onPresentationToggle={handlePresentationToggle}
+          onPresentationToggle={togglePresentation}
           theme={theme}
-          onThemeToggle={handleThemeToggle}
+          onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           cartCount={cartCount}
           onCartClick={handleScrollToCart}
         />
@@ -515,13 +357,13 @@ function App() {
               <Suspense fallback={<SectionSkeleton />}>
                 <StreamingSelector
                   selectedStreaming={selectedStreaming}
-                  onStreamingToggle={handleStreamingToggle}
+                  onStreamingToggle={toggleStreaming}
                   customerMobileCost={customerMobileCost}
-                  onMobileCostChange={handleMobileCostChange}
+                  onMobileCostChange={setMobileCost}
                   numberOfLines={numberOfLines}
-                  onNumberOfLinesChange={handleNumberOfLinesChange}
+                  onNumberOfLinesChange={setNumberOfLinesAction}
                   originalItemPrice={originalItemPrice}
-                  onOriginalItemPriceChange={handleOriginalItemPriceChange}
+                  onOriginalItemPriceChange={setOriginalItemPrice}
                   onEANSearch={handleEANSearch}
                   isSearching={isSearching}
                   onAutoSelectSolution={handleAutoSelectSolution}
@@ -573,8 +415,8 @@ function App() {
                         <PlanCard
                           plan={plan}
                           onAddToCart={handleAddToCart}
-                          onCBBMixToggle={handleCBBMixToggle}
-                          onCBBMixCountChange={handleCBBMixCountChange}
+                          onCBBMixToggle={setCbbMixEnabled}
+                          onCBBMixCountChange={setCbbMixCount}
                           cbbMixEnabled={cbbMixEnabled[plan.id] || false}
                           cbbMixCount={cbbMixCount[plan.id] || 2}
                         />
@@ -622,13 +464,13 @@ function App() {
                   numberOfLines={numberOfLines}
                   originalItemPrice={originalItemPrice}
                   cashDiscount={cashDiscount}
-                  onCashDiscountChange={handleCashDiscountChange}
+                  onCashDiscountChange={setCashDiscountAction}
                   cashDiscountLocked={cashDiscountLocked}
                   onCashDiscountLockedChange={setCashDiscountLocked}
                   autoAdjust={autoAdjust}
                   onAutoAdjustChange={setAutoAdjust}
                   showCashDiscount={showCashDiscount}
-                  onToggleCashDiscount={handleToggleCashDiscount}
+                  onToggleCashDiscount={toggleCashDiscount}
                   freeSetup={freeSetup}
                   onFreeSetupChange={setFreeSetup}
                 />

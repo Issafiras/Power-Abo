@@ -1,11 +1,10 @@
 /**
- * ErrorBoundary komponent
- * Fanger React fejl og viser en fallback UI i stedet for at crashe hele appen
+ * ErrorBoundary - Catch React errors gracefully
+ * Tim Cook Rebuild: Implementer robust error handling
  */
 
 import React from 'react';
 import Icon from './Icon';
-import COPY from '../../constants/copy';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -14,16 +13,22 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-    // Opdater state så næste render viser fallback UI
+    // Update state so the next render will show the fallback UI
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log fejlen kun i development mode
-    if (import.meta.env.DEV) {
+    // Log error to console in development
+    if (process.env.NODE_ENV === 'development') {
       console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
-    // I production, send til error reporting service (fx Sentry) når implementeret
+
+    // Log to error reporting service in production
+    // TODO: Integrate with error reporting service (e.g., Sentry)
+    // if (process.env.NODE_ENV === 'production') {
+    //   logErrorToService(error, errorInfo);
+    // }
+
     this.setState({
       error,
       errorInfo
@@ -32,32 +37,35 @@ class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
-  };
-
-  handleReload = () => {
-    window.location.reload();
+    // Optionally reload the page
+    if (this.props.resetOnError) {
+      window.location.reload();
+    }
   };
 
   render() {
     if (this.state.hasError) {
-      // Fallback UI
+      // Custom fallback UI
+      if (this.props.fallback) {
+        return this.props.fallback(this.state.error, this.handleReset);
+      }
+
+      // Default fallback UI
       return (
-        <div className="error-boundary" role="alert" aria-live="assertive">
+        <div className="error-boundary">
           <div className="error-boundary-content">
-            <div className="error-boundary-icon">
-              <Icon name="warning" size={64} />
-            </div>
-            <h1 className="error-boundary-title">Ups, noget gik galt</h1>
+            <Icon name="alertCircle" size={64} className="error-boundary-icon" />
+            <h1 className="error-boundary-title">Noget gik galt</h1>
             <p className="error-boundary-message">
-              Der opstod en uventet fejl. Lad os finde en løsning sammen.
+              Vi beklager, men der opstod en uventet fejl. Prøv at opdatere siden eller kontakt support hvis problemet fortsætter.
             </p>
             
-            {import.meta.env.DEV && this.state.error && (
+            {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="error-boundary-details">
-                <summary className="error-boundary-summary">Tekniske detaljer (kun i development)</summary>
-                <pre className="error-boundary-pre">
+                <summary>Tekniske detaljer (kun i udvikling)</summary>
+                <pre className="error-boundary-stack">
                   {this.state.error.toString()}
-                  {this.state.errorInfo && this.state.errorInfo.componentStack}
+                  {this.state.errorInfo?.componentStack}
                 </pre>
               </details>
             )}
@@ -65,26 +73,16 @@ class ErrorBoundary extends React.Component {
             <div className="error-boundary-actions">
               <button
                 onClick={this.handleReset}
-                className="btn btn-premium"
-                aria-label="Prøv igen"
+                className="btn btn-primary"
               >
-                <Icon name="refresh" size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
                 Prøv igen
               </button>
               <button
-                onClick={this.handleReload}
-                className="btn btn-glass"
-                aria-label="Genindlæs side"
+                onClick={() => window.location.reload()}
+                className="btn btn-secondary"
               >
-                <Icon name="refresh" size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-                Genindlæs side
+                Opdater side
               </button>
-            </div>
-
-            <div className="error-boundary-help">
-              <p className="error-boundary-help-text">
-                Hvis problemet fortsætter, kan du kontakte support.
-              </p>
             </div>
           </div>
 
@@ -100,24 +98,22 @@ class ErrorBoundary extends React.Component {
 
             .error-boundary-content {
               max-width: 600px;
-              width: 100%;
-              padding: var(--spacing-3xl);
-              background: var(--glass-bg);
-              border: 2px solid var(--glass-border-strong);
-              border-radius: var(--radius-xl);
               text-align: center;
-              box-shadow: var(--shadow-2xl);
-              backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+              padding: var(--spacing-2xl);
+              background: var(--glass-bg);
+              border-radius: var(--radius-xl);
+              border: 1px solid var(--glass-border);
+              box-shadow: var(--shadow-xl);
             }
 
             .error-boundary-icon {
-              margin-bottom: var(--spacing-xl);
               color: var(--color-danger);
+              margin-bottom: var(--spacing-lg);
             }
 
             .error-boundary-title {
               font-size: var(--font-3xl);
-              font-weight: var(--font-extrabold);
+              font-weight: var(--font-bold);
               margin-bottom: var(--spacing-md);
               color: var(--text-primary);
             }
@@ -130,53 +126,39 @@ class ErrorBoundary extends React.Component {
             }
 
             .error-boundary-details {
-              margin: var(--spacing-xl) 0;
-              padding: var(--spacing-md);
+              margin: var(--spacing-lg) 0;
+              text-align: left;
               background: rgba(0, 0, 0, 0.3);
               border-radius: var(--radius-md);
-              text-align: left;
+              padding: var(--spacing-md);
             }
 
-            .error-boundary-summary {
+            .error-boundary-details summary {
               cursor: pointer;
               font-weight: var(--font-semibold);
-              color: var(--text-primary);
               margin-bottom: var(--spacing-sm);
+              color: var(--text-secondary);
             }
 
-            .error-boundary-pre {
+            .error-boundary-stack {
+              font-family: var(--font-family-mono);
               font-size: var(--font-sm);
-              color: var(--text-muted);
+              color: var(--color-danger);
               overflow-x: auto;
               white-space: pre-wrap;
-              word-wrap: break-word;
-              margin: 0;
-              padding: var(--spacing-md);
-              background: rgba(0, 0, 0, 0.2);
-              border-radius: var(--radius-sm);
+              word-break: break-all;
             }
 
             .error-boundary-actions {
               display: flex;
               gap: var(--spacing-md);
               justify-content: center;
-              margin-bottom: var(--spacing-xl);
-            }
-
-            .error-boundary-help {
-              padding-top: var(--spacing-xl);
-              border-top: 1px solid var(--glass-border);
-            }
-
-            .error-boundary-help-text {
-              font-size: var(--font-sm);
-              color: var(--text-muted);
-              margin: 0;
+              margin-top: var(--spacing-xl);
             }
 
             @media (max-width: 900px) {
               .error-boundary-content {
-                padding: var(--spacing-xl);
+                padding: var(--spacing-lg);
               }
 
               .error-boundary-actions {
@@ -197,4 +179,3 @@ class ErrorBoundary extends React.Component {
 }
 
 export default ErrorBoundary;
-
