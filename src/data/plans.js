@@ -327,7 +327,7 @@ export const plans = [
     name: '100 GB World-data',
     data: '100 GB',
     price: 199,
-    earnings: 800,
+    earnings: 1100,
     features: ['4G', 'World Roaming', 'Global', 'CBB MIX'],
     color: '#410016',
     streaming: [],
