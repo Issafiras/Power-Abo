@@ -1,6 +1,6 @@
 # CLAUDE.md - AI Assistant Guide for Power Abo Beregner
 
-**Last Updated**: 2025-11-17
+**Last Updated**: 2025-11-19
 **Project Version**: v1.2
 **Primary Language**: Danish (UI & Documentation)
 
@@ -24,6 +24,7 @@
 14. [Accessibility Guidelines](#accessibility-guidelines)
 15. [API Integration](#api-integration)
 16. [Troubleshooting](#troubleshooting)
+17. [Known Issues and Technical Debt](#known-issues-and-technical-debt)
 
 ---
 
@@ -74,8 +75,11 @@
 - **Vitest**: Test framework with jsdom environment
 - **ESLint**: Code quality with react-hooks and react-refresh plugins
 
-### Removed Dependencies
-- ❌ `lucide-react`: Replaced with custom Icon component using Unicode emojis (to avoid forwardRef runtime errors)
+### Dependency Notes
+- ⚠️ `lucide-react@0.468.0`: Still in package.json but NOT imported anywhere in src/ (candidate for removal)
+  - Icon component successfully uses Unicode emoji replacements
+  - Originally replaced to avoid forwardRef runtime errors and reduce bundle size
+  - **Action item**: Should be removed from package.json and package-lock.json
 - ❌ `framer-motion`: Mentioned in README but not in package.json
 - ❌ `react-hot-toast`: Mentioned in README but using custom Toast component
 
@@ -302,15 +306,15 @@ The app uses **vanilla CSS with CSS variables** (no CSS-in-JS, no Tailwind):
 --radius-md: 12px;
 ```
 
-### CSS File Organization
-1. **variables.css**: All design tokens (colors, spacing, typography, breakpoints)
-2. **main.css**: Global resets, base styles, typography
-3. **components.css**: Component-specific styles (largest file ~78KB)
-4. **utilities.css**: Utility classes (`.text-center`, `.flex`, `.grid`, etc.)
-5. **animations.css**: Keyframes, transitions
-6. **cbb-mix.css**: CBB MIX selector styles
-7. **compact.css**: Compact mode overrides
-8. **mobile.css**: Mobile-specific overrides
+### CSS File Organization (Total: ~143KB)
+1. **components.css**: Component-specific styles (77KB - largest file)
+2. **main.css**: Global resets, base styles, typography (18KB)
+3. **utilities.css**: Utility classes `.text-center`, `.flex`, `.grid`, etc. (18KB)
+4. **variables.css**: All design tokens - colors, spacing, typography, breakpoints (14KB)
+5. **compact.css**: Compact mode overrides (6.5KB)
+6. **mobile.css**: Mobile-specific overrides (5KB)
+7. **cbb-mix.css**: CBB MIX selector styles (2.9KB)
+8. **animations.css**: Keyframes, transitions (1.9KB)
 
 ### Theming
 Dark/light theme via `data-theme` attribute:
@@ -430,6 +434,21 @@ import Icon from '../components/common/Icon';
 
 **Available icons**: See `src/components/common/Icon.jsx` glyphMap for full list.
 
+### Component Size Metrics
+Key files by line count (as of 2025-11-19):
+
+| Component | Lines | Notes |
+|-----------|-------|-------|
+| ComparisonPanel.jsx | 2,151 | Largest component - candidate for refactoring |
+| calculations.js | 1,494 | Business logic - well tested |
+| StreamingSelector.jsx | 1,338 | Streaming selection UI |
+| PlanCard.jsx | 958 | Individual plan display |
+| PresentationView.jsx | 846 | Presentation mode |
+| powerApi.js | 714 | Power.dk API integration |
+| App.jsx | 583 | Root component with lazy loading |
+
+**Total codebase**: ~15,000+ lines of JS/JSX across 30+ components
+
 ### Accessibility Patterns
 - **Semantic HTML**: Use proper tags (`<main>`, `<section>`, `<nav>`, `<button>`)
 - **ARIA labels**: `aria-label`, `aria-labelledby`, `aria-describedby`
@@ -460,6 +479,13 @@ import Icon from '../components/common/Icon';
 
 ### Plans Data (`src/data/plans.js`)
 
+**Current inventory (as of 2025-11-19)**: 24 plans total
+- **Telenor**: 8+ mobile plans (5G, family discounts enabled)
+- **Telenor B2B**: 5 business plans (VAT excluded pricing)
+- **Telmore**: 6+ mobile plans
+- **CBB**: Multiple mobile broadband options
+- **Telenor Bredbånd & Telmore Bredbånd**: Additional broadband plans
+
 ```javascript
 {
   id: 'unique-id',               // Required: Unique identifier
@@ -487,6 +513,12 @@ import Icon from '../components/common/Icon';
 
 ### Streaming Services (`src/data/streamingServices.js`)
 
+**Current inventory (as of 2025-11-19)**: 12 streaming services total
+- **Main services** (10): Netflix, Viaplay, MAX, TV2 Play, Saxo, Disney+, SkyShowtime, Prime Video, Musik, Nordisk Film+
+  - Prices range: 59-149 kr/month
+- **CBB MIX exclusive** (2): Podimo, Mofibo
+  - Only available as part of CBB MIX bundles
+
 ```javascript
 {
   id: 'netflix',                 // Required: Unique ID
@@ -496,6 +528,8 @@ import Icon from '../components/common/Icon';
   category: 'streaming'          // Required: Category
 }
 ```
+
+**Logo assets**: 18 image files in `/public/logos/` (streaming services + provider logos)
 
 ### Date Filtering
 Plans are automatically filtered by `availableFrom` and `expiresAt` dates:
@@ -560,9 +594,25 @@ describe('MyComponent', () => {
 ```
 
 ### Test Coverage Goals
-- **Calculations**: 100% coverage (critical business logic)
+- **Calculations**: 100% coverage (critical business logic) ✅
 - **Components**: Focus on user interactions and edge cases
 - **Utilities**: Test all public functions
+
+### Current Test Coverage Status
+**Tested** (4 files):
+- ✅ `calculations.js` - Comprehensive coverage
+- ✅ `Icon.jsx` - Basic component tests
+- ✅ `Cart.jsx` - Feature tests
+- ✅ `logger.js` - Utility tests
+
+**Untested** (notable gaps):
+- ⚠️ `ComparisonPanel.jsx` (2,151 lines) - Largest component, no tests
+- ⚠️ `StreamingSelector.jsx` (1,338 lines) - Complex component, no tests
+- ⚠️ `PlanCard.jsx` (958 lines) - Core component, no tests
+- ⚠️ `PresentationView.jsx` - Feature component, no tests
+- ⚠️ No integration or E2E tests
+
+**Recommendation**: Prioritize adding tests for core feature components (PlanCard, StreamingSelector, ComparisonPanel)
 
 ### What to Test
 ✅ Business logic (calculations, discounts, pricing)
@@ -791,9 +841,13 @@ try {
 6. **CSS optimization**: Minified, code-split CSS in production
 
 ### Bundle Size Optimization
-Recent refactoring removed `lucide-react` dependency:
-- **Before**: Large icon library in vendor bundle
-- **After**: Custom Icon component using Unicode (~33% bundle reduction)
+Recent refactoring replaced `lucide-react` with custom Icon component:
+- **Goal**: Reduce bundle size by ~33% and avoid forwardRef runtime errors
+- **Status**: Icon component successfully uses Unicode emojis (no imports of lucide-react in src/)
+- **⚠️ Action required**: `lucide-react@0.468.0` still in package.json - should be removed to complete optimization
+  ```bash
+  npm uninstall lucide-react
+  ```
 
 ### Performance Monitoring
 - Use React DevTools Profiler for component render analysis
@@ -1037,4 +1091,48 @@ npm run lint -- --fix          # Auto-fix lint errors
 
 ---
 
-**End of CLAUDE.md** | Last updated: 2025-11-17
+## 🔍 Known Issues and Technical Debt
+
+### High Priority
+1. **Remove unused dependency**: `lucide-react@0.468.0` still in package.json
+   - No imports in codebase
+   - Run: `npm uninstall lucide-react`
+   - Will reduce bundle size
+
+2. **Test coverage gaps**: Only 4 test files for 30+ components
+   - Missing tests for: ComparisonPanel, StreamingSelector, PlanCard, PresentationView
+   - No integration or E2E tests
+   - Recommendation: Add tests for core feature components
+
+3. **Large component**: ComparisonPanel.jsx (2,151 lines)
+   - Candidate for refactoring into smaller components
+   - Would improve maintainability and testability
+
+### Medium Priority
+4. **CSS file size**: components.css is 77KB
+   - Could benefit from further modularization
+   - Consider splitting into feature-specific CSS files
+
+5. **Component organization**: CBBMixSelector.jsx at component root
+   - Should be moved to `src/features/` directory
+   - Would improve consistency with feature-based structure
+
+### Low Priority
+6. **TypeScript config present but unused**
+   - tsconfig.json exists but project uses .js/.jsx
+   - Either adopt TypeScript or remove config
+   - Current setup is for IDE intellisense only
+
+### Recent Improvements (Completed)
+✅ Refactored to feature-based structure (commit ae967e4)
+✅ Removed unused HelpButton component (commit 82f368d)
+✅ Cleaned up documentation files (commit bfd2de6)
+✅ Replaced lucide-react imports with custom Icon component
+✅ Simplified Vite build configuration
+
+### Health Score: 8.5/10
+The codebase is well-organized with good patterns and documentation. Main areas for improvement are test coverage and completing the lucide-react removal.
+
+---
+
+**End of CLAUDE.md** | Last updated: 2025-11-19
