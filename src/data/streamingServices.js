@@ -70,7 +70,7 @@ export const streamingServices = [
   },
   {
     id: 'musik',
-    name: 'Musik (Spotify/Apple Music)',
+    name: 'Telmore Musik',
     price: 119, // Individual plan
     logoText: '♪',
     color: '#1DB954', // Spotify grøn
