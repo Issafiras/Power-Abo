@@ -146,7 +146,14 @@ export function calculateTotalEarnings(cartItems) {
     }
     
     // Standard beregning for alle andre planer
-    return total + (item.plan.earnings * item.quantity);
+    let earnings = (item.plan.earnings || 0) * item.quantity;
+    
+    // Alle CBB planer giver 100 kr ekstra indtjening pr. linje
+    if (item.plan.provider === 'cbb') {
+      earnings += 100 * item.quantity;
+    }
+    
+    return total + earnings;
   }, 0);
 }
 
