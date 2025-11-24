@@ -185,7 +185,11 @@ export const plans = [
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png',
     name: 'Fri Data',
     data: 'Fri Data',
-    price: 229,
+    price: 169, // Kampagnepris
+    originalPrice: 229, // Original pris før kampagne
+    campaignPrice: 169,
+    campaignExpiresAt: '2025-12-01', // Kampagnen udløber d. 1/12/25
+    campaign: true,
     earnings: 950,
     features: ['5G', 'EU Roaming', 'Ubegrænset'],
     color: '#002788',

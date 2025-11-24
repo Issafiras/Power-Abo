@@ -238,7 +238,9 @@ function App() {
       }
       
       // Tjek expiresAt - plan skal være aktiv indtil denne dato
-      if (plan.expiresAt) {
+      // VIGTIGT: Kun ekskluder hvis expiresAt er sat (ikke campaignExpiresAt)
+      // campaignExpiresAt betyder kun at kampagneprisen udløber, ikke planen selv
+      if (plan.expiresAt && !plan.campaignExpiresAt) {
         const expiresAtDate = new Date(plan.expiresAt);
         expiresAtDate.setHours(23, 59, 59, 999); // Inkluder hele dagen
         if (today > expiresAtDate) {

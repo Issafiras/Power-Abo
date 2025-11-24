@@ -4,7 +4,7 @@
  */
 
 import React, { Suspense } from 'react';
-import { formatCurrency } from '../../utils/calculations';
+import { formatCurrency, isCampaignActive, getCurrentPrice } from '../../utils/calculations';
 import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
 import CBBMixSelector from '../../components/CBBMixSelector';
@@ -19,6 +19,8 @@ function PlanCard({
 }) {
   const hasIntroPrice = plan.introPrice && plan.introMonths;
   const brandColor = plan.color || 'var(--color-orange)';
+  const campaignActive = isCampaignActive(plan);
+  const currentPrice = getCurrentPrice(plan);
 
   return (
     <div 
@@ -83,6 +85,14 @@ function PlanCard({
               </div>
             </div>
           )}
+          {/* Kampagne badge */}
+          {campaignActive && plan.campaign && (
+            <div className="subscription__badge-block">
+              <div className="subscription__badge text-size--16 badge--campaign color-white">
+                Kampagne
+              </div>
+            </div>
+          )}
           
           {/* Card wrapper */}
           <div className="subscription-card__wrapper background-white">
@@ -107,8 +117,13 @@ function PlanCard({
                 </div>
               </div>
               <div className="subscription-card__price-block">
+                {campaignActive && plan.originalPrice && (
+                  <div className="subscription-card__price-original" style={{ textDecoration: 'line-through', opacity: 0.6, fontSize: '0.9em' }}>
+                    {plan.originalPrice} kr./md.
+                  </div>
+                )}
                 <div className="subscription-card__price-main">
-                  {plan.price}
+                  {currentPrice}
                 </div>
                 <div className="subscription-card__price-period">kr./md.{plan.business ? ' (ex. moms)' : ''}</div>
               </div>
@@ -156,6 +171,12 @@ function PlanCard({
                 plan.provider.toUpperCase()
               )}
             </div>
+            {campaignActive && plan.campaign && (
+              <div className="badge badge-campaign">
+                <Icon name="tag" size={16} className="icon-inline icon-spacing-xs" />
+                Kampagne
+              </div>
+            )}
             {plan.familyDiscount && (
               <div className="badge badge-telenor">
                 <Icon name="users" size={16} className="icon-inline icon-spacing-xs" />
@@ -182,13 +203,18 @@ function PlanCard({
                 </div>
                 <div className="price-detail text-muted">
                   i {plan.introMonths} {plan.introMonths === 1 ? 'måned' : 'måneder'}, 
-                  derefter {formatCurrency(plan.price)}/md..
+                  derefter {formatCurrency(currentPrice)}/md..
                 </div>
               </>
             ) : (
               <div className="price-normal">
+                {campaignActive && plan.originalPrice && (
+                  <div className="price-original" style={{ textDecoration: 'line-through', opacity: 0.6, fontSize: '0.9em', marginBottom: '4px' }}>
+                    {formatCurrency(plan.originalPrice)}/md.
+                  </div>
+                )}
                 <span className="price-amount" style={{ color: brandColor }}>
-                  {formatCurrency(plan.price)}
+                  {formatCurrency(currentPrice)}
                 </span>
                 <span className="price-period">/md.</span>
               </div>
@@ -694,6 +720,11 @@ function PlanCard({
            box-shadow: 0 2px 8px rgba(255, 0, 110, 0.3);
          }
 
+         .badge--campaign {
+           background: linear-gradient(135deg, #ff6b35, #ff8c42) !important;
+           box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3) !important;
+         }
+
          .subscription-card__wrapper {
            flex: 1;
            display: flex;
@@ -868,6 +899,13 @@ function PlanCard({
          .telmore-card .price-detail {
            color: #002788;
            opacity: 0.7;
+         }
+
+         .badge-campaign {
+           background: linear-gradient(135deg, #ff6b35, #ff8c42) !important;
+           color: white !important;
+           border: none !important;
+           box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3) !important;
          }
 
          .telmore-card .badge {

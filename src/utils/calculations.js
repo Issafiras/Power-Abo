@@ -22,6 +22,47 @@
 // Oprettelsesgebyr er fjernet
 
 /**
+ * Tjek om kampagnen er aktiv for en plan
+ * @param {Object} plan - Plan objekt med campaignExpiresAt (valgfri)
+ * @returns {boolean} True hvis kampagnen er aktiv
+ */
+export function isCampaignActive(plan) {
+  if (!plan || !plan.campaignExpiresAt) return false;
+  
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiresAtDate = new Date(plan.campaignExpiresAt);
+    expiresAtDate.setHours(23, 59, 59, 999);
+    return today <= expiresAtDate;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Hent den aktuelle pris for en plan (kampagnepris hvis aktiv, ellers original eller normal pris)
+ * @param {Object} plan - Plan objekt
+ * @returns {number} Aktuel pris
+ */
+export function getCurrentPrice(plan) {
+  if (!plan) return 0;
+  
+  // Hvis kampagnen er aktiv, brug kampagneprisen
+  if (isCampaignActive(plan) && plan.campaignPrice != null) {
+    return plan.campaignPrice;
+  }
+  
+  // Hvis der er original pris (efter kampagnens udløb), brug den
+  if (plan.originalPrice != null) {
+    return plan.originalPrice;
+  }
+  
+  // Ellers brug normal pris
+  return plan.price || 0;
+}
+
+/**
  * Beregn 6-måneders pris for en plan med intro-pris håndtering
  * 
  * EKSEMPEL (med intro-pris):
@@ -44,21 +85,24 @@
 export function calculateSixMonthPrice(plan, quantity = 1) {
   if (!plan) return 0;
 
+  // Hent den aktuelle pris (kampagnepris hvis aktiv, ellers original/normal pris)
+  const currentPrice = getCurrentPrice(plan);
+
   // Hvis der er intro-pris (fx 199 kr i 3 måneder, derefter 299 kr)
   if (plan.introPrice && plan.introMonths) {
     // Step 1: Beregn intro-pris for intro-perioden
     const introTotal = plan.introPrice * plan.introMonths * quantity;
     
-    // Step 2: Beregn normal pris for resterende måneder
+    // Step 2: Beregn normal pris for resterende måneder (brug aktuel pris)
     const remainingMonths = 6 - plan.introMonths;
-    const normalTotal = plan.price * remainingMonths * quantity;
+    const normalTotal = currentPrice * remainingMonths * quantity;
     
     // Step 3: Total = intro + normal
     return introTotal + normalTotal;
   }
 
-  // Normal pris (ingen intro-pris): pris × 6 måneder × antal linjer
-  return plan.price * 6 * quantity;
+  // Normal pris (ingen intro-pris): aktuel pris × 6 måneder × antal linjer
+  return currentPrice * 6 * quantity;
 }
 
 /**
@@ -89,8 +133,9 @@ export function calculateMonthlyPrice(plan, quantity = 1) {
     return sixMonthTotal / 6; // Gennemsnitlig månedlig pris
   }
 
-  // Normal pris: bare månedlig pris × antal linjer
-  return plan.price * quantity;
+  // Normal pris: brug aktuel pris (kampagnepris hvis aktiv) × antal linjer
+  const currentPrice = getCurrentPrice(plan);
+  return currentPrice * quantity;
 }
 
 /**
@@ -135,6 +180,13 @@ export function calculateTelenorFamilyDiscount(cartItems) {
 export function calculateTotalEarnings(cartItems) {
   if (!cartItems || cartItems.length === 0) return 0;
 
+  // Tjek om vi stadig er inden for kampagneperioden (indtil og med 27/11/2025)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const campaignEndDate = new Date('2025-11-27');
+  campaignEndDate.setHours(23, 59, 59, 999);
+  const isWithinCampaignPeriod = today <= campaignEndDate;
+
   return cartItems.reduce((total, item) => {
     // Telenor 170 kr plan har forskellig indtjening for første vs. efterfølgende abonnementer
     if (item.plan.id === 'telenor-170kr' && item.plan.earningsAdditional) {
@@ -151,6 +203,11 @@ export function calculateTotalEarnings(cartItems) {
     // Alle CBB planer giver 100 kr ekstra indtjening pr. linje
     if (item.plan.provider === 'cbb') {
       earnings += 100 * item.quantity;
+      
+      // CBB planer med pris >= 129 kr får ekstra 200 kr indtjening pr. linje indtil 27/11/25
+      if (isWithinCampaignPeriod && item.plan.price >= 129) {
+        earnings += 200 * item.quantity;
+      }
     }
     
     return total + earnings;
@@ -707,7 +764,9 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     }
     
     // Tjek expiresAt - defensive date handling
-    if (plan.expiresAt != null) {
+    // VIGTIGT: Kun ekskluder hvis expiresAt er sat (ikke campaignExpiresAt)
+    // campaignExpiresAt betyder kun at kampagneprisen udløber, ikke planen selv
+    if (plan.expiresAt != null && !plan.campaignExpiresAt) {
       try {
         const expiresAtDate = new Date(plan.expiresAt);
         if (Number.isFinite(expiresAtDate.getTime())) {
