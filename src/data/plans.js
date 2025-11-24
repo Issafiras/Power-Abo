@@ -148,7 +148,7 @@ export const plans = [
     name: '150 GB',
     data: '150 GB',
     price: 149,
-    earnings: 700,
+    earnings: 950,
     features: ['5G', 'EU Roaming'],
     color: '#002788',
     streaming: []
@@ -162,7 +162,7 @@ export const plans = [
     price: 149,
     introPrice: 0,
     introMonths: 1,
-    earnings: 700,
+    earnings: 950,
     features: ['5G', 'EU Roaming', 'Musik inkl.', 'Intro-pris'],
     color: '#002788',
     streaming: ['musik']
@@ -174,7 +174,7 @@ export const plans = [
     name: '60 GB',
     data: '60 GB',
     price: 169,
-    earnings: 700,
+    earnings: 950,
     features: ['5G', 'EU Roaming'],
     color: '#002788',
     streaming: []
@@ -186,7 +186,7 @@ export const plans = [
     name: 'Fri Data',
     data: 'Fri Data',
     price: 229,
-    earnings: 700,
+    earnings: 950,
     features: ['5G', 'EU Roaming', 'Ubegrænset'],
     color: '#002788',
     streaming: []
@@ -200,7 +200,7 @@ export const plans = [
     price: 299,
     introPrice: 99,
     introMonths: 1,
-    earnings: 1000,
+    earnings: 1250,
     features: ['5G', 'EU Roaming', '2 Streaming', 'Intro-pris'],
     color: '#002788',
     streaming: [],
@@ -215,7 +215,7 @@ export const plans = [
     price: 399,
     introPrice: 99,
     introMonths: 1,
-    earnings: 1100,
+    earnings: 1350,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '3 Streaming', 'Intro-pris'],
     color: '#002788',
     streaming: [],
@@ -230,7 +230,7 @@ export const plans = [
     price: 449,
     introPrice: 99,
     introMonths: 1,
-    earnings: 1100,
+    earnings: 1350,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '4 Streaming', 'Intro-pris'],
     color: '#002788',
     streaming: [],
@@ -245,7 +245,7 @@ export const plans = [
     price: 499,
     introPrice: 99,
     introMonths: 1,
-    earnings: 1100,
+    earnings: 1350,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '5 Streaming', 'Intro-pris'],
     color: '#002788',
     streaming: [],
@@ -260,7 +260,7 @@ export const plans = [
     price: 599,
     introPrice: 99,
     introMonths: 1,
-    earnings: 1100,
+    earnings: 1350,
     features: ['5G', 'EU Roaming', 'Ubegrænset', '9 Streaming', 'Intro-pris'],
     color: '#002788',
     streaming: [],
@@ -431,4 +431,3 @@ export function searchPlans(query) {
 export function getPlanById(id) {
   return plans.find(plan => plan.id === id) || null;
 }
-
