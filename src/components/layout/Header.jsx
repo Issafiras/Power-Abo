@@ -69,8 +69,9 @@ function Header({
 
   const handleResetConfirm = useCallback(() => {
     setShowConfirm(false);
-    onReset();
-  }, [onReset]);
+    // Hard refresh - genindlæs siden helt fra serveren
+    window.location.reload(true);
+  }, []);
 
   const handleCartClick = useCallback(() => {
     if (onCartClick) {

@@ -100,11 +100,9 @@ function App() {
       }
       
       // Valider state værdier før brug
-      console.log('🔍 DEBUG: state.numberOfLines =', state.numberOfLines, 'type:', typeof state.numberOfLines);
       const validNumberOfLines = Number.isInteger(state.numberOfLines) && state.numberOfLines > 0 && state.numberOfLines <= 20
         ? state.numberOfLines 
         : 1;
-      console.log('🔍 DEBUG: validNumberOfLines =', validNumberOfLines);
       
       const validCustomerMobileCost = Number.isFinite(state.customerMobileCost) && state.customerMobileCost >= 0
         ? state.customerMobileCost 
