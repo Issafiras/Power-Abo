@@ -17,6 +17,7 @@
  * - Beregningslogik er skridt-for-skridt forklaret
  */
 
+import logger from './logger.js';
 
 // Konstanter
 // Oprettelsesgebyr er fjernet
@@ -898,6 +899,9 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
       let currentEarnings = 0;
       let streamingLinesUsed = 0;
       
+      logger.debug('CBB_MIX', `--- Evaluerer plan: ${mainPlan.name} (${mainPlan.provider}) ---`);
+      logger.debug('CBB_MIX', `cbbMixAvailable: ${mainPlan.cbbMixAvailable}, streamingCount: ${mainPlan.streamingCount}`);
+      
       // LOGIK: Hvor mange hoved-planer skal vi bruge?
       // Hvis kunden har streaming-behov, dækker vi det først.
       if (selectedStreaming.length > 0) {
@@ -906,10 +910,14 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
         else if (mainPlan.streamingCount) slotsPerLine = mainPlan.streamingCount;
         else if (mainPlan.streaming?.length) slotsPerLine = mainPlan.streaming.length; // Faste tjenester
 
+        logger.debug('CBB_MIX', `slotsPerLine: ${slotsPerLine}, selectedStreaming: ${selectedStreaming.length}`);
+
         if (slotsPerLine > 0) {
           // Beregn antal nødvendige linjer med denne plan
           const needed = Math.ceil(selectedStreaming.length / slotsPerLine);
           streamingLinesUsed = Math.min(needed, validRequiredLines); // Kan ikke bruge flere end kunden skal have
+          
+          logger.debug('CBB_MIX', `needed: ${needed}, streamingLinesUsed: ${streamingLinesUsed}, validRequiredLines: ${validRequiredLines}`);
           
           // CBB MIX REGEL: Kun én linje kan have CBB Mix aktiveret
           // Hvis det er en CBB Mix plan, skal vi oprette:
@@ -918,6 +926,9 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
           if (mainPlan.cbbMixAvailable) {
             // Første linje: Med CBB Mix
             const cbbMixCount = Math.min(selectedStreaming.length, 6); // Max 6 tjenester i Mix
+            
+            logger.debug('CBB_MIX', `🎯 CBB MIX AKTIVERET - Tilføjer 1 linje MED Mix (cbbMixCount: ${cbbMixCount})`);
+            
             testCart.push({
               plan: mainPlan,
               quantity: 1,
@@ -927,6 +938,8 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
             
             // Resterende streaming-linjer: Uden CBB Mix (bare mobil)
             if (streamingLinesUsed > 1) {
+              logger.debug('CBB_MIX', `📱 Tilføjer ${streamingLinesUsed - 1} linje(r) UDEN Mix (bare mobil)`);
+              
               testCart.push({
                 plan: mainPlan,
                 quantity: streamingLinesUsed - 1,
@@ -936,6 +949,8 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
             }
           } else {
             // Ikke-CBB plan (Telmore/Telenor med streamingCount)
+            logger.debug('CBB_MIX', `Ikke-CBB plan - tilføjer ${streamingLinesUsed} linje(r)`);
+            
             testCart.push({
               plan: mainPlan,
               quantity: streamingLinesUsed,
@@ -946,6 +961,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
         } else {
           // Voice-only plan som "Main" (hvis ingen streaming valgt eller fallback)
           streamingLinesUsed = 0; 
+          logger.debug('CBB_MIX', `Voice-only plan (slotsPerLine=0), venter til fill-up`);
           // Vi tilføjer den ikke her, venter til fill-up
         }
       }
@@ -953,6 +969,8 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
       // Fill-up: Fyld resten af linjerne op
       const linesCovered = testCart.reduce((sum, item) => sum + item.quantity, 0);
       const linesRemaining = validRequiredLines - linesCovered;
+
+      logger.debug('CBB_MIX', `Fill-up: linesCovered=${linesCovered}, linesRemaining=${linesRemaining}`);
 
       if (linesRemaining > 0) {
         // Hvis vi allerede har brugt en plan, prøv at finde voice-only fra SAMME udbyder
@@ -966,6 +984,8 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
         }
 
         if (fillPlan) {
+          logger.debug('CBB_MIX', `📱 Fill-up: Tilføjer ${linesRemaining} linje(r) med ${fillPlan.name} (cbbMixEnabled: false)`);
+          
           testCart.push({
             plan: fillPlan,
             quantity: linesRemaining,
@@ -978,6 +998,14 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
       // Spring over hvis vi ikke fik fyldt op (burde ikke ske)
       const totalLines = testCart.reduce((sum, item) => sum + item.quantity, 0);
       if (totalLines < validRequiredLines) continue;
+      
+      // LOG FINAL CART FOR DENNE PLAN
+      logger.debug('CBB_MIX', `📦 testCart for ${mainPlan.name}:`, testCart.map(item => ({
+        plan: item.plan.name,
+        quantity: item.quantity,
+        cbbMixEnabled: item.cbbMixEnabled,
+        cbbMixCount: item.cbbMixCount
+      })));
 
       // Beregn økonomi
       // (Brug din eksisterende logik til coverage check her for nøjagtighed)
@@ -1086,6 +1114,20 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
       if (!Number.isInteger(item.quantity) || item.quantity < 1) return false;
       return true;
     });
+  }
+
+  // LOG FINAL LØSNING
+  logger.info('CBB_MIX', '🏆 ===== ENDELIG LØSNING =====');
+  logger.info('CBB_MIX', `Antal items i kurv: ${validCartItems.length}`);
+  validCartItems.forEach((item, index) => {
+    logger.info('CBB_MIX', `  [${index}] ${item.plan.name} x${item.quantity} | cbbMixEnabled: ${item.cbbMixEnabled} | cbbMixCount: ${item.cbbMixCount}`);
+  });
+  
+  // Tæl antal linjer med CBB Mix
+  const linesWithMix = validCartItems.filter(item => item.cbbMixEnabled === true).reduce((sum, item) => sum + item.quantity, 0);
+  logger.info('CBB_MIX', `📊 Antal linjer med CBB Mix aktiveret: ${linesWithMix}`);
+  if (linesWithMix > 1) {
+    logger.warn('CBB_MIX', `⚠️ FEJL: Mere end 1 linje har CBB Mix aktiveret! (${linesWithMix} linjer)`);
   }
 
   // Valider at savings og earnings er gyldige tal
