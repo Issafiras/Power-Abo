@@ -742,9 +742,6 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     if (plan.business === true) return false;
     if (plan.type === 'broadband') return false;
     
-    // ALTID ekskluder CBB planer
-    if (plan.provider === 'cbb') return false;
-    
     // KRITISK: Ekskluder planer med negativ eller nul indtjening
     // Vi skal kun vælge løsninger hvor vi tjener penge
     const earnings = (plan.earnings != null && Number.isFinite(plan.earnings)) ? plan.earnings : 0;
@@ -942,7 +939,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
         
         // Hvis ingen voice-only fra samme udbyder, brug mainPlan igen (hvis det er voice-only) eller den bedste voice-only på tværs
         if (!fillPlan) {
-           if (!mainPlan.streamingCount && !mainPlan.cbbMixAvailable) fillPlan = mainPlan;
+           if (!mainPlan.streamingCount) fillPlan = mainPlan;
            else fillPlan = voiceOnlyPlans[0]; // Fallback til bedste indtjening uanset udbyder (hvis tilladt)
         }
 
