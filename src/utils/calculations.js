@@ -728,7 +728,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
   const validMinSavings = Number.isFinite(minSavings) ? minSavings : -Infinity;
 
   // Filtrer planer - ekskluder business planer og bredbånd hvis ikke relevant
-  const today = new Date();
+  let today = new Date();
   if (!Number.isFinite(today.getTime())) {
     // Hvis dato er ugyldig, brug nuværende dato
     today = new Date();

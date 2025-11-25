@@ -84,8 +84,7 @@ function App() {
       
       // Find bedste løsning - brug numberOfLines som maksimum
       // Ekskluder planer fra eksisterende brands
-      // ALTID ekskluder CBB
-      const excludedProviders = ['cbb'];
+      const excludedProviders = [];
       
       // Sikre array operation for existingBrands
       if (Array.isArray(state.existingBrands)) {
