@@ -911,16 +911,38 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
           const needed = Math.ceil(selectedStreaming.length / slotsPerLine);
           streamingLinesUsed = Math.min(needed, validRequiredLines); // Kan ikke bruge flere end kunden skal have
           
-          // Konfigurer hoved-linjerne
-          const cbbMixEnabled = mainPlan.cbbMixAvailable === true;
-          const cbbMixCount = cbbMixEnabled ? Math.min(selectedStreaming.length, 6) : 0; // Antag 6 tjenester max i pris-beregning for sikkerheds skyld
-          
-          testCart.push({
-            plan: mainPlan,
-            quantity: streamingLinesUsed,
-            cbbMixEnabled,
-            cbbMixCount
-          });
+          // CBB MIX REGEL: Kun én linje kan have CBB Mix aktiveret
+          // Hvis det er en CBB Mix plan, skal vi oprette:
+          // 1. Én linje MED Mix (til streaming)
+          // 2. Resterende linjer UDEN Mix (bare mobil)
+          if (mainPlan.cbbMixAvailable) {
+            // Første linje: Med CBB Mix
+            const cbbMixCount = Math.min(selectedStreaming.length, 6); // Max 6 tjenester i Mix
+            testCart.push({
+              plan: mainPlan,
+              quantity: 1,
+              cbbMixEnabled: true,
+              cbbMixCount
+            });
+            
+            // Resterende streaming-linjer: Uden CBB Mix (bare mobil)
+            if (streamingLinesUsed > 1) {
+              testCart.push({
+                plan: mainPlan,
+                quantity: streamingLinesUsed - 1,
+                cbbMixEnabled: false,
+                cbbMixCount: 0
+              });
+            }
+          } else {
+            // Ikke-CBB plan (Telmore/Telenor med streamingCount)
+            testCart.push({
+              plan: mainPlan,
+              quantity: streamingLinesUsed,
+              cbbMixEnabled: false,
+              cbbMixCount: 0
+            });
+          }
         } else {
           // Voice-only plan som "Main" (hvis ingen streaming valgt eller fallback)
           streamingLinesUsed = 0; 
