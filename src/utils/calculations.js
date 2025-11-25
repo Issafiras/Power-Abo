@@ -204,10 +204,15 @@ export function calculateTotalEarnings(cartItems) {
     // Alle CBB planer giver 100 kr ekstra indtjening pr. linje
     if (item.plan.provider === 'cbb') {
       earnings += 100 * item.quantity;
-      
+
       // CBB planer med pris >= 129 kr får ekstra 200 kr indtjening pr. linje indtil 27/11/25
       if (isWithinCampaignPeriod && item.plan.price >= 129) {
         earnings += 200 * item.quantity;
+      }
+
+      // CBB MIX giver 100 kr ekstra indtjening pr. linje hvis aktiveret
+      if (item.cbbMixEnabled && item.cbbMixCount > 0) {
+        earnings += 100 * item.quantity;
       }
     }
     
