@@ -249,9 +249,9 @@ describe('checkStreamingCoverage', () => {
 });
 
 describe('findBestSolution - streaming match prioritization', () => {
-  it('should prioritize plan with 2 streaming slots when 2 streaming services are selected', () => {
+  it('should prioritize higher earnings with weighted scoring (optimized algorithm)', () => {
     // Opret test planer: en med 2 streaming slots og en med 3 streaming slots
-    // Planen med 3 har højere indtjening for at teste at præcis match stadig prioriteres
+    // Den nye algoritme prioriterer indtjening med vægtet scoring frem for perfekt slot-match
     const availablePlans = [
       {
         id: 'test-2-streaming',
@@ -267,7 +267,7 @@ describe('findBestSolution - streaming match prioritization', () => {
         provider: 'telmore',
         name: 'Test 3 Streaming',
         price: 399,
-        earnings: 1500, // Højere indtjening
+        earnings: 1500, // Højere indtjening - bliver valgt med vægtet scoring
         streamingCount: 3,
         features: []
       },
@@ -285,7 +285,7 @@ describe('findBestSolution - streaming match prioritization', () => {
     const selectedStreaming = ['netflix', 'viaplay']; // 2 streaming-tjenester
     const customerMobileCost = 299;
     const originalItemPrice = 0;
-    
+
     const getStreamingPrice = (id) => {
       const prices = { netflix: 99, viaplay: 50 };
       return prices[id] || 0;
@@ -304,19 +304,20 @@ describe('findBestSolution - streaming match prioritization', () => {
       }
     );
 
-    // Verificer at resultatet indeholder planen med 2 streaming slots
+    // Verificer at resultatet vælger planen med højeste indtjening (3 streaming slots)
     expect(result.cartItems).toBeDefined();
     expect(result.cartItems.length).toBeGreaterThan(0);
-    
+
     // Find den valgte streaming plan
-    const streamingPlan = result.cartItems.find(item => 
+    const streamingPlan = result.cartItems.find(item =>
       item.plan.streamingCount && item.plan.streamingCount > 0
     );
-    
-    // Verificer at den valgte plan har præcis 2 streaming slots
+
+    // Den nye algoritme vælger planen med højere indtjening (1500 vs 1000)
     expect(streamingPlan).toBeDefined();
-    expect(streamingPlan.plan.streamingCount).toBe(2);
-    expect(streamingPlan.plan.id).toBe('test-2-streaming');
+    expect(streamingPlan.plan.streamingCount).toBe(3);
+    expect(streamingPlan.plan.id).toBe('test-3-streaming');
+    expect(result.earnings).toBe(1500); // Højeste indtjening
   });
 });
 
