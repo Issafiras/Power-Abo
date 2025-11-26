@@ -3,7 +3,7 @@
  * Multi-select grid af streaming-tjenester
  */
 
-import { streamingServices as staticStreaming } from '../../data/streamingServices';
+import { streamingServices as staticStreaming, getServiceById } from '../../data/streamingServices';
 import { formatCurrency } from '../../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
 import React, { useEffect, useRef, useState } from 'react';
@@ -13,8 +13,8 @@ import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
 import '../../styles/streaming-selector.css';
 
-function StreamingSelector({ 
-  selectedStreaming, 
+function StreamingSelector({
+  selectedStreaming,
   onStreamingToggle,
   customerMobileCost,
   onMobileCostChange,
@@ -26,7 +26,11 @@ function StreamingSelector({
   numberOfLines = 1,
   onNumberOfLinesChange = null,
   existingBrands = [],
-  onExistingBrandsChange = null
+  onExistingBrandsChange = null,
+  cartItems = [],
+  onCBBMixEnabled = null,
+  onCBBMixCount = null,
+  activeProvider = 'all'
 }) {
   const isMobile = typeof window !== 'undefined' && ((window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth <= 900);
   const canScan = isMobile && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -46,7 +50,60 @@ function StreamingSelector({
   const [torchOn, setTorchOn] = useState(false);
 
   const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const services = staticStreaming;
+
+  // Filtrér tjenester: Skjul CBB MIX-only tjenester hvis Telmore er valgt
+  const isTelmoreProvider = activeProvider === 'telmore' || activeProvider === 'telmore-bredbånd';
+  const services = isTelmoreProvider
+    ? staticStreaming.filter(service => !service.cbbMixOnly)
+    : staticStreaming;
+
+  // Wrapper funktion der håndterer CBB MIX aktivering/deaktivering
+  const handleStreamingToggle = (serviceId) => {
+    const service = getServiceById(serviceId);
+    if (!service) return;
+
+    const isCurrentlySelected = selectedStreaming.includes(serviceId);
+
+    // Hvis det er en CBB MIX-only tjeneste
+    if (service.cbbMixOnly) {
+      if (!isCurrentlySelected) {
+        // Aktiverer en CBB MIX-only tjeneste - aktiver CBB MIX hvis ikke allerede aktiveret og ikke Telmore
+        const hasCBBMixEnabled = cartItems.some(item => item.plan.cbbMixAvailable && item.cbbMixEnabled);
+        const isTelmoreProvider = activeProvider === 'telmore' || activeProvider === 'telmore-bredbånd';
+
+        if (!hasCBBMixEnabled && !isTelmoreProvider && onCBBMixEnabled && onCBBMixCount) {
+          // Find første plan der understøtter CBB MIX og aktiver det
+          const firstCBBMixPlan = cartItems.find(item => item.plan.cbbMixAvailable);
+          if (firstCBBMixPlan) {
+            onCBBMixEnabled(firstCBBMixPlan.plan.id, true);
+            onCBBMixCount(firstCBBMixPlan.plan.id, 2); // Standard 2 tjenester
+          }
+        }
+      } else {
+        // Fjerner en CBB MIX-only tjeneste - tjek om der er andre CBB MIX-only tjenester valgt
+        const cbbMixOnlyIds = staticStreaming
+          .filter(s => s.cbbMixOnly)
+          .map(s => s.id);
+
+        const remainingCBBMixOnly = selectedStreaming.filter(id =>
+          id !== serviceId && cbbMixOnlyIds.includes(id)
+        );
+
+        // Hvis ingen andre CBB MIX-only tjenester er valgt, deaktiver CBB MIX
+        if (remainingCBBMixOnly.length === 0 && onCBBMixEnabled) {
+          cartItems.forEach(item => {
+            if (item.plan.cbbMixAvailable && item.cbbMixEnabled) {
+              onCBBMixEnabled(item.plan.id, false);
+            }
+          });
+        }
+      }
+    }
+
+    // Kald den originale toggle funktion
+    onStreamingToggle(serviceId);
+  };
+
   const streamingTotal = services
     .filter(s => selectedStreaming.includes(s.id))
     .reduce((sum, s) => sum + (s.price || 0), 0);
@@ -601,7 +658,7 @@ function StreamingSelector({
           return (
             <button
               key={service.id}
-              onClick={() => onStreamingToggle(service.id)}
+              onClick={() => handleStreamingToggle(service.id)}
               className={`streaming-card glass-card ${isSelected ? 'selected' : ''}`}
               style={{ 
                 '--brand-color': service.color || 'var(--color-orange)',

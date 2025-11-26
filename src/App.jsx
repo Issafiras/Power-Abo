@@ -208,6 +208,10 @@ function App() {
                   onAutoSelectSolution={handleAutoSelectSolution}
                   existingBrands={state.existingBrands}
                   onExistingBrandsChange={actions.setExistingBrands}
+                  cartItems={state.cartItems}
+                  onCBBMixEnabled={actions.setCBBMixEnabled}
+                  onCBBMixCount={actions.setCBBMixCount}
+                  activeProvider={state.activeProvider}
                 />
               </Suspense>
             </div>
