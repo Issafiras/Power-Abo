@@ -35,7 +35,12 @@ const ICONS = {
 class Logger {
   constructor() {
     // Standard log niveau baseret på environment
-    this.level = import.meta.env.DEV ? LOG_LEVELS.DEBUG : LOG_LEVELS.INFO;
+    // Standard log niveau baseret på environment
+    // Håndter både Vite (import.meta.env) og Node.js miljøer
+    const isDev = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) ||
+      (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production');
+
+    this.level = isDev ? LOG_LEVELS.DEBUG : LOG_LEVELS.INFO;
     this.enabled = true;
     this.showTimestamp = true;
     this.showIcons = true;

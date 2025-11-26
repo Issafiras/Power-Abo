@@ -18,6 +18,7 @@
  */
 
 import logger from './logger.js';
+import { getServiceById } from '../data/streamingServices.js';
 
 // Konstanter
 // Oprettelsesgebyr er fjernet
@@ -585,10 +586,25 @@ export function checkCBBMixStreamingCoverage(cartItems, selectedStreaming) {
 
   // Hvis der er CBB MIX slots tilgængelige
   if (totalCBBMixSlots > 0) {
-    const included = selectedStreaming.slice(0, totalCBBMixSlots);
-    const notIncluded = selectedStreaming.slice(totalCBBMixSlots);
+    // Filtrer tjenester der er ekskluderet fra CBB Mix (fx Disney+)
+    const eligibleForMix = selectedStreaming.filter(id => {
+      const service = getServiceById(id);
+      return service && !service.cbbMixExcluded;
+    });
 
-    return { included, notIncluded, cbbMixSlots: totalCBBMixSlots };
+    const notEligibleForMix = selectedStreaming.filter(id => {
+      const service = getServiceById(id);
+      return !service || service.cbbMixExcluded;
+    });
+
+    // Tag de første N streaming-tjenester fra de kvalificerede (hvor N = totalCBBMixSlots)
+    const includedInMix = eligibleForMix.slice(0, totalCBBMixSlots);
+    const remainingEligible = eligibleForMix.slice(totalCBBMixSlots);
+
+    // Kombiner alt der ikke er inkluderet
+    const notIncluded = [...notEligibleForMix, ...remainingEligible];
+
+    return { included: includedInMix, notIncluded, cbbMixSlots: totalCBBMixSlots };
   }
 
   return { included: [], notIncluded: selectedStreaming, cbbMixSlots: 0 };
@@ -628,11 +644,27 @@ export function checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming) {
 
   // Hvis der er streaming slots tilgængelige (mix-system)
   if (totalStreamingSlots > 0) {
-    // Tag de første N streaming-tjenester (hvor N = totalStreamingSlots)
-    const included = selectedStreaming.slice(0, totalStreamingSlots);
-    const notIncluded = selectedStreaming.slice(totalStreamingSlots);
+    // Filtrer tjenester der er ekskluderet fra CBB Mix (fx Disney+)
+    // Bemærk: Dette gælder kun for CBB Mix slots, men her antager vi at streamingCount primært bruges til det
+    // Hvis vi har andre mix-typer i fremtiden, skal dette måske justeres
+    const eligibleForMix = selectedStreaming.filter(id => {
+      const service = getServiceById(id);
+      return service && !service.cbbMixExcluded;
+    });
 
-    return { included, notIncluded };
+    const notEligibleForMix = selectedStreaming.filter(id => {
+      const service = getServiceById(id);
+      return !service || service.cbbMixExcluded;
+    });
+
+    // Tag de første N streaming-tjenester (hvor N = totalStreamingSlots)
+    const includedInMix = eligibleForMix.slice(0, totalStreamingSlots);
+    const remainingEligible = eligibleForMix.slice(totalStreamingSlots);
+
+    // Kombiner alt der ikke er inkluderet
+    const notIncluded = [...notEligibleForMix, ...remainingEligible];
+
+    return { included: includedInMix, notIncluded };
   }
 
   // Ellers brug den gamle logik (specifikke streaming-tjenester)

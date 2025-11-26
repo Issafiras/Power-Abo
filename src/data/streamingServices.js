@@ -50,7 +50,8 @@ export const streamingServices = [
     price: 149, // Standard plan
     logo: 'https://issafiras.github.io/Power-Abo/logos/Disney+.png',
     bgColor: 'linear-gradient(180deg, #0072D2 0%, #00BCD4 100%)', // Disney gradient
-    category: 'streaming'
+    category: 'streaming',
+    cbbMixExcluded: true // CBB MIX understøtter ikke Disney+
   },
   {
     id: 'skyshowtime',
@@ -116,7 +117,7 @@ export const streamingServices = [
  */
 export function getStreamingTotal(selectedIds) {
   if (!selectedIds || selectedIds.length === 0) return 0;
-  
+
   return streamingServices
     .filter(service => selectedIds.includes(service.id))
     .reduce((total, service) => total + service.price, 0);
@@ -136,7 +137,7 @@ export function getServiceById(id) {
  * @returns {Array} CBB MIX tjenester
  */
 export function getCBBMixServices() {
-  return streamingServices.filter(service => 
+  return streamingServices.filter(service =>
     service.cbbMixOnly || service.cbbMixVariant
   );
 }
@@ -165,7 +166,7 @@ export function getCBBMixPrice(count) {
     7: 410,  // 7 tjenester = 410 kr/md
     8: 460   // 8 tjenester = 460 kr/md
   };
-  
+
   return cbbMixPricing[count] || 0;
 }
 
