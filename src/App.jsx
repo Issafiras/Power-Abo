@@ -62,13 +62,13 @@ function App() {
     try {
       const availablePlans = plans;
       const availableStreaming = staticStreaming;
-      
+
       // Valider input
       if (!Array.isArray(availablePlans) || availablePlans.length === 0) {
         toast(COPY.error.couldNotFindSolution, 'error');
         return;
       }
-      
+
       // Funktion til at hente streaming-pris med defensive checks
       const getStreamingPrice = (serviceId) => {
         try {
@@ -81,11 +81,11 @@ function App() {
           return 0;
         }
       };
-      
+
       // Find bedste løsning - brug numberOfLines som maksimum
       // Ekskluder planer fra eksisterende brands
       const excludedProviders = [];
-      
+
       // Sikre array operation for existingBrands
       if (Array.isArray(state.existingBrands)) {
         state.existingBrands.forEach(brand => {
@@ -98,22 +98,22 @@ function App() {
           }
         });
       }
-      
+
       // Valider state værdier før brug
       const validNumberOfLines = Number.isInteger(state.numberOfLines) && state.numberOfLines > 0 && state.numberOfLines <= 20
-        ? state.numberOfLines 
+        ? state.numberOfLines
         : 1;
-      
+
       const validCustomerMobileCost = Number.isFinite(state.customerMobileCost) && state.customerMobileCost >= 0
-        ? state.customerMobileCost 
+        ? state.customerMobileCost
         : 0;
-      
+
       const validOriginalItemPrice = Number.isFinite(state.originalItemPrice) && state.originalItemPrice >= 0
-        ? state.originalItemPrice 
+        ? state.originalItemPrice
         : 0;
-      
+
       const validSelectedStreaming = Array.isArray(state.selectedStreaming) ? state.selectedStreaming : [];
-      
+
       const result = findBestSolution(
         availablePlans,
         validSelectedStreaming,
@@ -124,16 +124,17 @@ function App() {
           maxLines: validNumberOfLines,
           minSavings: -Infinity,
           requiredLines: validNumberOfLines,
-          excludedProviders: excludedProviders
+          excludedProviders: excludedProviders,
+          preferSavings: true // Prioriter besparelse (passende abonnement) frem for ren indtjening
         }
       );
-      
+
       // Valider resultat før brug
       if (!result || typeof result !== 'object') {
         toast(COPY.error.couldNotFindSolution, 'error');
         return;
       }
-      
+
       // Valider at cartItems er et array
       if (Array.isArray(result.cartItems) && result.cartItems.length > 0) {
         // Valider at alle cart items har påkrævede properties
@@ -144,24 +145,24 @@ function App() {
           if (!Number.isInteger(item.quantity) || item.quantity < 1) return false;
           return true;
         });
-        
+
         if (validCartItems.length === 0) {
           toast(COPY.error.couldNotFindSolution, 'error');
           return;
         }
-        
+
         // Ryd kurv først
         actions.clearCart();
-        
+
         // Sæt hele cart på én gang
         actions.setCart(validCartItems);
-        
+
         // Opdater CBB Mix indstillinger hvis nødvendigt
         validCartItems.forEach(item => {
           try {
             if (item.cbbMixEnabled === true && item.plan && item.plan.id) {
               const mixCount = (item.cbbMixCount != null && Number.isInteger(item.cbbMixCount) && item.cbbMixCount >= 2 && item.cbbMixCount <= 8)
-                ? item.cbbMixCount 
+                ? item.cbbMixCount
                 : 2;
               actions.setCBBMixEnabled(item.plan.id, true);
               actions.setCBBMixCount(item.plan.id, mixCount);
@@ -170,11 +171,11 @@ function App() {
             // Skip hvis der er fejl ved opdatering af CBB Mix
           }
         });
-        
+
         // Vis besked med forklaring
         const validSavings = Number.isFinite(result.savings) ? result.savings : 0;
-        const explanation = (result.explanation && typeof result.explanation === 'string') 
-          ? result.explanation 
+        const explanation = (result.explanation && typeof result.explanation === 'string')
+          ? result.explanation
           : 'Løsning fundet';
         toast(COPY.success.foundSolution(explanation), validSavings >= 0 ? 'success' : 'error');
       } else {
@@ -191,13 +192,13 @@ function App() {
   const handleEANSearch = useCallback(async (searchResult) => {
     actions.setIsSearching(true);
     actions.setEanSearchResults(searchResult);
-    
+
     // Hvis der er fundet produkter, vis dem i en toast
     if (searchResult.products && searchResult.products.length > 0) {
       const firstProduct = searchResult.products[0];
       const price = searchResult.prices[firstProduct.productId] || firstProduct.price || 'Ukendt pris';
       toast(COPY.success.searchSuccess(firstProduct.title || firstProduct.name, price), 'success');
-      
+
       // Auto-fyld original item price hvis der er en pris
       if (typeof price === 'number' && price > 0) {
         actions.setOriginalItemPrice(price);
@@ -211,7 +212,7 @@ function App() {
         toast(COPY.error.noProductsFound, 'error');
       }
     }
-    
+
     actions.setIsSearching(false);
   }, [actions]);
 
@@ -225,7 +226,7 @@ function App() {
     // Filtrer baseret på datoer (availableFrom og expiresAt)
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Sæt tid til midnat for at sammenligne kun datoer
-    
+
     filtered = filtered.filter(plan => {
       // Tjek availableFrom - plan skal være tilgængelig fra denne dato
       if (plan.availableFrom) {
@@ -235,7 +236,7 @@ function App() {
           return false; // Plan er ikke tilgængelig endnu
         }
       }
-      
+
       // Tjek expiresAt - plan skal være aktiv indtil denne dato
       // VIGTIGT: Kun ekskluder hvis expiresAt er sat (ikke campaignExpiresAt)
       // campaignExpiresAt betyder kun at kampagneprisen udløber, ikke planen selv
@@ -246,7 +247,7 @@ function App() {
           return false; // Plan er udløbet
         }
       }
-      
+
       return true;
     });
 
@@ -271,7 +272,7 @@ function App() {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
         return;
       }
-      
+
       if ((e.key === 'p' || e.key === 'P') && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         actions.togglePresentation();
