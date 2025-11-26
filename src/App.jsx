@@ -87,6 +87,13 @@ function App() {
     actions.setIsSearching(false);
   }, [actions]);
 
+  // Cache dagens dato - kun opdater ved midnat (beregnes én gang per session)
+  const todayMidnight = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today.getTime(); // Brug timestamp for hurtigere sammenligning
+  }, []); // Tom array = beregnes kun én gang ved mount
+
   // Filtrerede planer - memoized for performance (bruger debounced search query)
   const filteredPlans = useMemo(() => {
     const source = plans;
@@ -95,15 +102,12 @@ function App() {
       : source.filter(p => p.provider === state.activeProvider);
 
     // Filtrer baseret på datoer (availableFrom og expiresAt)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Sæt tid til midnat for at sammenligne kun datoer
-
     filtered = filtered.filter(plan => {
       // Tjek availableFrom - plan skal være tilgængelig fra denne dato
       if (plan.availableFrom) {
         const availableFromDate = new Date(plan.availableFrom);
         availableFromDate.setHours(0, 0, 0, 0);
-        if (today < availableFromDate) {
+        if (todayMidnight < availableFromDate.getTime()) {
           return false; // Plan er ikke tilgængelig endnu
         }
       }
@@ -113,8 +117,8 @@ function App() {
       // campaignExpiresAt betyder kun at kampagneprisen udløber, ikke planen selv
       if (plan.expiresAt && !plan.campaignExpiresAt) {
         const expiresAtDate = new Date(plan.expiresAt);
-        expiresAtDate.setHours(23, 59, 59, 999); // Inkluder hele dagen
-        if (today > expiresAtDate) {
+        expiresAtDate.setHours(23, 59, 59, 999);
+        if (todayMidnight > expiresAtDate.getTime()) {
           return false; // Plan er udløbet
         }
       }
@@ -134,7 +138,7 @@ function App() {
     }
 
     return filtered;
-  }, [state.activeProvider, state.debouncedSearchQuery]);
+  }, [state.activeProvider, state.debouncedSearchQuery, todayMidnight]);
 
   // Keyboard shortcut: Press 'P' to toggle presentation
   useEffect(() => {

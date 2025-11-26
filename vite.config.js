@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Standard Vite-konfiguration uden manuel chunk-splitting
-// (for at undgå fejl i vendor-bundles, f.eks. med React/forwardRef)
+// Optimeret Vite-konfiguration med code-splitting
 export default defineConfig({
   base: '/Power-Abo/',
   plugins: [react()],
@@ -42,7 +41,39 @@ export default defineConfig({
     cssMinify: true,
     cssCodeSplit: true,
     target: 'es2015',
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
+    // Optimeret code-splitting for bedre caching og mindre initiel load
+    rollupOptions: {
+      output: {
+        // Split vendors og app kode
+        manualChunks: (id) => {
+          // React core - sjældent ændret, god cache-kandidat
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'react-vendor';
+          }
+          // Øvrige node_modules
+          if (id.includes('node_modules/')) {
+            return 'vendor';
+          }
+          // Data filer - planer og streaming services
+          if (id.includes('/data/plans') || id.includes('/data/streamingServices')) {
+            return 'app-data';
+          }
+          // Utilities og beregninger
+          if (id.includes('/utils/calculations/') || id.includes('/utils/powerApi')) {
+            return 'app-utils';
+          }
+        },
+        // Optimerede filnavne for bedre caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
+    }
   },
+  // Optimer dependencies der skal pre-bundles
+  optimizeDeps: {
+    include: ['react', 'react-dom']
+  }
 });
 

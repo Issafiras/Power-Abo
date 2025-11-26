@@ -3,7 +3,7 @@
  * Konsoliderer al app state i én provider for at eliminere prop drilling
  */
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import {
   saveCart,
   loadCart,
@@ -410,55 +410,67 @@ export function AppProvider({ children }) {
     document.documentElement.setAttribute('data-theme', savedState.settings.theme);
   }, []);
   
-  // Persist state to localStorage
+  // Track if initial load is complete to avoid saving during mount
+  const isInitialized = useRef(false);
+  
+  // Persist state to localStorage - batched for performance
   useEffect(() => {
-    if (state.cart.items) {
-      saveCart(state.cart.items);
+    // Skip the initial render (state is loaded from storage above)
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      return;
     }
-  }, [state.cart.items]);
+    
+    // Batch all localStorage writes with requestIdleCallback for better performance
+    const saveToStorage = () => {
+      // Cart
+      if (state.cart.items) {
+        saveCart(state.cart.items);
+      }
+      
+      // Customer
+      saveCustomerMobileCost(state.customer.mobileCost);
+      saveNumberOfLines(state.customer.numberOfLines);
+      saveOriginalItemPrice(state.customer.originalItemPrice);
+      saveExistingBrands(state.customer.existingBrands);
+      
+      // Streaming
+      saveSelectedStreaming(state.streaming.selected);
+      
+      // Settings
+      saveCashDiscount(state.settings.cashDiscount);
+      saveCashDiscountLocked(state.settings.cashDiscountLocked);
+      saveAutoAdjust(state.settings.autoAdjust);
+      saveShowCashDiscount(state.settings.showCashDiscount);
+      saveFreeSetup(state.settings.freeSetup);
+      saveTheme(state.settings.theme);
+    };
+    
+    // Use requestIdleCallback if available, otherwise use setTimeout
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(saveToStorage, { timeout: 500 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(saveToStorage, 100);
+      return () => clearTimeout(id);
+    }
+  }, [
+    state.cart.items,
+    state.customer.mobileCost,
+    state.customer.numberOfLines,
+    state.customer.originalItemPrice,
+    state.customer.existingBrands,
+    state.streaming.selected,
+    state.settings.cashDiscount,
+    state.settings.cashDiscountLocked,
+    state.settings.autoAdjust,
+    state.settings.showCashDiscount,
+    state.settings.freeSetup,
+    state.settings.theme
+  ]);
   
+  // Theme attribute update - immediate for visual feedback
   useEffect(() => {
-    saveSelectedStreaming(state.streaming.selected);
-  }, [state.streaming.selected]);
-  
-  useEffect(() => {
-    saveCustomerMobileCost(state.customer.mobileCost);
-  }, [state.customer.mobileCost]);
-  
-  useEffect(() => {
-    saveNumberOfLines(state.customer.numberOfLines);
-  }, [state.customer.numberOfLines]);
-  
-  useEffect(() => {
-    saveOriginalItemPrice(state.customer.originalItemPrice);
-  }, [state.customer.originalItemPrice]);
-  
-  useEffect(() => {
-    saveExistingBrands(state.customer.existingBrands);
-  }, [state.customer.existingBrands]);
-  
-  useEffect(() => {
-    saveCashDiscount(state.settings.cashDiscount);
-  }, [state.settings.cashDiscount]);
-  
-  useEffect(() => {
-    saveCashDiscountLocked(state.settings.cashDiscountLocked);
-  }, [state.settings.cashDiscountLocked]);
-  
-  useEffect(() => {
-    saveAutoAdjust(state.settings.autoAdjust);
-  }, [state.settings.autoAdjust]);
-  
-  useEffect(() => {
-    saveShowCashDiscount(state.settings.showCashDiscount);
-  }, [state.settings.showCashDiscount]);
-  
-  useEffect(() => {
-    saveFreeSetup(state.settings.freeSetup);
-  }, [state.settings.freeSetup]);
-  
-  useEffect(() => {
-    saveTheme(state.settings.theme);
     document.documentElement.setAttribute('data-theme', state.settings.theme);
   }, [state.settings.theme]);
   
