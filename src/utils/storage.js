@@ -15,6 +15,7 @@ const STORAGE_KEYS = {
   THEME: 'power_calculator_theme',
   SHOW_CASH_DISCOUNT: 'power_calculator_show_cash_discount',
   EXISTING_BRANDS: 'power_calculator_existing_brands',
+  BROADBAND_COST: 'power_calculator_broadband_cost',
   FREE_SETUP: 'power_calculator_free_setup'
 };
 
@@ -110,6 +111,15 @@ export function saveOriginalItemPrice(price) {
 
 export function loadOriginalItemPrice() {
   return getItem(STORAGE_KEYS.ORIGINAL_ITEM_PRICE, 0);
+}
+
+// Bredbånd udgifter
+export function saveBroadbandCost(cost) {
+  setItem(STORAGE_KEYS.BROADBAND_COST, cost);
+}
+
+export function loadBroadbandCost() {
+  return getItem(STORAGE_KEYS.BROADBAND_COST, 0);
 }
 
 // Kontant rabat funktioner

@@ -22,8 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
   
-  <!-- Preload critical assets -->
-  <link rel="preload" href="%BASE_URL%power-logo-white.png" as="image" type="image/png" />
+  <!-- Preload critical assets - removed power-logo-white.png preload as it's loaded eagerly in loading screen -->
   
   <title>Power Calculator - Mobilabonnement Beregner</title>
   
@@ -79,9 +78,9 @@
 <body>
   <!-- Loading screen -->
   <div id="loading-screen">
-    <img 
-      src="%BASE_URL%power-logo-white.png?v=1" 
-      alt="Power Abonnement" 
+    <img
+      src="/power-logo-white.png?v=1"
+      alt="Power Abonnement"
       class="loading-logo"
       loading="eager"
       width="200"

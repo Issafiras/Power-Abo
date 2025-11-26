@@ -22,6 +22,7 @@ export default function PresentationView({
   cartItems,
   selectedStreaming,
   customerMobileCost,
+  broadbandCost,
   originalItemPrice,
   cashDiscount,
   onClose,
@@ -34,7 +35,7 @@ export default function PresentationView({
   const notIncludedStreamingCost = getStreamingTotal(streamingCoverage.notIncluded);
   const streamingCost = getStreamingTotal(selectedStreaming);
   
-  const customerTotals = calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice);
+  const customerTotals = calculateCustomerTotal(customerMobileCost + (broadbandCost || 0), streamingCost, originalItemPrice);
   const ourOfferTotals = calculateOurOfferTotal(
     cartItems,
     notIncludedStreamingCost,

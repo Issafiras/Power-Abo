@@ -14,7 +14,8 @@ function Header({
   theme,
   onThemeToggle,
   cartCount = 0,
-  onCartClick
+  onCartClick,
+  onHelpClick
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -44,11 +45,18 @@ function Header({
         e.preventDefault();
         onThemeToggle();
       }
+      // F1 or Ctrl+H: Help
+      if (e.key === 'F1' || (e.ctrlKey && e.key === 'h')) {
+        e.preventDefault();
+        if (onHelpClick) {
+          onHelpClick();
+        }
+      }
     }
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [onPresentationToggle, onThemeToggle]);
+  }, [onPresentationToggle, onThemeToggle, onHelpClick]);
 
   // Smooth scroll detection - optimized performance
   useEffect(() => {
@@ -135,6 +143,16 @@ function Header({
                   )}
                 </button>
               )}
+
+              {/* Help Button */}
+              <button
+                onClick={onHelpClick}
+                className="header-modern__action-btn"
+                title="Hjælp og brugervejledning"
+                aria-label="Åbn hjælp og brugervejledning"
+              >
+                <Icon name="help" size={20} />
+              </button>
 
               {/* Presentation Toggle */}
               <button

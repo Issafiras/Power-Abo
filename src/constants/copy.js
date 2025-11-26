@@ -7,7 +7,7 @@ export const COPY = {
   // Overskrifter - Forenklede og action-orienterede
   titles: {
     customerSituation: 'Hvad betaler du i dag?',
-    customerSituationSubtitle: 'Vælg kundens nuværende streaming-tjenester og mobiludgifter',
+    customerSituationSubtitle: 'Vælg kundens nuværende streaming-tjenester, mobil- og bredbåndsudgifter',
     selectPlans: 'Find din perfekte pakke',
     selectPlansSubtitle: 'Vælg først operatør, derefter de abonnementer, som passer bedst til kunden',
     quickSolution: 'Få din løsning nu',
@@ -22,6 +22,7 @@ export const COPY = {
     existingBrands: 'Har kunden allerede abonnement hos?',
     existingBrandsHelp: 'Vælg brands, som kunden allerede har – disse vil blive ekskluderet fra automatisk løsning',
     mobileCost: 'Nuværende månedlige mobiludgifter',
+    broadbandCost: 'Nuværende månedlige bredbåndsudgifter',
     originalItemPrice: 'Varens pris inden rabat og besparelse',
     eanSearch: 'Søg vare efter navn, EAN eller mærke',
     streaming: 'Vælg streaming-tjenester',
@@ -47,6 +48,8 @@ export const COPY = {
     scan: 'Scan',
     scanBarcode: 'Scan stregkode',
     cancel: 'Annullér',
+    help: 'Hjælp',
+    closeHelp: 'Luk hjælp',
     close: 'Luk',
     togglePresentation: 'Præsentér',
     toggleTheme: 'Skift tema',
@@ -57,27 +60,62 @@ export const COPY = {
     nextCustomer: 'Næste kunde'
   },
 
-  // Success meddelelser - Empatisk tone
+  // Success meddelelser - Salgsorienterede og empatiske
   success: {
-    addedToCart: (name) => `Godt valg! ${name} er tilføjet til kurven`,
-    updatedInCart: (name) => `${name} opdateret i kurven`,
-    removedFromCart: (name) => `${name} fjernet fra kurven`,
-    foundSolution: (explanation) => `Godt valg! ${explanation}`,
-    reset: 'Alt nulstillet',
-    saved: 'Gemt',
-    searchSuccess: (title, price) => `Fundet: ${title} - ${price} kr`,
-    priceFound: (price) => `Pris fundet: ${price} kr (via filter)`
+    addedToCart: (name) => `Perfekt valg! ${name} er nu i din løsning`,
+    updatedInCart: (name) => `Opdateret! ${name} justeret efter dine behov`,
+    removedFromCart: (name) => `${name} fjernet - vi finder noget bedre`,
+    foundSolution: (explanation) => `Fantastisk løsning fundet! ${explanation}`,
+    reset: 'Klar til næste kunde - alt nulstillet',
+    saved: 'Løsningen er gemt til senere',
+    searchSuccess: (title, price) => `Produkt fundet! ${title} til kun ${price} kr`,
+    priceFound: (price) => `Pris bekræftet: ${price} kr - god besparelse!`,
+    autoSelectedPlan: (name, price, savings) => `Automatisk valgt: ${name} (${price} kr/md) - sparer ${savings} kr`,
+    streamingAdded: (name) => `${name} tilføjet til din underholdningspakke`,
+    streamingRemoved: (name) => `${name} fjernet fra pakken`,
+    customerDataSaved: 'Kundens situation gemt - klar til næste trin',
+    presentationReady: 'Præsentation er klar - imponer kunden!',
+    calculationComplete: 'Beregning færdig - se den fantastiske besparelse!',
+    discountApplied: (amount) => `Rabat på ${amount} kr anvendt - endnu bedre tilbud!`,
+    familyDiscountActive: (lines, savings) => `Familierabat aktiveret: ${lines} linjer sparer ${savings} kr/md`,
+    streamingBundleActive: (count, savings) => `Streaming-pakke aktiveret: ${count} tjenester sparer ${savings} kr/md`
   },
 
-  // Error meddelelser - Actionable
+  // Error meddelelser - Hjælpsomme og action-oriented
   error: {
-    noSolution: 'Ups, vi kunne ikke finde en match. Lad os justere...',
-    noProductsFound: 'Ingen produkter fundet for denne søgeterm',
-    searchFailed: (message) => `Fejl ved søgning: ${message}`,
-    couldNotFindSolution: 'Kunne ikke finde en løsning. Prøv at tilføje streaming-tjenester eller mobiludgifter.',
-    scannerAccess: 'Kunne ikke få adgang til kamera. Tjek tilladelser.',
-    scannerUnsupported: 'Din browser understøtter ikke indbygget stregkodescanning. Brug manuel søgning i stedet.',
-    validation: (field, message) => `${field}: ${message}`
+    noSolution: 'Ingen løsning fundet endnu. Tilføj flere detaljer om kundens situation for bedre resultater.',
+    noProductsFound: 'Produkt ikke fundet. Prøv at søge på mærke, model eller EAN-kode.',
+    searchFailed: (message) => `Søgning fejlede. Tjek internetforbindelsen eller prøv igen.`,
+    couldNotFindSolution: 'Behøver flere oplysninger for at finde den perfekte løsning. Tilføj streaming-tjenester eller mobiludgifter.',
+    scannerAccess: 'Kamera-adgang nægtet. Tillad kamera i browser-indstillinger eller brug manuel søgning.',
+    scannerUnsupported: 'Kamera-scanning ikke understøttet. Brug søgefeltet til at finde produktet.',
+    validation: (field, message) => `Ret fejl i ${field}: ${message}`,
+    networkError: 'Forbindelsesfejl. Tjek internet og prøv igen.',
+    apiUnavailable: 'Tjenesten er midlertidigt utilgængelig. Prøv igen om et øjeblik.',
+    invalidData: 'Ugyldige data indtastet. Kontroller og ret venligst.',
+    cartEmpty: 'Ingen produkter valgt. Tilføj abonnementer for at fortsætte.',
+    calculationError: 'Beregning fejlede. Prøv at genindlæse siden.',
+    saveFailed: 'Kunne ikke gemme. Prøv igen eller kontakt support hvis problemet fortsætter.'
+  },
+
+  // Warning meddelelser - Forsigtige påmindelser
+  warning: {
+    highCostDifference: (difference) => `Stort prisgab på ${difference} kr. Overvej at justere løsningen.`,
+    streamingOverBudget: (budget, actual) => `Streaming-udgifter overstiger budget: ${budget} kr vs ${actual} kr`,
+    planMayExpire: (planName, days) => `${planName} udløber om ${days} dage - planlæg opfølgning`,
+    dataUsageHigh: (usage) => `Højt dataforbrug på ${usage} GB. Overvej større datapakke.`,
+    competitionRisk: 'Kunden har allerede abonnement hos konkurrent - fremhæv vores fordele',
+    incompleteCustomerData: 'Manglende kundeoplysninger kan give upræcise beregninger'
+  },
+
+  // Info meddelelser - Neutrale oplysninger
+  info: {
+    autoSaveEnabled: 'Auto-gemning aktiveret - dine ændringer gemmes automatisk',
+    presentationModeTip: 'Brug P på tastaturet til at skifte til præsentationstilstand',
+    calculationUpdated: 'Beregning opdateret med nye priser og rabatter',
+    newPlansAvailable: 'Nye abonnementer er nu tilgængelige - se efter opdateringer',
+    featureHighlight: (feature) => `Tip: ${feature} er nu tilgængelig i denne løsning`,
+    keyboardShortcuts: 'Tryk Ctrl+R for at nulstille eller Ctrl+P for præsentation'
   },
 
   // Help tekster - Kortere med bullet points

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
  * Console Logger Utility
  * Håndterer struktureret logging med forskellige niveauer og kategorier
@@ -36,9 +35,9 @@ class Logger {
   constructor() {
     // Standard log niveau baseret på environment
     // Standard log niveau baseret på environment
-    // Håndter både Vite (import.meta.env) og Node.js miljøer
+    // Håndter Vite miljø (import.meta.env)
     const isDev = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) ||
-      (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production');
+      (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE !== 'production');
 
     this.level = isDev ? LOG_LEVELS.DEBUG : LOG_LEVELS.INFO;
     this.enabled = true;

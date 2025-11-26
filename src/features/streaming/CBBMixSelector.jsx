@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { formatCurrency } from '../utils/calculations';
-import Icon from './common/Icon';
+import { formatCurrency } from '../../utils/calculations';
+import Icon from '../../components/common/Icon';
 
 function CBBMixSelector({ 
   selectedCount, 

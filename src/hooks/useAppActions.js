@@ -4,9 +4,10 @@
  */
 
 import { useCallback } from 'react';
-import { useAppContext, ActionTypes } from '../context/AppContext';
+import { useAppContext } from '../context/AppContext';
+import { ActionTypes } from '../context/ActionTypes';
 import { validatePrice, validateQuantity } from '../utils/validators';
-import { toast } from '../components/common/Toast';
+import { toast } from '../utils/toast';
 import { resetAll as resetStorage } from '../utils/storage';
 import COPY from '../constants/copy';
 
@@ -80,7 +81,14 @@ export function useAppActions() {
   const setExistingBrands = useCallback((brands) => {
     dispatch({ type: ActionTypes.SET_EXISTING_BRANDS, payload: brands });
   }, [dispatch]);
-  
+
+  const setBroadbandCost = useCallback((value) => {
+    const validation = validatePrice(value);
+    if (validation.valid) {
+      dispatch({ type: ActionTypes.SET_BROADBAND_COST, payload: validation.value });
+    }
+  }, [dispatch]);
+
   // Streaming actions
   const toggleStreaming = useCallback((serviceId) => {
     dispatch({ type: ActionTypes.TOGGLE_STREAMING, payload: serviceId });
@@ -165,7 +173,15 @@ export function useAppActions() {
   const setIsSearching = useCallback((searching) => {
     dispatch({ type: ActionTypes.SET_IS_SEARCHING, payload: searching });
   }, [dispatch]);
-  
+
+  const setShowHelpGuide = useCallback((show) => {
+    dispatch({ type: ActionTypes.SET_SHOW_HELP_GUIDE, payload: show });
+  }, [dispatch]);
+
+  const toggleHelpGuide = useCallback(() => {
+    dispatch({ type: ActionTypes.TOGGLE_HELP_GUIDE });
+  }, [dispatch]);
+
   // Reset action
   const resetAll = useCallback(() => {
     resetStorage();
@@ -186,6 +202,7 @@ export function useAppActions() {
     setNumberOfLines,
     setOriginalItemPrice,
     setExistingBrands,
+    setBroadbandCost,
     
     // Streaming
     toggleStreaming,
@@ -210,7 +227,9 @@ export function useAppActions() {
     setCBBMixCount,
     setEanSearchResults,
     setIsSearching,
-    
+    setShowHelpGuide,
+    toggleHelpGuide,
+
     // Reset
     resetAll
   };

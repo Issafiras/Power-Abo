@@ -286,6 +286,12 @@
   --gradient-divider: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   --gradient-divider-colored: linear-gradient(90deg, rgba(99, 102, 241, 0), rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.5), rgba(94, 143, 255, 0.4), rgba(167, 139, 250, 0.3), rgba(99, 102, 241, 0));
 
+  /* Common component gradients */
+  --gradient-orange: linear-gradient(135deg, var(--color-orange), #ff8c42);
+  --gradient-orange-glass: linear-gradient(135deg, rgba(255, 109, 31, 0.2), rgba(255, 109, 31, 0.1));
+  --gradient-orange-strong: linear-gradient(135deg, rgba(255, 109, 31, 0.3), rgba(255, 109, 31, 0.15));
+  --gradient-telenor-orange: linear-gradient(135deg, var(--color-orange), var(--color-telenor));
+
   /* Compact Fluid typography - Optimized for density */
   --fluid-text-sm: clamp(0.5625rem, 0.5rem + 0.15vw, 0.6875rem);
   --fluid-text-base: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);

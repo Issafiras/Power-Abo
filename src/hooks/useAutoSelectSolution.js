@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
 import { findBestSolution } from '../utils/calculations';
+import { calculateCustomerTotal } from '../utils/calculations/pricing';
 import { getServiceById, streamingServices as staticStreaming } from '../data/streamingServices';
 import { plans } from '../data/plans';
-import { toast } from '../components/common/Toast';
+import { toast } from '../utils/toast';
 import COPY from '../constants/copy';
 
 export function useAutoSelectSolution(state, actions) {
@@ -30,6 +31,31 @@ export function useAutoSelectSolution(state, actions) {
                 }
             };
 
+            // Valider state værdier før brug
+            const validNumberOfLines = Number.isInteger(state.numberOfLines) && state.numberOfLines > 0 && state.numberOfLines <= 20
+                ? state.numberOfLines
+                : 1;
+
+            const validCustomerMobileCost = Number.isFinite(state.customerMobileCost) && state.customerMobileCost >= 0
+                ? state.customerMobileCost
+                : 0;
+
+            const validBroadbandCost = Number.isFinite(state.broadbandCost) && state.broadbandCost >= 0
+                ? state.broadbandCost
+                : 0;
+
+            const validOriginalItemPrice = Number.isFinite(state.originalItemPrice) && state.originalItemPrice >= 0
+                ? state.originalItemPrice
+                : 0;
+
+            const validSelectedStreaming = Array.isArray(state.selectedStreaming) ? state.selectedStreaming : [];
+
+            // Beregn kundens nuværende totale udgifter inkl. bredbånd
+            const streamingCost = validSelectedStreaming.reduce((sum, id) => sum + (Number.isFinite(getStreamingPrice(id)) ? getStreamingPrice(id) : 0), 0);
+            const totalCurrentCost = validCustomerMobileCost + validBroadbandCost;
+            const customerTotal = calculateCustomerTotal(totalCurrentCost, streamingCost, validOriginalItemPrice);
+            const validCustomerSixMonth = customerTotal.sixMonth || 0;
+
             // Find bedste løsning - brug numberOfLines som maksimum
             // Ekskluder planer fra eksisterende brands
             const excludedProviders = [];
@@ -47,25 +73,10 @@ export function useAutoSelectSolution(state, actions) {
                 });
             }
 
-            // Valider state værdier før brug
-            const validNumberOfLines = Number.isInteger(state.numberOfLines) && state.numberOfLines > 0 && state.numberOfLines <= 20
-                ? state.numberOfLines
-                : 1;
-
-            const validCustomerMobileCost = Number.isFinite(state.customerMobileCost) && state.customerMobileCost >= 0
-                ? state.customerMobileCost
-                : 0;
-
-            const validOriginalItemPrice = Number.isFinite(state.originalItemPrice) && state.originalItemPrice >= 0
-                ? state.originalItemPrice
-                : 0;
-
-            const validSelectedStreaming = Array.isArray(state.selectedStreaming) ? state.selectedStreaming : [];
-
             const result = findBestSolution(
                 availablePlans,
                 validSelectedStreaming,
-                validCustomerMobileCost,
+                totalCurrentCost,
                 validOriginalItemPrice,
                 getStreamingPrice,
                 {
@@ -134,7 +145,7 @@ export function useAutoSelectSolution(state, actions) {
             console.error('Fejl ved automatisk valg af løsning:', error);
             toast(COPY.error.couldNotFindSolution, 'error');
         }
-    }, [state.selectedStreaming, state.customerMobileCost, state.originalItemPrice, state.numberOfLines, state.existingBrands, actions]);
+    }, [state.selectedStreaming, state.customerMobileCost, state.originalItemPrice, state.numberOfLines, state.existingBrands, state.broadbandCost, actions]);
 
     return handleAutoSelectSolution;
 }

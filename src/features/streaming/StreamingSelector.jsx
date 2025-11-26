@@ -4,20 +4,23 @@
  */
 
 import { streamingServices as staticStreaming, getServiceById } from '../../data/streamingServices';
+import { plans } from '../../data/plans';
 import { formatCurrency } from '../../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { toast } from '../../components/common/Toast';
+import { toast } from '../../utils/toast';
 import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
-import '../../styles/streaming-selector.css';
+// Streaming selector styles moved to components.css
 
 function StreamingSelector({
   selectedStreaming,
   onStreamingToggle,
   customerMobileCost,
   onMobileCostChange,
+  broadbandCost,
+  onBroadbandCostChange,
   originalItemPrice,
   onOriginalItemPriceChange,
   onEANSearch,
@@ -30,7 +33,8 @@ function StreamingSelector({
   cartItems = [],
   onCBBMixEnabled = null,
   onCBBMixCount = null,
-  activeProvider = 'all'
+  activeProvider = 'all',
+  onAddToCart = null
 }) {
   const isMobile = typeof window !== 'undefined' && ((window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth <= 900);
   const canScan = isMobile && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -51,9 +55,9 @@ function StreamingSelector({
 
   const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-  // Filtrér tjenester: Skjul CBB MIX-only tjenester hvis Telmore er valgt
-  const isTelmoreProvider = activeProvider === 'telmore' || activeProvider === 'telmore-bredbånd';
-  const services = isTelmoreProvider
+  // Filtrér tjenester: Skjul CBB MIX-only tjenester hvis Telmore eller bredbånd er valgt
+  const isTelmoreOrBroadband = activeProvider === 'telmore' || activeProvider === 'broadband';
+  const services = isTelmoreOrBroadband
     ? staticStreaming.filter(service => !service.cbbMixOnly)
     : staticStreaming;
 
@@ -67,11 +71,11 @@ function StreamingSelector({
     // Hvis det er en CBB MIX-only tjeneste
     if (service.cbbMixOnly) {
       if (!isCurrentlySelected) {
-        // Aktiverer en CBB MIX-only tjeneste - aktiver CBB MIX hvis ikke allerede aktiveret og ikke Telmore
+        // Aktiverer en CBB MIX-only tjeneste - aktiver CBB MIX hvis ikke allerede aktiveret og ikke Telmore eller bredbånd
         const hasCBBMixEnabled = cartItems.some(item => item.plan.cbbMixAvailable && item.cbbMixEnabled);
-        const isTelmoreProvider = activeProvider === 'telmore' || activeProvider === 'telmore-bredbånd';
+        const isTelmoreOrBroadband = activeProvider === 'telmore' || activeProvider === 'broadband';
 
-        if (!hasCBBMixEnabled && !isTelmoreProvider && onCBBMixEnabled && onCBBMixCount) {
+        if (!hasCBBMixEnabled && !isTelmoreOrBroadband && onCBBMixEnabled && onCBBMixCount) {
           // Find første plan der understøtter CBB MIX og aktiver det
           const firstCBBMixPlan = cartItems.find(item => item.plan.cbbMixAvailable);
           if (firstCBBMixPlan) {
@@ -107,7 +111,7 @@ function StreamingSelector({
   const streamingTotal = services
     .filter(s => selectedStreaming.includes(s.id))
     .reduce((sum, s) => sum + (s.price || 0), 0);
-  const monthlyTotal = (customerMobileCost || 0) + streamingTotal;
+  const monthlyTotal = (customerMobileCost || 0) + (broadbandCost || 0) + streamingTotal;
   const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
 
   const handleMobileCostChange = (e) => {
@@ -118,6 +122,61 @@ function StreamingSelector({
   const handleOriginalItemPriceChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     onOriginalItemPriceChange(value);
+  };
+
+  const handleBroadbandCostChange = (e) => {
+    const inputValue = parseFloat(e.target.value) || 0;
+    onBroadbandCostChange(inputValue);
+  };
+
+  const handleBroadbandCostBlur = (e) => {
+    const inputValue = parseFloat(e.target.value) || 0;
+
+    // Hvis der indtastes et beløb, prøv at vælge bredbånd fra samme udbyder som mobilabonnementer
+    if (inputValue > 0 && cartItems && cartItems.length > 0) {
+      // Find udbydere i kurven (udeluk bredbånd planer)
+      const mobileProviders = cartItems
+        .filter(item => item.plan.type !== 'broadband')
+        .map(item => item.plan.provider)
+        .filter(provider => provider !== 'broadband');
+
+      // Fjern duplikater og telenor-b2b (behandl som telenor)
+      const uniqueProviders = [...new Set(mobileProviders.map(p => p === 'telenor-b2b' ? 'telenor' : p))];
+
+      // Hvis der kun er én udbyder, vælg bredbånd fra samme udbyder
+      if (uniqueProviders.length === 1) {
+        const provider = uniqueProviders[0];
+
+        // Find bredbånd planer fra samme udbyder
+        const broadbandPlans = plans.filter(plan =>
+          plan.type === 'broadband' &&
+          plan.name.toLowerCase().includes(provider)
+        );
+
+        if (broadbandPlans.length > 0) {
+          // Vælg den første tilgængelige bredbånd plan og sæt prisen
+          const selectedPlan = broadbandPlans[0];
+          const planPrice = selectedPlan.introPrice && selectedPlan.introMonths ?
+            selectedPlan.introPrice : selectedPlan.price;
+
+          // Tjek om bredbåndet allerede er i kurven
+          const isAlreadyInCart = cartItems.some(item => item.plan.id === selectedPlan.id);
+
+          if (!isAlreadyInCart && onAddToCart) {
+            // Tilføj bredbåndet til kurven
+            onAddToCart(selectedPlan);
+          }
+
+          // Vis besked til brugeren
+          const actionText = isAlreadyInCart ? 'allerede i kurv' : 'tilføjet til kurv';
+          toast(COPY.success.autoSelectedPlan(selectedPlan.name, planPrice, actionText), 'success');
+
+          // Sæt bredbånd prisen til planens pris
+          onBroadbandCostChange(planPrice);
+          return;
+        }
+      }
+    }
   };
 
   const handleNumberOfLinesChange = (e) => {
@@ -518,6 +577,31 @@ function StreamingSelector({
         )}
       </div>
 
+      {/* Bredbånd udgifter input */}
+      {onBroadbandCostChange && (
+        <div className="broadband-cost-input">
+          <label htmlFor="broadband-cost" className="input-label">
+            <Icon name="wifi" size={18} className="icon-inline icon-spacing-xs" />
+            {COPY.labels.broadbandCost}
+          </label>
+          <div className="input-with-currency">
+            <input
+              id="broadband-cost"
+              name="broadband-cost"
+              type="number"
+              className="input"
+              placeholder="299"
+              value={broadbandCost || ''}
+              onChange={handleBroadbandCostChange}
+              onBlur={handleBroadbandCostBlur}
+              min="0"
+              step="10"
+            />
+            <span className="currency-suffix">kr./md.</span>
+          </div>
+        </div>
+      )}
+
       {/* Varens pris inden rabat input */}
       <div className="original-item-price-input">
         <label htmlFor="original-item-price" className="input-label">
@@ -704,6 +788,10 @@ function StreamingSelector({
         <div className="total-row">
           <span className="total-label">{COPY.help.perMonth}:</span>
           <span className="total-value">{formatCurrency(customerMobileCost || 0)}</span>
+        </div>
+        <div className="total-row">
+          <span className="total-label">Bredbånd {COPY.help.perMonthShort}:</span>
+          <span className="total-value">{formatCurrency(broadbandCost || 0)}</span>
         </div>
         <div className="total-row">
           <span className="total-label">Streaming {COPY.help.perMonthShort}:</span>

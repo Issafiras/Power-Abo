@@ -220,7 +220,7 @@ VITE_PROXY_CORS_API_KEY=your-api-key
 ```javascript
 {
   id: 'unique-id',
-  provider: 'telmore' | 'telenor' | 'telenor-b2b' | 'telenor-bredbånd' | 'telmore-bredbånd' | 'cbb',
+  provider: 'telmore' | 'telenor' | 'telenor-b2b' | 'cbb' | 'broadband',
   name: 'Plan navn',
   data: '25 GB',
   price: 299,

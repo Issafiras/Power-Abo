@@ -41,10 +41,10 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
     let today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Filtrer og valider planer
-    const mobilePlans = availablePlans.filter(plan => {
+    // Filtrer og valider planer - separer mobil og bredbånd
+    const allValidPlans = availablePlans.filter(plan => {
         if (!plan || typeof plan !== 'object') return false;
-        if (plan.business === true || plan.type === 'broadband') return false;
+        if (plan.business === true) return false;
 
         const earnings = (plan.earnings != null && Number.isFinite(plan.earnings)) ? plan.earnings : 0;
         if (earnings <= 0) return false;
@@ -68,8 +68,12 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
         return true;
     });
 
+    // Separer mobil og bredbånd planer
+    const mobilePlans = allValidPlans.filter(plan => plan.type !== 'broadband');
+    const broadbandPlans = allValidPlans.filter(plan => plan.type === 'broadband');
+
     if (mobilePlans.length === 0) {
-        return { cartItems: [], explanation: 'Ingen gyldige planer fundet', savings: 0, earnings: 0 };
+        return { cartItems: [], explanation: 'Ingen gyldige mobilplaner fundet', savings: 0, earnings: 0 };
     }
 
     // Beregn nuværende streaming-omkostninger
@@ -186,6 +190,34 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
                     });
                 }
 
+                // === TRIN 3: Overvej bredbånd fra samme provider ===
+                // Hvis vi har valgt en mobilplan, overvej også bredbånd fra samme provider
+                const mainProvider = mainPlan.provider;
+                if (mainProvider && broadbandPlans.length > 0) {
+                    const matchingBroadband = broadbandPlans.find(bb => {
+                        // Match Telmore mobil med Telmore bredbånd, Telenor mobil med Telenor bredbånd
+                        if (mainProvider === 'telmore' && bb.id.includes('telmore')) return true;
+                        if (mainProvider === 'telenor' && bb.id.includes('telenor')) return true;
+                        return false;
+                    });
+
+                    if (matchingBroadband) {
+                        // Tjek om bredbånd giver økonomisk mening
+                        const broadbandMonthlyCost = validCustomerMobileCost * 0.3; // Estimer bredbånd udgør ~30% af mobiludgifter
+                        const broadbandSavings = broadbandMonthlyCost * 6; // 6 måneder
+
+                        // Kun tilføj hvis det giver besparelse eller hvis kunden allerede har bredbånd
+                        if (broadbandSavings > (matchingBroadband.price * 6) || validCustomerMobileCost > 200) {
+                            testCart.push({
+                                plan: matchingBroadband,
+                                quantity: 1,
+                                cbbMixEnabled: false,
+                                cbbMixCount: 0
+                            });
+                        }
+                    }
+                }
+
                 // === BEREGN ØKONOMI & SCORE ===
                 
                 // 1. Dækning
@@ -228,10 +260,17 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
                     const mainName = mainPlan.name;
                     const fillName = (linesRemaining > 0 && fillPlan) ? fillPlan.name : '';
                     const mixInfo = (tempCartStart.length > 0 && tempCartStart[0].cbbMixEnabled) ? ` (Mix ${tempCartStart[0].cbbMixCount})` : '';
-                    
+
+                    // Tjek om bredbånd er inkluderet
+                    const broadbandIncluded = testCart.some(item => item.plan.type === 'broadband');
+                    const broadbandName = broadbandIncluded ? testCart.find(item => item.plan.type === 'broadband').plan.name : '';
+
                     bestExplanation = `Anbefaling: ${mainName}${mixInfo}`;
                     if (linesRemaining > 0 && fillName && fillName !== mainName) {
                         bestExplanation += ` + ${linesRemaining} stk ${fillName}`;
+                    }
+                    if (broadbandIncluded) {
+                        bestExplanation += ` + ${broadbandName}`;
                     }
                 }
             }

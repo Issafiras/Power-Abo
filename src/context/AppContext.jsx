@@ -4,6 +4,7 @@
  */
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
+import { ActionTypes } from './ActionTypes';
 import {
   saveCart,
   loadCart,
@@ -15,6 +16,8 @@ import {
   loadNumberOfLines,
   saveOriginalItemPrice,
   loadOriginalItemPrice,
+  saveBroadbandCost,
+  loadBroadbandCost,
   saveCashDiscount,
   loadCashDiscount,
   saveCashDiscountLocked,
@@ -42,7 +45,8 @@ const initialState = {
     mobileCost: 0,
     numberOfLines: 1,
     originalItemPrice: 0,
-    existingBrands: []
+    existingBrands: [],
+    broadbandCost: 0
   },
   streaming: {
     selected: [],
@@ -64,56 +68,12 @@ const initialState = {
     cbbMixEnabled: {},
     cbbMixCount: {},
     eanSearchResults: null,
-    isSearching: false
+    isSearching: false,
+    showHelpGuide: false
   }
 };
 
-// Action types
-const ActionTypes = {
-  // Cart actions
-  ADD_TO_CART: 'ADD_TO_CART',
-  REMOVE_FROM_CART: 'REMOVE_FROM_CART',
-  UPDATE_QUANTITY: 'UPDATE_QUANTITY',
-  SET_CART: 'SET_CART',
-  CLEAR_CART: 'CLEAR_CART',
-  
-  // Customer actions
-  SET_MOBILE_COST: 'SET_MOBILE_COST',
-  SET_NUMBER_OF_LINES: 'SET_NUMBER_OF_LINES',
-  SET_ORIGINAL_ITEM_PRICE: 'SET_ORIGINAL_ITEM_PRICE',
-  SET_EXISTING_BRANDS: 'SET_EXISTING_BRANDS',
-  
-  // Streaming actions
-  TOGGLE_STREAMING: 'TOGGLE_STREAMING',
-  SET_STREAMING: 'SET_STREAMING',
-  CLEAR_STREAMING: 'CLEAR_STREAMING',
-  
-  // Settings actions
-  SET_THEME: 'SET_THEME',
-  SET_CASH_DISCOUNT: 'SET_CASH_DISCOUNT',
-  SET_CASH_DISCOUNT_LOCKED: 'SET_CASH_DISCOUNT_LOCKED',
-  SET_AUTO_ADJUST: 'SET_AUTO_ADJUST',
-  SET_SHOW_CASH_DISCOUNT: 'SET_SHOW_CASH_DISCOUNT',
-  TOGGLE_CASH_DISCOUNT: 'TOGGLE_CASH_DISCOUNT',
-  SET_FREE_SETUP: 'SET_FREE_SETUP',
-  
-  // UI actions
-  SET_ACTIVE_PROVIDER: 'SET_ACTIVE_PROVIDER',
-  SET_SEARCH_QUERY: 'SET_SEARCH_QUERY',
-  SET_DEBOUNCED_SEARCH_QUERY: 'SET_DEBOUNCED_SEARCH_QUERY',
-  SET_SHOW_PRESENTATION: 'SET_SHOW_PRESENTATION',
-  TOGGLE_PRESENTATION: 'TOGGLE_PRESENTATION',
-  SET_CBB_MIX_ENABLED: 'SET_CBB_MIX_ENABLED',
-  SET_CBB_MIX_COUNT: 'SET_CBB_MIX_COUNT',
-  SET_EAN_SEARCH_RESULTS: 'SET_EAN_SEARCH_RESULTS',
-  SET_IS_SEARCHING: 'SET_IS_SEARCHING',
-  
-  // Reset
-  RESET_ALL: 'RESET_ALL',
-  
-  // Load from storage
-  LOAD_STATE: 'LOAD_STATE'
-};
+// Action types imported from separate file to fix Fast Refresh issues
 
 // Reducer
 function appReducer(state, action) {
@@ -211,7 +171,13 @@ function appReducer(state, action) {
         ...state,
         customer: { ...state.customer, existingBrands: action.payload }
       };
-    
+
+    case ActionTypes.SET_BROADBAND_COST:
+      return {
+        ...state,
+        customer: { ...state.customer, broadbandCost: action.payload }
+      };
+
     // Streaming actions
     case ActionTypes.TOGGLE_STREAMING: {
       const serviceId = action.payload;
@@ -309,7 +275,19 @@ function appReducer(state, action) {
         ...state,
         ui: { ...state.ui, showPresentation: !state.ui.showPresentation }
       };
-    
+
+    case ActionTypes.SET_SHOW_HELP_GUIDE:
+      return {
+        ...state,
+        ui: { ...state.ui, showHelpGuide: action.payload }
+      };
+
+    case ActionTypes.TOGGLE_HELP_GUIDE:
+      return {
+        ...state,
+        ui: { ...state.ui, showHelpGuide: !state.ui.showHelpGuide }
+      };
+
     case ActionTypes.SET_CBB_MIX_ENABLED: {
       const { planId, enabled } = action.payload;
       return {
@@ -375,7 +353,8 @@ export function AppProvider({ children }) {
         mobileCost: loadCustomerMobileCost(),
         numberOfLines: loadNumberOfLines(),
         originalItemPrice: loadOriginalItemPrice(),
-        existingBrands: loadExistingBrands()
+        existingBrands: loadExistingBrands(),
+        broadbandCost: loadBroadbandCost()
       },
       streaming: {
         selected: loadSelectedStreaming(),
@@ -433,6 +412,7 @@ export function AppProvider({ children }) {
       saveNumberOfLines(state.customer.numberOfLines);
       saveOriginalItemPrice(state.customer.originalItemPrice);
       saveExistingBrands(state.customer.existingBrands);
+      saveBroadbandCost(state.customer.broadbandCost);
       
       // Streaming
       saveSelectedStreaming(state.streaming.selected);
@@ -460,6 +440,7 @@ export function AppProvider({ children }) {
     state.customer.numberOfLines,
     state.customer.originalItemPrice,
     state.customer.existingBrands,
+    state.customer.broadbandCost,
     state.streaming.selected,
     state.settings.cashDiscount,
     state.settings.cashDiscountLocked,
@@ -492,6 +473,7 @@ export function AppProvider({ children }) {
 }
 
 // Hook to access context
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAppContext() {
   const context = useContext(AppContext);
   if (!context) {
@@ -500,6 +482,5 @@ export function useAppContext() {
   return context;
 }
 
-// Export ActionTypes for use in components
-export { ActionTypes };
+// ActionTypes are now imported from separate file to fix Fast Refresh issues
 

@@ -198,7 +198,6 @@ setTimeout(() => {
 // ============================================
 
 // Vis alle kategorier der har været brugt
-// eslint-disable-next-line no-console
 console.log('Used categories:', logger.getCategories());
 
 // Vis aktuel konfiguration

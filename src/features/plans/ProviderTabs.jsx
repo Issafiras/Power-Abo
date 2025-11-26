@@ -10,7 +10,8 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery 
     { id: 'all', name: 'Alle', icon: '📱' },
     { id: 'telmore', name: 'Telmore', icon: '🟠', logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png' },
     { id: 'telenor', name: 'Telenor', icon: '🔵', logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png' },
-    { id: 'cbb', name: 'CBB', icon: '🟣', logo: 'https://issafiras.github.io/Power-Abo/logos/CBB_Mobil_800x400.png' }
+    { id: 'cbb', name: 'CBB', icon: '🟣', logo: 'https://issafiras.github.io/Power-Abo/logos/CBB_Mobil_800x400.png' },
+    { id: 'broadband', name: 'Bredbånd', icon: '🏠', logo: 'https://issafiras.github.io/Power-Abo/logos/broadband.svg' }
   ];
 
   return (
@@ -46,7 +47,7 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery 
       </div>
 
       {/* Segment Controls - Refined Apple Segmented Control */}
-      {(activeProvider === 'telenor' || activeProvider === 'telenor-b2b' || activeProvider === 'telenor-bredbånd') && (
+      {(activeProvider === 'telenor' || activeProvider === 'telenor-b2b') && (
         <div className="segment-control">
           <div className="segment-control-wrapper">
             <button
@@ -65,20 +66,12 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery 
             >
               <span>B2B</span>
             </button>
-            <button
-              className={`segment-btn ${activeProvider === 'telenor-bredbånd' ? 'segment-btn-active' : ''}`}
-              onClick={() => onProviderChange('telenor-bredbånd')}
-              aria-pressed={activeProvider === 'telenor-bredbånd'}
-              aria-label="Vis Telenor bredbånd abonnementer"
-            >
-              <span>Bredbånd</span>
-            </button>
           </div>
         </div>
       )}
 
       {/* Telmore Segment Controls */}
-      {(activeProvider === 'telmore' || activeProvider === 'telmore-bredbånd') && (
+      {activeProvider === 'telmore' && (
         <div className="segment-control">
           <div className="segment-control-wrapper">
             <button
@@ -88,14 +81,6 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery 
               aria-label="Vis Telmore privat abonnementer"
             >
               <span>Privat</span>
-            </button>
-            <button
-              className={`segment-btn ${activeProvider === 'telmore-bredbånd' ? 'segment-btn-active' : ''}`}
-              onClick={() => onProviderChange('telmore-bredbånd')}
-              aria-pressed={activeProvider === 'telmore-bredbånd'}
-              aria-label="Vis Telmore bredbånd abonnementer"
-            >
-              <span>Bredbånd</span>
             </button>
           </div>
         </div>

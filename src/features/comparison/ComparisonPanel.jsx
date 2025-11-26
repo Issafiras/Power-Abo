@@ -23,7 +23,7 @@ import { getStreamingTotal, getServiceById, streamingServices as staticStreaming
 import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
 import NumberDisplay from '../../components/common/NumberDisplay';
-import '../../styles/comparison-panel.css';
+// Comparison panel styles moved to components.css
 
 // Tab komponenter - lazy loaded for bedre code-splitting
 import { OverviewTab, PriceBreakdownTab, StreamingTab, SpecificationsTab } from './tabs';
@@ -32,6 +32,7 @@ function ComparisonPanel({
   cartItems,
   selectedStreaming,
   customerMobileCost,
+  broadbandCost,
   numberOfLines = 1,
   originalItemPrice,
   cashDiscount,
@@ -82,8 +83,8 @@ function ComparisonPanel({
   );
   
   const customerTotals = useMemo(() => 
-    calculateCustomerTotal(customerMobileCost, streamingCost, originalItemPrice),
-    [customerMobileCost, streamingCost, originalItemPrice]
+    calculateCustomerTotal(customerMobileCost + (broadbandCost || 0), streamingCost, originalItemPrice),
+    [customerMobileCost, broadbandCost, streamingCost, originalItemPrice]
   );
 
   // Vores tilbud (uden kontant rabat for auto-adjust beregning) - memoized

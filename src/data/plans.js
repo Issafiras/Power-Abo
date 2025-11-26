@@ -361,12 +361,12 @@ export const plans = [
     }
   },
 
-  // TELMORE BREDBÅND PLANER
+  // BREDBÅND PLANER
   {
     id: 'telmore-5g-internet',
-    provider: 'telmore-bredbånd',
+    provider: 'broadband',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png',
-    name: '5G Internet',
+    name: 'Telmore 5G Internet',
     data: 'Fri Data',
     price: 289,
     introPrice: 139,
@@ -378,11 +378,10 @@ export const plans = [
     type: 'broadband'
   },
 
-  // TELENOR BREDBÅND PLANER
   {
     id: 'telenor-bredbånd-fri-data',
-    provider: 'telenor-bredbånd',
-    name: 'Fri Data',
+    provider: 'broadband',
+    name: 'Telenor Fri Data',
     data: 'Fri Data',
     price: 299,
     introPrice: 99,
@@ -399,7 +398,7 @@ export const plans = [
 
 /**
  * Hent planer baseret på provider
- * @param {string} provider - Provider navn ('telenor', 'telmore', 'cbb', eller 'all')
+ * @param {string} provider - Provider navn ('telenor', 'telmore', 'cbb', 'broadband', eller 'all')
  * @returns {Array} Filtrerede planer
  */
 export function getPlansByProvider(provider) {

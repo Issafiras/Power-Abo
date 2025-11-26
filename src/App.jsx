@@ -16,26 +16,36 @@ const Cart = lazy(() => import('./features/cart/Cart'));
 const ComparisonPanel = lazy(() => import('./features/comparison/ComparisonPanel'));
 const Footer = lazy(() => import('./components/layout/Footer'));
 const PresentationView = lazy(() => import('./features/presentation/PresentationView'));
+const HelpGuide = lazy(() => import('./components/common/HelpGuide'));
 import { plans } from './data/plans';
-import { toast } from './components/common/Toast';
+import { toast } from './utils/toast';
 import Icon from './components/common/Icon';
 import COPY from './constants/copy';
 import AccessibilityHelper from './components/common/AccessibilityHelper';
 
 function App() {
-  // Get state from Context
+  // Get state from Context - hooks MUST be called first and in same order every render
   const state = useAppState();
   const actions = useAppActions();
-
   // Scroll to cart handler
   const handleScrollToCart = useCallback(() => {
-    const element = document.getElementById('comparison-section');
-    if (element) {
-      const headerHeight = 120;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerHeight - 16;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-    }
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+      const element = document.getElementById('cart-section');
+      if (element) {
+        // Get current header height dynamically
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight + 20 : 100;
+
+        const elementTop = element.getBoundingClientRect().top + window.scrollY;
+        const scrollToPosition = elementTop - headerHeight;
+
+        window.scrollTo({
+          top: scrollToPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 200);
   }, []);
 
   // Cart handlers - wrapped for compatibility
@@ -56,7 +66,7 @@ function App() {
     actions.updateQuantity(planId, newQuantity);
   }, [actions]);
 
-  // Auto-select løsning handler
+  // Auto-select løsning handler - this is NOT a hook, it's a function call
   const handleAutoSelectSolution = useAutoSelectSolution(state, actions);
 
   // EAN søgning handler
@@ -184,6 +194,7 @@ function App() {
           onThemeToggle={() => actions.toggleTheme(state.theme)}
           cartCount={state.cartCount}
           onCartClick={handleScrollToCart}
+          onHelpClick={actions.toggleHelpGuide}
         />
       </Suspense>
 
@@ -199,6 +210,8 @@ function App() {
                   onStreamingToggle={actions.toggleStreaming}
                   customerMobileCost={state.customerMobileCost}
                   onMobileCostChange={actions.setMobileCost}
+                  broadbandCost={state.broadbandCost}
+                  onBroadbandCostChange={actions.setBroadbandCost}
                   numberOfLines={state.numberOfLines}
                   onNumberOfLinesChange={actions.setNumberOfLines}
                   originalItemPrice={state.originalItemPrice}
@@ -212,6 +225,7 @@ function App() {
                   onCBBMixEnabled={actions.setCBBMixEnabled}
                   onCBBMixCount={actions.setCBBMixCount}
                   activeProvider={state.activeProvider}
+                  onAddToCart={handleAddToCart}
                 />
               </Suspense>
             </div>
@@ -304,6 +318,7 @@ function App() {
                   cartItems={state.cartItems}
                   selectedStreaming={state.selectedStreaming}
                   customerMobileCost={state.customerMobileCost}
+                  broadbandCost={state.broadbandCost}
                   numberOfLines={state.numberOfLines}
                   originalItemPrice={state.originalItemPrice}
                   cashDiscount={state.cashDiscount}
@@ -328,6 +343,7 @@ function App() {
             cartItems={state.cartItems}
             selectedStreaming={state.selectedStreaming}
             customerMobileCost={state.customerMobileCost}
+            broadbandCost={state.broadbandCost}
             originalItemPrice={state.originalItemPrice}
             cashDiscount={state.cashDiscount}
             onClose={() => actions.setShowPresentation(false)}
@@ -335,6 +351,14 @@ function App() {
           />
         </Suspense>
       )}
+
+      {/* Help Guide */}
+      <Suspense fallback={null}>
+        <HelpGuide
+          isOpen={state.showHelpGuide}
+          onClose={() => actions.setShowHelpGuide(false)}
+        />
+      </Suspense>
 
       {/* Footer */}
       <Suspense fallback={null}>
