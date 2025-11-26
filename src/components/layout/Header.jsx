@@ -6,11 +6,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Icon from '../common/Icon';
 import Button from '../ui/Button';
+import { resetAll } from '../../utils/storage';
 
-function Header({ 
-  onReset, 
-  onPresentationToggle, 
-  theme, 
+function Header({
+  onReset,
+  onPresentationToggle,
+  theme,
   onThemeToggle,
   cartCount = 0,
   onCartClick
@@ -25,7 +26,7 @@ function Header({
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
         return;
       }
-      
+
       // Ctrl+R: Reset
       if (e.ctrlKey && e.key === 'r') {
         e.preventDefault();
@@ -52,7 +53,7 @@ function Header({
   // Smooth scroll detection - optimized performance
   useEffect(() => {
     let ticking = false;
-    
+
     function handleScroll() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
@@ -62,13 +63,15 @@ function Header({
         ticking = true;
       }
     }
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleResetConfirm = useCallback(() => {
     setShowConfirm(false);
+    // Clear all local storage
+    resetAll();
     // Hard refresh - genindlæs siden helt fra serveren
     window.location.reload(true);
   }, []);
@@ -81,7 +84,7 @@ function Header({
 
   return (
     <>
-      <header 
+      <header
         className={`header-modern ${isCompact ? 'header-modern--compact' : ''}`}
         role="banner"
         aria-label="Hovednavigation"
@@ -93,9 +96,9 @@ function Header({
           <div className="header-modern__container">
             {/* Logo */}
             <div className="header-modern__logo">
-              <a 
-                href="#" 
-                className="header-modern__logo-link" 
+              <a
+                href="#"
+                className="header-modern__logo-link"
                 aria-label="Power Abonnement - Gå til toppen"
                 onClick={(e) => {
                   e.preventDefault();
@@ -169,8 +172,8 @@ function Header({
 
       {/* Reset confirmation dialog */}
       {showConfirm && (
-        <div 
-          className="modal-overlay" 
+        <div
+          className="modal-overlay"
           onClick={() => setShowConfirm(false)}
           role="dialog"
           aria-modal="true"
@@ -185,15 +188,15 @@ function Header({
               Er du sikker på, at du vil nulstille alt? Dette kan ikke fortrydes.
             </p>
             <div className="modal-actions">
-              <Button 
-                onClick={() => setShowConfirm(false)} 
+              <Button
+                onClick={() => setShowConfirm(false)}
                 variant="outline"
                 aria-label="Annullér nulstilling"
               >
                 Annullér
               </Button>
-              <Button 
-                onClick={handleResetConfirm} 
+              <Button
+                onClick={handleResetConfirm}
                 variant="danger"
                 aria-label="Bekræft nulstilling"
               >
