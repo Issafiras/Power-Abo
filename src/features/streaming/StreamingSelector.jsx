@@ -130,53 +130,8 @@ function StreamingSelector({
   };
 
   const handleBroadbandCostBlur = (e) => {
-    const inputValue = parseFloat(e.target.value) || 0;
-
-    // Hvis der indtastes et beløb, prøv at vælge bredbånd fra samme udbyder som mobilabonnementer
-    if (inputValue > 0 && cartItems && cartItems.length > 0) {
-      // Find udbydere i kurven (udeluk bredbånd planer)
-      const mobileProviders = cartItems
-        .filter(item => item.plan.type !== 'broadband')
-        .map(item => item.plan.provider)
-        .filter(provider => provider !== 'broadband');
-
-      // Fjern duplikater og telenor-b2b (behandl som telenor)
-      const uniqueProviders = [...new Set(mobileProviders.map(p => p === 'telenor-b2b' ? 'telenor' : p))];
-
-      // Hvis der kun er én udbyder, vælg bredbånd fra samme udbyder
-      if (uniqueProviders.length === 1) {
-        const provider = uniqueProviders[0];
-
-        // Find bredbånd planer fra samme udbyder
-        const broadbandPlans = plans.filter(plan =>
-          plan.type === 'broadband' &&
-          plan.name.toLowerCase().includes(provider)
-        );
-
-        if (broadbandPlans.length > 0) {
-          // Vælg den første tilgængelige bredbånd plan og sæt prisen
-          const selectedPlan = broadbandPlans[0];
-          const planPrice = selectedPlan.introPrice && selectedPlan.introMonths ?
-            selectedPlan.introPrice : selectedPlan.price;
-
-          // Tjek om bredbåndet allerede er i kurven
-          const isAlreadyInCart = cartItems.some(item => item.plan.id === selectedPlan.id);
-
-          if (!isAlreadyInCart && onAddToCart) {
-            // Tilføj bredbåndet til kurven
-            onAddToCart(selectedPlan);
-          }
-
-          // Vis besked til brugeren
-          const actionText = isAlreadyInCart ? 'allerede i kurv' : 'tilføjet til kurv';
-          toast(COPY.success.autoSelectedPlan(selectedPlan.name, planPrice, actionText), 'success');
-
-          // Sæt bredbånd prisen til planens pris
-          onBroadbandCostChange(planPrice);
-          return;
-        }
-      }
-    }
+    // Vi behøver ikke længere auto-vælge bredbånd, da det forvirrer brugeren.
+    // Denne funktion er nu tom, men beholdes hvis vi vil tilføje validering senere.
   };
 
   const handleNumberOfLinesChange = (e) => {

@@ -28,7 +28,7 @@ export function validatePrice(value) {
   }
 
   // Check om det er for stort
-  if (num > 10000) {
+  if (num > 1000000) {
     return { valid: false, error: 'Prisen virker usædvanlig høj', value: null };
   }
 
