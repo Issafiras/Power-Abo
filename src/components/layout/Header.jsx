@@ -164,6 +164,93 @@ function Header({
                 <Icon name="presentation" size={20} />
               </button>
 
+              {/* Coverage Map Button */}
+              <div className="header-modern__action-wrapper" style={{ position: 'relative' }}>
+                <button
+                  onClick={() => {
+                    // Toggle logic handled by local state or separate component if needed
+                    // For now using a simple state in Header
+                    const menu = document.getElementById('coverage-menu');
+                    if (menu) {
+                      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                    }
+                  }}
+                  className="header-modern__action-btn"
+                  title="Dækningskort"
+                  aria-label="Se dækningskort"
+                  aria-expanded="false"
+                  aria-controls="coverage-menu"
+                >
+                  <Icon name="signal" size={20} />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div
+                  id="coverage-menu"
+                  className="header-modern__dropdown"
+                  style={{
+                    display: 'none',
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '8px',
+                    background: 'rgba(30, 30, 30, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    padding: '8px',
+                    minWidth: '200px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                    zIndex: 1000
+                  }}
+                >
+                  <a
+                    href="https://www.telmore.dk/internet/daekningskort"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="header-modern__dropdown-item"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 12px',
+                      color: '#fff',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
+                      transition: 'background 0.2s',
+                      fontSize: '14px'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Icon name="map" size={16} />
+                    <span>Telmore Dækning</span>
+                  </a>
+                  <a
+                    href="https://www.telenor.dk/kundeservice/drift-og-dakning/dakning/dakningskort/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="header-modern__dropdown-item"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 12px',
+                      color: '#fff',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
+                      transition: 'background 0.2s',
+                      fontSize: '14px'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Icon name="map" size={16} />
+                    <span>Telenor/CBB Dækning</span>
+                  </a>
+                </div>
+              </div>
+
               {/* Theme Toggle */}
               <button
                 onClick={onThemeToggle}
@@ -226,6 +313,18 @@ function Header({
       )}
     </>
   );
+}
+
+// Add click outside listener to close dropdown
+if (typeof window !== 'undefined') {
+  window.addEventListener('click', (e) => {
+    const menu = document.getElementById('coverage-menu');
+    const btn = e.target.closest('.header-modern__action-btn');
+    // If click is outside menu AND not on the button that toggles it
+    if (menu && menu.style.display === 'block' && !menu.contains(e.target) && (!btn || btn.getAttribute('aria-controls') !== 'coverage-menu')) {
+      menu.style.display = 'none';
+    }
+  });
 }
 
 export default React.memo(Header);

@@ -88,6 +88,8 @@ const glyphMap = {
   settings: '⚙️',
   loader: '⏳',
   'loader-2': '⏳',
+  map: '🗺️',
+  signal: '📶',
 };
 
 export default function Icon({ name, size = 20, className = '', style = {}, ...props }) {
