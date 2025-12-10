@@ -6,13 +6,13 @@
 export const plans = [
   // TELENOR PLANER
   {
-    id: 'telenor-25gb',
+    id: 'telenor-30gb',
     provider: 'telenor',
-    name: '25 GB',
-    data: '25 GB',
-    price: 159,
+    name: '30 GB',
+    data: '30 GB',
+    price: 169,
     earnings: 700,
-    features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
+    features: ['5G', 'Fri tale', '+30 GB i 70+ lande', 'Tryghedspakke', 'Familie'],
     familyDiscount: true,
     color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
@@ -73,28 +73,15 @@ export const plans = [
     streaming: []
   },
   {
-    id: 'telenor-70gb',
-    provider: 'telenor',
-    name: '70 GB',
-    data: '70 GB',
-    price: 199,
-    earnings: 900,
-    features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
-    familyDiscount: true,
-    mostPopular: true,
-    color: '#0207b2',
-    logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
-    streaming: []
-  },
-  {
     id: 'telenor-120gb',
     provider: 'telenor',
     name: '120 GB',
     data: '120 GB',
     price: 239,
     earnings: 1200,
-    features: ['5G', 'eSIM', 'EU Roaming', 'Familie'],
+    features: ['5G', 'Fri tale', '+55 GB i 70+ lande', 'Tryghedspakke', 'Familie'],
     familyDiscount: true,
+    mostPopular: true,
     color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: []
@@ -121,7 +108,7 @@ export const plans = [
     data: 'Fri Data',
     price: 289,
     earnings: 1300,
-    features: ['5G', 'eSIM', 'EU Roaming', 'Familie', 'Ubegrænset'],
+    features: ['5G', 'Fri tale', '+65 GB i 70+ lande', 'Tryghedspakke', 'Familie', 'Ubegrænset'],
     familyDiscount: true,
     color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
@@ -379,20 +366,17 @@ export const plans = [
   },
 
   {
-    id: 'telenor-bredbånd-fri-data',
+    id: 'telenor-5g-internet',
     provider: 'broadband',
-    name: 'Telenor Fri Data',
+    name: 'Telenor 5G Internet',
     data: 'Fri Data',
     price: 299,
-    introPrice: 99,
-    introMonths: 6,
     earnings: 1000,
-    features: ['5G', 'Fri Data', 'Router inkl.', 'Intro-pris'],
+    features: ['5G', 'Op til 1.000 Mbit', 'WiFi 7 Router inkl.', 'Ubegrænset data', 'Blokering af skadelige sider'],
     color: '#0207b2',
     logo: 'https://issafiras.github.io/Power-Abo/logos/Telenor.png',
     streaming: [],
-    type: 'broadband',
-    expiresAt: '2025-12-31' // Udløber i butikken d. 31/12/25
+    type: 'broadband'
   }
 ];
 
