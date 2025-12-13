@@ -3,7 +3,7 @@
  * Sammenligner kundens situation med vores tilbud
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   formatCurrency,
   calculateCustomerTotal,
@@ -23,6 +23,7 @@ import { getStreamingTotal, getServiceById, streamingServices as staticStreaming
 import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
 import NumberDisplay from '../../components/common/NumberDisplay';
+import { toast } from '../../utils/toast';
 // Comparison panel styles moved to components.css
 
 // Tab komponenter - lazy loaded for bedre code-splitting
@@ -60,35 +61,35 @@ function ComparisonPanel({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
   // Beregn streaming coverage med CBB MIX support - memoized
-  const streamingCoverage = useMemo(() => 
+  const streamingCoverage = useMemo(() =>
     checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming),
     [cartItems, selectedStreaming]
   );
-  
-  const notIncludedStreamingCost = useMemo(() => 
+
+  const notIncludedStreamingCost = useMemo(() =>
     getStreamingTotal(streamingCoverage.notIncluded),
     [streamingCoverage.notIncluded]
   );
-  
+
   // Check CBB MIX kompatibilitet - memoized
-  const cbbMixCompatibility = useMemo(() => 
+  const cbbMixCompatibility = useMemo(() =>
     checkCBBMixCompatibility(cartItems),
     [cartItems]
   );
 
   // Kunde totaler - mobiludgifter er allerede totalt (ikke pr. linje) - memoized
-  const streamingCost = useMemo(() => 
+  const streamingCost = useMemo(() =>
     getStreamingTotal(selectedStreaming),
     [selectedStreaming]
   );
-  
-  const customerTotals = useMemo(() => 
+
+  const customerTotals = useMemo(() =>
     calculateCustomerTotal(customerMobileCost + (broadbandCost || 0), streamingCost, originalItemPrice),
     [customerMobileCost, broadbandCost, streamingCost, originalItemPrice]
   );
 
   // Vores tilbud (uden kontant rabat for auto-adjust beregning) - memoized
-  const ourOfferWithoutDiscount = useMemo(() => 
+  const ourOfferWithoutDiscount = useMemo(() =>
     calculateOurOfferTotal(
       cartItems,
       notIncludedStreamingCost,
@@ -105,24 +106,55 @@ function ComparisonPanel({
 
   // Auto-adjust kontant rabat - Sælger-strategi: Giv noget af indtjeningen tilbage
   // Bemærk: Indtjening er engangsindtjening, så vi skal konvertere til 6 måneder for sammenligning
+  // Auto-adjust kontant rabat - Sælger-strategi: Giv noget af indtjeningen tilbage
+  // Bemærk: Indtjening er engangsindtjening, så vi skal konvertere til 6 måneder for sammenligning
+  // Use a ref to track previous autoAdjust state to show toast only on toggle
+  const prevAutoAdjustRef = useRef(autoAdjust);
+
   useEffect(() => {
+    // Check if just toggled on
+    const wasAutoAdjust = prevAutoAdjustRef.current;
+    prevAutoAdjustRef.current = autoAdjust;
+    const justToggledOn = !wasAutoAdjust && autoAdjust;
+
     if (autoAdjust && !cashDiscountLocked && cartItems.length > 0) {
       // Konverter engangsindtjening til 6 måneder for sammenligning (sælger-strategi)
       const earningsForComparison = totalEarnings; // Engangsindtjening bruges direkte
+      // Use the helper to determine optimal discount
       const neededDiscount = autoAdjustCashDiscount(
         customerTotals.sixMonth,
         ourOfferWithoutDiscount.sixMonth,
         500,
         earningsForComparison
       );
-      if (neededDiscount !== (cashDiscount || 0)) {
+
+      // If calculated discount differs from current, update it
+      // Strict check against cashDiscount to allow setting 0 instead of null
+      if (neededDiscount !== (cashDiscount ?? -1)) { // ?? -1 to ensure null !== 0 triggers update
         onCashDiscountChange(neededDiscount);
+
+        // Show feedback if just toggled on
+        if (justToggledOn) {
+          if (neededDiscount > 0) {
+            toast(COPY.success.discountApplied(neededDiscount), 'success');
+          } else {
+            // Needed is 0, but maybe we just set it to 0 from null/something else
+            toast('Auto-justering: Prisen er allerede optimal', 'success');
+          }
+        }
+      } else if (justToggledOn) {
+        // No change needed, but user just clicked it. Give feedback!
+        if (neededDiscount === 0) {
+          toast('Auto-justering: Ingen yderligere rabat nødvendig', 'info');
+        } else {
+          toast('Auto-justering: Prisen er opdateret', 'info');
+        }
       }
     }
   }, [autoAdjust, cashDiscountLocked, customerTotals.sixMonth, ourOfferWithoutDiscount.sixMonth, cartItems.length, cashDiscount, onCashDiscountChange, totalEarnings]);
 
   // Vores tilbud med kontant rabat - memoized
-  const ourOfferTotals = useMemo(() => 
+  const ourOfferTotals = useMemo(() =>
     calculateOurOfferTotal(
       cartItems,
       notIncludedStreamingCost,
@@ -133,34 +165,34 @@ function ComparisonPanel({
   );
 
   // Besparelse - memoized
-  const savings = useMemo(() => 
+  const savings = useMemo(() =>
     calculateSavings(customerTotals.sixMonth, ourOfferTotals.sixMonth),
     [customerTotals.sixMonth, ourOfferTotals.sixMonth]
   );
-  
+
   const isPositiveSavings = savings > 0;
 
   // Beregn faktisk månedlig abonnementspris (før kontant rabat, men efter familie-rabat)
   // Dette er den korrekte månedlige pris for abonnementerne
   const baseMonthlyPlansPrice = useMemo(() => {
     if (!cartItems || cartItems.length === 0) return 0;
-    
+
     // Sum af alle planers månedlige priser (inkl. intro-priser)
     const plansMonthly = cartItems.reduce((total, item) => {
       const planMonthly = calculateMonthlyPrice(item.plan, item.quantity);
-      
+
       // Tilføj CBB Mix pris hvis aktiv (månedlig)
       if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount) {
         const mixPrice = calculateCBBMixPrice(item.plan, item.cbbMixCount);
         return total + planMonthly + (mixPrice * item.quantity);
       }
-      
+
       return total + planMonthly;
     }, 0);
-    
+
     // Træk familie-rabat fra (da det er en del af abonnementsprisen)
     const telenorDiscount = calculateTelenorFamilyDiscount(cartItems);
-    
+
     return plansMonthly - telenorDiscount;
   }, [cartItems]);
 
@@ -174,7 +206,7 @@ function ComparisonPanel({
           </h2>
           <p className="text-secondary">{COPY.empty.noCartItems}</p>
         </div>
-        
+
         <div className="empty-state">
           <Icon name="chart" size={64} className="empty-state-icon opacity-30" aria-hidden="true" />
           <p className="text-secondary">
@@ -224,9 +256,9 @@ function ComparisonPanel({
               aria-label={showCashDiscount ? 'Skjul kontant rabat' : 'Vis kontant rabat'}
               title={showCashDiscount ? 'Skjul kontant rabat' : 'Vis kontant rabat'}
             >
-              <Icon 
-                name="lock" 
-                size={20} 
+              <Icon
+                name="lock"
+                size={20}
                 className={`cash-discount-toggle-icon ${showCashDiscount ? 'active' : ''}`}
               />
             </button>
@@ -271,7 +303,7 @@ function ComparisonPanel({
                 </label>
               </div>
             </div>
-            
+
             <input
               id="cash-discount-amount"
               name="cash-discount-amount"
@@ -284,7 +316,7 @@ function ComparisonPanel({
               min="0"
               step="100"
             />
-            
+
           </div>
 
           <div className="divider"></div>
@@ -391,47 +423,47 @@ function ComparisonPanel({
 
       {/* Besparelse - kun vis i Oversigt tab */}
       {activeTab === 'oversigt' && (
-        <div 
+        <div
           className={`savings-banner ${isPositiveSavings ? 'positive' : 'negative'}`}
         >
-        <div className="savings-label">
-          {isPositiveSavings ? (
-            <>
-              <Icon name="checkCircle" size={20} className="icon-inline icon-spacing-sm" />
-              {COPY.labels.savings}
-            </>
-          ) : (
-            <>
-              <Icon name="warning" size={20} className="icon-inline icon-spacing-sm" />
-              {COPY.labels.mersalg}
-            </>
-          )}
-        </div>
-        <div 
-          className="savings-amount"
-        >
-          <NumberDisplay 
-            value={Math.abs(savings)} 
-            size="5xl" 
-            color={isPositiveSavings ? 'success' : 'danger'}
-            prefix={isPositiveSavings ? '' : '-'}
-          />
-        </div>
-        <div className="savings-subtitle">
-          {COPY.labels.over6Months}
-        </div>
-        {isPositiveSavings && savings > 0 && (
-          <div className="savings-monthly">
-            <span className="savings-monthly-label">Besparelse pr. måned:</span>
-            <NumberDisplay 
-              value={Math.abs(savings) / 6} 
-              size="xl" 
-              color="success"
-              suffix="/md."
+          <div className="savings-label">
+            {isPositiveSavings ? (
+              <>
+                <Icon name="checkCircle" size={20} className="icon-inline icon-spacing-sm" />
+                {COPY.labels.savings}
+              </>
+            ) : (
+              <>
+                <Icon name="warning" size={20} className="icon-inline icon-spacing-sm" />
+                {COPY.labels.mersalg}
+              </>
+            )}
+          </div>
+          <div
+            className="savings-amount"
+          >
+            <NumberDisplay
+              value={Math.abs(savings)}
+              size="5xl"
+              color={isPositiveSavings ? 'success' : 'danger'}
+              prefix={isPositiveSavings ? '' : '-'}
             />
           </div>
-        )}
-      </div>
+          <div className="savings-subtitle">
+            {COPY.labels.over6Months}
+          </div>
+          {isPositiveSavings && savings > 0 && (
+            <div className="savings-monthly">
+              <span className="savings-monthly-label">Besparelse pr. måned:</span>
+              <NumberDisplay
+                value={Math.abs(savings) / 6}
+                size="xl"
+                color="success"
+                suffix="/md."
+              />
+            </div>
+          )}
+        </div>
       )}
 
     </div>
