@@ -15,7 +15,9 @@ function Header({
   onThemeToggle,
   cartCount = 0,
   onCartClick,
-  onHelpClick
+  onHelpClick,
+  onAdminToggle,
+  showAdmin = false
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -52,11 +54,19 @@ function Header({
           onHelpClick();
         }
       }
+
+      // Ctrl+Shift+A: Admin Dashboard
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        if (onAdminToggle) {
+          onAdminToggle();
+        }
+      }
     }
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [onPresentationToggle, onThemeToggle, onHelpClick]);
+  }, [onPresentationToggle, onThemeToggle, onHelpClick, onAdminToggle]);
 
   // Smooth scroll detection - optimized performance
   useEffect(() => {
@@ -270,6 +280,18 @@ function Header({
               >
                 <Icon name="refresh-cw" size={20} />
               </button>
+
+              {/* Admin Dashboard Toggle */}
+              {(import.meta.env.DEV || showAdmin) && (
+                <button
+                  onClick={onAdminToggle}
+                  className={`header-modern__action-btn ${showAdmin ? 'header-modern__action-btn--active' : ''}`}
+                  title="Admin Dashboard"
+                  aria-label="Åbn/luk admin dashboard"
+                >
+                  <Icon name="settings" size={20} />
+                </button>
+              )}
             </div>
           </div>
         </nav>

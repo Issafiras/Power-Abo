@@ -21,4 +21,12 @@ module.exports = {
     'no-unused-vars': 'off',
     'no-prototype-builtins': 'error',
   },
+  overrides: [
+    {
+      files: ['scripts/**/*.js', 'src/utils/seedPlans.js'],
+      env: {
+        node: true,
+      },
+    },
+  ],
 }

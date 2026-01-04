@@ -3,7 +3,7 @@
  * Bruger Context API for state management og orkestrerer alle subkomponenter
  */
 
-import { useMemo, useCallback, lazy, Suspense, useEffect } from 'react';
+import { useMemo, useCallback, lazy, Suspense, useEffect, useState } from 'react';
 import { useAppState } from './hooks/useAppState';
 import { useAppActions } from './hooks/useAppActions';
 import { useAutoSelectSolution } from './hooks/useAutoSelectSolution';
@@ -17,6 +17,7 @@ const ComparisonPanel = lazy(() => import('./features/comparison/ComparisonPanel
 const Footer = lazy(() => import('./components/layout/Footer'));
 const PresentationView = lazy(() => import('./features/presentation/PresentationView'));
 const HelpGuide = lazy(() => import('./components/common/HelpGuide'));
+const AdminDashboard = lazy(() => import('./features/admin/AdminDashboard'));
 import { plans } from './data/plans';
 import { toast } from './utils/toast';
 import Icon from './components/common/Icon';
@@ -27,6 +28,7 @@ function App() {
   // Get state from Context - hooks MUST be called first and in same order every render
   const state = useAppState();
   const actions = useAppActions();
+  const [showAdmin, setShowAdmin] = useState(false);
   // Scroll to cart handler
   const handleScrollToCart = useCallback(() => {
     // Use setTimeout to ensure DOM is ready
@@ -195,11 +197,22 @@ function App() {
           cartCount={state.cartCount}
           onCartClick={handleScrollToCart}
           onHelpClick={actions.toggleHelpGuide}
+          onAdminToggle={() => setShowAdmin(!showAdmin)}
+          showAdmin={showAdmin}
         />
       </Suspense>
 
+      {/* Admin Dashboard */}
+      {showAdmin && (
+        <Suspense fallback={<SectionSkeleton />}>
+          <div className="admin-dashboard-overlay">
+            <AdminDashboard onClose={() => setShowAdmin(false)} />
+          </div>
+        </Suspense>
+      )}
+
       {/* Main content */}
-      <main id="main-content" className="main-content" role="main" aria-label="Hovedindhold">
+      <main id="main-content" className="main-content" role="main" aria-label="Hovedindhold" style={{ display: showAdmin ? 'none' : 'block' }}>
         <div className="container">
           {/* Top section: Customer situation */}
           <section id="customer-situation" className="section">
