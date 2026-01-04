@@ -11,9 +11,14 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "seed": "node scripts/seed.js",
+    "test:supabase": "node scripts/test-supabase.js",
+    "verify:data": "node scripts/verify-data.js",
+    "test:hook": "node scripts/test-hook.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
