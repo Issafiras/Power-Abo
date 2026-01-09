@@ -319,5 +319,144 @@ describe('findBestSolution - streaming match prioritization', () => {
     expect(streamingPlan.plan.id).toBe('test-3-streaming');
     expect(result.earnings).toBe(1500); // Højeste indtjening
   });
+
+  it('should prioritize Telmore for streaming requests when not excluded', () => {
+    // Scenario: Customer wants streaming.
+    // Option A: CBB Mix (Good savings, decent earnings)
+    // Option B: Telmore Play (Higher price/lower savings, but high strategic value)
+    
+    // We want the system to choose Telmore Play because of the strategic bonus
+    const availablePlans = [
+      {
+        id: 'cbb-mix',
+        provider: 'cbb',
+        name: 'CBB Mix',
+        price: 200,
+        earnings: 800,
+        cbbMixAvailable: true,
+        features: []
+      },
+      {
+        id: 'telmore-play',
+        provider: 'telmore',
+        name: 'Telmore Play',
+        price: 250, // More expensive for customer
+        earnings: 900, // Slightly better earnings, but normally savings might win
+        streamingCount: 2,
+        features: []
+      }
+    ];
+
+    const selectedStreaming = ['netflix', 'tv2'];
+    const customerMobileCost = 200; // Customer pays 200 today
+    
+    // CBB: Price 200 (Savings 0) + Earnings 800 -> Score ~ 800
+    // Telmore: Price 250 (Savings -300 over 6mo) + Earnings 900 -> Score ~ 900 + (-300*2) = 300
+    // Without bonus, CBB wins (800 > 300).
+    // With bonus (+2000), Telmore wins (2300 > 800).
+
+    const result = findBestSolution(
+      availablePlans,
+      selectedStreaming,
+      customerMobileCost,
+      0,
+      () => 100,
+      { requiredLines: 1 }
+    );
+
+    const chosenPlan = result.cartItems[0].plan;
+    expect(chosenPlan.provider).toBe('telmore');
+    expect(chosenPlan.id).toBe('telmore-play');
+  });
+
+  it('should NOT prioritize Telmore if excluded (customer already has it)', () => {
+    const availablePlans = [
+      {
+        id: 'cbb-mix',
+        provider: 'cbb',
+        name: 'CBB Mix',
+        price: 200,
+        earnings: 800,
+        cbbMixAvailable: true
+      },
+      {
+        id: 'telmore-play',
+        provider: 'telmore',
+        name: 'Telmore Play',
+        price: 250,
+        earnings: 900,
+        streamingCount: 2
+      }
+    ];
+
+    const selectedStreaming = ['netflix'];
+    
+    // If Telmore is excluded, it shouldn't be chosen at all
+    // But since it's the only plan with streaming, and we required streaming?
+    // Wait, createMainPlanConfig handles streaming.
+    // If selectedStreaming.length > 0, it tries to add streaming plan.
+    // If no streaming capability, it might return empty cart?
+    // CBB Mix DOES have streaming capability.
+    // Why did it fail?
+    // In createMainPlanConfig:
+    // if (mainPlan.cbbMixAvailable) ...
+    // It seems correct.
+    
+    // The issue might be that createMainPlanConfig checks cbbMixPricing[optimalMixCount].
+    // Our mock CBB Mix plan doesn't have cbbMixPricing property!
+    // So optimalMixCount stays at 2?
+    // if (mainPlan.cbbMixPricing && !mainPlan.cbbMixPricing[optimalMixCount]) { optimalMixCount = 2; }
+    // It handles missing cbbMixPricing by defaulting to 2? No, only if property exists but key missing.
+    // If cbbMixPricing is undefined, it skips the check.
+    // So cart should be created with cbbMixCount = 2 (if length >= 2) or 1?
+    // optimalMixCount = Math.min(selectedStreaming.length, 6);
+    // if < 2, optimalMixCount = 2.
+    // So it should be fine.
+    
+    // Let's ensure our CBB Mix mock plan has necessary properties.
+    const availablePlansUpdated = [
+      {
+        id: 'cbb-mix',
+        provider: 'cbb',
+        name: 'CBB Mix',
+        price: 200,
+        earnings: 800,
+        cbbMixAvailable: true,
+        cbbMixPricing: { 2: 250, 3: 300, 4: 350 }, // Added mock pricing
+        features: []
+      },
+      {
+        id: 'telmore-play',
+        provider: 'telmore',
+        name: 'Telmore Play',
+        price: 250,
+        earnings: 900,
+        streamingCount: 2,
+        features: []
+      }
+    ];
+
+    const result = findBestSolution(
+      availablePlansUpdated,
+      selectedStreaming,
+      200,
+      0,
+      () => 100,
+      { 
+        requiredLines: 1,
+        excludedProviders: ['telmore']
+      }
+    );
+    
+    // Debug output if it fails again
+    if (result.cartItems.length === 0) {
+        console.log('STILL FAILING for CBB Mix. Result:', JSON.stringify(result));
+    }
+
+    expect(result.cartItems).toBeDefined();
+    expect(result.cartItems.length).toBeGreaterThan(0);
+    const chosenPlan = result.cartItems[0].plan;
+    expect(chosenPlan.provider).toBe('cbb');
+  });
 });
 

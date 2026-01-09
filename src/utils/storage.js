@@ -16,7 +16,8 @@ const STORAGE_KEYS = {
   SHOW_CASH_DISCOUNT: 'power_calculator_show_cash_discount',
   EXISTING_BRANDS: 'power_calculator_existing_brands',
   BROADBAND_COST: 'power_calculator_broadband_cost',
-  FREE_SETUP: 'power_calculator_free_setup'
+  FREE_SETUP: 'power_calculator_free_setup',
+  TELMORE_AB_GROUP: 'power_calculator_telmore_ab_group'
 };
 
 /**
@@ -180,6 +181,15 @@ export function saveFreeSetup(enabled) {
 
 export function loadFreeSetup() {
   return getItem(STORAGE_KEYS.FREE_SETUP, false);
+}
+
+// A/B Testing - Telmore
+export function saveTelmoreAbGroup(group) {
+  setItem(STORAGE_KEYS.TELMORE_AB_GROUP, group);
+}
+
+export function loadTelmoreAbGroup() {
+  return getItem(STORAGE_KEYS.TELMORE_AB_GROUP, null);
 }
 
 // Reset alt

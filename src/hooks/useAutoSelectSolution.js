@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { findBestSolution } from '../utils/calculations';
 import { calculateCustomerTotal } from '../utils/calculations/pricing';
+import { loadTelmoreAbGroup, saveTelmoreAbGroup } from '../utils/storage';
 import { getServiceById, streamingServices as staticStreaming } from '../data/streamingServices';
 import { plans } from '../data/plans';
 import { toast } from '../utils/toast';
@@ -73,6 +74,19 @@ export function useAutoSelectSolution(state, actions) {
                 });
             }
 
+            // A/B Testing: Telmore Prioritization
+            let abGroup = loadTelmoreAbGroup();
+            if (!abGroup) {
+                // Randomly assign 'control' (no boost) or 'treatment' (boost)
+                abGroup = Math.random() < 0.5 ? 'control' : 'treatment';
+                saveTelmoreAbGroup(abGroup);
+                
+                // Log assignment (mock analytics)
+                console.log(`[A/B Test] Assigned user to ${abGroup} group for Telmore prioritization`);
+            }
+            
+            const enableTelmoreBoost = abGroup === 'treatment';
+
             const result = findBestSolution(
                 availablePlans,
                 validSelectedStreaming,
@@ -84,9 +98,16 @@ export function useAutoSelectSolution(state, actions) {
                     minSavings: -Infinity,
                     requiredLines: validNumberOfLines,
                     excludedProviders: excludedProviders,
-                    preferSavings: true // Prioriter besparelse (passende abonnement) frem for ren indtjening
+                    preferSavings: true, // Prioriter besparelse (passende abonnement) frem for ren indtjening
+                    enableTelmoreBoost: enableTelmoreBoost
                 }
             );
+
+            // Log result for A/B analysis
+            if (validSelectedStreaming.length > 0) {
+                const chosenProvider = result?.cartItems?.[0]?.plan?.provider;
+                console.log(`[A/B Test] Group: ${abGroup}, Selected: ${chosenProvider}, Boost Enabled: ${enableTelmoreBoost}`);
+            }
 
             // Valider resultat før brug
             if (!result || typeof result !== 'object') {
