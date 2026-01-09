@@ -5,7 +5,7 @@
 
 import React from 'react';
 
-function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery }) {
+function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery, includeBroadband, onIncludeBroadbandChange }) {
   const providers = [
     { id: 'all', name: 'Alle', icon: '📱' },
     { id: 'telmore', name: 'Telmore', icon: '🟠', logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png' },
@@ -125,6 +125,21 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery 
             </button>
           )}
         </div>
+
+        {/* Broadband Checkbox */}
+        {onIncludeBroadbandChange && (
+          <div className="broadband-toggle-container">
+            <label className="broadband-checkbox-label">
+              <input 
+                type="checkbox" 
+                checked={includeBroadband} 
+                onChange={(e) => onIncludeBroadbandChange(e.target.checked)}
+                className="broadband-checkbox"
+              />
+              <span className="broadband-checkbox-text">Internet skal være inkluderet</span>
+            </label>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -420,6 +435,70 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery 
           .search-input {
             font-size: var(--font-sm);
           }
+        }
+
+        /* Broadband Toggle Styles */
+        .broadband-toggle-container {
+          margin-top: var(--spacing-md);
+          display: flex;
+          justify-content: flex-start;
+          padding: 0 var(--spacing-xs);
+        }
+        
+        .broadband-checkbox-label {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          cursor: pointer;
+          color: var(--text-secondary);
+          font-size: var(--font-sm);
+          user-select: none;
+          transition: color var(--transition-fast);
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        }
+        
+        .broadband-checkbox-label:hover {
+          color: var(--text-primary);
+        }
+        
+        .broadband-checkbox {
+          appearance: none;
+          -webkit-appearance: none;
+          width: 20px;
+          height: 20px;
+          border: 1.5px solid rgba(255, 255, 255, 0.3);
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.05);
+          cursor: pointer;
+          position: relative;
+          transition: all var(--transition-fast);
+        }
+        
+        .broadband-checkbox:checked {
+          background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
+          border-color: #FF6D1F;
+          box-shadow: 0 2px 8px rgba(255, 109, 31, 0.3);
+        }
+        
+        .broadband-checkbox:checked::after {
+          content: '';
+          position: absolute;
+          left: 6px;
+          top: 2px;
+          width: 6px;
+          height: 10px;
+          border: solid white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+        
+        .broadband-checkbox:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(255, 109, 31, 0.2);
+        }
+
+        .broadband-checkbox-text {
+          font-weight: 500;
         }
       `}</style>
     </div>

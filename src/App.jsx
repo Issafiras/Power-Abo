@@ -29,6 +29,7 @@ function App() {
   const state = useAppState();
   const actions = useAppActions();
   const [showAdmin, setShowAdmin] = useState(false);
+  const [includeBroadband, setIncludeBroadband] = useState(false);
   // Scroll to cart handler
   const handleScrollToCart = useCallback(() => {
     // Use setTimeout to ensure DOM is ready
@@ -112,6 +113,11 @@ function App() {
     let filtered = state.activeProvider === 'all'
       ? source
       : source.filter(p => p.provider === state.activeProvider);
+
+    // Filtrer bredbånd fra, medmindre det er valgt til eller vi er på bredbånd-fanen
+    if (!includeBroadband && state.activeProvider !== 'broadband') {
+      filtered = filtered.filter(plan => plan.type !== 'broadband');
+    }
 
     // Filtrer baseret på datoer (availableFrom og expiresAt)
     filtered = filtered.filter(plan => {
@@ -266,19 +272,13 @@ function App() {
                     onProviderChange={actions.setActiveProvider}
                     searchQuery={state.searchQuery}
                     onSearch={actions.setSearchQuery}
+                    includeBroadband={includeBroadband}
+                    onIncludeBroadbandChange={setIncludeBroadband}
                   />
                 </Suspense>
 
                 {/* Plans grid */}
-                {state.activeProvider === 'all' ? (
-                  <div className="empty-state">
-                    <Icon name="smartphone" size={48} className="empty-state-icon opacity-30" />
-                    <p className="text-lg font-semibold">{COPY.labels.selectProvider}</p>
-                    <p className="text-secondary">
-                      {COPY.labels.selectProviderHelp}
-                    </p>
-                  </div>
-                ) : filteredPlans.length > 0 ? (
+                {filteredPlans.length > 0 ? (
                   <div className="plans-grid grid grid-cols-3">
                     {filteredPlans.map((plan) => (
                       <Suspense key={plan.id} fallback={<div className="skeleton" style={{ height: '400px' }} />}>
