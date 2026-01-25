@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency, calculateSixMonthPrice } from '../../utils/calculations';
 import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
@@ -11,7 +12,12 @@ import COPY from '../../constants/copy';
 const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, newlyAddedPlans = new Set() }) {
   if (cartItems.length === 0) {
     return (
-      <div className="cart glass-card-no-hover fade-in-up">
+      <motion.div 
+        className="cart glass-card-no-hover"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="section-header">
         <h2>
           <Icon name="cart" size={24} className="icon-inline icon-spacing-md" />
@@ -20,13 +26,18 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
           <p className="text-secondary">{COPY.empty.noCartItems}</p>
         </div>
         
-        <div className="empty-state">
+        <motion.div 
+          className="empty-state"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, type: "spring" }}
+        >
           <Icon name="cart" size={64} className="empty-state-icon opacity-30" aria-hidden="true" />
           <p className="text-lg font-semibold">Kurven er tom</p>
           <p className="text-secondary">
             Vælg mobilabonnementer fra listen nedenfor.
           </p>
-        </div>
+        </motion.div>
 
         <style>{`
           .cart {
@@ -52,12 +63,16 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
             opacity: 0.3;
           }
         `}</style>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="cart glass-card-no-hover fade-in-up">
+    <motion.div 
+      className="cart glass-card-no-hover"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
       <div className="section-header">
           <h2>
             <Icon name="cart" size={24} className="icon-inline icon-spacing-md" />
@@ -71,120 +86,145 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
 
       {/* Cart items */}
       <div className="cart-items">
-        {cartItems.map((item) => {
-          const sixMonthPrice = calculateSixMonthPrice(item.plan, item.quantity);
-          const hasIntro = item.plan.introPrice && item.plan.introMonths;
-          
-          return (
-            <div 
-              key={item.plan.id} 
-              className={`cart-item ${newlyAddedPlans.has(item.plan.id) ? 'newly-added' : ''}`}
-            >
-              {/* Plan info */}
-              <div className="cart-item-header">
-                <div className="cart-item-provider" style={{ color: item.plan.color || 'var(--color-orange)' }}>
-                  {item.plan.provider.toUpperCase()}
+        <AnimatePresence mode="popLayout">
+          {cartItems.map((item) => {
+            const sixMonthPrice = calculateSixMonthPrice(item.plan, item.quantity);
+            const hasIntro = item.plan.introPrice && item.plan.introMonths;
+            
+            return (
+              <motion.div 
+                key={item.plan.id} 
+                className={`cart-item ${newlyAddedPlans.has(item.plan.id) ? 'newly-added' : ''}`}
+                layout
+                initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              >
+                {/* Plan info */}
+                <div className="cart-item-header">
+                  <div className="cart-item-provider" style={{ color: item.plan.color || 'var(--color-orange)' }}>
+                    {item.plan.provider.toUpperCase()}
+                  </div>
+                  <motion.button
+                    onClick={() => onRemove(item.plan.id)}
+                    className="btn-remove"
+                    title="Fjern fra kurv"
+                    aria-label="Fjern fra kurv"
+                    whileHover={{ scale: 1.1, backgroundColor: 'var(--color-danger)', color: 'white' }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    ✕
+                  </motion.button>
                 </div>
-                <button
-                  onClick={() => onRemove(item.plan.id)}
-                  className="btn-remove"
-                  title="Fjern fra kurv"
-                  aria-label="Fjern fra kurv"
-                >
-                  ✕
-                </button>
-              </div>
 
-              <div className="cart-item-name">{item.plan.name}</div>
-              <div className="cart-item-data text-muted">{item.plan.data}</div>
+                <div className="cart-item-name">{item.plan.name}</div>
+                <div className="cart-item-data text-muted">{item.plan.data}</div>
 
-              {/* Quantity controls */}
-              <div className="quantity-controls">
-                <button
-                  onClick={() => onUpdateQuantity(item.plan.id, item.quantity - 1)}
-                  className="btn btn-icon btn-secondary quantity-btn"
-                  disabled={item.quantity <= 1}
-                  aria-label={`Reducer antal ${item.plan.name}`}
-                  aria-controls={`quantity-${item.plan.id}`}
-                >
-                  <span aria-hidden="true">−</span>
-                </button>
-                <span id={`quantity-${item.plan.id}`} className="quantity-value" aria-label={`Antal: ${item.quantity}`}>{item.quantity}</span>
-                <button
-                  onClick={() => onUpdateQuantity(item.plan.id, item.quantity + 1)}
-                  className="btn btn-icon btn-secondary quantity-btn"
-                  disabled={item.quantity >= 20}
-                  aria-label={`Forøg antal ${item.plan.name}`}
-                  aria-controls={`quantity-${item.plan.id}`}
-                >
-                  <span aria-hidden="true">+</span>
-                </button>
-              </div>
+                {/* Quantity controls */}
+                <div className="quantity-controls">
+                  <motion.button
+                    onClick={() => onUpdateQuantity(item.plan.id, item.quantity - 1)}
+                    className="btn btn-icon btn-secondary quantity-btn"
+                    disabled={item.quantity <= 1}
+                    aria-label={`Reducer antal ${item.plan.name}`}
+                    aria-controls={`quantity-${item.plan.id}`}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <span aria-hidden="true">−</span>
+                  </motion.button>
+                  <motion.span 
+                    id={`quantity-${item.plan.id}`} 
+                    className="quantity-value" 
+                    aria-label={`Antal: ${item.quantity}`}
+                    key={item.quantity}
+                    initial={{ scale: 1.5, color: 'var(--color-orange)' }}
+                    animate={{ scale: 1, color: 'var(--text-primary)' }}
+                  >
+                    {item.quantity}
+                  </motion.span>
+                  <motion.button
+                    onClick={() => onUpdateQuantity(item.plan.id, item.quantity + 1)}
+                    className="btn btn-icon btn-secondary quantity-btn"
+                    disabled={item.quantity >= 20}
+                    aria-label={`Forøg antal ${item.plan.name}`}
+                    aria-controls={`quantity-${item.plan.id}`}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <span aria-hidden="true">+</span>
+                  </motion.button>
+                </div>
 
-              {/* Pricing */}
-              <div className="cart-item-pricing">
-                {hasIntro ? (
-                  <>
+                {/* Pricing */}
+                <div className="cart-item-pricing">
+                  {hasIntro ? (
+                    <>
+                      <div className="price-line">
+                        <span className="price-label">Intro ({item.plan.introMonths} mdr.):</span>
+                        <span className="price-value">
+                          {formatCurrency(item.plan.introPrice * item.quantity)}/md.
+                        </span>
+                      </div>
+                      <div className="price-line">
+                        <span className="price-label">Derefter:</span>
+                        <span className="price-value">
+                          {formatCurrency(item.plan.price * item.quantity)}/md.
+                        </span>
+                      </div>
+                    </>
+                  ) : (
                     <div className="price-line">
-                      <span className="price-label">Intro ({item.plan.introMonths} mdr.):</span>
-                      <span className="price-value">
-                        {formatCurrency(item.plan.introPrice * item.quantity)}/md.
-                      </span>
-                    </div>
-                    <div className="price-line">
-                      <span className="price-label">Derefter:</span>
+                      <span className="price-label">Pris pr. måned:</span>
                       <span className="price-value">
                         {formatCurrency(item.plan.price * item.quantity)}/md.
                       </span>
                     </div>
-                  </>
-                ) : (
-                  <div className="price-line">
-                    <span className="price-label">Pris pr. måned:</span>
-                    <span className="price-value">
-                      {formatCurrency(item.plan.price * item.quantity)}/md.
-                    </span>
-                  </div>
-                )}
+                  )}
 
-                {/* CBB Mix pricing */}
-                {item.cbbMixEnabled && item.cbbMixCount && (
-                  <div className="cbb-mix-pricing">
-                    <div className="price-line cbb-mix-line">
-                      <span className="price-label">
-                        <Icon name="film" size={16} className="icon-inline icon-spacing-xs" />
-                        CBB MIX ({item.cbbMixCount} tjenester):
-                      </span>
-                      <span className="price-value">
-                        {formatCurrency((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * item.quantity)}/md.
-                      </span>
+                  {/* CBB Mix pricing */}
+                  {item.cbbMixEnabled && item.cbbMixCount && (
+                    <div className="cbb-mix-pricing">
+                      <div className="price-line cbb-mix-line">
+                        <span className="price-label">
+                          <Icon name="film" size={16} className="icon-inline icon-spacing-xs" />
+                          CBB MIX ({item.cbbMixCount} tjenester):
+                        </span>
+                        <span className="price-value">
+                          {formatCurrency((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * item.quantity)}/md.
+                        </span>
+                      </div>
                     </div>
+                  )}
+                  
+                  <div className="price-line total">
+                    <span className="price-label font-semibold">6 måneder:</span>
+                    <motion.span 
+                      className="price-value font-bold"
+                      key={sixMonthPrice}
+                      initial={{ opacity: 0.5 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      {formatCurrency(sixMonthPrice + (item.cbbMixEnabled && item.cbbMixCount ? 
+                        ((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * 6 * item.quantity) : 0))} kr.
+                    </motion.span>
+                  </div>
+
+                </div>
+
+                {/* Features */}
+                {item.plan.features && item.plan.features.length > 0 && (
+                  <div className="cart-item-features">
+                    {item.plan.features.slice(0, 3).map((feature, idx) => (
+                      <span key={idx} className="badge badge-info">
+                        {feature}
+                      </span>
+                    ))}
                   </div>
                 )}
-                
-                <div className="price-line total">
-                  <span className="price-label font-semibold">6 måneder:</span>
-                  <span className="price-value font-bold">
-                    {formatCurrency(sixMonthPrice + (item.cbbMixEnabled && item.cbbMixCount ? 
-                      ((item.plan.cbbMixPricing[item.cbbMixCount] || 0) * 6 * item.quantity) : 0))} kr.
-                  </span>
-                </div>
-
-              </div>
-
-              {/* Features */}
-              {item.plan.features && item.plan.features.length > 0 && (
-                <div className="cart-item-features">
-                  {item.plan.features.slice(0, 3).map((feature, idx) => (
-                    <span key={idx} className="badge badge-info">
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
 
 
@@ -222,7 +262,7 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
           );
           border-radius: var(--radius-lg);
           border: 1px solid rgba(255, 255, 255, 0.15);
-          transition: all var(--transition-base);  /* Max 300ms */
+          /* transition removed in favor of motion */
           position: relative;
           transform-style: preserve-3d;
           backdrop-filter: blur(var(--blur-md)) saturate(150%);
@@ -238,7 +278,7 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
           bottom: 0;
           background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05));
           opacity: 0;
-          transition: opacity var(--transition-base);
+          transition: opacity 0.3s ease;
           border-radius: var(--radius-lg);
           pointer-events: none;
         }
@@ -249,7 +289,7 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
             var(--shadow-xl), 
             0 0 30px rgba(255, 109, 31, 0.3),
             0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-          transform: translateX(4px) translateY(-1px) translateZ(0);  /* Reduced motion, GPU accelerated */
+          /* transform handled by motion */
           background: linear-gradient(135deg, 
             rgba(255, 255, 255, 0.12) 0%, 
             rgba(255, 255, 255, 0.06) 100%
@@ -261,7 +301,7 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
         }
 
         .cart-item.newly-added {
-          animation: fadeIn 0.3s ease-out;
+          /* animation handled by motion initial prop */
           border-color: var(--color-success);
           box-shadow: 
             var(--shadow-xl), 
@@ -309,17 +349,11 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
           color: var(--color-danger);
           border-radius: 50%;
           cursor: pointer;
-          transition: all var(--transition-fast);
+          /* transition handled by motion */
           font-size: var(--font-lg);
           display: flex;
           align-items: center;
           justify-content: center;
-        }
-
-        .btn-remove:hover {
-          background: var(--color-danger);
-          color: white;
-          transform: scale(1.1);
         }
 
         .cart-item-name {
@@ -343,28 +377,12 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
         .quantity-btn {
           font-size: var(--font-xl);
           font-weight: var(--font-bold);
-          transition: all var(--transition-fast);
-        }
-
-        .quantity-btn:hover {
-          transform: scale(1.1) translateZ(0);  /* Reduced rotation, GPU accelerated */
-          background: var(--color-orange);
-          color: white;
-          box-shadow: 0 8px 24px rgba(255, 109, 31, 0.4);
-          filter: brightness(1.1);
-        }
-
-        .quantity-btn:active {
-          transform: scale(0.95);
+          /* transition handled by motion */
         }
 
         .quantity-value {
-          transition: all var(--transition-fast);
-        }
-
-        .quantity-btn:hover + .quantity-value {
-          transform: scale(1.1);
-          color: var(--color-orange);
+          display: inline-block; /* Required for transform */
+          transition: none; /* Handled by motion */
         }
 
         .quantity-value {
@@ -443,9 +461,8 @@ const Cart = React.memo(function Cart({ cartItems, onUpdateQuantity, onRemove, n
           }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 });
 
 export default Cart;
-

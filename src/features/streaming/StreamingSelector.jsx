@@ -10,6 +10,7 @@ import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from '../../utils/toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
 // Streaming selector styles moved to components.css
@@ -429,6 +430,21 @@ function StreamingSelector({
     }
   }, [showScanner]);
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
     <div 
       className="streaming-selector glass-card-no-hover"
@@ -702,15 +718,19 @@ function StreamingSelector({
               {COPY.titles.quickSolutionSubtitle}
             </p>
           </div>
-          <button
+          <motion.button
             onClick={onAutoSelectSolution}
             className={`btn btn-premium auto-select-btn ${(selectedStreaming.length > 0 || customerMobileCost > 0) ? 'auto-select-btn--ready' : ''}`}
             disabled={!selectedStreaming.length && !customerMobileCost}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
           >
             <Icon name="rocket" size={32} className="btn-icon" />
             <span className="btn-text">{COPY.cta.findBestSolution}</span>
             <Icon name="chevronRight" size={24} className="btn-arrow" />
-          </button>
+          </motion.button>
           {(!selectedStreaming.length && !customerMobileCost) && (
             <div className="auto-select-hint-wrapper">
               <p className="auto-select-hint">
@@ -724,12 +744,17 @@ function StreamingSelector({
       <div className="divider"></div>
 
       {/* Streaming grid */}
-      <div className="streaming-grid">
+      <motion.div 
+        className="streaming-grid"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         {services.map((service, index) => {
           const isSelected = selectedStreaming.includes(service.id);
           
           return (
-            <button
+            <motion.button
               key={service.id}
               onClick={() => handleStreamingToggle(service.id)}
               className={`streaming-card glass-card ${isSelected ? 'selected' : ''}`}
@@ -739,6 +764,10 @@ function StreamingSelector({
               }}
               aria-pressed={isSelected}
               aria-label={`${isSelected ? 'Fjern' : 'Tilføj'} ${service.name} streaming-tjeneste`}
+              variants={item}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              layout
             >
               <div className="streaming-icon" style={{ 
                 background: service.bgColor
@@ -759,16 +788,19 @@ function StreamingSelector({
               <div className="streaming-name">{service.name}</div>
               <div className="streaming-price">{formatCurrency(service.price)}/md.</div>
               {isSelected && (
-                <div 
+                <motion.div 
                   className="streaming-checkmark"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 >
                   <Icon name="checkCircle" size={28} color="var(--color-success)" />
-                </div>
+                </motion.div>
               )}
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
 
       <div className="divider"></div>
 
