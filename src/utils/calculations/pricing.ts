@@ -5,13 +5,14 @@
  */
 
 import { CAMPAIGN, PRICING, OPTIMIZER } from '../../constants/businessRules.js';
+import { Plan, CartItem, CustomerTotal, OurOfferTotal } from './types.js';
 
 /**
  * Tjek om kampagnen er aktiv for en plan
- * @param {Object} plan - Plan objekt med campaignExpiresAt (valgfri)
- * @returns {boolean} True hvis kampagnen er aktiv
+ * @param plan - Plan objekt med campaignExpiresAt (valgfri)
+ * @returns True hvis kampagnen er aktiv
  */
-export function isCampaignActive(plan) {
+export function isCampaignActive(plan: Plan | null | undefined): boolean {
     if (!plan || !plan.campaignExpiresAt) return false;
 
     try {
@@ -27,10 +28,10 @@ export function isCampaignActive(plan) {
 
 /**
  * Hent den aktuelle pris for en plan (kampagnepris hvis aktiv, ellers original eller normal pris)
- * @param {Object} plan - Plan objekt
- * @returns {number} Aktuel pris
+ * @param plan - Plan objekt
+ * @returns Aktuel pris
  */
-export function getCurrentPrice(plan) {
+export function getCurrentPrice(plan: Plan | null | undefined): number {
     if (!plan) return 0;
 
     // Hvis kampagnen er aktiv, brug kampagneprisen
@@ -49,18 +50,18 @@ export function getCurrentPrice(plan) {
 
 /**
  * Beregn 6-måneders pris for en plan med intro-pris håndtering
- * @param {Object} plan - Plan objekt med price, introPrice (valgfri), introMonths (valgfri)
- * @param {number} quantity - Antal linjer/abonnementer
- * @returns {number} Total 6-måneders pris for alle linjer
+ * @param plan - Plan objekt med price, introPrice (valgfri), introMonths (valgfri)
+ * @param quantity - Antal linjer/abonnementer
+ * @returns Total 6-måneders pris for alle linjer
  */
-export function calculateSixMonthPrice(plan, quantity = 1) {
+export function calculateSixMonthPrice(plan: Plan | null | undefined, quantity: number = 1): number {
     if (!plan) return 0;
 
     // Hent den aktuelle pris (kampagnepris hvis aktiv, ellers original/normal pris)
     const currentPrice = getCurrentPrice(plan);
 
     // Hvis der er intro-pris (fx 199 kr i 3 måneder, derefter 299 kr)
-    if (plan.introPrice && plan.introMonths) {
+    if (plan.introPrice != null && plan.introMonths) {
         // Step 1: Beregn intro-pris for intro-perioden
         const introTotal = plan.introPrice * plan.introMonths * quantity;
 
@@ -78,15 +79,15 @@ export function calculateSixMonthPrice(plan, quantity = 1) {
 
 /**
  * Beregn månedlig pris for en plan (gennemsnit over 6 måneder hvis intro-pris)
- * @param {Object} plan - Plan objekt
- * @param {number} quantity - Antal linjer
- * @returns {number} Gennemsnitlig månedlig pris
+ * @param plan - Plan objekt
+ * @param quantity - Antal linjer
+ * @returns Gennemsnitlig månedlig pris
  */
-export function calculateMonthlyPrice(plan, quantity = 1) {
+export function calculateMonthlyPrice(plan: Plan | null | undefined, quantity: number = 1): number {
     if (!plan) return 0;
 
     // Hvis intro-pris: beregn gennemsnit over 6 måneder
-    if (plan.introPrice && plan.introMonths) {
+    if (plan.introPrice != null && plan.introMonths) {
         const sixMonthTotal = calculateSixMonthPrice(plan, quantity);
         return sixMonthTotal / 6; // Gennemsnitlig månedlig pris
     }
@@ -98,23 +99,23 @@ export function calculateMonthlyPrice(plan, quantity = 1) {
 
 /**
  * Beregn CBB MIX pris for en plan
- * @param {Object} plan - Plan objekt
- * @param {number} mixCount - Antal CBB MIX tjenester (2-8)
- * @returns {number} CBB MIX pris
+ * @param plan - Plan objekt
+ * @param mixCount - Antal CBB MIX tjenester (2-8)
+ * @returns CBB MIX pris
  */
-export function calculateCBBMixPrice(plan, mixCount) {
-    if (!plan.cbbMixAvailable || !mixCount) return 0;
+export function calculateCBBMixPrice(plan: Plan, mixCount: number): number {
+    if (!plan.cbbMixAvailable || !mixCount || !plan.cbbMixPricing) return 0;
     return plan.cbbMixPricing[mixCount] || 0;
 }
 
 /**
  * Beregn plan med CBB MIX
- * @param {Object} plan - Plan objekt
- * @param {number} quantity - Antal linjer
- * @param {number} mixCount - Antal CBB MIX tjenester
- * @returns {number} Total 6-måneders pris inkl. CBB MIX
+ * @param plan - Plan objekt
+ * @param quantity - Antal linjer
+ * @param mixCount - Antal CBB MIX tjenester
+ * @returns Total 6-måneders pris inkl. CBB MIX
  */
-export function calculatePlanWithCBBMix(plan, quantity = 1, mixCount = 0) {
+export function calculatePlanWithCBBMix(plan: Plan, quantity: number = 1, mixCount: number = 0): number {
     const basePrice = calculateSixMonthPrice(plan, quantity);
     const mixPrice = calculateCBBMixPrice(plan, mixCount) * 6; // 6 måneder
     return basePrice + mixPrice;
@@ -122,10 +123,10 @@ export function calculatePlanWithCBBMix(plan, quantity = 1, mixCount = 0) {
 
 /**
  * Beregn Telenor familie-rabat
- * @param {Array} cartItems - Array af kurv-items
- * @returns {number} Total månedlig rabat i kr
+ * @param cartItems - Array af kurv-items
+ * @returns Total månedlig rabat i kr
  */
-export function calculateTelenorFamilyDiscount(cartItems) {
+export function calculateTelenorFamilyDiscount(cartItems: CartItem[] | null | undefined): number {
     if (!cartItems || cartItems.length === 0) return 0;
 
     // Step 1: Tæl antal Telenor-linjer med familyDiscount
@@ -140,10 +141,10 @@ export function calculateTelenorFamilyDiscount(cartItems) {
 
 /**
  * Beregn total indtjening fra kurv
- * @param {Array} cartItems - Array af kurv-items
- * @returns {number} Total indtjening
+ * @param cartItems - Array af kurv-items
+ * @returns Total indtjening
  */
-export function calculateTotalEarnings(cartItems) {
+export function calculateTotalEarnings(cartItems: CartItem[] | null | undefined): number {
     if (!cartItems || cartItems.length === 0) return 0;
 
     // Tjek om vi stadig er inden for kampagneperioden
@@ -176,7 +177,7 @@ export function calculateTotalEarnings(cartItems) {
             }
 
             // CBB MIX giver 100 kr ekstra indtjening pr. linje hvis aktiveret
-            if (item.cbbMixEnabled && item.cbbMixCount > 0) {
+            if (item.cbbMixEnabled && item.cbbMixCount && item.cbbMixCount > 0) {
                 earnings += PRICING.CBB_MIX_EARNINGS * item.quantity;
             }
         }
@@ -187,12 +188,12 @@ export function calculateTotalEarnings(cartItems) {
 
 /**
  * Beregn kunde totaler (hvad kunden betaler nu)
- * @param {number} currentMobileCost - Nuværende mobiludgifter pr. måned (TOTAL for alle linjer)
- * @param {number} streamingCost - Total streaming-udgifter pr. måned
- * @param {number} originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
- * @returns {Object} { monthly: number, sixMonth: number }
+ * @param currentMobileCost - Nuværende mobiludgifter pr. måned (TOTAL for alle linjer)
+ * @param streamingCost - Total streaming-udgifter pr. måned
+ * @param originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
+ * @returns { monthly: number, sixMonth: number }
  */
-export function calculateCustomerTotal(currentMobileCost, streamingCost, originalItemPrice = 0) {
+export function calculateCustomerTotal(currentMobileCost: number, streamingCost: number, originalItemPrice: number = 0): CustomerTotal {
     // Step 1: Månedlig total = mobil + streaming
     const monthly = (currentMobileCost || 0) + (streamingCost || 0);
 
@@ -205,14 +206,14 @@ export function calculateCustomerTotal(currentMobileCost, streamingCost, origina
 
 /**
  * Beregn vores tilbud total (hvad kunden betaler med os)
- * @param {Array} cartItems - Array af kurv-items
- * @param {number} streamingCost - Ikke-inkluderet streaming-omkostning pr. måned
- * @param {number} cashDiscount - Kontant rabat (engangsrabat, valgfri)
- * @param {number} originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
- * @param {number} buybackAmount - RePOWER indbytningspris (engangsrabat, valgfri)
- * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number }
+ * @param cartItems - Array af kurv-items
+ * @param streamingCost - Ikke-inkluderet streaming-omkostning pr. måned
+ * @param cashDiscount - Kontant rabat (engangsrabat, valgfri)
+ * @param originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
+ * @param buybackAmount - RePOWER indbytningspris (engangsrabat, valgfri)
+ * @returns { monthly: number, sixMonth: number, telenorDiscount: number }
  */
-export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0, buybackAmount = 0) {
+export function calculateOurOfferTotal(cartItems: CartItem[] | null | undefined, streamingCost: number = 0, cashDiscount: number = 0, originalItemPrice: number = 0, buybackAmount: number = 0): OurOfferTotal {
     if (!cartItems || cartItems.length === 0) {
         return { monthly: 0, sixMonth: 0, telenorDiscount: 0 };
     }
@@ -265,23 +266,23 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
 
 /**
  * Beregn besparelse (forskellen mellem kundens nuværende situation og vores tilbud)
- * @param {number} customerTotal - Kunde 6-måneders total (hvad de betaler nu)
- * @param {number} ourTotal - Vores 6-måneders total (hvad de betaler med os)
- * @returns {number} Besparelse i kr (positiv = besparelse, negativ = mersalg)
+ * @param customerTotal - Kunde 6-måneders total (hvad de betaler nu)
+ * @param ourTotal - Vores 6-måneders total (hvad de betaler med os)
+ * @returns Besparelse i kr (positiv = besparelse, negativ = mersalg)
  */
-export function calculateSavings(customerTotal, ourTotal) {
+export function calculateSavings(customerTotal: number, ourTotal: number): number {
     return customerTotal - ourTotal;
 }
 
 /**
  * Auto-justér kontant rabat for minimum besparelse
- * @param {number} customerTotal - Kunde 6-måneders total
- * @param {number} ourTotalBeforeDiscount - Vores total før kontant rabat
- * @param {number} minimumSavings - Minimum ønsket besparelse (standard: 500)
- * @param {number} totalEarnings - Total engangsindtjening fra løsningen (ikke løbende)
- * @returns {number} Nødvendig kontant rabat
+ * @param customerTotal - Kunde 6-måneders total
+ * @param ourTotalBeforeDiscount - Vores total før kontant rabat
+ * @param minimumSavings - Minimum ønsket besparelse (standard: 500)
+ * @param totalEarnings - Total engangsindtjening fra løsningen (ikke løbende)
+ * @returns Nødvendig kontant rabat
  */
-export function autoAdjustCashDiscount(customerTotal, ourTotalBeforeDiscount, minimumSavings = OPTIMIZER.DEFAULT_MIN_SAVINGS, totalEarnings = 0) {
+export function autoAdjustCashDiscount(customerTotal: number, ourTotalBeforeDiscount: number, minimumSavings: number = OPTIMIZER.DEFAULT_MIN_SAVINGS, totalEarnings: number = 0): number {
     const currentSavings = customerTotal - ourTotalBeforeDiscount;
 
     // Hvis kunden allerede har god besparelse, ingen rabat nødvendig
@@ -316,10 +317,10 @@ export function autoAdjustCashDiscount(customerTotal, ourTotalBeforeDiscount, mi
 
 /**
  * Format tal til dansk valuta format
- * @param {number} amount - Beløb
- * @returns {string} Formateret streng
+ * @param amount - Beløb
+ * @returns Formateret streng
  */
-export function formatCurrency(amount) {
+export function formatCurrency(amount: number): string {
     return new Intl.NumberFormat('da-DK', {
         style: 'currency',
         currency: 'DKK',
@@ -330,29 +331,29 @@ export function formatCurrency(amount) {
 
 /**
  * Format tal med tusinde-separator
- * @param {number} num - Tal
- * @returns {string} Formateret streng
+ * @param num - Tal
+ * @returns Formateret streng
  */
-export function formatNumber(num) {
+export function formatNumber(num: number): string {
     return new Intl.NumberFormat('da-DK').format(num);
 }
 
 /**
  * Beregn måned-for-måned pris for en plan (inkl. intro-pris transition)
- * @param {Object} plan - Plan objekt
- * @param {number} quantity - Antal linjer
- * @returns {Array<number>} Array med priser for hver måned (6 måneder)
+ * @param plan - Plan objekt
+ * @param quantity - Antal linjer
+ * @returns Array med priser for hver måned (6 måneder)
  */
-export function calculateMonthlyBreakdown(plan, quantity = 1) {
+export function calculateMonthlyBreakdown(plan: Plan | null | undefined, quantity: number = 1): number[] {
     if (!plan) return [0, 0, 0, 0, 0, 0];
 
-    const monthlyPrices = [];
+    const monthlyPrices: number[] = [];
 
     for (let month = 1; month <= 6; month++) {
-        let price;
+        let price: number;
 
         // Hvis der er intro-pris og vi stadig er i intro-perioden
-        if (plan.introPrice && plan.introMonths && month <= plan.introMonths) {
+        if (plan.introPrice != null && plan.introMonths && month <= plan.introMonths) {
             price = plan.introPrice * quantity;
         } else {
             price = plan.price * quantity;
@@ -366,10 +367,10 @@ export function calculateMonthlyBreakdown(plan, quantity = 1) {
 
 /**
  * Beregn effektiv hardware pris efter besparelse
- * @param {number} hardwarePrice - Original hardware pris
- * @param {number} savings - Total besparelse (6 mdr)
- * @returns {number} Effektiv pris
+ * @param hardwarePrice - Original hardware pris
+ * @param savings - Total besparelse (6 mdr)
+ * @returns Effektiv pris
  */
-export function calculateEffectiveHardwarePrice(hardwarePrice, savings) {
+export function calculateEffectiveHardwarePrice(hardwarePrice: number, savings: number): number {
     return (hardwarePrice || 0) - (savings || 0);
 }

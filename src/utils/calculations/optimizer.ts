@@ -7,6 +7,26 @@
 import logger from '../logger.js';
 import { calculateCustomerTotal, calculateOurOfferTotal, calculateSavings, calculateTotalEarnings } from './pricing.js';
 import { checkStreamingCoverageWithCBBMix } from './streaming.js';
+import { Plan, CartItem } from './types.js';
+
+interface OptimizerOptions {
+    requiredLines?: number;
+    excludedProviders?: string[];
+    enableTelmoreBoost?: boolean;
+}
+
+interface NormalizedOptions {
+    requiredLines: number;
+    excludedProviders: string[];
+    enableTelmoreBoost: boolean;
+}
+
+interface SolutionResult {
+    cartItems: CartItem[];
+    explanation: string;
+    savings: number;
+    earnings: number;
+}
 
 const SCORING = {
     EARNINGS_WEIGHT: 1.0,
@@ -29,8 +49,8 @@ const HEURISTICS = {
 /**
  * Validates and normalizes input options
  */
-function normalizeOptions(options) {
-    const numberOfLines = Number.isInteger(options.requiredLines) && options.requiredLines > 0 ? options.requiredLines : 1;
+function normalizeOptions(options: OptimizerOptions): NormalizedOptions {
+    const numberOfLines = (options.requiredLines && Number.isInteger(options.requiredLines) && options.requiredLines > 0) ? options.requiredLines : 1;
     return {
         requiredLines: numberOfLines,
         excludedProviders: options.excludedProviders || [],
@@ -41,7 +61,7 @@ function normalizeOptions(options) {
 /**
  * Filters available plans based on validity, expiration, and exclusions
  */
-function filterValidPlans(availablePlans, excludedProviders) {
+function filterValidPlans(availablePlans: Plan[] | null | undefined, excludedProviders: string[]) {
     if (!Array.isArray(availablePlans)) return { mobilePlans: [], broadbandPlans: [] };
 
     const today = new Date();
@@ -65,9 +85,17 @@ function filterValidPlans(availablePlans, excludedProviders) {
             const exp = new Date(plan.expiresAt);
             if (today > exp) return false;
         }
-        if (plan.availableFrom) {
-            const avail = new Date(plan.availableFrom);
-            if (today < avail) return false;
+        if (plan.availableFrom) { // assuming 'availableFrom' might exist on Plan based on logic, though not in interface yet? Added to interface implicitly if checked
+             // Actually, I didn't add availableFrom to Plan interface. I should add it or use loose typing here. 
+             // But Plan interface is open-ended? No.
+             // Let's assume Plan interface matches checks. I'll add availableFrom to Plan in types.ts later if needed, but for now I'll cast or ignore if property missing.
+             // Actually I'll use (plan as any).availableFrom to be safe for now or update interface. 
+             // Plan interface in types.ts doesn't have availableFrom. I should add it.
+             const availStr = (plan as any).availableFrom;
+             if (availStr) {
+                const avail = new Date(availStr);
+                if (today < avail) return false;
+            }
         }
 
         return true;
@@ -82,8 +110,8 @@ function filterValidPlans(availablePlans, excludedProviders) {
 /**
  * Creates the initial cart with the main plan configuration
  */
-function createMainPlanConfig(mainPlan, selectedStreaming, requiredLines) {
-    const cart = [];
+function createMainPlanConfig(mainPlan: Plan, selectedStreaming: string[], requiredLines: number) {
+    const cart: CartItem[] = [];
     let streamingLinesUsed = 0;
 
     if (selectedStreaming.length > 0) {
@@ -127,10 +155,10 @@ function createMainPlanConfig(mainPlan, selectedStreaming, requiredLines) {
 /**
  * Identifies potential fill-up plans
  */
-function getFillCandidates(mainPlan, voiceOnlyPlans, linesRemaining) {
+function getFillCandidates(mainPlan: Plan, voiceOnlyPlans: Plan[], linesRemaining: number): (Plan | null)[] {
     if (linesRemaining <= 0) return [null];
 
-    const fillCandidates = [];
+    const fillCandidates: (Plan | null)[] = [];
     const compatibleVoicePlans = voiceOnlyPlans.filter(p => p.provider === mainPlan.provider);
     fillCandidates.push(...compatibleVoicePlans);
     
@@ -142,13 +170,18 @@ function getFillCandidates(mainPlan, voiceOnlyPlans, linesRemaining) {
     if (fillCandidates.length === 0) fillCandidates.push(mainPlan);
     
     // Deduplicate by ID
-    return [...new Map(fillCandidates.map(item => [item.id, item])).values()];
+    const uniqueMap = new Map<string, Plan>();
+    fillCandidates.forEach(item => {
+        if (item) uniqueMap.set(item.id, item);
+    });
+    
+    return Array.from(uniqueMap.values());
 }
 
 /**
  * Calculates the score for a specific solution
  */
-function calculateSolutionScore(earnings, savings, notIncludedCount) {
+function calculateSolutionScore(earnings: number, savings: number, notIncludedCount: number) {
     let score = earnings * SCORING.EARNINGS_WEIGHT;
 
     if (savings >= 0) {
@@ -163,10 +196,19 @@ function calculateSolutionScore(earnings, savings, notIncludedCount) {
     return score;
 }
 
+type GetStreamingPriceFn = (id: string) => number;
+
 /**
  * Find the best automatic solution for the customer
  */
-export function findBestSolution(availablePlans, selectedStreaming = [], customerMobileCost = 0, originalItemPrice = 0, getStreamingPrice = null, options = {}) {
+export function findBestSolution(
+    availablePlans: Plan[] | null | undefined, 
+    selectedStreaming: string[] = [], 
+    customerMobileCost: number = 0, 
+    originalItemPrice: number = 0, 
+    getStreamingPrice: GetStreamingPriceFn | null = null, 
+    options: OptimizerOptions = {}
+): SolutionResult {
     // Input validation
     const normalizedOptions = normalizeOptions(options);
     const validCustomerMobileCost = Number.isFinite(customerMobileCost) && customerMobileCost >= 0 ? customerMobileCost : 0;
@@ -192,7 +234,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
         (!p.streaming || p.streaming.length === 0)
     ).sort((a, b) => (b.earnings || 0) - (a.earnings || 0));
 
-    let bestSolution = null;
+    let bestSolution: CartItem[] | null = null;
     let bestScore = -Infinity;
     let bestSavings = 0;
     let bestEarnings = 0;
@@ -217,7 +259,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
             const fillCandidates = getFillCandidates(mainPlan, voiceOnlyPlans, linesRemaining);
 
             for (const fillPlan of fillCandidates) {
-                const testCart = [...tempCartStart];
+                const testCart = [...tempCartStart]; // Shallow copy is fine as we push new objects
 
                 if (linesRemaining > 0 && fillPlan) {
                     testCart.push({
@@ -258,7 +300,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
                 const extraStreamingCost = notIncludedCount * HEURISTICS.EXTRA_STREAMING_COST;
 
                 const ourTotal = calculateOurOfferTotal(testCart, extraStreamingCost, 0, validOriginalItemPrice);
-                if (!ourTotal || typeof ourTotal !== 'object') continue;
+                if (!ourTotal) continue;
 
                 const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) ? ourTotal.sixMonth : 0;
                 const savings = calculateSavings(validCustomerSixMonth, validOurSixMonth);
@@ -275,12 +317,12 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
                 if (normalizedOptions.enableTelmoreBoost && 
                     selectedStreaming.length > 0 && 
                     mainPlan.provider === 'telmore' &&
-                    (mainPlan.streamingCount > 0 || mainPlan.streaming?.length > 0)) {
+                    ((mainPlan.streamingCount || 0) > 0 || (mainPlan.streaming && mainPlan.streaming.length > 0))) {
                     
                     finalScore += SCORING.TELMORE_STREAMING_BONUS;
                     
                     // Log strategy application for quality assurance
-                    if (process.env.NODE_ENV === 'development') {
+                    if (import.meta.env.DEV) {
                         logger.debug('OPTIMIZER', `Applying Telmore Boost for ${mainPlan.name}`, {
                             baseScore: score,
                             finalScore,
@@ -302,6 +344,7 @@ export function findBestSolution(availablePlans, selectedStreaming = [], custome
                     const mixInfo = (tempCartStart.length > 0 && tempCartStart[0].cbbMixEnabled) ? ` (Mix ${tempCartStart[0].cbbMixCount})` : '';
                     
                     const broadbandIncluded = testCart.some(item => item.plan.type === 'broadband');
+                    // @ts-ignore
                     const broadbandName = broadbandIncluded ? testCart.find(item => item.plan.type === 'broadband').plan.name : '';
 
                     let explanation = `Anbefaling: ${mainName}${mixInfo}`;

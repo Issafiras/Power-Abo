@@ -5,20 +5,25 @@
  */
 
 import { getServiceById } from '../../data/streamingServices.js';
+import { CartItem, CoverageResult, CBBMixCoverageResult, StreamingService } from './types.js';
 
 /**
  * Check om streaming er inkluderet i valgte planer
- * @param {Array} cartItems - Array af kurv-items
- * @param {Array} selectedStreaming - Array af valgte streaming-ID'er
- * @returns {Object} { included: Array, notIncluded: Array }
+ * @param cartItems - Array af kurv-items
+ * @param selectedStreaming - Array af valgte streaming-ID'er
+ * @returns { included: Array, notIncluded: Array }
  */
-export function checkStreamingCoverage(cartItems, selectedStreaming) {
+export function checkStreamingCoverage(cartItems: CartItem[] | null | undefined, selectedStreaming: string[] | null | undefined): CoverageResult {
     if (!selectedStreaming || selectedStreaming.length === 0) {
         return { included: [], notIncluded: [] };
     }
 
+    if (!cartItems) {
+        return { included: [], notIncluded: selectedStreaming };
+    }
+
     // Hent alle inkluderede streaming-tjenester fra planer
-    const includedStreaming = new Set();
+    const includedStreaming = new Set<string>();
     let totalStreamingSlots = 0;
 
     cartItems.forEach(item => {
@@ -51,10 +56,12 @@ export function checkStreamingCoverage(cartItems, selectedStreaming) {
 
 /**
  * Check CBB MIX kompatibilitet
- * @param {Array} cartItems - Array af kurv-items
- * @returns {Object} { compatible: boolean, message: string }
+ * @param cartItems - Array af kurv-items
+ * @returns { compatible: boolean, message: string }
  */
-export function checkCBBMixCompatibility(cartItems) {
+export function checkCBBMixCompatibility(cartItems: CartItem[] | null | undefined): { compatible: boolean; message?: string } {
+    if (!cartItems) return { compatible: true };
+
     const hasCBBPlan = cartItems.some(item => item.plan.provider === 'cbb');
     const hasCBBMixPlan = cartItems.some(item => item.plan.cbbMixAvailable && item.cbbMixEnabled);
 
@@ -70,19 +77,23 @@ export function checkCBBMixCompatibility(cartItems) {
 
 /**
  * Beregn CBB MIX streaming coverage
- * @param {Array} cartItems - Array af kurv-items
- * @param {Array} selectedStreaming - Array af valgte streaming-ID'er
- * @returns {Object} { included: Array, notIncluded: Array, cbbMixSlots: number }
+ * @param cartItems - Array af kurv-items
+ * @param selectedStreaming - Array af valgte streaming-ID'er
+ * @returns { included: Array, notIncluded: Array, cbbMixSlots: number }
  */
-export function checkCBBMixStreamingCoverage(cartItems, selectedStreaming) {
+export function checkCBBMixStreamingCoverage(cartItems: CartItem[] | null | undefined, selectedStreaming: string[] | null | undefined): CBBMixCoverageResult {
     if (!selectedStreaming || selectedStreaming.length === 0) {
         return { included: [], notIncluded: [], cbbMixSlots: 0 };
+    }
+
+    if (!cartItems) {
+        return { included: [], notIncluded: selectedStreaming, cbbMixSlots: 0 };
     }
 
     let totalCBBMixSlots = 0;
 
     cartItems.forEach(item => {
-        if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount > 0) {
+        if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount && item.cbbMixCount > 0) {
             totalCBBMixSlots += item.cbbMixCount * item.quantity;
         }
     });
@@ -91,12 +102,12 @@ export function checkCBBMixStreamingCoverage(cartItems, selectedStreaming) {
     if (totalCBBMixSlots > 0) {
         // Filtrer tjenester der er ekskluderet fra CBB Mix (fx Disney+)
         const eligibleForMix = selectedStreaming.filter(id => {
-            const service = getServiceById(id);
+            const service = getServiceById(id) as StreamingService | null;
             return service && !service.cbbMixExcluded;
         });
 
         const notEligibleForMix = selectedStreaming.filter(id => {
-            const service = getServiceById(id);
+            const service = getServiceById(id) as StreamingService | null;
             return !service || service.cbbMixExcluded;
         });
 
@@ -115,17 +126,21 @@ export function checkCBBMixStreamingCoverage(cartItems, selectedStreaming) {
 
 /**
  * Opdateret streaming coverage check med CBB MIX support
- * @param {Array} cartItems - Array af kurv-items
- * @param {Array} selectedStreaming - Array af valgte streaming-ID'er
- * @returns {Object} { included: Array, notIncluded: Array }
+ * @param cartItems - Array af kurv-items
+ * @param selectedStreaming - Array af valgte streaming-ID'er
+ * @returns { included: Array, notIncluded: Array }
  */
-export function checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming) {
+export function checkStreamingCoverageWithCBBMix(cartItems: CartItem[] | null | undefined, selectedStreaming: string[] | null | undefined): CoverageResult {
     if (!selectedStreaming || selectedStreaming.length === 0) {
         return { included: [], notIncluded: [] };
     }
 
+    if (!cartItems) {
+        return { included: [], notIncluded: selectedStreaming };
+    }
+
     // Hent alle inkluderede streaming-tjenester fra planer
-    const includedStreaming = new Set();
+    const includedStreaming = new Set<string>();
     let totalStreamingSlots = 0;
 
     cartItems.forEach(item => {
@@ -140,7 +155,7 @@ export function checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming) {
         }
 
         // CBB MIX slots
-        if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount > 0) {
+        if (item.plan.cbbMixAvailable && item.cbbMixEnabled && item.cbbMixCount && item.cbbMixCount > 0) {
             totalStreamingSlots += item.cbbMixCount * item.quantity;
         }
     });
@@ -149,12 +164,12 @@ export function checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming) {
     if (totalStreamingSlots > 0) {
         // Filtrer tjenester der er ekskluderet fra CBB Mix (fx Disney+)
         const eligibleForMix = selectedStreaming.filter(id => {
-            const service = getServiceById(id);
+            const service = getServiceById(id) as StreamingService | null;
             return service && !service.cbbMixExcluded;
         });
 
         const notEligibleForMix = selectedStreaming.filter(id => {
-            const service = getServiceById(id);
+            const service = getServiceById(id) as StreamingService | null;
             return !service || service.cbbMixExcluded;
         });
 
