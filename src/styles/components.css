@@ -4400,6 +4400,7 @@
 /* Tabs styling */
 .comparison-tabs-wrapper {
   margin: var(--spacing-xl) 0;
+  position: relative;
 }
 
 .comparison-tabs {
@@ -4414,10 +4415,34 @@
   box-shadow: 
     0 2px 16px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.comparison-tabs::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+}
+
+@media (max-width: 900px) {
+  .comparison-tabs-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(90deg, transparent, var(--bg-primary));
+    pointer-events: none;
+    border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+    z-index: 2;
+  }
 }
 
 .comparison-tab {
   flex: 1;
+  min-width: fit-content;
   background: transparent;
   border: none;
   border-radius: var(--radius-lg);
@@ -4434,6 +4459,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
+  white-space: nowrap;
 }
 
 .comparison-tab:hover {
@@ -4492,6 +4518,12 @@
   gap: var(--spacing-lg);
 }
 
+@media (max-width: 900px) {
+  .breakdown-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .breakdown-column {
   padding: var(--spacing-lg);
   background: rgba(255, 255, 255, 0.03);
@@ -4540,16 +4572,17 @@
   background: rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .monthly-breakdown-header,
 .monthly-breakdown-row,
 .monthly-breakdown-footer {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, minmax(100px, 1fr));
   gap: var(--spacing-md);
   padding: var(--spacing-md);
+  min-width: 500px;
 }
 
 .monthly-breakdown-header {
@@ -4576,6 +4609,33 @@
 
 .monthly-breakdown-cell {
   font-size: var(--font-sm);
+}
+
+/* Summary Bar Mobile Optimization */
+@media (max-width: 900px) {
+  .comparison-summary-bar {
+    flex-direction: column !important;
+    gap: var(--spacing-xl) !important;
+    padding: var(--spacing-lg) !important;
+  }
+
+  .summary-vs {
+    flex-direction: row !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: var(--spacing-md) 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .vs-arrow-wrapper {
+    transform: rotate(90deg); /* Arrow points down on mobile */
+  }
+
+  .vs-savings {
+    flex: 1;
+    text-align: center;
+  }
 }
 
 .breakdown-note {

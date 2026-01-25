@@ -44,23 +44,11 @@ function ComparisonPanel({
   autoAdjust,
   onAutoAdjustChange,
   showCashDiscount,
-  onToggleCashDiscount
+  onToggleCashDiscount,
+  showEarnings = false
 }) {
-  const [showEarnings, setShowEarnings] = useState(false);
   const [activeTab, setActiveTab] = useState('oversigt');
 
-  // F8 keyboard shortcut til at vise/skjule indtjening
-  useEffect(() => {
-    function handleKeyPress(e) {
-      if (e.key === 'F8') {
-        e.preventDefault();
-        setShowEarnings(prev => !prev);
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
   // Beregn streaming coverage med CBB MIX support - memoized
   const streamingCoverage = useMemo(() =>
     checkStreamingCoverageWithCBBMix(cartItems, selectedStreaming),

@@ -19,6 +19,7 @@ const PresentationView = lazy(() => import('./features/presentation/Presentation
 const HelpGuide = lazy(() => import('./components/common/HelpGuide'));
 const AdminDashboard = lazy(() => import('./features/admin/AdminDashboard'));
 const WhatsNewModal = lazy(() => import('./components/common/WhatsNewModal'));
+const MobileStickySummary = lazy(() => import('./components/mobile/MobileStickySummary'));
 import { plans } from './data/plans';
 import { CURRENT_VERSION } from './constants/changelog';
 import { toast } from './utils/toast';
@@ -34,6 +35,7 @@ function App() {
   const [includeBroadband, setIncludeBroadband] = useState(false);
   const [plansExpanded, setPlansExpanded] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
+  const [showEarnings, setShowEarnings] = useState(false);
 
   // Tjek for ny version ved mount
   useEffect(() => {
@@ -46,6 +48,19 @@ function App() {
       }, 1500);
       return () => clearTimeout(timer);
     }
+  }, []);
+
+  // F8 keyboard shortcut til at vise/skjule indtjening
+  useEffect(() => {
+    function handleKeyPress(e) {
+      if (e.key === 'F8') {
+        e.preventDefault();
+        setShowEarnings(prev => !prev);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
   // Scroll to cart handler
   const handleScrollToCart = useCallback(() => {
@@ -378,6 +393,7 @@ function App() {
                   onAutoAdjustChange={actions.setAutoAdjust}
                   showCashDiscount={state.showCashDiscount}
                   onToggleCashDiscount={actions.toggleCashDiscount}
+                  showEarnings={showEarnings}
                 />
               </Suspense>
             </div>
@@ -400,6 +416,20 @@ function App() {
           />
         </Suspense>
       )}
+
+      {/* Mobile Sticky Summary */}
+      <Suspense fallback={null}>
+        <MobileStickySummary
+          cartItems={state.cartItems}
+          selectedStreaming={state.selectedStreaming}
+          customerMobileCost={state.customerMobileCost}
+          broadbandCost={state.broadbandCost}
+          originalItemPrice={state.originalItemPrice}
+          buybackAmount={state.buybackAmount}
+          cashDiscount={state.cashDiscount}
+          showEarnings={showEarnings}
+        />
+      </Suspense>
 
       {/* Help Guide */}
       <Suspense fallback={null}>
