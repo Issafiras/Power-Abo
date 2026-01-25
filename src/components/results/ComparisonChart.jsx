@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import NumberDisplay from '../common/NumberDisplay';
 import Icon from '../common/Icon';
 
@@ -17,8 +18,11 @@ function ComparisonChart({ customerTotal, ourOfferTotal, savings }) {
   const ourOfferPercentage = maxValue > 0 ? (ourOfferTotal / maxValue) * 100 : 0;
 
   return (
-    <div 
+    <motion.div 
       className="comparison-chart-v2"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
       {/* Header med icon */}
       <div className="comparison-chart-v2__header">
@@ -27,14 +31,19 @@ function ComparisonChart({ customerTotal, ourOfferTotal, savings }) {
           <h4 className="comparison-chart-v2__title">Visuel Sammenligning</h4>
         </div>
         {Math.abs(savings) > 0 && (
-          <div className={`comparison-chart-v2__badge ${isPositiveSavings ? 'comparison-chart-v2__badge--positive' : 'comparison-chart-v2__badge--negative'}`}>
+          <motion.div 
+            className={`comparison-chart-v2__badge ${isPositiveSavings ? 'comparison-chart-v2__badge--positive' : 'comparison-chart-v2__badge--negative'}`}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30, delay: 0.8 }}
+          >
             <Icon 
               name={isPositiveSavings ? 'checkCircle' : 'warning'} 
               size={16} 
               style={{ marginRight: '6px' }} 
             />
             {isPositiveSavings ? 'Besparelse' : 'Forskel'}
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -55,27 +64,39 @@ function ComparisonChart({ customerTotal, ourOfferTotal, savings }) {
           </div>
 
           <div className="comparison-chart-v2__bar-container">
-            <div 
+            <motion.div 
               className="comparison-chart-v2__bar comparison-chart-v2__bar--customer"
-              style={{ width: `${customerPercentage}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${customerPercentage}%` }}
+              transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
             >
               <div className="comparison-chart-v2__bar-fill comparison-chart-v2__bar-fill--customer" />
               <div className="comparison-chart-v2__bar-glow comparison-chart-v2__bar-glow--customer" />
-              <span className="comparison-chart-v2__bar-percentage">
+              <motion.span 
+                className="comparison-chart-v2__bar-percentage"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2 }}
+              >
                 {customerPercentage.toFixed(0)}%
-              </span>
-            </div>
+              </motion.span>
+            </motion.div>
           </div>
         </div>
 
         {/* VS divider */}
-        <div className="comparison-chart-v2__vs">
+        <motion.div 
+          className="comparison-chart-v2__vs"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, type: "spring" }}
+        >
           <div className="comparison-chart-v2__vs-line" />
           <div className="comparison-chart-v2__vs-icon">
             <Icon name="zap" size={28} />
           </div>
           <div className="comparison-chart-v2__vs-line" />
-        </div>
+        </motion.div>
 
         {/* Our offer column */}
         <div 
@@ -92,24 +113,34 @@ function ComparisonChart({ customerTotal, ourOfferTotal, savings }) {
           </div>
 
           <div className="comparison-chart-v2__bar-container">
-            <div 
+            <motion.div 
               className="comparison-chart-v2__bar comparison-chart-v2__bar--offer"
-              style={{ width: `${ourOfferPercentage}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${ourOfferPercentage}%` }}
+              transition={{ duration: 1, ease: "easeOut", delay: 0.8 }} // Start later than customer bar
             >
               <div className="comparison-chart-v2__bar-fill comparison-chart-v2__bar-fill--offer" />
               <div className="comparison-chart-v2__bar-glow comparison-chart-v2__bar-glow--offer" />
-              <span className="comparison-chart-v2__bar-percentage">
+              <motion.span 
+                className="comparison-chart-v2__bar-percentage"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.8 }}
+              >
                 {ourOfferPercentage.toFixed(0)}%
-              </span>
-            </div>
+              </motion.span>
+            </motion.div>
           </div>
         </div>
       </div>
 
       {/* Savings highlight */}
       {Math.abs(savings) > 0 && (
-        <div 
+        <motion.div 
           className={`comparison-chart-v2__savings ${isPositiveSavings ? 'comparison-chart-v2__savings--positive' : 'comparison-chart-v2__savings--negative'}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, type: "spring" }}
         >
           <div className="comparison-chart-v2__savings-content">
             <div className="comparison-chart-v2__savings-icon">
@@ -141,14 +172,16 @@ function ComparisonChart({ customerTotal, ourOfferTotal, savings }) {
 
           {/* Savings bar indicator */}
           <div className="comparison-chart-v2__savings-bar-container">
-            <div 
+            <motion.div 
               className={`comparison-chart-v2__savings-bar ${isPositiveSavings ? 'comparison-chart-v2__savings-bar--positive' : 'comparison-chart-v2__savings-bar--negative'}`}
-              style={{ width: `${savingsPercentage}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${savingsPercentage}%` }}
+              transition={{ duration: 1, ease: "easeOut", delay: 2.0 }}
             >
               <div className="comparison-chart-v2__savings-fill" />
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       <style>{`
@@ -498,7 +531,7 @@ function ComparisonChart({ customerTotal, ourOfferTotal, savings }) {
           }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }
 
