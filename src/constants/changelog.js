@@ -3,9 +3,31 @@
  * Holder styr på versioner og nye features
  */
 
-export const CURRENT_VERSION = '2.1.0';
+export const CURRENT_VERSION = '2.2.0';
 
 export const CHANGELOG = [
+  {
+    version: '2.2.0',
+    date: 'Januar 2026',
+    title: 'Performance & UI Update',
+    features: [
+      {
+        icon: 'zap',
+        title: 'TypeScript Motor',
+        description: 'Hele beregningsmotoren er nu drevet af TypeScript for 100% præcision og stabilitet.'
+      },
+      {
+        icon: 'play',
+        title: 'Flydende Animationer',
+        description: 'Framer Motion er tilføjet for at give en mere levende oplevelse med animerede grafer og interaktive kort.'
+      },
+      {
+        icon: 'smartphone',
+        title: 'Mobil Optimering',
+        description: 'Ny sticky bund-bar og responsive tabeller gør appen perfekt til tablets og telefoner.'
+      }
+    ]
+  },
   {
     version: '2.1.0',
     date: 'Januar 2026',

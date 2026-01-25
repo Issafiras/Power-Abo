@@ -1,7 +1,7 @@
 {
   "name": "power-calculator-app",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.2.0",
   "type": "module",
   "description": "Mobilabonnement og streaming beregner med React og Vite",
   "scripts": {
