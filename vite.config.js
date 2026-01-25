@@ -47,14 +47,6 @@ export default defineConfig({
       output: {
         // Split vendors og app kode
         manualChunks: (id) => {
-          // React core - sjældent ændret, god cache-kandidat
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
-            return 'react-vendor';
-          }
-          // Øvrige node_modules
-          if (id.includes('node_modules/')) {
-            return 'vendor';
-          }
           // Data filer - planer og streaming services
           if (id.includes('/data/plans') || id.includes('/data/streamingServices')) {
             return 'app-data';
@@ -62,6 +54,10 @@ export default defineConfig({
           // Utilities og beregninger
           if (id.includes('/utils/calculations/') || id.includes('/utils/powerApi')) {
             return 'app-utils';
+          }
+          // Alt fra node_modules ryger i én vendor chunk for at undgå init-problemer
+          if (id.includes('node_modules')) {
+            return 'vendor';
           }
         },
         // Optimerede filnavne for bedre caching
