@@ -1,4 +1,4 @@
-# Power Abo Beregner 2.1 🚀
+# Power Abo Beregner 2.2 🚀
 
 **Det ultimative salgsværktøj til POWER-huset.**
 
@@ -6,45 +6,34 @@ Dette værktøj transformerer kompleksiteten ved mobilabonnementer, bredbånd og
 
 ---
 
-## 🔥 Nye Features i v2.1
+## 🔥 Nye Features i v2.2 (Januar 2026)
 
-### 📱 Effektiv Hardware Pris (TCO)
-Vis kunden den *reelle* pris på deres nye iPhone eller Samsung.
-- Beregneren trækker automatisk 6 måneders besparelse fra telefonens pris.
-- Resultat: En markant lavere pris, der gør det nemmere at lukke hardware-salget.
+### 🏗️ TypeScript Motor
+Hele beregningsmotoren er nu fuldt migreret til **TypeScript**.
+- Sikrer 100% præcision i prisberegninger.
+- Fanger fejl i datatyper (f.eks. forkerte prisformater) før de når kunden.
+- Gør koden ekstremt robust og nem at vedligeholde.
 
-### ♻️ RePOWER Indbytning
-Integreret indbytningsberegner.
-- Indtast værdien af kundens gamle enhed direkte i flowet.
-- Beløbet modregnes med det samme i totalprisen som en kontant rabat.
+### 🎨 Flydende Animationer (Framer Motion)
+Brugeroplevelsen har fået et stort løft med moderne animationer.
+- **Voksende Grafer:** Se besparelsen vokse frem visuelt.
+- **Interaktive Kort:** Abonnementskort reagerer på berøring og mus for en premium følelse.
+- **Smooth transitions:** Alle overgange mellem streaming-tjenester og kurv-ændringer sker nu flydende.
 
-### 📲 QR Deling ("Tag tilbuddet med hjem")
-Kunden skal lige tænke over det? Intet problem.
-- Klik på **Del** ikonet i toppen.
-- Kunden scanner QR-koden.
-- Hele beregningen åbner på kundens egen telefon – præcis som den ser ud på din skærm.
-- Ingen installation, ingen login, ingen server. Ren magi.
-
-### ⚡ Lynhurtig & Offline
-- **Ingen ventetid:** Vi har fjernet den gamle database-backend.
-- **Lokal:** Alt kører 100% i browseren.
-- **PWA:** Kan installeres som en app på iPad/PC og virker uden internet.
+### 📱 Mobil-optimering & Sticky Summary
+Designet specifikt til butikkens tablets og sælgernes telefoner.
+- **Sticky Bottom Bar:** Hav altid kundens aktuelle besparelse og din indtjening lige ved hånden, uanset hvor langt du scroller.
+- **Swipe-venlige tabeller:** Horisontal scroll på sammenligninger sikrer læsbarhed på alle skærmstørrelser.
+- **Touch-optimering:** Alle knapper følger WCAG AAA standarder for touch-størrelse (min. 44px).
 
 ---
 
-## 🛠️ Funktioner
+## 📱 Kernefeatures fra v2.1
 
-### For Sælgeren
-- **EAN Søgning:** Lynhurtigt opslag af produkter via Power.dk integration.
-- **Indtjenings-overblik:** Tryk `F8` for at se din provision på den valgte løsning (skjult for kunden).
-- **Auto-Match:** Systemet foreslår automatisk den bedste pakke baseret på kundens nuværende forbrug.
-- **CBB MIX:** Automatisk håndtering af komplekse streaming-regler (2-8 tjenester).
-- **Familierabat:** Telenors samlerabat beregnes automatisk.
-
-### For Kunden
-- **Visuelt Overblik:** Grafer og simple tal, der er til at forstå.
-- **Præsentations-mode (`Ctrl + P`):** Skjuler alt "sælger-støj" og viser kun det, kunden skal forholde sig til.
-- **Besparelse:** Krystalklar visning af besparelse over 6 måneder.
+- **Effektiv Hardware Pris (TCO):** Trækker 6 måneders besparelse fra hardwareprisen.
+- **♻️ RePOWER Indbytning:** Integreret indbytningsberegner.
+- **📲 QR Deling:** Lad kunden scanne en kode og tage hele beregningen med hjem.
+- **⚡ 100% Offline:** Kører udelukkende i browseren uden brug af database.
 
 ---
 
@@ -64,12 +53,12 @@ Spar tid med disse pro-genveje:
 
 ## 👨‍💻 Teknisk Info (For Udviklere)
 
-Applikationen er en moderne **Single Page Application (SPA)** bygget på React 18.
+Applikationen er en moderne **Single Page Application (SPA)** bygget på React 18 og TypeScript.
 
-- **Stack:** React, Vite 5, CSS Modules.
-- **State:** React Context + useReducer (Redux-like pattern uden boilerplate).
-- **Persistence:** LocalStorage (Ingen backend/database kræves).
-- **Sharing:** URL-baseret state encoding (LZ-string/Base64) via `src/utils/share.js`.
+- **Stack:** React, Vite 5, TypeScript, Framer Motion.
+- **State:** React Context + useReducer.
+- **Persistence:** LocalStorage.
+- **Testing:** Vitest (67+ unit tests validerer alle beregninger).
 
 ### Installation
 
@@ -83,21 +72,6 @@ npm install
 # 3. Start udviklingsserver
 npm run dev
 ```
-
-### Projektstruktur
-
-- `src/data/plans.js`: Her ligger alle abonnementer og priser. Ret her for at opdatere priser.
-- `src/utils/calculations/`: Al forretningslogik (rabatter, TCO, provision).
-- `src/components/`: Genbrugelige UI-komponenter.
-- `GEMINI.md`: Detaljeret arkitekturbeskrivelse for AI-assistenter.
-
----
-
-## 🔒 Privatliv & Sikkerhed
-
-- **Ingen Tracking:** Vi gemmer ingen data om kunden på nogen server.
-- **Lokalt:** Alt bliver i browserens `localStorage`.
-- **Sletning:** Data slettes automatisk, når du trykker "Nulstil alt" eller rydder browserdata.
 
 ---
 
