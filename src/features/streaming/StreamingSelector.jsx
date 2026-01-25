@@ -23,6 +23,8 @@ function StreamingSelector({
   onBroadbandCostChange,
   originalItemPrice,
   onOriginalItemPriceChange,
+  buybackAmount = 0,
+  onBuybackAmountChange = null,
   onEANSearch,
   isSearching = false,
   onAutoSelectSolution = null,
@@ -112,7 +114,7 @@ function StreamingSelector({
     .filter(s => selectedStreaming.includes(s.id))
     .reduce((sum, s) => sum + (s.price || 0), 0);
   const monthlyTotal = (customerMobileCost || 0) + (broadbandCost || 0) + streamingTotal;
-  const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0);
+  const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0) - (buybackAmount || 0);
 
   const handleMobileCostChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
@@ -122,6 +124,13 @@ function StreamingSelector({
   const handleOriginalItemPriceChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     onOriginalItemPriceChange(value);
+  };
+
+  const handleBuybackAmountChange = (e) => {
+    const value = parseFloat(e.target.value) || 0;
+    if (onBuybackAmountChange) {
+      onBuybackAmountChange(value);
+    }
   };
 
   const handleBroadbandCostChange = (e) => {
@@ -577,6 +586,31 @@ function StreamingSelector({
           />
           <span className="currency-suffix">kr</span>
         </div>
+      </div>
+
+      {/* RePOWER Indbytning input */}
+      <div className="buyback-amount-input">
+        <label htmlFor="buyback-amount" className="input-label">
+          <Icon name="refresh" size={18} className="icon-inline icon-spacing-xs" />
+          RePOWER Indbytning
+        </label>
+        <div className="input-with-currency">
+          <input
+            id="buyback-amount"
+            name="buyback-amount"
+            type="number"
+            className="input"
+            placeholder="0"
+            value={buybackAmount || ''}
+            onChange={handleBuybackAmountChange}
+            min="0"
+            step="10"
+          />
+          <span className="currency-suffix">kr.</span>
+        </div>
+        <p className="input-help-text">
+          Indtast værdien fra RePOWER-vurderingen
+        </p>
       </div>
 
       {/* Produkt søgning */}

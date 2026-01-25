@@ -4,14 +4,15 @@
  */
 
 import React from 'react';
+import { CURRENT_VERSION } from '../../constants/changelog';
 
-function Footer() {
+function Footer({ onVersionClick }) {
   return (
     <footer className="app-footer fade-in-up delay-200" role="contentinfo">
       <div className="container app-footer__content">
         <div className="app-footer__text">
           <p className="app-footer__copyright">
-            © 2025 Issa Firas. Alle rettigheder forbeholdes.
+            © 2025 Issa Firas. Alle rettigheder forbeholdes. v{CURRENT_VERSION}
           </p>
           <p className="app-footer__purpose">
             Udviklet til POWER butik – kun til internt brug.

@@ -89,6 +89,13 @@ export function useAppActions() {
     }
   }, [dispatch]);
 
+  const setBuybackAmount = useCallback((value) => {
+    const validation = validatePrice(value);
+    if (validation.valid) {
+      dispatch({ type: ActionTypes.SET_BUYBACK_AMOUNT, payload: validation.value });
+    }
+  }, [dispatch]);
+
   // Streaming actions
   const toggleStreaming = useCallback((serviceId) => {
     dispatch({ type: ActionTypes.TOGGLE_STREAMING, payload: serviceId });
@@ -203,6 +210,7 @@ export function useAppActions() {
     setOriginalItemPrice,
     setExistingBrands,
     setBroadbandCost,
+    setBuybackAmount,
     
     // Streaming
     toggleStreaming,

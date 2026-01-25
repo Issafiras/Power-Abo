@@ -18,7 +18,9 @@ const Footer = lazy(() => import('./components/layout/Footer'));
 const PresentationView = lazy(() => import('./features/presentation/PresentationView'));
 const HelpGuide = lazy(() => import('./components/common/HelpGuide'));
 const AdminDashboard = lazy(() => import('./features/admin/AdminDashboard'));
+const WhatsNewModal = lazy(() => import('./components/common/WhatsNewModal'));
 import { plans } from './data/plans';
+import { CURRENT_VERSION } from './constants/changelog';
 import { toast } from './utils/toast';
 import Icon from './components/common/Icon';
 import COPY from './constants/copy';
@@ -30,6 +32,21 @@ function App() {
   const actions = useAppActions();
   const [showAdmin, setShowAdmin] = useState(false);
   const [includeBroadband, setIncludeBroadband] = useState(false);
+  const [plansExpanded, setPlansExpanded] = useState(false);
+  const [showWhatsNew, setShowWhatsNew] = useState(false);
+
+  // Tjek for ny version ved mount
+  useEffect(() => {
+    const lastSeenVersion = localStorage.getItem('power_calculator_last_version');
+    if (lastSeenVersion !== CURRENT_VERSION) {
+      // Vis "Hvad er nyt" efter et kort ophold
+      const timer = setTimeout(() => {
+        setShowWhatsNew(true);
+        localStorage.setItem('power_calculator_last_version', CURRENT_VERSION);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
   // Scroll to cart handler
   const handleScrollToCart = useCallback(() => {
     // Use setTimeout to ensure DOM is ready
@@ -203,6 +220,7 @@ function App() {
           cartCount={state.cartCount}
           onCartClick={handleScrollToCart}
           onHelpClick={actions.toggleHelpGuide}
+          onWhatsNewClick={() => setShowWhatsNew(true)}
           onAdminToggle={() => setShowAdmin(!showAdmin)}
           showAdmin={showAdmin}
         />
@@ -235,6 +253,8 @@ function App() {
                   onNumberOfLinesChange={actions.setNumberOfLines}
                   originalItemPrice={state.originalItemPrice}
                   onOriginalItemPriceChange={actions.setOriginalItemPrice}
+                  buybackAmount={state.buybackAmount}
+                  onBuybackAmountChange={actions.setBuybackAmount}
                   onEANSearch={handleEANSearch}
                   isSearching={state.isSearching}
                   onAutoSelectSolution={handleAutoSelectSolution}
@@ -256,50 +276,65 @@ function App() {
           <section id="plans-section" className="section">
             <div className="section-shell">
               <div className="plans-section">
-                <div className="section-header">
-                  <h2 className="section-header__title icon-with-text">
-                    <Icon name="smartphone" size={24} className="icon-inline icon-spacing-md" />
-                    {COPY.titles.selectPlans}
-                  </h2>
-                  <p className="section-header__subtitle">
-                    {COPY.titles.selectPlansSubtitle}
-                  </p>
+                <div 
+                  className="section-header clickable" 
+                  onClick={() => setPlansExpanded(!plansExpanded)}
+                  style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <div>
+                    <h2 className="section-header__title icon-with-text">
+                      <Icon name="smartphone" size={24} className="icon-inline icon-spacing-md" />
+                      {COPY.titles.selectPlans}
+                    </h2>
+                    <p className="section-header__subtitle">
+                      {COPY.titles.selectPlansSubtitle}
+                    </p>
+                  </div>
+                  <Icon 
+                    name={plansExpanded ? "chevronUp" : "chevronDown"} 
+                    size={24} 
+                    className={`transition-transform ${plansExpanded ? 'rotate-180' : ''}`} 
+                  />
                 </div>
 
-                <Suspense fallback={<div className="skeleton" style={{ height: '60px', marginBottom: 'var(--spacing-md)' }} />}>
-                  <ProviderTabs
-                    activeProvider={state.activeProvider}
-                    onProviderChange={actions.setActiveProvider}
-                    searchQuery={state.searchQuery}
-                    onSearch={actions.setSearchQuery}
-                    includeBroadband={includeBroadband}
-                    onIncludeBroadbandChange={setIncludeBroadband}
-                  />
-                </Suspense>
+                {plansExpanded && (
+                  <div className="fade-in">
+                    <Suspense fallback={<div className="skeleton" style={{ height: '60px', marginBottom: 'var(--spacing-md)' }} />}>
+                      <ProviderTabs
+                        activeProvider={state.activeProvider}
+                        onProviderChange={actions.setActiveProvider}
+                        searchQuery={state.searchQuery}
+                        onSearch={actions.setSearchQuery}
+                        includeBroadband={includeBroadband}
+                        onIncludeBroadbandChange={setIncludeBroadband}
+                      />
+                    </Suspense>
 
-                {/* Plans grid */}
-                {filteredPlans.length > 0 ? (
-                  <div className="plans-grid grid grid-cols-3">
-                    {filteredPlans.map((plan) => (
-                      <Suspense key={plan.id} fallback={<div className="skeleton" style={{ height: '400px' }} />}>
-                        <PlanCard
-                          plan={plan}
-                          onAddToCart={handleAddToCart}
-                          onCBBMixToggle={actions.setCBBMixEnabled}
-                          onCBBMixCountChange={actions.setCBBMixCount}
-                          cbbMixEnabled={state.cbbMixEnabled[plan.id] || false}
-                          cbbMixCount={state.cbbMixCount[plan.id] || 2}
-                        />
-                      </Suspense>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="empty-state">
-                    <Icon name="search" size={48} className="empty-state-icon opacity-30" />
-                    <p className="text-lg font-semibold">{COPY.labels.noPlansFound}</p>
-                    <p className="text-secondary">
-                      {COPY.labels.noPlansFoundHelp}
-                    </p>
+                    {/* Plans grid */}
+                    {filteredPlans.length > 0 ? (
+                      <div className="plans-grid grid grid-cols-3">
+                        {filteredPlans.map((plan) => (
+                          <Suspense key={plan.id} fallback={<div className="skeleton" style={{ height: '400px' }} />}>
+                            <PlanCard
+                              plan={plan}
+                              onAddToCart={handleAddToCart}
+                              onCBBMixToggle={actions.setCBBMixEnabled}
+                              onCBBMixCountChange={actions.setCBBMixCount}
+                              cbbMixEnabled={state.cbbMixEnabled[plan.id] || false}
+                              cbbMixCount={state.cbbMixCount[plan.id] || 2}
+                            />
+                          </Suspense>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="empty-state">
+                        <Icon name="search" size={48} className="empty-state-icon opacity-30" />
+                        <p className="text-lg font-semibold">{COPY.labels.noPlansFound}</p>
+                        <p className="text-secondary">
+                          {COPY.labels.noPlansFoundHelp}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -334,6 +369,7 @@ function App() {
                   broadbandCost={state.broadbandCost}
                   numberOfLines={state.numberOfLines}
                   originalItemPrice={state.originalItemPrice}
+                  buybackAmount={state.buybackAmount}
                   cashDiscount={state.cashDiscount}
                   onCashDiscountChange={actions.setCashDiscount}
                   cashDiscountLocked={state.cashDiscountLocked}
@@ -375,8 +411,15 @@ function App() {
 
       {/* Footer */}
       <Suspense fallback={null}>
-        <Footer />
+        <Footer onVersionClick={() => setShowWhatsNew(true)} />
       </Suspense>
+
+      {/* "Hvad er nyt" Modal */}
+      {showWhatsNew && (
+        <Suspense fallback={null}>
+          <WhatsNewModal onClose={() => setShowWhatsNew(false)} />
+        </Suspense>
+      )}
 
       <style>{`
         .app {

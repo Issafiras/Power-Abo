@@ -36,6 +36,7 @@ function ComparisonPanel({
   broadbandCost,
   numberOfLines = 1,
   originalItemPrice,
+  buybackAmount = 0,
   cashDiscount,
   onCashDiscountChange,
   cashDiscountLocked,
@@ -94,9 +95,10 @@ function ComparisonPanel({
       cartItems,
       notIncludedStreamingCost,
       0,
-      originalItemPrice
+      originalItemPrice,
+      buybackAmount
     ),
-    [cartItems, notIncludedStreamingCost, originalItemPrice]
+    [cartItems, notIncludedStreamingCost, originalItemPrice, buybackAmount]
   );
 
   // Beregn total indtjening - memoized (engangsindtjening, ikke løbende)
@@ -159,9 +161,10 @@ function ComparisonPanel({
       cartItems,
       notIncludedStreamingCost,
       cashDiscount,
-      originalItemPrice
+      originalItemPrice,
+      buybackAmount
     ),
-    [cartItems, notIncludedStreamingCost, cashDiscount, originalItemPrice]
+    [cartItems, notIncludedStreamingCost, cashDiscount, originalItemPrice, buybackAmount]
   );
 
   // Besparelse - memoized
@@ -370,6 +373,8 @@ function ComparisonPanel({
           isPositiveSavings={isPositiveSavings}
           streamingCoverage={streamingCoverage}
           cashDiscount={cashDiscount}
+          originalItemPrice={originalItemPrice}
+          buybackAmount={buybackAmount}
         />
       )}
 
@@ -382,6 +387,7 @@ function ComparisonPanel({
           notIncludedStreamingCost={notIncludedStreamingCost}
           cashDiscount={cashDiscount}
           originalItemPrice={originalItemPrice}
+          buybackAmount={buybackAmount}
         />
       )}
 

@@ -3,10 +3,12 @@
  * Elegant, minimalistisk header med bedre navigation og accessibility
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Icon from '../common/Icon';
 import Button from '../ui/Button';
 import { resetAll } from '../../utils/storage';
+
+const ShareModal = lazy(() => import('../common/ShareModal'));
 
 function Header({
   onReset,
@@ -16,11 +18,13 @@ function Header({
   cartCount = 0,
   onCartClick,
   onHelpClick,
+  onWhatsNewClick,
   onAdminToggle,
   showAdmin = false
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -164,6 +168,18 @@ function Header({
                 <Icon name="help" size={20} />
               </button>
 
+              {/* Whats New Button */}
+              {onWhatsNewClick && (
+                <button
+                  onClick={onWhatsNewClick}
+                  className="header-modern__action-btn"
+                  title="Hvad er nyt?"
+                  aria-label="Se nyheder"
+                >
+                  <Icon name="sparkles" size={20} />
+                </button>
+              )}
+
               {/* Presentation Toggle */}
               <button
                 onClick={onPresentationToggle}
@@ -172,6 +188,16 @@ function Header({
                 aria-label="Skift præsentationsvisning"
               >
                 <Icon name="presentation" size={20} />
+              </button>
+
+              {/* Share Button */}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="header-modern__action-btn"
+                title="Del tilbud (QR)"
+                aria-label="Del tilbud via QR kode"
+              >
+                <Icon name="share" size={20} />
               </button>
 
               {/* Coverage Map Button */}
@@ -332,6 +358,13 @@ function Header({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <Suspense fallback={null}>
+          <ShareModal onClose={() => setShowShareModal(false)} />
+        </Suspense>
       )}
     </>
   );

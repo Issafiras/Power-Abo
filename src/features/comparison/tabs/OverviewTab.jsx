@@ -4,17 +4,48 @@
  */
 
 import React from 'react';
-import { formatCurrency, calculateSavings } from '../../../utils/calculations';
+import { formatCurrency, calculateSavings, calculateEffectiveHardwarePrice } from '../../../utils/calculations';
 import Icon from '../../../components/common/Icon';
 import NumberDisplay from '../../../components/common/NumberDisplay';
 
-function OverviewTab({ customerTotals, ourOfferTotals, savings, isPositiveSavings, streamingCoverage, cashDiscount }) {
+function OverviewTab({ customerTotals, ourOfferTotals, savings, isPositiveSavings, streamingCoverage, cashDiscount, originalItemPrice, buybackAmount = 0 }) {
   const savingsPercentage = customerTotals.sixMonth > 0 
     ? ((savings / customerTotals.sixMonth) * 100).toFixed(1)
     : 0;
 
+  const effectiveHardwarePrice = originalItemPrice > 0 
+    ? calculateEffectiveHardwarePrice(originalItemPrice, savings) 
+    : 0;
+
   return (
     <div className="detailed-comparison">
+      {originalItemPrice > 0 && isPositiveSavings && (
+        <div className="effective-hardware-card">
+          <div className="effective-hardware-header">
+            <Icon name="smartphone" size={20} className="effective-hardware-icon" />
+            <div className="effective-hardware-title">Effektiv hardware pris</div>
+          </div>
+          <div className="effective-hardware-content">
+            <div className="effective-hardware-original">
+              <span className="label">Førpris:</span>
+              <span className="value strike">{formatCurrency(originalItemPrice)}</span>
+            </div>
+            <div className="effective-hardware-arrow">
+              <Icon name="arrowRight" size={16} />
+            </div>
+            <div className="effective-hardware-new">
+              <span className="label">Din pris:</span>
+              <span className="value highlight">
+                {effectiveHardwarePrice <= 0 ? '0 kr.' : formatCurrency(effectiveHardwarePrice)}
+              </span>
+            </div>
+          </div>
+          <div className="effective-hardware-footer">
+            Du sparer {formatCurrency(savings - buybackAmount)} på dit abonnement over 6 mdr. samt får {formatCurrency(buybackAmount)} i indbytning her og nu.
+          </div>
+        </div>
+      )}
+
       <div className="comparison-summary-bar">
         <div className="summary-item customer-summary">
           <div className="summary-label">Kundens total</div>
@@ -111,6 +142,16 @@ function OverviewTab({ customerTotals, ourOfferTotals, savings, isPositiveSaving
               <div className="highlight-content">
                 <div className="highlight-title">Kontant rabat</div>
                 <div className="highlight-value text-success">-{formatCurrency(cashDiscount)}</div>
+              </div>
+            </div>
+          )}
+
+          {buybackAmount > 0 && (
+            <div className="highlight-item success">
+              <Icon name="refresh" size={18} className="highlight-icon" />
+              <div className="highlight-content">
+                <div className="highlight-title">RePOWER indbytning</div>
+                <div className="highlight-value text-success">-{formatCurrency(buybackAmount)}</div>
               </div>
             </div>
           )}

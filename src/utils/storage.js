@@ -17,7 +17,8 @@ const STORAGE_KEYS = {
   EXISTING_BRANDS: 'power_calculator_existing_brands',
   BROADBAND_COST: 'power_calculator_broadband_cost',
   FREE_SETUP: 'power_calculator_free_setup',
-  TELMORE_AB_GROUP: 'power_calculator_telmore_ab_group'
+  TELMORE_AB_GROUP: 'power_calculator_telmore_ab_group',
+  BUYBACK_AMOUNT: 'power_calculator_buyback_amount'
 };
 
 /**
@@ -190,6 +191,15 @@ export function saveTelmoreAbGroup(group) {
 
 export function loadTelmoreAbGroup() {
   return getItem(STORAGE_KEYS.TELMORE_AB_GROUP, null);
+}
+
+// RePOWER indbytning funktioner
+export function saveBuybackAmount(amount) {
+  setItem(STORAGE_KEYS.BUYBACK_AMOUNT, amount);
+}
+
+export function loadBuybackAmount() {
+  return getItem(STORAGE_KEYS.BUYBACK_AMOUNT, 0);
 }
 
 // Reset alt

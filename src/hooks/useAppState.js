@@ -21,6 +21,7 @@ export function useAppState() {
     originalItemPrice: state.customer.originalItemPrice,
     existingBrands: state.customer.existingBrands,
     broadbandCost: state.customer.broadbandCost,
+    buybackAmount: state.customer.buybackAmount,
 
     // Streaming state
     selectedStreaming: state.streaming.selected,

@@ -32,8 +32,12 @@ import {
   loadExistingBrands,
   saveFreeSetup,
   loadFreeSetup,
+  saveBuybackAmount,
+  loadBuybackAmount,
   resetAll as resetStorage
 } from '../utils/storage';
+import { decodeState } from '../utils/share';
+import { plans } from '../data/plans';
 
 // Initial state
 const initialState = {
@@ -46,7 +50,8 @@ const initialState = {
     numberOfLines: 1,
     originalItemPrice: 0,
     existingBrands: [],
-    broadbandCost: 0
+    broadbandCost: 0,
+    buybackAmount: 0
   },
   streaming: {
     selected: [],
@@ -176,6 +181,12 @@ function appReducer(state, action) {
       return {
         ...state,
         customer: { ...state.customer, broadbandCost: action.payload }
+      };
+
+    case ActionTypes.SET_BUYBACK_AMOUNT:
+      return {
+        ...state,
+        customer: { ...state.customer, buybackAmount: action.payload }
       };
 
     // Streaming actions
@@ -344,6 +355,50 @@ export function AppProvider({ children }) {
   
   // Load state from localStorage on mount
   useEffect(() => {
+    // Tjek efter URL parameter først
+    const urlParams = new URLSearchParams(window.location.search);
+    const offerParam = urlParams.get('offer');
+    
+    let decodedState = null;
+    if (offerParam) {
+      const decoded = decodeState(offerParam);
+      if (decoded) {
+        // Rekonstruer cart items fra IDs
+        const items = decoded.cartItems.map(item => {
+          const plan = plans.find(p => p.id === item.id);
+          if (!plan) return null;
+          return {
+            plan,
+            quantity: item.q,
+            cbbMixEnabled: item.mix,
+            cbbMixCount: item.cnt
+          };
+        }).filter(Boolean);
+
+        decodedState = {
+          cart: {
+            items,
+            count: items.reduce((sum, item) => sum + item.quantity, 0)
+          },
+          customer: {
+            mobileCost: decoded.customerMobileCost,
+            numberOfLines: decoded.numberOfLines,
+            originalItemPrice: decoded.originalItemPrice,
+            existingBrands: [], // Reset brands ved deling
+            broadbandCost: decoded.broadbandCost,
+            buybackAmount: decoded.buybackAmount
+          },
+          streaming: {
+            selected: decoded.selectedStreaming,
+            total: 0 // Beregnes i komponenten
+          }
+        };
+        
+        // Fjern offer param fra URL for clean look
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
     const savedState = {
       cart: {
         items: loadCart(),
@@ -354,7 +409,8 @@ export function AppProvider({ children }) {
         numberOfLines: loadNumberOfLines(),
         originalItemPrice: loadOriginalItemPrice(),
         existingBrands: loadExistingBrands(),
-        broadbandCost: loadBroadbandCost()
+        broadbandCost: loadBroadbandCost(),
+        buybackAmount: loadBuybackAmount()
       },
       streaming: {
         selected: loadSelectedStreaming(),
@@ -380,13 +436,16 @@ export function AppProvider({ children }) {
       }
     };
     
-    // Calculate cart count
-    savedState.cart.count = savedState.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    // Brug decoded state hvis tilgængelig, ellers localStorage
+    const finalState = decodedState ? { ...savedState, ...decodedState } : savedState;
     
-    dispatch({ type: ActionTypes.LOAD_STATE, payload: savedState });
+    // Calculate cart count
+    finalState.cart.count = finalState.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    
+    dispatch({ type: ActionTypes.LOAD_STATE, payload: finalState });
     
     // Set theme on document
-    document.documentElement.setAttribute('data-theme', savedState.settings.theme);
+    document.documentElement.setAttribute('data-theme', finalState.settings.theme);
   }, []);
   
   // Track if initial load is complete to avoid saving during mount
@@ -413,6 +472,7 @@ export function AppProvider({ children }) {
       saveOriginalItemPrice(state.customer.originalItemPrice);
       saveExistingBrands(state.customer.existingBrands);
       saveBroadbandCost(state.customer.broadbandCost);
+      saveBuybackAmount(state.customer.buybackAmount);
       
       // Streaming
       saveSelectedStreaming(state.streaming.selected);
@@ -441,6 +501,7 @@ export function AppProvider({ children }) {
     state.customer.originalItemPrice,
     state.customer.existingBrands,
     state.customer.broadbandCost,
+    state.customer.buybackAmount,
     state.streaming.selected,
     state.settings.cashDiscount,
     state.settings.cashDiscountLocked,

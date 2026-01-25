@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 import { formatCurrency, calculateSavings, calculateTelenorFamilyDiscount } from '../../../utils/calculations';
 import Icon from '../../../components/common/Icon';
 
-function PriceBreakdownTab({ cartItems, customerTotals, ourOfferTotals, streamingCost, notIncludedStreamingCost, cashDiscount, originalItemPrice }) {
+function PriceBreakdownTab({ cartItems, customerTotals, ourOfferTotals, streamingCost, notIncludedStreamingCost, cashDiscount, originalItemPrice, buybackAmount = 0 }) {
   const savings = useMemo(() => 
     calculateSavings(customerTotals.sixMonth, ourOfferTotals.sixMonth),
     [customerTotals.sixMonth, ourOfferTotals.sixMonth]
@@ -125,6 +125,13 @@ function PriceBreakdownTab({ cartItems, customerTotals, ourOfferTotals, streamin
           <div className="breakdown-note">
             <Icon name="info" size={16} className="icon-inline icon-spacing-xs" />
             <span>Engangsbetaling på {formatCurrency(originalItemPrice)} er inkluderet i totalen</span>
+          </div>
+        )}
+
+        {buybackAmount > 0 && (
+          <div className="breakdown-note success">
+            <Icon name="refresh" size={16} className="icon-inline icon-spacing-xs" />
+            <span>RePOWER indbytning på {formatCurrency(buybackAmount)} er trukket fra totalen</span>
           </div>
         )}
       </div>

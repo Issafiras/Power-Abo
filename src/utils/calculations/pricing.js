@@ -209,9 +209,10 @@ export function calculateCustomerTotal(currentMobileCost, streamingCost, origina
  * @param {number} streamingCost - Ikke-inkluderet streaming-omkostning pr. måned
  * @param {number} cashDiscount - Kontant rabat (engangsrabat, valgfri)
  * @param {number} originalItemPrice - Varens pris inden rabat (engangspris, valgfri)
+ * @param {number} buybackAmount - RePOWER indbytningspris (engangsrabat, valgfri)
  * @returns {Object} { monthly: number, sixMonth: number, telenorDiscount: number }
  */
-export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0) {
+export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscount = 0, originalItemPrice = 0, buybackAmount = 0) {
     if (!cartItems || cartItems.length === 0) {
         return { monthly: 0, sixMonth: 0, telenorDiscount: 0 };
     }
@@ -244,19 +245,19 @@ export function calculateOurOfferTotal(cartItems, streamingCost = 0, cashDiscoun
     // Tilføj ikke-inkluderet streaming (månedlig × 6)
     const streamingSixMonth = streamingCost * 6;
 
-    // ===== TRIN 4: KONTANT RABAT =====
-    // Total før kontant rabat
-    const beforeCashDiscount = afterFamilyDiscount + streamingSixMonth;
+    // ===== TRIN 4: KONTANT RABAT OG INDBYTNING =====
+    // Total før kontant rabat og indbytning
+    const beforeEngangsRabatter = afterFamilyDiscount + streamingSixMonth;
 
-    // Træk kontant rabat fra (engangsrabat, kun hvis aktiv)
-    const afterCashDiscount = beforeCashDiscount - (cashDiscount || 0);
+    // Træk kontant rabat og indbytning fra (engangsrabat)
+    const afterEngangsRabatter = beforeEngangsRabatter - (cashDiscount || 0) - (buybackAmount || 0);
 
     // ===== TRIN 5: ENGANGSBETALINGER =====
     // Tilføj varens pris (engangsbetaling)
-    const sixMonth = afterCashDiscount + (originalItemPrice || 0);
+    const sixMonth = afterEngangsRabatter + (originalItemPrice || 0);
 
     return {
-        monthly: afterCashDiscount / 6, // Månedlig beregnes uden engangsbetalinger (abonnementer + streaming - rabatter)
+        monthly: afterEngangsRabatter / 6, // Månedlig beregnes uden engangsbetalinger (abonnementer + streaming - rabatter)
         sixMonth: Math.max(0, sixMonth), // Må ikke være negativ
         telenorDiscount // Månedlig Telenor rabat (til visning)
     };
@@ -361,4 +362,14 @@ export function calculateMonthlyBreakdown(plan, quantity = 1) {
     }
 
     return monthlyPrices;
+}
+
+/**
+ * Beregn effektiv hardware pris efter besparelse
+ * @param {number} hardwarePrice - Original hardware pris
+ * @param {number} savings - Total besparelse (6 mdr)
+ * @returns {number} Effektiv pris
+ */
+export function calculateEffectiveHardwarePrice(hardwarePrice, savings) {
+    return (hardwarePrice || 0) - (savings || 0);
 }
