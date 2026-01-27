@@ -1380,8 +1380,8 @@ a:hover {
     font-size: var(--font-lg) !important;
     padding: var(--spacing-lg) var(--spacing-xl) !important;
     border: 2px solid rgba(255, 255, 255, 0.25) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
   }
 
   /* Stærkere pulsing på mobil når klar - Forbedret visuel feedback */

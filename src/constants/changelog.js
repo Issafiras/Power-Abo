@@ -3,9 +3,31 @@
  * Holder styr på versioner og nye features
  */
 
-export const CURRENT_VERSION = '2.2.0';
+export const CURRENT_VERSION = '2.3.0';
 
 export const CHANGELOG = [
+  {
+    version: '2.3.0',
+    date: 'Januar 2026',
+    title: 'Brain & Beauty Update',
+    features: [
+      {
+        icon: 'cpu',
+        title: 'Ny Smart Motor',
+        description: 'Vores abonnements-motor er blevet opgraderet. Den finder nu endnu bedre løsninger, regner smartere på kombinationer og prioriterer automatisk de stærkeste tilbud.'
+      },
+      {
+        icon: 'star',
+        title: 'Premium Design',
+        description: 'Streaming-vælgeren har fået et stort løft med nyt lækkert layout, bedre overblik over input-felter og en mere eksklusiv følelse inspireret af moderne retail.'
+      },
+      {
+        icon: 'database',
+        title: 'Opdateret Data',
+        description: 'CBB indtjening er justeret til præcise satser (400-900 kr.), og vi har ryddet op i gamle produkter. Tallene passer nu 100% med virkeligheden.'
+      }
+    ]
+  },
   {
     version: '2.2.0',
     date: 'Januar 2026',
