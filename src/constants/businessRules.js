@@ -8,12 +8,12 @@
 export const CAMPAIGN = {
     END_DATE: '2025-11-27',
     CBB_EXTRA_EARNINGS_THRESHOLD: 129,
-    CBB_EXTRA_EARNINGS_AMOUNT: 200,
+    CBB_EXTRA_EARNINGS_AMOUNT: 0, // Opdateret efter bruger-ønske (0 kr)
 };
 
 export const PRICING = {
     TELENOR_FAMILY_DISCOUNT: 50,
-    CBB_BASE_EARNINGS: 100,
+    CBB_BASE_EARNINGS: 0, // Opdateret efter bruger-ønske (0 kr)
     CBB_MIX_EARNINGS: 100,
     DEFAULT_STREAMING_PRICE: 100,
 };

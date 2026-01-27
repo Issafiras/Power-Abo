@@ -10,10 +10,10 @@ import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
 import CBBMixSelector from '../streaming/CBBMixSelector';
 
-function PlanCard({ 
-  plan, 
-  onAddToCart, 
-  onCBBMixToggle, 
+function PlanCard({
+  plan,
+  onAddToCart,
+  onCBBMixToggle,
   onCBBMixCountChange,
   cbbMixEnabled = false,
   cbbMixCount = 2
@@ -57,7 +57,7 @@ function PlanCard({
           {hasIntroPrice ? (
             <>
               <div className="price-intro">
-                <motion.span 
+                <motion.span
                   className="price-amount"
                   layoutId={`price-${plan.id}`}
                 >
@@ -77,7 +77,7 @@ function PlanCard({
                   {formatCurrency(plan.originalPrice)}/md.
                 </div>
               )}
-              <motion.span 
+              <motion.span
                 className="price-amount"
                 layoutId={`price-${plan.id}`}
               >
@@ -135,10 +135,10 @@ function PlanCard({
         <div className="cbb-mix-section">
           <div className="mix-toggle">
             <label className="mix-toggle-label">
-              <input 
+              <input
                 id={`cbb-mix-${plan.id}`}
                 name={`cbb-mix-${plan.id}`}
-                type="checkbox" 
+                type="checkbox"
                 checked={cbbMixEnabled}
                 onChange={(e) => onCBBMixToggle && onCBBMixToggle(plan.id, e.target.checked)}
                 className="mix-checkbox"
@@ -147,7 +147,7 @@ function PlanCard({
               <span className="mix-toggle-text">Tilføj CBB MIX</span>
             </label>
           </div>
-          
+
           {cbbMixEnabled && (
             <Suspense fallback={<div className="skeleton" style={{ height: '100px', margin: 'var(--spacing-md)' }} />}>
               <motion.div
@@ -170,7 +170,7 @@ function PlanCard({
       <motion.button
         onClick={() => onAddToCart(plan)}
         className="btn btn-premium plan-add-btn"
-        style={{ 
+        style={{
           background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)`,
           boxShadow: `0 0 20px ${brandColor}40`
         }}
@@ -209,7 +209,20 @@ function PlanCard({
         }
 
         .plan-card:hover::before {
-          opacity: 0.4;
+          opacity: 0.6;
+        }
+
+        .broadband-card {
+           backdrop-filter: blur(var(--blur-md));
+           -webkit-backdrop-filter: blur(var(--blur-md));
+           box-shadow: var(--shadow-glass);
+           border: 1px solid var(--glass-border);
+           transition: transform var(--transition-base), box-shadow var(--transition-base);
+        }
+
+        .broadband-card:hover {
+           box-shadow: var(--shadow-floating);
+           border-color: var(--glass-border-strong);
         }
 
         .broadband-header {
@@ -293,8 +306,9 @@ function PlanCard({
         .price-family {
           margin-top: var(--spacing-xs);
           padding: var(--spacing-xs) var(--spacing-sm);
-          background: rgba(2, 7, 178, 0.1);
+          background: rgba(255, 255, 255, 0.1);
           border-radius: var(--radius-sm);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .plan-add-btn {
@@ -346,13 +360,13 @@ function PlanCard({
           gap: var(--spacing-sm);
           cursor: pointer;
           font-weight: var(--font-semibold);
-          color: #410016;
+          color: var(--color-cbb);
         }
 
         .mix-checkbox {
           width: 18px;
           height: 18px;
-          accent-color: #410016;
+          accent-color: var(--color-cbb);
         }
 
         .mix-toggle-text {
@@ -368,41 +382,41 @@ function PlanCard({
 
         /* Provider-specifikke farver */
         .broadband-card--broadband {
-          background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-          border: 2px solid rgba(79, 70, 229, 0.3);
+          background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary) 100%);
+          border: 1px solid var(--glass-border);
           color: white;
         }
 
         .broadband-card--broadband .plan-add-btn {
-          background: linear-gradient(135deg, #4F46E5, #7C3AED);
+          background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
           color: white;
           border: none;
-          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+          box-shadow: 0 4px 12px var(--color-primary-glow);
         }
 
         .broadband-card--telenor,
         .broadband-card--telenor-b2b {
-          background: linear-gradient(135deg, #0207b2 0%, #3b4fdb 100%);
-          border: 2px solid rgba(2, 7, 178, 0.3);
+          background: linear-gradient(135deg, var(--color-telenor-dark) 0%, var(--color-telenor) 100%);
+          border: 1px solid var(--glass-border);
           color: white;
         }
 
         .broadband-card--telenor .plan-add-btn,
         .broadband-card--telenor-b2b .plan-add-btn {
-          background: linear-gradient(135deg, #0207b2, #3b4fdb);
+          background: linear-gradient(135deg, var(--color-telenor), var(--color-telenor-light));
           color: white;
           border: none;
-          box-shadow: 0 4px 12px rgba(2, 7, 178, 0.3);
+          box-shadow: 0 4px 12px var(--color-telenor-glow);
         }
 
         .broadband-card--telmore {
-          background: linear-gradient(135deg, #002788 0%, #003fa3 100%);
-          border: 2px solid rgba(0, 39, 136, 0.3);
+          background: linear-gradient(135deg, #002788 0%, #0045B5 100%); /* Beholder Telmore blå da den ikke er i vars */
+          border: 1px solid var(--glass-border);
           color: white;
         }
 
         .broadband-card--telmore .plan-add-btn {
-          background: linear-gradient(135deg, #002788, #003fa3);
+          background: linear-gradient(135deg, #002788, #0045B5);
           color: white;
           border: none;
           box-shadow: 0 4px 12px rgba(0, 39, 136, 0.3);
@@ -410,7 +424,7 @@ function PlanCard({
 
         .broadband-card--cbb {
           background: linear-gradient(135deg, #410016 0%, #6b0024 100%);
-          border: 2px solid rgba(65, 0, 22, 0.3);
+          border: 1px solid var(--glass-border);
           color: white;
         }
 

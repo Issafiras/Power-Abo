@@ -3,7 +3,7 @@
  * Global styles og layout
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import './variables.css';
 @import './components.css';
 /* CBB MIX styles integrated into components.css */
@@ -12,6 +12,7 @@
 @import './admin.css';
 /* Compact styles integrated below */
 /* Mobile styles integrated below */
+@import './streaming-fix.css';
 
 /* Reset og base styles */
 *,
@@ -29,8 +30,10 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 100px;
   overflow-x: hidden;
-  overflow-y: scroll;  /* Always show scrollbar to prevent layout shift */
-  height: 100%;  /* Ensure html takes full height */
+  overflow-y: scroll;
+  /* Always show scrollbar to prevent layout shift */
+  height: 100%;
+  /* Ensure html takes full height */
   transition: background-color var(--transition-theme), color var(--transition-fast);
 }
 
@@ -79,15 +82,18 @@ body {
   color: var(--text-primary);
   background-color: var(--bg-primary);
   /* Removed min-height: 100vh to prevent double scrolling - #root handles it */
-  height: 100%;  /* Match html height */
+  height: 100%;
+  /* Match html height */
   overflow-x: hidden;
-  overflow-y: auto;  /* Body handles scrolling */
+  overflow-y: auto;
+  /* Body handles scrolling */
   position: relative;
   font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.01em;      /* Reduced for better readability */
+  letter-spacing: -0.01em;
+  /* Reduced for better readability */
   font-variant-ligatures: common-ligatures;
   font-weight: var(--font-normal);
   font-size: var(--font-base);
@@ -111,16 +117,23 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  overflow-y: visible;  /* Let body handle scrolling */
+  overflow-y: visible;
+  /* Let body handle scrolling */
 }
 
 
 /* Premium Typography - Tech-Ikon Precision - Mathematical Ratios */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
   margin-bottom: var(--spacing-sm);
-  letter-spacing: -0.02em;        /* Reduced for clarity */
+  letter-spacing: -0.02em;
+  /* Reduced for clarity */
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -131,34 +144,46 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: var(--font-5xl);          /* 48px */
-  font-weight: var(--font-extrabold);  /* 800 - Større forskel */
+  font-size: var(--font-5xl);
+  /* 48px */
+  font-weight: var(--font-extrabold);
+  /* 800 - Større forskel */
   line-height: var(--leading-tight);
-  letter-spacing: var(--letter-spacing-tighter);  /* -0.05em */
+  letter-spacing: var(--letter-spacing-tighter);
+  /* -0.05em */
   margin-bottom: var(--spacing-lg);
 }
 
 h2 {
-  font-size: var(--font-3xl);          /* 32px */
-  font-weight: var(--font-bold);       /* 700 - Tydelig forskel */
+  font-size: var(--font-3xl);
+  /* 32px */
+  font-weight: var(--font-bold);
+  /* 700 - Tydelig forskel */
   line-height: var(--leading-tight);
-  letter-spacing: var(--letter-spacing-tight);    /* -0.025em */
+  letter-spacing: var(--letter-spacing-tight);
+  /* -0.025em */
   margin-bottom: var(--spacing-md);
 }
 
 h3 {
-  font-size: var(--font-2xl);          /* 24px */
-  font-weight: var(--font-semibold);   /* 600 - Tydelig forskel */
+  font-size: var(--font-2xl);
+  /* 24px */
+  font-weight: var(--font-semibold);
+  /* 600 - Tydelig forskel */
   line-height: var(--leading-tight);
-  letter-spacing: var(--letter-spacing-normal);   /* 0 */
+  letter-spacing: var(--letter-spacing-normal);
+  /* 0 */
   margin-bottom: var(--spacing-sm);
 }
 
 h4 {
-  font-size: var(--font-xl);           /* 20px */
-  font-weight: var(--font-semibold);   /* 600 */
+  font-size: var(--font-xl);
+  /* 20px */
+  font-weight: var(--font-semibold);
+  /* 600 */
   line-height: var(--leading-tight);
-  letter-spacing: var(--letter-spacing-normal);   /* 0 */
+  letter-spacing: var(--letter-spacing-normal);
+  /* 0 */
   margin-bottom: var(--spacing-sm);
 }
 
@@ -180,7 +205,8 @@ h6 {
 
 p {
   margin-bottom: var(--spacing-sm);
-  line-height: var(--leading-normal);  /* 1.5x for WCAG AAA readability */
+  line-height: var(--leading-normal);
+  /* 1.5x for WCAG AAA readability */
   color: var(--text-secondary);
   letter-spacing: -0.005em;
   font-size: var(--font-base);
@@ -242,6 +268,7 @@ a:hover {
 }
 
 @media (max-width: 900px) {
+
   .grid-cols-2,
   .grid-cols-3 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -250,30 +277,35 @@ a:hover {
   /* Fuld bredde på mobil - fjern container begrænsninger */
   .container {
     max-width: 100%;
-    padding-left: var(--spacing-md);  /* Øget padding: 20px for bedre luft */
+    padding-left: var(--spacing-md);
+    /* Øget padding: 20px for bedre luft */
     padding-right: var(--spacing-md);
   }
-  
+
   /* Ultra minimal section spacing på mobil - minimal scroll */
   .section {
-    padding: var(--spacing-sm) 0;  /* Ultra minimal vertikal spacing */
+    padding: var(--spacing-sm) 0;
+    /* Ultra minimal vertikal spacing */
     margin-bottom: var(--spacing-sm);
   }
-  
+
   /* Optimal grid gaps på mobil - forbedret spacing */
   .grid,
   .plans-grid,
   .streaming-grid {
-    gap: var(--spacing-md);  /* Forbedret gap for bedre separation */
+    gap: var(--spacing-md);
+    /* Forbedret gap for bedre separation */
   }
 
   .cart-comparison-grid {
-    gap: var(--spacing-md);  /* Forbedret gap for bedre separation */
+    gap: var(--spacing-md);
+    /* Forbedret gap for bedre separation */
   }
-  
+
   /* Ultra minimal container padding */
   .container {
-    padding-left: var(--spacing-xs);  /* Ultra minimal: 4px */
+    padding-left: var(--spacing-xs);
+    /* Ultra minimal: 4px */
     padding-right: var(--spacing-xs);
   }
 }
@@ -312,53 +344,162 @@ a:hover {
 }
 
 /* Spacing utilities */
-.m-0 { margin: 0; }
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
+.m-0 {
+  margin: 0;
+}
 
-.p-sm { padding: var(--spacing-sm); }
-.p-md { padding: var(--spacing-md); }
-.p-lg { padding: var(--spacing-lg); }
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+  margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+
+.p-sm {
+  padding: var(--spacing-sm);
+}
+
+.p-md {
+  padding: var(--spacing-md);
+}
+
+.p-lg {
+  padding: var(--spacing-lg);
+}
 
 /* Text utilities */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.text-center {
+  text-align: center;
+}
 
-.text-xs { font-size: var(--font-xs); }
-.text-sm { font-size: var(--font-sm); }
-.text-base { font-size: var(--font-base); }
-.text-lg { font-size: var(--font-lg); }
-.text-xl { font-size: var(--font-xl); }
-.text-2xl { font-size: var(--font-2xl); }
-.text-3xl { font-size: var(--font-3xl); }
-.text-4xl { font-size: var(--font-4xl); }
-.text-5xl { font-size: var(--font-5xl); }
+.text-left {
+  text-align: left;
+}
 
-.font-light { font-weight: 300; }
-.font-normal { font-weight: var(--font-normal); }
-.font-medium { font-weight: var(--font-medium); }
-.font-semibold { font-weight: var(--font-semibold); }
-.font-bold { font-weight: var(--font-bold); }
-.font-extrabold { font-weight: var(--font-extrabold); }
-.font-black { font-weight: 900; }
+.text-right {
+  text-align: right;
+}
 
-.font-mono { font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace; }
-.font-sans { font-family: var(--font-family-base); }
+.text-xs {
+  font-size: var(--font-xs);
+}
 
-.tracking-tight { letter-spacing: -0.025em; }
-.tracking-normal { letter-spacing: 0; }
-.tracking-wide { letter-spacing: 0.025em; }
+.text-sm {
+  font-size: var(--font-sm);
+}
 
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-muted { color: var(--text-muted); }
-.text-success { color: var(--color-success); }
-.text-danger { color: var(--color-danger); }
+.text-base {
+  font-size: var(--font-base);
+}
+
+.text-lg {
+  font-size: var(--font-lg);
+}
+
+.text-xl {
+  font-size: var(--font-xl);
+}
+
+.text-2xl {
+  font-size: var(--font-2xl);
+}
+
+.text-3xl {
+  font-size: var(--font-3xl);
+}
+
+.text-4xl {
+  font-size: var(--font-4xl);
+}
+
+.text-5xl {
+  font-size: var(--font-5xl);
+}
+
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: var(--font-normal);
+}
+
+.font-medium {
+  font-weight: var(--font-medium);
+}
+
+.font-semibold {
+  font-weight: var(--font-semibold);
+}
+
+.font-bold {
+  font-weight: var(--font-bold);
+}
+
+.font-extrabold {
+  font-weight: var(--font-extrabold);
+}
+
+.font-black {
+  font-weight: 900;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+}
+
+.font-sans {
+  font-family: var(--font-family-base);
+}
+
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+.tracking-normal {
+  letter-spacing: 0;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
 
 /* Minimal animations - kun de mest nødvendige */
 .fade-in {
@@ -366,8 +507,13 @@ a:hover {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .fade-in-up {
@@ -379,6 +525,7 @@ a:hover {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -387,12 +534,10 @@ a:hover {
 
 /* Loading skeleton */
 .skeleton {
-  background: linear-gradient(
-    120deg,
-    color-mix(in srgb, var(--glass-bg) 60%, transparent) 0%,
-    rgba(255, 255, 255, 0.16) 48%,
-    color-mix(in srgb, var(--glass-bg) 80%, transparent) 100%
-  );
+  background: linear-gradient(120deg,
+      color-mix(in srgb, var(--glass-bg) 60%, transparent) 0%,
+      rgba(255, 255, 255, 0.16) 48%,
+      color-mix(in srgb, var(--glass-bg) 80%, transparent) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: var(--radius-md);
@@ -402,8 +547,13 @@ a:hover {
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* Selection */
@@ -415,7 +565,8 @@ a:hover {
 /* Focus visible - WCAG AAA Compliance */
 *:focus-visible {
   outline: 3px solid var(--color-orange);
-  outline-offset: 4px;              /* Increased for better visibility */
+  outline-offset: 4px;
+  /* Increased for better visibility */
   box-shadow: 0 0 0 6px rgba(255, 107, 26, 0.3);
   transition: outline var(--transition-fast), box-shadow var(--transition-fast);
   /* Ensure focus is always visible */
@@ -435,7 +586,8 @@ a:hover {
 /* Mobile performance optimizations - Fix flimmer/flakken - Ultra simple */
 @media (max-width: 900px) {
   html {
-    scroll-padding-top: 64px;  /* Opdateret til ny header højde */
+    scroll-padding-top: 64px;
+    /* Opdateret til ny header højde */
   }
 
   /* Deaktiver alle baggrunds-animationer på mobil */
@@ -445,24 +597,24 @@ a:hover {
     transform: none !important;
     opacity: 0.4 !important;
   }
-  
+
   body::after {
     animation: none !important;
     opacity: 0.01 !important;
   }
-  
+
   /* Deaktiver meshFloat animation på mobil */
   #root::before {
     display: none !important;
   }
-  
+
   /* Reducer backdrop-filter kraftigt for bedre performance */
   .glass-card,
   .glass-card-no-hover {
     -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
     backdrop-filter: blur(8px) saturate(120%) !important;
   }
-  
+
   /* Fjern ALLE hover-effekter på mobil - helt statisk */
   .glass-card:hover {
     transform: none !important;
@@ -470,7 +622,7 @@ a:hover {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
     filter: none !important;
   }
-  
+
   /* Fjern alle button hover-effekter */
   .btn-primary:hover:not(:disabled),
   .btn-secondary:hover:not(:disabled),
@@ -480,14 +632,14 @@ a:hover {
     will-change: auto !important;
     filter: none !important;
   }
-  
+
   /* Deaktiver alle gradient animationer */
   .btn-primary,
   .btn-premium {
     animation: none !important;
     background-position: 0% 50% !important;
   }
-  
+
   /* Deaktiver alle fade-in animationer */
   .fade-in,
   .fade-in-up,
@@ -500,72 +652,73 @@ a:hover {
     opacity: 1 !important;
     transform: none !important;
   }
-  
+
   /* Deaktiver stagger animationer */
   .stagger-item {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  
+
   /* Deaktiver reveal-on-scroll */
   .reveal-on-scroll,
-  .reveal-stagger > * {
+  .reveal-stagger>* {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
   }
-  
+
   /* Reducer shimmer animationer - helt statisk */
   .skeleton {
     animation: none !important;
     background: var(--glass-bg) !important;
   }
-  
+
   .skeleton::after {
     display: none !important;
   }
-  
+
   /* Deaktiver text-gradient animation */
   .text-gradient {
     animation: none !important;
     background-position: 0% 50% !important;
   }
-  
-        /* Reducer alle transitions til meget korte - Performance First */
-        *,
-        *::before,
-        *::after {
-          transition-duration: 0.15s !important;  /* Slightly longer for smoother feel */
-          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-  
+
+  /* Reducer alle transitions til meget korte - Performance First */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.15s !important;
+    /* Slightly longer for smoother feel */
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
   /* Deaktiver pulse animationer */
   .pulse,
   .pulse-glow {
     animation: none !important;
   }
-  
+
   /* Deaktiver floating animationer */
   .floating,
   .glow-animation {
     animation: none !important;
   }
-  
+
   /* Deaktiver header animationer på mobil */
   .header.fade-in-down {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  
+
   /* Deaktiver logo animationer */
   .app-logo.bounce-in {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  
+
   /* Reducer header backdrop-filter yderligere */
   .header {
     -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
@@ -627,12 +780,12 @@ a:hover {
 }
 
 /* Fjernet stagger reveal - for bedre performance */
-.reveal-stagger > * {
+.reveal-stagger>* {
   opacity: 0;
   transition: opacity 0.2s ease-out;
 }
 
-.reveal-stagger.is-visible > * {
+.reveal-stagger.is-visible>* {
   opacity: 1;
 }
 
@@ -672,7 +825,7 @@ a:hover {
   outline: 4px solid rgba(255, 255, 255, 0.8);
   outline-offset: 3px;
   transform: scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(255, 109, 31, 0.6),
     0 0 32px rgba(255, 109, 31, 0.4);
 }
@@ -693,7 +846,8 @@ a:hover {
 .btn:not(:disabled):hover,
 .plan-card:hover {
   will-change: transform;
-  transform: translateZ(0);  /* Force GPU layer */
+  transform: translateZ(0);
+  /* Force GPU layer */
 }
 
 /* Remove will-change when not needed to save memory */
@@ -748,8 +902,13 @@ a:hover {
 
 /* Simple fade in - Ultra hurtig */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .fade-in {
@@ -767,6 +926,7 @@ a:hover {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -775,17 +935,20 @@ a:hover {
 
 /* Shimmer for skeleton - Let og hurtig */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
-  background: linear-gradient(
-    120deg,
-    color-mix(in srgb, var(--glass-bg) 60%, transparent) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    color-mix(in srgb, var(--glass-bg) 60%, transparent) 100%
-  );
+  background: linear-gradient(120deg,
+      color-mix(in srgb, var(--glass-bg) 60%, transparent) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      color-mix(in srgb, var(--glass-bg) 60%, transparent) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   will-change: background-position;
@@ -793,6 +956,7 @@ a:hover {
 
 /* Reduced motion - deaktiver alle animationer */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -821,6 +985,7 @@ a:hover {
 
 /* Mobile: Deaktiver alle animationer for bedre performance */
 @media (max-width: 900px) {
+
   .fade-in,
   .fade-in-up {
     animation: none !important;
@@ -1143,6 +1308,7 @@ a:hover {
 
 /* Touch target improvements - WCAG AAA compliance */
 @media (max-width: 900px) {
+
   /* Ensure all interactive elements meet 44x44px minimum */
   button,
   a,
@@ -1172,7 +1338,8 @@ a:hover {
   textarea,
   select {
     min-height: 48px;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
+    /* Prevent zoom on iOS */
     padding: var(--spacing-md);
   }
 
@@ -1188,7 +1355,8 @@ a:hover {
   /* Better spacing for thumb reach */
   .plans-grid {
     gap: var(--spacing-md) !important;
-    padding-bottom: var(--spacing-2xl) !important; /* Extra space for bottom buttons */
+    padding-bottom: var(--spacing-2xl) !important;
+    /* Extra space for bottom buttons */
   }
 
   /* Lower buttons positioning */
@@ -1207,7 +1375,8 @@ a:hover {
       0 -4px 24px rgba(0, 0, 0, 0.4),
       0 -8px 40px rgba(255, 109, 31, 0.5),
       0 0 0 2px rgba(255, 109, 31, 0.2) !important;
-    min-height: 56px !important; /* Extra large for primary action - WCAG AAA */
+    min-height: 56px !important;
+    /* Extra large for primary action - WCAG AAA */
     font-size: var(--font-lg) !important;
     padding: var(--spacing-lg) var(--spacing-xl) !important;
     border: 2px solid rgba(255, 255, 255, 0.25) !important;
@@ -1226,13 +1395,16 @@ a:hover {
   }
 
   @keyframes mobilePulse {
-    0%, 100% {
+
+    0%,
+    100% {
       box-shadow:
         0 -4px 24px rgba(0, 0, 0, 0.4),
         0 -8px 40px rgba(255, 109, 31, 0.7),
         0 0 0 4px rgba(255, 109, 31, 0.4),
         0 0 0 8px rgba(255, 109, 31, 0.2);
     }
+
     50% {
       box-shadow:
         0 -6px 32px rgba(0, 0, 0, 0.5),
@@ -1249,7 +1421,7 @@ a:hover {
   }
 
   /* Target react-hot-toast container */
-  body > div[data-sonner-toaster] {
+  body>div[data-sonner-toaster] {
     width: calc(100% - 2 * var(--spacing-md)) !important;
     max-width: none !important;
     left: var(--spacing-md) !important;
@@ -1257,7 +1429,7 @@ a:hover {
     bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom)) !important;
   }
 
-  body > div[data-sonner-toaster] > div {
+  body>div[data-sonner-toaster]>div {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
@@ -1279,6 +1451,7 @@ a:hover {
 
 /* Reduced animation complexity on mobile */
 @media (max-width: 900px) {
+
   /* Simplify framer-motion animations */
   [data-reduce-motion] *,
   [data-reduce-motion] *::before,
@@ -1318,8 +1491,7 @@ a:hover {
   }
 
   /* Snap scrolling for better UX */
-  .streaming-grid > * {
+  .streaming-grid>* {
     scroll-snap-align: start;
   }
 }
-

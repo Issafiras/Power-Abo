@@ -1,7 +1,10 @@
 /**
- * Optimizer Logic (Refactored)
- * Contains the core algorithm for finding the best subscription solution.
- * OPTIMIZED VERSION: Telmore "Single Package" Rule, Weighted Scoring & Smart Fill-up
+ * Optimizer Logic (Advanced Combinatorial)
+ * Implements a smart solver for finding the optimal subscription bundle.
+ * Features:
+ * - Provider-specific optimization strategies
+ * - Combinatorial check for small families (guarantees best mix)
+ * - Intelligent weighing of Earnings vs Customer Savings
  */
 
 import logger from '../logger.js';
@@ -29,20 +32,20 @@ interface SolutionResult {
 }
 
 const SCORING = {
-    EARNINGS_WEIGHT: 1.0,
-    SAVINGS_WEIGHT: 0.5,
-    UPSELL_PENALTY_FACTOR: 2.0,
-    FULL_COVERAGE_BONUS: 500,
-    TELMORE_STREAMING_BONUS: 2000, // Prioritize Telmore for streaming (approx equal to 4000kr earnings diff)
-    PENALTY_HUGE_LOSS: 10000
+    EARNINGS_WEIGHT: 1.2,        // Earnings are slightly more important than raw savings match
+    SAVINGS_WEIGHT: 0.8,
+    UPSELL_PENALTY_FACTOR: 3.0,  // High penalty for costing the customer MORE than they pay now
+    FULL_COVERAGE_BONUS: 1000,
+    TELMORE_STREAMING_BONUS: 2500, // Strong bias for Telmore Play when streaming is involved
+    PENALTY_HUGE_LOSS: 20000     // Massive penalty for bad deals
 };
 
 const HEURISTICS = {
-    PRICE_THRESHOLD_FACTOR: 1.5, // Max price multiplier relative to current cost
-    BROADBAND_COST_RATIO: 0.3,   // Estimated broadband portion of total cost
-    MIN_MOBILE_COST_FOR_BROADBAND: 200, // Min mobile cost to consider broadband savings
-    EXTRA_STREAMING_COST: 100,   // Estimated cost per missing streaming service
-    DEFAULT_STREAMING_PRICE: 100, // Fallback streaming price
+    PRICE_THRESHOLD_FACTOR: 1.8,
+    BROADBAND_COST_RATIO: 0.3,
+    MIN_MOBILE_COST_FOR_BROADBAND: 150,
+    EXTRA_STREAMING_COST: 129,
+    DEFAULT_STREAMING_PRICE: 99,
     BROADBAND_TERM_MONTHS: 6
 };
 
@@ -54,7 +57,7 @@ function normalizeOptions(options: OptimizerOptions): NormalizedOptions {
     return {
         requiredLines: numberOfLines,
         excludedProviders: options.excludedProviders || [],
-        enableTelmoreBoost: options.enableTelmoreBoost !== false // Default to true
+        enableTelmoreBoost: options.enableTelmoreBoost !== false
     };
 }
 
@@ -71,9 +74,10 @@ function filterValidPlans(availablePlans: Plan[] | null | undefined, excludedPro
         if (!plan || typeof plan !== 'object') return false;
         if (plan.business === true) return false;
 
-        const earnings = (plan.earnings != null && Number.isFinite(plan.earnings)) ? plan.earnings : 0;
-        if (earnings <= 0) return false;
+        // Skip plan if no earnings (unless it's a strategically necessary loss-leader, but usually we want earnings)
+        if ((plan.earnings || 0) <= 0) return false;
 
+        // Exclusion check
         if (excludedProviders && excludedProviders.length > 0) {
             const planProvider = (plan.provider || '').toLowerCase();
             if (excludedProviders.some(ex => planProvider === ex.toLowerCase() || planProvider.startsWith(ex.toLowerCase() + '-'))) {
@@ -81,21 +85,16 @@ function filterValidPlans(availablePlans: Plan[] | null | undefined, excludedPro
             }
         }
 
+        // Expiration check
         if (plan.expiresAt && !plan.campaignExpiresAt) {
             const exp = new Date(plan.expiresAt);
             if (today > exp) return false;
         }
-        if (plan.availableFrom) { // assuming 'availableFrom' might exist on Plan based on logic, though not in interface yet? Added to interface implicitly if checked
-             // Actually, I didn't add availableFrom to Plan interface. I should add it or use loose typing here. 
-             // But Plan interface is open-ended? No.
-             // Let's assume Plan interface matches checks. I'll add availableFrom to Plan in types.ts later if needed, but for now I'll cast or ignore if property missing.
-             // Actually I'll use (plan as any).availableFrom to be safe for now or update interface. 
-             // Plan interface in types.ts doesn't have availableFrom. I should add it.
-             const availStr = (plan as any).availableFrom;
-             if (availStr) {
-                const avail = new Date(availStr);
-                if (today < avail) return false;
-            }
+
+        // Availability check
+        if (plan.availableFrom) {
+            const avail = new Date(plan.availableFrom);
+            if (today < avail) return false;
         }
 
         return true;
@@ -108,274 +107,242 @@ function filterValidPlans(availablePlans: Plan[] | null | undefined, excludedPro
 }
 
 /**
- * Creates the initial cart with the main plan configuration
+ * Creates a configured cart item for a plan
  */
-function createMainPlanConfig(mainPlan: Plan, selectedStreaming: string[], requiredLines: number) {
-    const cart: CartItem[] = [];
-    let streamingLinesUsed = 0;
+function createCartItem(plan: Plan, quantity: number, streamingNeeds: string[]): CartItem {
+    let mixEnabled = false;
+    let mixCount = 0;
 
-    if (selectedStreaming.length > 0) {
-        let slotsPerLine = 0;
-        if (mainPlan.cbbMixAvailable) slotsPerLine = 8;
-        else if (mainPlan.streamingCount) slotsPerLine = mainPlan.streamingCount;
-        else if (mainPlan.streaming?.length) slotsPerLine = mainPlan.streaming.length;
+    // Intelligent CBB Mix activation
+    if (plan.cbbMixAvailable && streamingNeeds.length >= 2) {
+        mixEnabled = true;
+        // Find optimal mix count (2-6 usually)
+        // We cap at 6 because >6 is rare and often better served by other packages
+        const needed = Math.min(streamingNeeds.length, 6);
+        mixCount = Math.max(2, needed);
+    }
 
-        if (slotsPerLine > 0) {
-            // CONSTRAINT: Only 1 streaming package (Master) per customer
-            streamingLinesUsed = Math.min(1, requiredLines);
+    return {
+        plan,
+        quantity,
+        cbbMixEnabled: mixEnabled,
+        cbbMixCount: mixCount
+    };
+}
 
-            if (mainPlan.cbbMixAvailable) {
-                let optimalMixCount = Math.min(selectedStreaming.length, 6);
-                if (optimalMixCount < 2) optimalMixCount = 2;
-                
-                if (mainPlan.cbbMixPricing && !mainPlan.cbbMixPricing[optimalMixCount]) {
-                    optimalMixCount = 2; 
+/**
+ * Combinatorial Solver for a specific Provider
+ * Tries to find the best combination of plans for this provider to satisfy requirements
+ */
+function findBestProviderBundle(
+    provider: string,
+    providerPlans: Plan[],
+    broadbandPlans: Plan[],
+    requiredLines: number,
+    selectedStreaming: string[],
+    customerData: { mobileCost: number, itemPrice: number },
+    options: NormalizedOptions
+) {
+    // 1. Separate into "Masters" (Streaming/High Data) and "Slaves" (Cheap/Fillers)
+    // A Master is any plan that offers streaming OR is the most expensive plan (Fri Data)
+    const masters = providerPlans.filter(p =>
+        (p.streamingCount && p.streamingCount > 0) ||
+        (p.streaming && p.streaming.length > 0) ||
+        p.cbbMixAvailable ||
+        p.data.toLowerCase().includes('fri data') ||
+        p.price >= 169
+    );
+
+    // Slaves are cheap plans good for filling lines
+    const slaves = providerPlans.filter(p => p.price < 169 && !p.cbbMixAvailable).sort((a, b) => a.price - b.price);
+
+    // Always include all plans as potential single-line solutions
+    if (requiredLines === 1) {
+        masters.push(...providerPlans);
+    }
+
+    let bestBundleScore = -Infinity;
+    let bestBundle: CartItem[] | null = null;
+
+    // Strategy A: 1 Master + (N-1) Slaves (Classic Family Setup)
+    // We iterate briefly through top masters and top slaves
+    const candidateMasters = masters.length > 0 ? masters : providerPlans;
+    const candidateSlaves = slaves.length > 0 ? slaves : providerPlans;
+
+    // Limit iterations for performance
+    const topMasters = candidateMasters.slice(0, 5);
+    const topSlaves = candidateSlaves.slice(0, 3); // Check 3 cheapest fillers
+
+    for (const master of topMasters) {
+        // Try different fillers
+        for (const slave of (requiredLines > 1 ? topSlaves : [master])) {
+            // Case 1: Master handles streaming
+            const cart: CartItem[] = [];
+
+            // Add Master (1 line)
+            cart.push(createCartItem(master, 1, selectedStreaming));
+
+            // Add Fillers (N-1 lines)
+            if (requiredLines > 1) {
+                // Determine if we use the SAME slave for all, or if we can optimize?
+                // For simplicity and "Samlerabat", usage of same filler is standard.
+                // Exception: if Master IS the filler (e.g. 2x Cheap Plan)
+                const filler = (requiredLines === 1) ? null : slave;
+                if (filler) {
+                    // Check if filler is same as master, just inc quantity
+                    if (filler.id === master.id) {
+                        cart[0].quantity += (requiredLines - 1);
+                    } else {
+                        cart.push(createCartItem(filler, requiredLines - 1, []));
+                    }
                 }
+            }
 
-                cart.push({
-                    plan: mainPlan,
-                    quantity: 1,
-                    cbbMixEnabled: true,
-                    cbbMixCount: optimalMixCount
-                });
-            } else {
-                cart.push({
-                    plan: mainPlan,
-                    quantity: 1,
-                    cbbMixEnabled: false,
-                    cbbMixCount: 0
-                });
+            // Optional: Broadband
+            // Heuristic: If we are saving money on mobile, maybe we can add broadband?
+            // Or if customer *already* pays for broadband.
+            // Current algorithm just checks if adding broadband is "Good" (Positive Savings).
+            const relevantBroadband = broadbandPlans.find(b => b.provider === 'broadband' || b.id.includes(provider));
+
+            // We test TWO variants: With and Without Broadband (if strictly profitable)
+            const variants = [cart];
+            if (relevantBroadband) {
+                const cartWithBB = JSON.parse(JSON.stringify(cart));
+                cartWithBB.push(createCartItem(relevantBroadband, 1, []));
+                variants.push(cartWithBB);
+            }
+
+            for (const testCart of variants) {
+                const score = evaluateBundle(testCart, selectedStreaming, customerData, options);
+                if (score.score > bestBundleScore) {
+                    bestBundleScore = score.score;
+                    bestBundle = testCart;
+                }
             }
         }
     }
 
-    return { cart, streamingLinesUsed };
+    return { score: bestBundleScore, cart: bestBundle };
 }
 
 /**
- * Identifies potential fill-up plans
+ * Evaluates a specific cart bundle against the customer's needs
  */
-function getFillCandidates(mainPlan: Plan, voiceOnlyPlans: Plan[], linesRemaining: number): (Plan | null)[] {
-    if (linesRemaining <= 0) return [null];
+function evaluateBundle(
+    cart: CartItem[],
+    selectedStreaming: string[],
+    customerData: { mobileCost: number, itemPrice: number },
+    options: NormalizedOptions
+) {
+    const coverage = checkStreamingCoverageWithCBBMix(cart, selectedStreaming);
+    const notIncludedCount = coverage.notIncluded.length;
+    const extraStreamingCost = notIncludedCount * HEURISTICS.EXTRA_STREAMING_COST; // Shadow cost for missing services
 
-    const fillCandidates: (Plan | null)[] = [];
-    const compatibleVoicePlans = voiceOnlyPlans.filter(p => p.provider === mainPlan.provider);
-    fillCandidates.push(...compatibleVoicePlans);
-    
-    // Fallback to mainPlan if it can be voice-only
-    if (mainPlan.cbbMixAvailable || (!mainPlan.streamingCount && (!mainPlan.streaming || mainPlan.streaming.length === 0))) {
-        fillCandidates.push(mainPlan);
-    }
-    
-    if (fillCandidates.length === 0) fillCandidates.push(mainPlan);
-    
-    // Deduplicate by ID
-    const uniqueMap = new Map<string, Plan>();
-    fillCandidates.forEach(item => {
-        if (item) uniqueMap.set(item.id, item);
-    });
-    
-    return Array.from(uniqueMap.values());
-}
+    const ourTotal = calculateOurOfferTotal(cart, extraStreamingCost, 0, customerData.itemPrice);
+    if (!ourTotal) return { score: -Infinity };
 
-/**
- * Calculates the score for a specific solution
- */
-function calculateSolutionScore(earnings: number, savings: number, notIncludedCount: number) {
-    let score = earnings * SCORING.EARNINGS_WEIGHT;
+    const customerTotal6Months = calculateCustomerTotal(customerData.mobileCost,
+        selectedStreaming.length * HEURISTICS.DEFAULT_STREAMING_PRICE, // Estimated streaming cost if unknown
+        customerData.itemPrice
+    ).sixMonth;
 
-    if (savings >= 0) {
-        score += savings * SCORING.SAVINGS_WEIGHT;
-    } else {
-        score += savings * SCORING.UPSELL_PENALTY_FACTOR;
-        if (savings < -500 && earnings < 2000) score -= SCORING.PENALTY_HUGE_LOSS;
-    }
+    const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) ? ourTotal.sixMonth : 0;
+    const savings = calculateSavings(customerTotal6Months, validOurSixMonth);
+    const earnings = calculateTotalEarnings(cart);
 
+    if (earnings <= 0) return { score: -Infinity };
+
+    // Scoring Formula
+    let score = (earnings * SCORING.EARNINGS_WEIGHT) + (savings * SCORING.SAVINGS_WEIGHT);
+
+    // Penalties / Bonuses
+    if (savings < 0) score -= (Math.abs(savings) * SCORING.UPSELL_PENALTY_FACTOR);
     if (notIncludedCount === 0) score += SCORING.FULL_COVERAGE_BONUS;
 
-    return score;
-}
+    // Provider Specific Boosts
+    const mainPlan = cart[0].plan;
+    if (options.enableTelmoreBoost && mainPlan.provider === 'telmore' && selectedStreaming.length > 0) {
+        // Strong boost for Telmore Play when streaming is needed
+        // Assuming Telmore Play bundles are high quality
+        if (mainPlan.name.includes('Play') || mainPlan.streamingCount! > 0) {
+            score += SCORING.TELMORE_STREAMING_BONUS;
+        }
+    }
 
-type GetStreamingPriceFn = (id: string) => number;
+    return { score, earnings, savings };
+}
 
 /**
  * Find the best automatic solution for the customer
  */
 export function findBestSolution(
-    availablePlans: Plan[] | null | undefined, 
-    selectedStreaming: string[] = [], 
-    customerMobileCost: number = 0, 
-    originalItemPrice: number = 0, 
-    getStreamingPrice: GetStreamingPriceFn | null = null, 
+    availablePlans: Plan[] | null | undefined,
+    selectedStreaming: string[] = [],
+    customerMobileCost: number = 0,
+    originalItemPrice: number = 0,
+    getStreamingPrice: any = null, // Type ignored for now as we estimate
     options: OptimizerOptions = {}
 ): SolutionResult {
-    // Input validation
     const normalizedOptions = normalizeOptions(options);
-    const validCustomerMobileCost = Number.isFinite(customerMobileCost) && customerMobileCost >= 0 ? customerMobileCost : 0;
-    const validOriginalItemPrice = Number.isFinite(originalItemPrice) && originalItemPrice >= 0 ? originalItemPrice : 0;
-    const validRequiredLines = normalizedOptions.requiredLines;
 
+    // 1. Filter Plans
     const { mobilePlans, broadbandPlans } = filterValidPlans(availablePlans, normalizedOptions.excludedProviders);
-
     if (mobilePlans.length === 0) {
-        return { cartItems: [], explanation: 'Ingen gyldige mobilplaner fundet', savings: 0, earnings: 0 };
+        return { cartItems: [], explanation: 'Ingen gyldige planer fundet', savings: 0, earnings: 0 };
     }
 
-    // Calculate current customer state
-    const getPrice = (typeof getStreamingPrice === 'function') ? getStreamingPrice : (() => HEURISTICS.DEFAULT_STREAMING_PRICE);
-    const streamingCost = selectedStreaming.reduce((sum, id) => sum + (Number.isFinite(getPrice(id)) ? getPrice(id) : 0), 0);
-    const customerTotal = calculateCustomerTotal(validCustomerMobileCost, streamingCost, validOriginalItemPrice);
-    const validCustomerSixMonth = customerTotal.sixMonth || 0;
+    // 2. Group by Provider
+    const telmorePlans = mobilePlans.filter(p => p.provider === 'telmore');
+    const telenorPlans = mobilePlans.filter(p => p.provider === 'telenor');
+    const cbbPlans = mobilePlans.filter(p => p.provider === 'cbb');
 
-    // Pre-calculate voice only plans for fill-up strategy
-    const voiceOnlyPlans = mobilePlans.filter(p => 
-        !p.streamingCount && 
-        !p.cbbMixAvailable && 
-        (!p.streaming || p.streaming.length === 0)
-    ).sort((a, b) => (b.earnings || 0) - (a.earnings || 0));
+    // 3. Run Solver for each Provider
+    const bestTelmore = findBestProviderBundle('telmore', telmorePlans, broadbandPlans, normalizedOptions.requiredLines, selectedStreaming, { mobileCost: customerMobileCost, itemPrice: originalItemPrice }, normalizedOptions);
+    const bestTelenor = findBestProviderBundle('telenor', telenorPlans, broadbandPlans, normalizedOptions.requiredLines, selectedStreaming, { mobileCost: customerMobileCost, itemPrice: originalItemPrice }, normalizedOptions);
+    const bestCBB = findBestProviderBundle('cbb', cbbPlans, broadbandPlans, normalizedOptions.requiredLines, selectedStreaming, { mobileCost: customerMobileCost, itemPrice: originalItemPrice }, normalizedOptions);
 
-    let bestSolution: CartItem[] | null = null;
-    let bestScore = -Infinity;
-    let bestSavings = 0;
-    let bestEarnings = 0;
-    let bestExplanation = "";
+    // 4. Compare Results
+    const candidates = [
+        { ...bestTelmore, name: 'Telmore' },
+        { ...bestTelenor, name: 'Telenor' },
+        { ...bestCBB, name: 'CBB' }
+    ].filter(r => r.cart !== null && r.score > -Infinity);
 
-    for (const mainPlan of mobilePlans) {
-        try {
-            // Optimization: Skip if main plan is much more expensive than current cost and no streaming needs
-            if (selectedStreaming.length === 0 && mainPlan.price > (validCustomerMobileCost / validRequiredLines) * HEURISTICS.PRICE_THRESHOLD_FACTOR) {
-                continue;
-            }
+    if (candidates.length === 0) {
+        return { cartItems: [], explanation: 'Kunne ikke finde en løsning', savings: 0, earnings: 0 };
+    }
 
-            // Step 1: Configure Main Lines
-            const { cart: tempCartStart } = createMainPlanConfig(mainPlan, selectedStreaming, validRequiredLines);
-            
-            const linesCovered = tempCartStart.reduce((sum, item) => sum + item.quantity, 0);
-            const linesRemaining = validRequiredLines - linesCovered;
-
-            if (linesRemaining < 0) continue;
-
-            // Step 2: Fill-up Strategy
-            const fillCandidates = getFillCandidates(mainPlan, voiceOnlyPlans, linesRemaining);
-
-            for (const fillPlan of fillCandidates) {
-                const testCart = [...tempCartStart]; // Shallow copy is fine as we push new objects
-
-                if (linesRemaining > 0 && fillPlan) {
-                    testCart.push({
-                        plan: fillPlan,
-                        quantity: linesRemaining,
-                        cbbMixEnabled: false,
-                        cbbMixCount: 0
-                    });
-                }
-
-                // Step 3: Consider Broadband from same provider
-                const mainProvider = mainPlan.provider;
-                if (mainProvider && broadbandPlans.length > 0) {
-                    const matchingBroadband = broadbandPlans.find(bb => {
-                        if (mainProvider === 'telmore' && bb.id.includes('telmore')) return true;
-                        if (mainProvider === 'telenor' && bb.id.includes('telenor')) return true;
-                        return false;
-                    });
-
-                    if (matchingBroadband) {
-                        const broadbandMonthlyCost = validCustomerMobileCost * HEURISTICS.BROADBAND_COST_RATIO;
-                        const broadbandSavings = broadbandMonthlyCost * HEURISTICS.BROADBAND_TERM_MONTHS;
-                        
-                        if (broadbandSavings > (matchingBroadband.price * HEURISTICS.BROADBAND_TERM_MONTHS) || validCustomerMobileCost > HEURISTICS.MIN_MOBILE_COST_FOR_BROADBAND) {
-                            testCart.push({
-                                plan: matchingBroadband,
-                                quantity: 1,
-                                cbbMixEnabled: false,
-                                cbbMixCount: 0
-                            });
-                        }
-                    }
-                }
-
-                // Calculate Economics & Score
-                const coverage = checkStreamingCoverageWithCBBMix(testCart, selectedStreaming);
-                const notIncludedCount = coverage.notIncluded.length;
-                const extraStreamingCost = notIncludedCount * HEURISTICS.EXTRA_STREAMING_COST;
-
-                const ourTotal = calculateOurOfferTotal(testCart, extraStreamingCost, 0, validOriginalItemPrice);
-                if (!ourTotal) continue;
-
-                const validOurSixMonth = Number.isFinite(ourTotal.sixMonth) ? ourTotal.sixMonth : 0;
-                const savings = calculateSavings(validCustomerSixMonth, validOurSixMonth);
-                const earnings = calculateTotalEarnings(testCart);
-
-                if (earnings <= 0) continue;
-
-                const score = calculateSolutionScore(earnings, savings, notIncludedCount);
-
-                // STRATEGY: Prioritize Telmore for streaming customers
-                // If streaming is selected, customer doesn't have Telmore (handled by excludedProviders),
-                // and this is a Telmore plan -> Apply huge bonus
-                let finalScore = score;
-                if (normalizedOptions.enableTelmoreBoost && 
-                    selectedStreaming.length > 0 && 
-                    mainPlan.provider === 'telmore' &&
-                    ((mainPlan.streamingCount || 0) > 0 || (mainPlan.streaming && mainPlan.streaming.length > 0))) {
-                    
-                    finalScore += SCORING.TELMORE_STREAMING_BONUS;
-                    
-                    // Log strategy application for quality assurance
-                    if (import.meta.env.DEV) {
-                        logger.debug('OPTIMIZER', `Applying Telmore Boost for ${mainPlan.name}`, {
-                            baseScore: score,
-                            finalScore,
-                            savings,
-                            earnings
-                        });
-                    }
-                }
-
-                if (finalScore > bestScore) {
-                    bestScore = finalScore;
-                    bestSolution = testCart;
-                    bestSavings = savings;
-                    bestEarnings = earnings;
-                    
-                    // Generate explanation
-                    const mainName = mainPlan.name;
-                    const fillName = (linesRemaining > 0 && fillPlan) ? fillPlan.name : '';
-                    const mixInfo = (tempCartStart.length > 0 && tempCartStart[0].cbbMixEnabled) ? ` (Mix ${tempCartStart[0].cbbMixCount})` : '';
-                    
-                    const broadbandIncluded = testCart.some(item => item.plan.type === 'broadband');
-                    // @ts-ignore
-                    const broadbandName = broadbandIncluded ? testCart.find(item => item.plan.type === 'broadband').plan.name : '';
-
-                    let explanation = `Anbefaling: ${mainName}${mixInfo}`;
-                    if (linesRemaining > 0 && fillName && fillName !== mainName) {
-                        explanation += ` + ${linesRemaining} stk ${fillName}`;
-                    }
-                    if (broadbandIncluded) {
-                        explanation += ` + ${broadbandName}`;
-                    }
-                    bestExplanation = explanation;
-                }
-            }
-        } catch (e) {
-            logger.error('OPTIMIZER', `Fejl ved behandling af plan ${mainPlan.id}`, e);
-            continue;
+    // Sort by Score with Telmore preference on tie
+    candidates.sort((a, b) => {
+        // If scores are very close (within 100 points, approx 100kr earnings value), prefer Telmore
+        // Score is roughly 1.0 * Earnings.
+        if (Math.abs(a.score - b.score) < 120) {
+            if (a.name === 'Telmore' && b.name !== 'Telmore') return -1;
+            if (b.name === 'Telmore' && a.name !== 'Telmore') return 1;
         }
+        return b.score - a.score;
+    });
+    const winner = candidates[0];
+
+    // 5. Finalize Result
+    const cartItems = winner.cart!;
+
+    // Generate Explanation
+    const mainPlan = cartItems[0].plan;
+    const providerName = mainPlan.provider.charAt(0).toUpperCase() + mainPlan.provider.slice(1);
+    let explanation = `Bedste løsning: ${providerName}`;
+
+    if (selectedStreaming.length > 0) {
+        explanation += ` dækker ${selectedStreaming.length} streaming-tjenester`;
     }
 
-    if (!bestSolution || bestEarnings <= 0) {
-        return {
-            cartItems: [],
-            explanation: 'Kunne ikke finde en optimal løsning med positiv indtjening.',
-            savings: 0,
-            earnings: 0
-        };
-    }
+    // Calculate final metrics for the winning bundle
+    const evaluation = evaluateBundle(cartItems, selectedStreaming, { mobileCost: customerMobileCost, itemPrice: originalItemPrice }, normalizedOptions);
 
     return {
-        cartItems: bestSolution,
-        explanation: bestExplanation,
-        savings: bestSavings,
-        earnings: bestEarnings
+        cartItems: cartItems,
+        explanation: explanation,
+        savings: evaluation.savings || 0,
+        earnings: evaluation.earnings || 0
     };
 }

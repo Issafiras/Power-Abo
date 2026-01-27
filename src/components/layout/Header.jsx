@@ -107,20 +107,21 @@ function Header({
   return (
     <>
       <header
-        className={`header-modern ${isCompact ? 'header-modern--compact' : ''}`}
+        className={`apple-header ${isCompact ? 'apple-header--compact' : ''}`}
         role="banner"
         aria-label="Hovednavigation"
       >
         {/* Backdrop blur layer */}
-        <div className="header-modern__backdrop" aria-hidden="true" />
+        <div className="apple-header__backdrop" aria-hidden="true" />
 
-        <nav className="header-modern__nav" aria-label="Hovednavigation">
-          <div className="header-modern__container">
-            {/* Logo */}
-            <div className="header-modern__logo">
+        <nav className="apple-header__nav" aria-label="Hovednavigation">
+          <div className="apple-header__container">
+
+            {/* Logo Area */}
+            <div className="apple-header__logo">
               <a
                 href="#"
-                className="header-modern__logo-link"
+                className="apple-header__logo-link"
                 aria-label="Power Abonnement - Gå til toppen"
                 onClick={(e) => {
                   e.preventDefault();
@@ -130,194 +131,109 @@ function Header({
                 <img
                   src={`${import.meta.env.BASE_URL}power-logo-white.png?v=1`}
                   alt="Power Abonnement"
-                  className="header-modern__logo-image"
+                  className="apple-header__logo-image"
                   loading="eager"
-                  width="200"
-                  height="60"
+                  width="140"
+                  height="44"
                   decoding="async"
                 />
               </a>
             </div>
 
+            {/* Navigation Links (Desktop) */}
+            <div className="apple-header__nav-links hidden-mobile">
+              <button onClick={onHelpClick} className="apple-header__nav-link">Hjælp</button>
+              <button onClick={onWhatsNewClick} className="apple-header__nav-link">Nyheder</button>
+              <button
+                onMouseEnter={() => document.getElementById('coverage-menu').style.display = 'block'}
+                className="apple-header__nav-link"
+              >
+                Dækning
+              </button>
+            </div>
+
             {/* Actions - Right Side */}
-            <div className="header-modern__actions">
-              {/* Cart Button */}
-              {cartCount > 0 && (
-                <button
-                  onClick={handleCartClick}
-                  className="header-modern__cart-btn"
-                  aria-label={`Kurv med ${cartCount} ${cartCount === 1 ? 'vare' : 'varer'}`}
-                  title="Se kurv"
-                >
-                  <Icon name="shopping-cart" size={20} />
-                  {cartCount > 0 && (
-                    <span className="header-modern__cart-badge" aria-hidden="true">
-                      {cartCount > 99 ? '99+' : cartCount}
-                    </span>
-                  )}
-                </button>
-              )}
+            <div className="apple-header__actions">
 
-              {/* Help Button */}
-              <button
-                onClick={onHelpClick}
-                className="header-modern__action-btn"
-                title="Hjælp og brugervejledning"
-                aria-label="Åbn hjælp og brugervejledning"
+              {/* Coverage Menu (Dropdown) */}
+              <div
+                id="coverage-menu"
+                className="header-modern__dropdown" /* Reusing existing dropdown style for now */
+                style={{
+                  display: 'none',
+                  position: 'absolute',
+                  top: '50px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  marginTop: '8px',
+                  background: 'rgba(20, 20, 20, 0.95)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '16px',
+                  padding: '8px',
+                  minWidth: '220px',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                  zIndex: 1000
+                }}
+                onMouseLeave={() => document.getElementById('coverage-menu').style.display = 'none'}
               >
-                <Icon name="help" size={20} />
-              </button>
-
-              {/* Whats New Button */}
-              {onWhatsNewClick && (
-                <button
-                  onClick={onWhatsNewClick}
-                  className="header-modern__action-btn"
-                  title="Hvad er nyt?"
-                  aria-label="Se nyheder"
-                >
-                  <Icon name="sparkles" size={20} />
-                </button>
-              )}
-
-              {/* Presentation Toggle */}
-              <button
-                onClick={onPresentationToggle}
-                className="header-modern__action-btn"
-                title="Præsentationsvisning (Ctrl+P)"
-                aria-label="Skift præsentationsvisning"
-              >
-                <Icon name="presentation" size={20} />
-              </button>
-
-              {/* Share Button */}
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="header-modern__action-btn"
-                title="Del tilbud (QR)"
-                aria-label="Del tilbud via QR kode"
-              >
-                <Icon name="share" size={20} />
-              </button>
-
-              {/* Coverage Map Button */}
-              <div className="header-modern__action-wrapper" style={{ position: 'relative' }}>
-                <button
-                  onClick={() => {
-                    // Toggle logic handled by local state or separate component if needed
-                    // For now using a simple state in Header
-                    const menu = document.getElementById('coverage-menu');
-                    if (menu) {
-                      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-                    }
-                  }}
-                  className="header-modern__action-btn"
-                  title="Dækningskort"
-                  aria-label="Se dækningskort"
-                  aria-expanded="false"
-                  aria-controls="coverage-menu"
-                >
-                  <Icon name="signal" size={20} />
-                </button>
-
-                {/* Dropdown Menu */}
-                <div
-                  id="coverage-menu"
-                  className="header-modern__dropdown"
-                  style={{
-                    display: 'none',
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '8px',
-                    background: 'rgba(30, 30, 30, 0.95)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    padding: '8px',
-                    minWidth: '200px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-                    zIndex: 1000
-                  }}
-                >
-                  <a
-                    href="https://www.telmore.dk/internet/daekningskort"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="header-modern__dropdown-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 12px',
-                      color: '#fff',
-                      textDecoration: 'none',
-                      borderRadius: '8px',
-                      transition: 'background 0.2s',
-                      fontSize: '14px'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <Icon name="map" size={16} />
-                    <span>Telmore Dækning</span>
-                  </a>
-                  <a
-                    href="https://www.telenor.dk/kundeservice/drift-og-dakning/dakning/dakningskort/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="header-modern__dropdown-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 12px',
-                      color: '#fff',
-                      textDecoration: 'none',
-                      borderRadius: '8px',
-                      transition: 'background 0.2s',
-                      fontSize: '14px'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <Icon name="map" size={16} />
-                    <span>Telenor/CBB Dækning</span>
-                  </a>
-                </div>
+                <a href="https://www.telmore.dk/internet/daekningskort" target="_blank" rel="noopener noreferrer" className="header-modern__dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', color: '#fff', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s', fontSize: '13px', fontWeight: '500' }}>
+                  <Icon name="map" size={16} /> <span>Telmore Dækning</span>
+                </a>
+                <a href="https://www.telenor.dk/kundeservice/drift-og-dakning/dakning/dakningskort/" target="_blank" rel="noopener noreferrer" className="header-modern__dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', color: '#fff', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s', fontSize: '13px', fontWeight: '500' }}>
+                  <Icon name="map" size={16} /> <span>Telenor/CBB Dækning</span>
+                </a>
               </div>
 
               {/* Theme Toggle */}
               <button
                 onClick={onThemeToggle}
-                className="header-modern__action-btn"
-                title="Skift tema (Ctrl+T)"
-                aria-label={`Skift til ${theme === 'dark' ? 'lyst' : 'mørkt'} tema`}
+                className="apple-header__action-icon"
+                title="Skift tema"
               >
-                <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={20} />
+                <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={18} />
               </button>
+
+              {/* Presentation Toggle */}
+              <button
+                onClick={onPresentationToggle}
+                className="apple-header__action-icon"
+                title="Præsentation"
+              >
+                <Icon name="presentation" size={18} />
+              </button>
+
+              {/* Share Button */}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="apple-header__action-icon"
+                title="Del"
+              >
+                <Icon name="share" size={18} />
+              </button>
+
+              {/* Cart Button (Highlighted) */}
+              {cartCount > 0 && (
+                <button
+                  onClick={handleCartClick}
+                  className="apple-header__nav-link apple-header__nav-link--primary ml-2" /* Added margin left */
+                  title="Se kurv"
+                >
+                  <span>Kurv</span>
+                  <span className="cart-badge">{cartCount > 99 ? '99+' : cartCount}</span>
+                </button>
+              )}
 
               {/* Reset Button */}
               <button
                 onClick={() => setShowConfirm(true)}
-                className="header-modern__action-btn header-modern__action-btn--danger"
-                title="Nulstil alt (Ctrl+R)"
-                aria-label="Nulstil alt"
+                className="apple-header__action-icon"
+                title="Nulstil"
+                style={{ color: 'var(--color-danger)' }}
               >
-                <Icon name="refresh-cw" size={20} />
+                <Icon name="refresh-cw" size={18} />
               </button>
 
-              {/* Admin Dashboard Toggle */}
-              {(import.meta.env.DEV || showAdmin) && (
-                <button
-                  onClick={onAdminToggle}
-                  className={`header-modern__action-btn ${showAdmin ? 'header-modern__action-btn--active' : ''}`}
-                  title="Admin Dashboard"
-                  aria-label="Åbn/luk admin dashboard"
-                >
-                  <Icon name="settings" size={20} />
-                </button>
-              )}
             </div>
           </div>
         </nav>

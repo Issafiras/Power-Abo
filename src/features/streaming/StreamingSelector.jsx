@@ -175,15 +175,15 @@ function StreamingSelector({
   const handleEANSearch = async (e) => {
     e.preventDefault();
     const eanInput = e.target.ean.value.trim();
-    
+
     if (!eanInput) return;
-    
+
     const validation = validateEAN(eanInput);
     if (!validation.valid) {
       toast.error(validation.message);
       return;
     }
-    
+
     try {
       const result = await searchProductsWithPrices(eanInput);
       if (onEANSearch) {
@@ -350,7 +350,7 @@ function StreamingSelector({
       // Tjek understøttede formater – iOS Safari kan have BarcodeDetector men uden EAN
       try {
         const supported = (await window.BarcodeDetector.getSupportedFormats?.()) || [];
-        const need = ['ean-13','ean-8','upc-e','upc-a','code-128'];
+        const need = ['ean-13', 'ean-8', 'upc-e', 'upc-a', 'code-128'];
         const ok = need.some(f => supported.includes(f));
         if (!ok) {
           setHasBarcodeApi(false);
@@ -446,7 +446,7 @@ function StreamingSelector({
   };
 
   return (
-    <div 
+    <div
       className="streaming-selector glass-card-no-hover"
     >
       <div className="section-header">
@@ -458,37 +458,130 @@ function StreamingSelector({
           {COPY.titles.customerSituationSubtitle}
         </p>
       </div>
-      
+
       {/* Skip to main content link for accessibility */}
       <a href="#plans-section" className="sr-only skip-link">
         Spring til hovedindhold
       </a>
 
-      {/* Antal mobilabonnementer input */}
-      {onNumberOfLinesChange && (
-        <div className="number-of-lines-input">
-          <label htmlFor="number-of-lines" className="input-label">
-            <Icon name="smartphone" size={18} className="icon-inline icon-spacing-xs" />
-            {COPY.labels.numberOfLines}
+      {/* Input Group - Financial Details */}
+      <div className="input-group-grid">
+
+        {/* Antal mobilabonnementer */}
+        {onNumberOfLinesChange && (
+          <div className="input-card-premium">
+            <label htmlFor="number-of-lines">
+              <Icon name="smartphone" size={14} className="icon-inline" />
+              {COPY.labels.numberOfLines}
+            </label>
+            <div className="input-wrapper">
+              <input
+                id="number-of-lines"
+                name="number-of-lines"
+                type="number"
+                placeholder="1"
+                value={numberOfLines === '' ? '' : (numberOfLines || 1)}
+                onChange={handleNumberOfLinesChange}
+                onBlur={handleNumberOfLinesBlur}
+                min="1"
+                max="20"
+                step="1"
+              />
+              <span className="unit">stk.</span>
+            </div>
+          </div>
+        )}
+
+        {/* Mobil udgifter input */}
+        <div className="input-card-premium">
+          <label htmlFor="mobile-cost">
+            <Icon name="creditCard" size={14} className="icon-inline" />
+            Nuværende mobilpris
           </label>
-          <div className="input-with-info">
+          <div className="input-wrapper">
             <input
-              id="number-of-lines"
-              name="number-of-lines"
+              id="mobile-cost"
+              name="mobile-cost"
               type="number"
-              className="input"
-              placeholder="1"
-              value={numberOfLines === '' ? '' : (numberOfLines || 1)}
-              onChange={handleNumberOfLinesChange}
-              onBlur={handleNumberOfLinesBlur}
-              min="1"
-              max="20"
-              step="1"
+              placeholder="299"
+              value={customerMobileCost || ''}
+              onChange={handleMobileCostChange}
+              min="0"
+              step="10"
             />
-            <span className="info-suffix">abonnement{(numberOfLines || 1) !== 1 ? 'er' : ''}</span>
+            <span className="unit">kr./md.</span>
           </div>
         </div>
-      )}
+
+        {/* Bredbånd udgifter input */}
+        {onBroadbandCostChange && (
+          <div className="input-card-premium">
+            <label htmlFor="broadband-cost">
+              <Icon name="wifi" size={14} className="icon-inline" />
+              {COPY.labels.broadbandCost}
+            </label>
+            <div className="input-wrapper">
+              <input
+                id="broadband-cost"
+                name="broadband-cost"
+                type="number"
+                placeholder="299"
+                value={broadbandCost || ''}
+                onChange={handleBroadbandCostChange}
+                onBlur={handleBroadbandCostBlur}
+                min="0"
+                step="10"
+              />
+              <span className="unit">kr./md.</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Hardware & Buyback Group */}
+      <div className="input-group-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: 'var(--spacing-lg)' }}>
+        {/* Varens pris inden rabat input */}
+        <div className="input-card-premium">
+          <label htmlFor="original-item-price">
+            <Icon name="tag" size={14} className="icon-inline" />
+            {COPY.labels.originalItemPrice}
+          </label>
+          <div className="input-wrapper">
+            <input
+              id="original-item-price"
+              name="original-item-price"
+              type="number"
+              placeholder="0"
+              value={originalItemPrice || ''}
+              onChange={handleOriginalItemPriceChange}
+              min="0"
+              step="10"
+            />
+            <span className="unit">kr.</span>
+          </div>
+        </div>
+
+        {/* RePOWER Indbytning input */}
+        <div className="input-card-premium">
+          <label htmlFor="buyback-amount">
+            <Icon name="refresh" size={14} className="icon-inline" />
+            RePOWER Indbytning
+          </label>
+          <div className="input-wrapper">
+            <input
+              id="buyback-amount"
+              name="buyback-amount"
+              type="number"
+              placeholder="0"
+              value={buybackAmount || ''}
+              onChange={handleBuybackAmountChange}
+              min="0"
+              step="10"
+            />
+            <span className="unit">kr.</span>
+          </div>
+        </div>
+      </div>
 
       {/* Eksisterende brands selector */}
       {onExistingBrandsChange && (
@@ -530,105 +623,6 @@ function StreamingSelector({
         </div>
       )}
 
-      {/* Mobil udgifter input */}
-      <div className="mobile-cost-input">
-          <label htmlFor="mobile-cost" className="input-label">
-          <Icon name="creditCard" size={18} className="icon-inline icon-spacing-xs" />
-          {COPY.labels.mobileCost} {onNumberOfLinesChange && numberOfLines > 1 ? `(total for ${numberOfLines} abonnementer)` : '(total)'}
-        </label>
-        <div className="input-with-currency">
-          <input
-            id="mobile-cost"
-            name="mobile-cost"
-            type="number"
-            className="input"
-            placeholder="299"
-            value={customerMobileCost || ''}
-            onChange={handleMobileCostChange}
-            min="0"
-            step="10"
-          />
-          <span className="currency-suffix">kr./md.</span>
-        </div>
-        {onNumberOfLinesChange && numberOfLines > 1 && customerMobileCost > 0 && (
-          <p className="input-help-text">
-            Gennemsnit pr. abonnement: {formatCurrency((customerMobileCost || 0) / numberOfLines)}/md.
-          </p>
-        )}
-      </div>
-
-      {/* Bredbånd udgifter input */}
-      {onBroadbandCostChange && (
-        <div className="broadband-cost-input">
-          <label htmlFor="broadband-cost" className="input-label">
-            <Icon name="wifi" size={18} className="icon-inline icon-spacing-xs" />
-            {COPY.labels.broadbandCost}
-          </label>
-          <div className="input-with-currency">
-            <input
-              id="broadband-cost"
-              name="broadband-cost"
-              type="number"
-              className="input"
-              placeholder="299"
-              value={broadbandCost || ''}
-              onChange={handleBroadbandCostChange}
-              onBlur={handleBroadbandCostBlur}
-              min="0"
-              step="10"
-            />
-            <span className="currency-suffix">kr./md.</span>
-          </div>
-        </div>
-      )}
-
-      {/* Varens pris inden rabat input */}
-      <div className="original-item-price-input">
-        <label htmlFor="original-item-price" className="input-label">
-          <Icon name="tag" size={18} className="icon-inline icon-spacing-xs" />
-          {COPY.labels.originalItemPrice}
-        </label>
-        <div className="input-with-currency">
-          <input
-            id="original-item-price"
-            name="original-item-price"
-            type="number"
-            className="input"
-            placeholder="0"
-            value={originalItemPrice || ''}
-            onChange={handleOriginalItemPriceChange}
-            min="0"
-            step="10"
-          />
-          <span className="currency-suffix">kr</span>
-        </div>
-      </div>
-
-      {/* RePOWER Indbytning input */}
-      <div className="buyback-amount-input">
-        <label htmlFor="buyback-amount" className="input-label">
-          <Icon name="refresh" size={18} className="icon-inline icon-spacing-xs" />
-          RePOWER Indbytning
-        </label>
-        <div className="input-with-currency">
-          <input
-            id="buyback-amount"
-            name="buyback-amount"
-            type="number"
-            className="input"
-            placeholder="0"
-            value={buybackAmount || ''}
-            onChange={handleBuybackAmountChange}
-            min="0"
-            step="10"
-          />
-          <span className="currency-suffix">kr.</span>
-        </div>
-        <p className="input-help-text">
-          Indtast værdien fra RePOWER-vurderingen
-        </p>
-      </div>
-
       {/* Produkt søgning */}
       <div className="ean-search-input">
         <label htmlFor="ean-search" className="input-label">
@@ -646,7 +640,7 @@ function StreamingSelector({
               maxLength="50"
             />
             {canScan && (
-              <button 
+              <button
                 type="button"
                 className="btn scan-btn"
                 onClick={startScanner}
@@ -656,8 +650,8 @@ function StreamingSelector({
                 {COPY.cta.scan}
               </button>
             )}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary ean-search-btn"
               disabled={isSearching}
             >
@@ -744,59 +738,65 @@ function StreamingSelector({
       <div className="divider"></div>
 
       {/* Streaming grid */}
-      <motion.div 
-        className="streaming-grid"
+      <motion.div
+        className="streaming-grid-container"
         variants={container}
         initial="hidden"
         animate="show"
       >
         {services.map((service, index) => {
           const isSelected = selectedStreaming.includes(service.id);
-          
+
           return (
             <motion.button
               key={service.id}
               onClick={() => handleStreamingToggle(service.id)}
-              className={`streaming-card glass-card ${isSelected ? 'selected' : ''}`}
-              style={{ 
+              className={`streaming-card-premium ${isSelected ? 'selected' : ''}`}
+              style={{
                 '--brand-color': service.color || 'var(--color-orange)',
                 '--brand-bg': service.bgColor || 'var(--glass-bg)'
               }}
               aria-pressed={isSelected}
               aria-label={`${isSelected ? 'Fjern' : 'Tilføj'} ${service.name} streaming-tjeneste`}
               variants={item}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
               layout
             >
-              <div className="streaming-icon" style={{ 
+              <div className="streaming-icon" style={{
                 background: service.bgColor
               }}>
                 {service.logo ? (
-                  <img 
-                    src={service.logo} 
+                  <img
+                    src={service.logo}
                     alt={service.name}
                     className="streaming-logo-img"
                     loading="lazy"
                   />
                 ) : (
-                  <span className="logo-musik" style={{ color: service.color }}>
+                  <span className="logo-musik" style={{ color: service.color, fontSize: '1.25rem', fontWeight: 'bold' }}>
                     {service.logoText}
                   </span>
                 )}
+
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="checkmark-badge"
+                    >
+                      <Icon name="check" size={12} color="white" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <div className="streaming-name">{service.name}</div>
-              <div className="streaming-price">{formatCurrency(service.price)}/md.</div>
-              {isSelected && (
-                <motion.div 
-                  className="streaming-checkmark"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                >
-                  <Icon name="checkCircle" size={28} color="var(--color-success)" />
-                </motion.div>
-              )}
+
+              <div className="text-center w-full">
+                <div className="streaming-name text-ellipsis">{service.name}</div>
+                <div className="streaming-price mt-1">{formatCurrency(service.price)}/md.</div>
+              </div>
             </motion.button>
           );
         })}

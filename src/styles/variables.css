@@ -65,17 +65,18 @@
   --bg-gradient-start: #000000;
   --bg-gradient-end: #0A0A0A;
 
-  /* Glass Effect - Ultra Refined Frosted Glass - Steve Jobs Minimal */
+  /* Glass Effect - Ultra Refined Frosted Glass - Premium Depth */
   --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-strong: rgba(255, 255, 255, 0.15);
-  --glass-shadow: rgba(0, 0, 0, 0.6);
-  --surface-0: rgba(10, 10, 10, 0.4);
-  --surface-1: rgba(15, 15, 15, 0.5);
-  --surface-2: rgba(20, 20, 20, 0.6);
-  --surface-glow: rgba(255, 122, 80, 0.1);
-  --surface-muted: rgba(255, 255, 255, 0.04);
-  --surface-overlay: rgba(0, 0, 0, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-border-strong: rgba(255, 255, 255, 0.12);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+  --surface-0: rgba(12, 12, 12, 0.5);
+  --surface-1: rgba(18, 18, 18, 0.6);
+  --surface-2: rgba(24, 24, 24, 0.7);
+  --surface-glow: rgba(255, 109, 31, 0.08);
+  /* Power Orange Glow */
+  --surface-muted: rgba(255, 255, 255, 0.03);
+  --surface-overlay: rgba(0, 0, 0, 0.75);
 
   /* Premium Surface Layers - Ultra Minimal */
   --surface-glass: rgba(255, 255, 255, 0.04);
@@ -192,9 +193,9 @@
   --z-popover: 50;
   --z-tooltip: 60;
 
-  /* Typography - Inter/System Font Stack - Perfect Hierarchy */
-  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
-  --font-family-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  /* Typography - Distinctive & Modern */
+  --font-family-base: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-family-mono: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', monospace;
 
   /* Font Sizes - Enhanced Hierarchy with Larger Differences */

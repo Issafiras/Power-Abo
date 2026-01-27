@@ -140,20 +140,7 @@ export const plans = [
     color: '#002788',
     streaming: []
   },
-  {
-    id: 'telmore-25gb-musik',
-    provider: 'telmore',
-    logo: 'https://issafiras.github.io/Power-Abo/logos/Telmore-logo.png',
-    name: '25 GB + Musik',
-    data: '25 GB',
-    price: 149,
-    introPrice: 0,
-    introMonths: 1,
-    earnings: 700,
-    features: ['5G', 'EU Roaming', 'Musik inkl.', 'Intro-pris'],
-    color: '#002788',
-    streaming: ['musik']
-  },
+
   {
     id: 'telmore-60gb',
     provider: 'telmore',
