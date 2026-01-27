@@ -3,12 +3,14 @@
 ## 🎯 Project Overview
 **Power Abo Beregner** is a specialized sales tool designed for POWER store employees. It calculates the optimal combination of mobile subscriptions, broadband, and streaming services to demonstrate savings and total cost of ownership (TCO) to customers.
 
-**Current Version:** 2.1.0 (Local Standalone)
+**Current Version:** 2.3.0 (Local Standalone)
 
 ## 🛠 Tech Stack
 - **Framework:** React 18
+- **Language:** JavaScript + TypeScript (Calculations)
 - **Build Tool:** Vite 5
 - **State Management:** React Context API + `useReducer`
+- **Animation:** Framer Motion
 - **Persistence:** LocalStorage (No backend/database)
 - **Styling:** CSS Variables (Theming), Modular CSS, "Clean Retail" Aesthetic
 - **Icons:** Lucide React
@@ -30,18 +32,20 @@
   - `ui`: Search queries, modal states.
 
 ### 3. Calculation Engine (`src/utils/calculations/`)
-- **`pricing.js`**: Core logic for:
+- **TypeScript:** Core logic migrated to TypeScript for precision.
+- **`pricing.ts`**: Core logic for:
   - 6-month TCO calculations.
   - Intro prices vs. normal prices.
   - Family discounts (Telenor logic: -50kr for lines > 1).
   - **Effective Hardware Price:** `(Hardware Price) - (Savings) - (Buyback)`.
-- **`streaming.js`**: Logic for CBB MIX bundling (2-8 services) and cost optimization.
+- **`streaming.ts`**: Logic for CBB MIX bundling (2-8 services) and cost optimization.
 
 ## 🔑 Key Features
 
 ### 🛒 Subscription Calculator
 - **ProviderTabs:** Filters plans by provider (Telmore, Telenor, CBB, Broadband).
 - **Auto-Bundling:** Automatically enables CBB MIX prices when compatible plans + streaming are selected.
+- **Smart Engine:** Prioritizes strongest offers and calculates smart combinations.
 
 ### 📱 Hardware TCO & RePOWER
 - **Input:** "Varens pris inden rabat" (Original Price).
@@ -67,7 +71,7 @@
 - **Components:**
   - **Glass Cards:** High saturation backdrop blur.
   - **Buttons:** Pill-shaped, tactile feedback (`scale(0.96)` on click).
-  - **Animations:** Subtle fade-ins (`.fade-in`), optimized for GPU.
+  - **Animations:** Fluid transitions with Framer Motion.
 
 ### Rules for UI Changes
 1.  **Do NOT** introduce new heavy CSS frameworks (Tailwind, Bootstrap). Use existing CSS modules.
@@ -92,14 +96,14 @@ src/
 │   └── plans/        # Plan cards and tabs
 ├── hooks/            # useAppState, useAppActions
 ├── styles/           # variables.css, main.css, components.css
-└── utils/            # calculations/, storage.js, share.js, powerApi.js
+└── utils/            # calculations/ (TypeScript), storage.js, share.js, powerApi.js
 ```
 
-## 📝 Recent Changelog (v2.1.0)
-1.  **Removed Supabase:** Application is now fully offline-capable.
-2.  **Added RePOWER:** Logic for trade-in values.
-3.  **Added QR Sharing:** URL-based state sharing.
-4.  **UI Overhaul:** Reverted to original design but optimized for performance and structure.
+## 📝 Recent Changelog (v2.3.0)
+1.  **Brain & Beauty Update:** Improved calculation engine and premium design overhaul.
+2.  **TypeScript Migration:** Core calculation logic moved to TS.
+3.  **Framer Motion:** Added fluid animations and interactive elements.
+4.  **Data Update:** CBB earnings and product cleanup.
 5.  **Docs:** Added `GEMINI.md` (this file) and `CHANGELOG.js`.
 
 ## 🔮 Future Roadmap / Known Limitations
