@@ -4,12 +4,45 @@
  */
 
 export const streamingServices = [
+  // Netflix har flere varianter. Selve "netflix"-kortet er en container i UI,
+  // mens varianterne (nedenfor) er dem der faktisk kan vælges og tælles med i totalen.
   {
     id: 'netflix',
     name: 'Netflix',
-    price: 129, // Standard plan
     logo: 'https://issafiras.github.io/Power-Abo/logos/Netflix.png',
     bgColor: '#000000', // Netflix sort
+    category: 'streaming',
+    variants: [
+      'netflix-standard-69',
+      'netflix-standard-129',
+      'netflix-premium-169'
+    ]
+  },
+  {
+    id: 'netflix-standard-69',
+    parentId: 'netflix',
+    name: 'Netflix Standard',
+    price: 69,
+    description: 'Billigere indgangsvinkel',
+    hidden: true,
+    category: 'streaming'
+  },
+  {
+    id: 'netflix-standard-129',
+    parentId: 'netflix',
+    name: 'Netflix Standard',
+    price: 129,
+    description: 'Full HD, 2 enheder ad gangen',
+    hidden: true,
+    category: 'streaming'
+  },
+  {
+    id: 'netflix-premium-169',
+    parentId: 'netflix',
+    name: 'Netflix Premium',
+    price: 169,
+    description: '4K + HDR, 4 enheder ad gangen, rumlig lyd',
+    hidden: true,
     category: 'streaming'
   },
   {
@@ -120,7 +153,8 @@ export function getStreamingTotal(selectedIds) {
 
   return streamingServices
     .filter(service => selectedIds.includes(service.id))
-    .reduce((total, service) => total + service.price, 0);
+    // Container-entries som Netflix (med variants) tælles ikke med i total
+    .reduce((total, service) => total + (service.price || 0), 0);
 }
 
 /**

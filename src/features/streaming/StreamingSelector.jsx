@@ -4,10 +4,11 @@
  */
 
 import { streamingServices as staticStreaming, getServiceById } from '../../data/streamingServices';
+import NetflixVariantsModal from './components/NetflixVariantsModal';
 import { plans } from '../../data/plans';
 import { formatCurrency } from '../../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from '../../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -64,10 +65,38 @@ function StreamingSelector({
     ? staticStreaming.filter(service => !service.cbbMixOnly)
     : staticStreaming;
 
+  // UI: Skjul under-"variant" entries i grid'et (de åbnes via Netflix-kortet)
+  const visibleServices = services.filter(s => !s.hidden);
+
+  const [netflixModalOpen, setNetflixModalOpen] = useState(false);
+  const netflix = useMemo(() => getServiceById('netflix'), []);
+  const netflixVariants = useMemo(() => {
+    const ids = netflix?.variants || [];
+    return ids.map(id => getServiceById(id)).filter(Boolean);
+  }, [netflix]);
+
+  const closeNetflixModal = () => setNetflixModalOpen(false);
+
+  const selectNetflixVariant = (variantId) => {
+    // Netflix skal fungere som "radio": kun én variant ad gangen
+    const toClear = netflixVariants.map(v => v.id).filter(id => selectedStreaming.includes(id));
+    toClear.forEach(id => onStreamingToggle(id));
+
+    // Toggle den valgte variant (hvis den allerede var valgt, bliver den fjernet)
+    onStreamingToggle(variantId);
+    setNetflixModalOpen(false);
+  };
+
   // Wrapper funktion der håndterer CBB MIX aktivering/deaktivering
   const handleStreamingToggle = (serviceId) => {
     const service = getServiceById(serviceId);
     if (!service) return;
+
+    // Netflix er en container: åbner modal med varianter i stedet for at toggle direkte
+    if (serviceId === 'netflix') {
+      setNetflixModalOpen(true);
+      return;
+    }
 
     const isCurrentlySelected = selectedStreaming.includes(serviceId);
 
@@ -744,7 +773,7 @@ function StreamingSelector({
         initial="hidden"
         animate="show"
       >
-        {services.map((service, index) => {
+        {visibleServices.map((service, index) => {
           const isSelected = selectedStreaming.includes(service.id);
 
           return (
@@ -801,6 +830,14 @@ function StreamingSelector({
           );
         })}
       </motion.div>
+
+      <NetflixVariantsModal
+        open={netflixModalOpen}
+        onClose={closeNetflixModal}
+        variants={netflixVariants}
+        selectedStreaming={selectedStreaming}
+        onSelectVariant={selectNetflixVariant}
+      />
 
       <div className="divider"></div>
 
