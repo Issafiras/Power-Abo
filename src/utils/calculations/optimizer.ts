@@ -149,7 +149,7 @@ function findBestProviderBundle(
         (p.streamingCount && p.streamingCount > 0) ||
         (p.streaming && p.streaming.length > 0) ||
         p.cbbMixAvailable ||
-        p.data.toLowerCase().includes('fri data') ||
+        (p.data?.toLowerCase?.().includes('fri data') ?? false) ||
         p.price >= 169
     );
 
