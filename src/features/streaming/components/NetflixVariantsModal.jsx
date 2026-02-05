@@ -98,8 +98,8 @@ export default function NetflixVariantsModal({
                     whileTap={{ scale: 0.98 }}
                   >
                     {isPremium && (
-                      <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg uppercase tracking-wider">
-                        Anbefalet
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg z-10 whitespace-nowrap border border-yellow-200">
+                        ⭐ Anbefalet
                       </div>
                     )}
 
