@@ -99,7 +99,24 @@ export default function NetflixVariantsModal({
                     style={{ padding: '24px 16px' }}
                   >
                     {isPremium && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg z-10 whitespace-nowrap border border-yellow-200">
+                      <div style={{
+                        position: 'absolute',
+                        top: '-14px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: 'linear-gradient(to right, #fbbf24, #d97706)',
+                        color: '#000',
+                        fontSize: '10px',
+                        fontWeight: '800',
+                        padding: '4px 12px',
+                        borderRadius: '9999px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        zIndex: '10',
+                        whiteSpace: 'nowrap',
+                        border: '1px solid rgba(255,255,255,0.2)'
+                      }}>
                         ⭐ Anbefalet
                       </div>
                     )}
