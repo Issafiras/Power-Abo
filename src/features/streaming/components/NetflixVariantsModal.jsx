@@ -96,22 +96,22 @@ export default function NetflixVariantsModal({
                     onClick={() => onSelectVariant?.(v.id)}
                     whileHover={{ scale: 1.02, y: -4 }}
                     whileTap={{ scale: 0.98 }}
-                    style={{ padding: '24px 16px' }}
+                    style={{ padding: '20px 12px' }}
                   >
                     {isPremium && (
                       <div style={{
                         position: 'absolute',
-                        top: '-14px',
+                        top: '-12px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         background: 'linear-gradient(to right, #fbbf24, #d97706)',
                         color: '#000',
-                        fontSize: '10px',
+                        fontSize: '9px',
                         fontWeight: '800',
-                        padding: '4px 12px',
+                        padding: '3px 10px',
                         borderRadius: '9999px',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
+                        letterSpacing: '0.05em',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                         zIndex: '10',
                         whiteSpace: 'nowrap',
@@ -121,17 +121,17 @@ export default function NetflixVariantsModal({
                       </div>
                     )}
 
-                    <div className="variant-option-name" style={{ padding: '0 10px', marginBottom: '8px' }}>
+                    <div className="variant-option-name" style={{ padding: '0 5px', marginBottom: '6px', fontSize: '0.95rem' }}>
                       {v.name.replace('Netflix', '').trim() || v.name}
                     </div>
 
-                    <div className="variant-option-price" style={{ marginBottom: '12px' }}>
+                    <div className="variant-option-price" style={{ marginBottom: '10px', fontSize: '1.1rem' }}>
                       {formatCurrency(v.price)}
                       <span style={{ fontSize: '0.5em', fontWeight: 'normal', opacity: 0.7, marginLeft: '2px' }}>/md.</span>
                     </div>
 
                     {v.description && (
-                      <div className="variant-option-description" style={{ fontSize: '0.85rem', minHeight: '2.8em', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="variant-option-description" style={{ fontSize: '0.75rem', minHeight: '2.5em', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {v.description}
                       </div>
                     )}
@@ -142,7 +142,7 @@ export default function NetflixVariantsModal({
                         animate={{ scale: 1 }}
                         className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1 shadow-md z-20"
                       >
-                        <Icon name="check" size={12} />
+                        <Icon name="check" size={10} />
                       </motion.div>
                     )}
                   </motion.div>

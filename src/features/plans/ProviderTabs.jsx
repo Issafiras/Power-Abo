@@ -168,14 +168,24 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery,
           box-shadow: 
             0 2px 16px rgba(0, 0, 0, 0.25),
             inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .tabs::-webkit-scrollbar {
+          display: none;
         }
 
         .tab {
           flex: 1;
+          min-width: 100px;
+          min-height: 44px;
           background: transparent;
           border: none;
           border-radius: var(--radius-lg);
-          padding: var(--spacing-md) var(--spacing-lg);
+          padding: var(--spacing-sm) var(--spacing-md);
           color: var(--text-secondary);
           font-size: var(--font-sm);
           font-weight: var(--font-medium);
@@ -188,6 +198,7 @@ function ProviderTabs({ activeProvider, onProviderChange, onSearch, searchQuery,
           opacity: 0;
           transform: translateY(8px);
           animation: fadeInUp 0.4s ease forwards;
+          white-space: nowrap;
         }
 
         @keyframes fadeInUp {

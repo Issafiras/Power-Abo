@@ -98,15 +98,15 @@ export default function MobileStickySummary({
           bottom: 0;
           left: 0;
           right: 0;
-          background: rgba(10, 10, 10, 0.85);
+          background: rgba(20, 20, 20, 0.95);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          padding: var(--spacing-sm) var(--spacing-md);
-          padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom));
+          border-top: 1px solid rgba(255, 255, 255, 0.15);
+          padding: 12px 16px;
+          padding-bottom: max(12px, env(safe-area-inset-bottom));
           z-index: 1000;
           display: none;
-          box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
         }
 
         @media (max-width: 900px) {
@@ -119,55 +119,66 @@ export default function MobileStickySummary({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--spacing-md);
+          gap: 16px;
+          max-width: 600px;
+          margin: 0 auto;
         }
 
         .mobile-summary-info {
           flex: 1;
           cursor: pointer;
+          min-height: 44px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         .mobile-summary-label {
-          font-size: 10px;
+          font-size: 9px;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.08em;
           color: var(--text-muted);
-          margin-bottom: 2px;
+          margin-bottom: 1px;
+          font-weight: 700;
         }
 
         .mobile-summary-amount {
-          font-size: var(--font-xl);
-          font-weight: var(--font-bold);
-          line-height: 1;
+          font-size: 1.25rem;
+          font-weight: 800;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
         }
 
         .mobile-summary-amount.positive {
-          color: var(--color-success);
+          color: #10b981;
+          text-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
         }
 
         .mobile-summary-amount.negative {
-          color: var(--color-danger);
+          color: #ef4444;
         }
 
         .mobile-summary-earnings {
           font-size: 10px;
-          color: var(--color-orange);
+          color: #FF6D1F;
           margin-top: 2px;
-          font-weight: var(--font-semibold);
+          font-weight: 700;
         }
 
         .mobile-summary-cta {
-          background: var(--gradient-primary);
+          background: linear-gradient(135deg, #FF6D1F 0%, #FF8F57 100%);
           border: none;
-          border-radius: var(--radius-lg);
+          border-radius: 12px;
           color: white;
-          padding: var(--spacing-sm) var(--spacing-md);
+          padding: 0 20px;
+          height: 44px;
           display: flex;
           align-items: center;
-          gap: var(--spacing-xs);
-          font-size: var(--font-sm);
-          font-weight: var(--font-bold);
-          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+          gap: 8px;
+          font-size: 14px;
+          font-weight: 700;
+          box-shadow: 0 4px 15px rgba(255, 109, 31, 0.4);
+          white-space: nowrap;
         }
 
         .mobile-summary-cta:active {

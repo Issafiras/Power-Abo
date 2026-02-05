@@ -4544,10 +4544,11 @@
 .comparison-tab {
   flex: 1;
   min-width: fit-content;
+  min-height: 44px;
   background: transparent;
   border: none;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   color: var(--text-secondary);
   font-size: var(--font-sm);
   font-weight: var(--font-medium);
@@ -5272,6 +5273,28 @@
   margin-bottom: var(--spacing-md);
 }
 
+@media (max-width: 600px) {
+  .savings-banner {
+    padding: var(--spacing-lg) var(--spacing-md);
+    margin: var(--spacing-md) 0;
+  }
+
+  .savings-label {
+    font-size: var(--font-lg);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .savings-amount {
+    font-size: var(--font-3xl);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .savings-subtitle {
+    font-size: var(--font-base);
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
 /* CBB mix warning */
 .cbb-mix-warning {
   display: flex;
@@ -5754,8 +5777,15 @@
 
 .variant-options-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--spacing-4);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 480px) {
+  .variant-options-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
 }
 
 .variant-option-card {

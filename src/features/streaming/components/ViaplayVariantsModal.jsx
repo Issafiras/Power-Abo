@@ -130,7 +130,7 @@ export default function ViaplayVariantsModal({
                     </div>
 
                     {v.description && (
-                      <div className="variant-option-description" style={{ fontSize: '0.8rem', minHeight: '5.5em', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                      <div className="variant-option-description" style={{ fontSize: '0.75rem', minHeight: '4em', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
                         {v.description.split(/, | og /).map((feature, i) => (
                           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <Icon name="check" size={10} color="var(--color-primary)" />

@@ -133,6 +133,7 @@ function Header({
                   alt="Power Abonnement"
                   className="apple-header__logo-image"
                   loading="eager"
+                  style={{ height: 'auto', width: 'auto', maxHeight: isCompact ? '32px' : '40px' }}
                   width="140"
                   height="44"
                   decoding="async"
@@ -162,28 +163,40 @@ function Header({
                 style={{
                   display: 'none',
                   position: 'absolute',
-                  top: '50px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
+                  top: '60px',
+                  right: '10px',
                   marginTop: '8px',
-                  background: 'rgba(20, 20, 20, 0.95)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '16px',
-                  padding: '8px',
-                  minWidth: '220px',
-                  boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                  background: 'rgba(30, 30, 30, 0.98)',
+                  backdropFilter: 'blur(30px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '20px',
+                  padding: '10px',
+                  minWidth: '240px',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
                   zIndex: 1000
                 }}
                 onMouseLeave={() => document.getElementById('coverage-menu').style.display = 'none'}
               >
-                <a href="https://www.telmore.dk/internet/daekningskort" target="_blank" rel="noopener noreferrer" className="header-modern__dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', color: '#fff', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s', fontSize: '13px', fontWeight: '500' }}>
-                  <Icon name="map" size={16} /> <span>Telmore Dækning</span>
+                <div style={{ padding: '8px 12px', fontSize: '11px', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dækningskort</div>
+                <a href="https://www.telmore.dk/internet/daekningskort" target="_blank" rel="noopener noreferrer" className="header-modern__dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', color: '#fff', textDecoration: 'none', borderRadius: '12px', transition: 'background 0.2s', fontSize: '14px', fontWeight: '600' }}>
+                  <div style={{ background: '#002788', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="map" size={16} /></div> <span>Telmore</span>
                 </a>
-                <a href="https://www.telenor.dk/kundeservice/drift-og-dakning/dakning/dakningskort/" target="_blank" rel="noopener noreferrer" className="header-modern__dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', color: '#fff', textDecoration: 'none', borderRadius: '8px', transition: 'background 0.2s', fontSize: '13px', fontWeight: '500' }}>
-                  <Icon name="map" size={16} /> <span>Telenor/CBB Dækning</span>
+                <a href="https://www.telenor.dk/kundeservice/drift-og-dakning/dakning/dakningskort/" target="_blank" rel="noopener noreferrer" className="header-modern__dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', color: '#fff', textDecoration: 'none', borderRadius: '12px', transition: 'background 0.2s', fontSize: '14px', fontWeight: '600' }}>
+                  <div style={{ background: '#0207b2', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="map" size={16} /></div> <span>Telenor / CBB</span>
                 </a>
               </div>
+
+              {/* Coverage Toggle (Mobile) */}
+              <button
+                onClick={() => {
+                  const menu = document.getElementById('coverage-menu');
+                  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                }}
+                className="apple-header__action-icon"
+                title="Dækning"
+              >
+                <Icon name="map" size={18} />
+              </button>
 
               {/* Theme Toggle */}
               <button
