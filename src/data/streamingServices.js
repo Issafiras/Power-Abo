@@ -9,32 +9,6 @@ export const streamingServices = [
   {
     id: 'netflix',
     name: 'Netflix',
-<<<<<<< HEAD
-    price: 129, // Default/fallback price
-    logo: 'https://issafiras.github.io/Power-Abo/logos/Netflix.png',
-    bgColor: '#000000',
-    category: 'streaming',
-    variants: [
-      {
-        id: 'netflix-basis',
-        name: 'Netflix Basis',
-        price: 89,
-        description: '1 enhed, HD'
-      },
-      {
-        id: 'netflix-standard',
-        name: 'Netflix Standard',
-        price: 129,
-        description: '2 enheder, HD'
-      },
-      {
-        id: 'netflix-premium',
-        name: 'Netflix Premium',
-        price: 169,
-        description: '4 enheder, Ultra HD'
-      }
-    ]
-=======
     logo: 'https://issafiras.github.io/Power-Abo/logos/Netflix.png',
     bgColor: '#000000', // Netflix sort
     category: 'streaming',
@@ -70,7 +44,6 @@ export const streamingServices = [
     description: '4K + HDR, 4 enheder ad gangen, rumlig lyd',
     hidden: true,
     category: 'streaming'
->>>>>>> 658e4cf33ad166ac46973a2bc4d27880108e2917
   },
   {
     id: 'viaplay',
@@ -178,27 +151,10 @@ export const streamingServices = [
 export function getStreamingTotal(selectedIds) {
   if (!selectedIds || selectedIds.length === 0) return 0;
 
-<<<<<<< HEAD
-  return selectedIds.reduce((total, id) => {
-    // Check if it's a main service
-    const service = streamingServices.find(s => s.id === id);
-    if (service) return total + service.price;
-
-    // Check if it's a variant (nested)
-    for (const s of streamingServices) {
-      if (s.variants) {
-        const variant = s.variants.find(v => v.id === id);
-        if (variant) return total + variant.price;
-      }
-    }
-    return total;
-  }, 0);
-=======
   return streamingServices
     .filter(service => selectedIds.includes(service.id))
     // Container-entries som Netflix (med variants) tælles ikke med i total
     .reduce((total, service) => total + (service.price || 0), 0);
->>>>>>> 658e4cf33ad166ac46973a2bc4d27880108e2917
 }
 
 /**
@@ -210,18 +166,15 @@ export function getServiceById(id) {
   const mainService = streamingServices.find(service => service.id === id);
   if (mainService) return mainService;
 
-  // Search in variants
+  // Search in variants (if variants are objects - support both old and new data structure for safety)
   for (const service of streamingServices) {
-    if (service.variants) {
-      const variant = service.variants.find(v => v.id === id);
-      if (variant) {
-        // Return variant but with parent metadata mixed in if needed, 
-        // or just the variant with enough info.
-        // Let's attach the parent logo/color for UI consistency
+    if (service.variants && Array.isArray(service.variants)) {
+      const variant = service.variants.find(v => v.id === id || v === id);
+      if (typeof variant === 'object' && variant !== null) {
         return {
           ...variant,
-          logo: service.logo, // Inherit logo
-          bgColor: service.bgColor, // Inherit color
+          logo: service.logo,
+          bgColor: service.bgColor,
           parentId: service.id
         };
       }
@@ -267,4 +220,3 @@ export function getCBBMixPrice(count) {
 
   return cbbMixPricing[count] || 0;
 }
-

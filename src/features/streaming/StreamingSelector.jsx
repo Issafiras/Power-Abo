@@ -3,12 +3,8 @@
  * Multi-select grid af streaming-tjenester
  */
 
-<<<<<<< HEAD
 import { streamingServices as staticStreaming, getServiceById, getStreamingTotal } from '../../data/streamingServices';
-=======
-import { streamingServices as staticStreaming, getServiceById } from '../../data/streamingServices';
 import NetflixVariantsModal from './components/NetflixVariantsModal';
->>>>>>> 658e4cf33ad166ac46973a2bc4d27880108e2917
 import { plans } from '../../data/plans';
 import { formatCurrency } from '../../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
@@ -515,7 +511,7 @@ function StreamingSelector({
       const track = videoTrackRef.current;
       if (!track) return;
       const caps = track.getCapabilities ? track.getCapabilities() : {};
-      if (!caps || typeof caps.torch !== 'boolean') return;
+      if (!caps || typeof caps.torch === 'boolean') return;
       const newVal = !torchOn;
       await track.applyConstraints({ advanced: [{ torch: newVal }] });
       setTorchOn(newVal);
@@ -1034,4 +1030,3 @@ function StreamingSelector({
 }
 
 export default React.memo(StreamingSelector);
-
