@@ -3,7 +3,7 @@
  * Multi-select grid af streaming-tjenester
  */
 
-import { streamingServices as staticStreaming, getServiceById } from '../../data/streamingServices';
+import { streamingServices as staticStreaming, getServiceById, getStreamingTotal } from '../../data/streamingServices';
 import { plans } from '../../data/plans';
 import { formatCurrency } from '../../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
@@ -56,7 +56,21 @@ function StreamingSelector({
   const [torchSupported, setTorchSupported] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
 
-  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+
+  const [selectedVariantState, setSelectedVariantState] = useState(null); // { service, anchorRect }
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (selectedVariantState) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedVariantState]);
 
   // Filtrér tjenester: Skjul CBB MIX-only tjenester hvis Telmore eller bredbånd er valgt
   const isTelmoreOrBroadband = activeProvider === 'telmore' || activeProvider === 'broadband';
@@ -107,13 +121,75 @@ function StreamingSelector({
       }
     }
 
+    // Check for variants (e.g. Netflix)
+    if (service.variants) {
+      // Find the clicked element to use as anchor
+      // We can't easily get the event object here since logic is inside a handler called by onClick
+      // but we can pass it or find the element by ID.
+      // Better: Update onClick to pass event.
+      // Since we can't change the signature of onStreamingToggle easily if it's used elsewhere?
+      // Actually this is local.
+
+      // We'll update the onClick in the render loop to capture the event.
+      return;
+    }
+
     // Kald den originale toggle funktion
     onStreamingToggle(serviceId);
   };
 
-  const streamingTotal = services
-    .filter(s => selectedStreaming.includes(s.id))
-    .reduce((sum, s) => sum + (s.price || 0), 0);
+  const handleServiceClick = (e, service) => {
+    if (service.variants) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setSelectedVariantState({
+        service,
+        anchorRect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        }
+      });
+    } else {
+      handleStreamingToggle(service.id);
+    }
+  };
+
+  const handleVariantSelection = (variantId) => {
+    if (!selectedVariantState) return;
+    const { service: selectedService } = selectedVariantState;
+
+    // Find currently selected variant ID for this service (if any)
+    const variants = selectedService.variants.map(v => v.id);
+
+    // Remove all existing variants of this service from selection
+    variants.forEach(vId => {
+      if (selectedStreaming.includes(vId) && vId !== variantId) {
+        onStreamingToggle(vId); // Remove old
+      }
+    });
+
+    // If new variant is not selected, select it
+    if (!selectedStreaming.includes(variantId)) {
+      onStreamingToggle(variantId);
+    }
+
+    setSelectedVariantState(null);
+  };
+
+  const handleVariantRemove = () => {
+    if (!selectedVariantState) return;
+    const { service: selectedService } = selectedVariantState;
+    const variants = selectedService.variants.map(v => v.id);
+    variants.forEach(vId => {
+      if (selectedStreaming.includes(vId)) {
+        onStreamingToggle(vId);
+      }
+    });
+    setSelectedVariantState(null);
+  };
+
+  const streamingTotal = getStreamingTotal(selectedStreaming);
   const monthlyTotal = (customerMobileCost || 0) + (broadbandCost || 0) + streamingTotal;
   const sixMonthTotal = (monthlyTotal * 6) + (originalItemPrice || 0) - (buybackAmount || 0);
 
@@ -735,6 +811,73 @@ function StreamingSelector({
         </div>
       )}
 
+      {/* Variant Selection Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {selectedVariantState && (
+            <motion.div
+              className="variant-modal-backdrop"
+              onClick={() => setSelectedVariantState(null)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="variant-modal"
+                onClick={e => e.stopPropagation()}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              >
+                <button className="variant-modal-close" onClick={() => setSelectedVariantState(null)}>
+                  <Icon name="x" size={24} />
+                </button>
+
+                <div className="variant-modal-header">
+                  <div style={{ display: 'inline-flex', padding: 12, borderRadius: 20, background: selectedVariantState.service.bgColor, marginBottom: 16 }}>
+                    <img src={selectedVariantState.service.logo} alt={selectedVariantState.service.name} style={{ height: 40 }} />
+                  </div>
+                  <h3 className="variant-modal-title">Vælg {selectedVariantState.service.name} Abonnement</h3>
+                </div>
+
+                <div className="variant-options-grid">
+                  {selectedVariantState.service.variants.map(variant => {
+                    const isSelected = selectedStreaming.includes(variant.id);
+                    const isPremium = variant.name.toLowerCase().includes('premium');
+
+                    return (
+                      <div
+                        key={variant.id}
+                        className={`variant-option-card ${isSelected ? 'selected' : ''} ${isPremium ? 'premium-tier' : ''}`}
+                        onClick={() => handleVariantSelection(variant.id)}
+                      >
+                        <div className="variant-option-name">{variant.name.replace(selectedVariantState.service.name, '').trim() || variant.name}</div>
+                        <div className="variant-option-price">{variant.price},-</div>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
+                            <Icon name="check" size={12} color="white" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 flex justify-center">
+                  <button
+                    className="btn btn-ghost text-red-500"
+                    onClick={handleVariantRemove}
+                  >
+                    Fjern {selectedVariantState.service.name}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
       <div className="divider"></div>
 
       {/* Streaming grid */}
@@ -748,10 +891,11 @@ function StreamingSelector({
           const isSelected = selectedStreaming.includes(service.id);
 
           return (
+
             <motion.button
               key={service.id}
-              onClick={() => handleStreamingToggle(service.id)}
-              className={`streaming-card-premium ${isSelected ? 'selected' : ''}`}
+              onClick={(e) => handleServiceClick(e, service)}
+              className={`streaming-card-premium ${isSelected || (service.variants && service.variants.some(v => selectedStreaming.includes(v.id))) ? 'selected' : ''}`}
               style={{
                 '--brand-color': service.color || 'var(--color-orange)',
                 '--brand-bg': service.bgColor || 'var(--glass-bg)'
@@ -780,7 +924,7 @@ function StreamingSelector({
                 )}
 
                 <AnimatePresence>
-                  {isSelected && (
+                  {(isSelected || (service.variants && service.variants.some(v => selectedStreaming.includes(v.id)))) && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -795,7 +939,19 @@ function StreamingSelector({
 
               <div className="text-center w-full">
                 <div className="streaming-name text-ellipsis">{service.name}</div>
-                <div className="streaming-price mt-1">{formatCurrency(service.price)}/md.</div>
+                {/* Show active variant price if selected */}
+                {(() => {
+                  const activeVariant = service.variants && service.variants.find(v => selectedStreaming.includes(v.id));
+                  if (activeVariant) {
+                    return (
+                      <>
+                        <div className="streaming-price mt-1">{formatCurrency(activeVariant.price)}/md.</div>
+                        <div className="current-variant-badge">{activeVariant.name.replace(service.name, '').trim()}</div>
+                      </>
+                    );
+                  }
+                  return <div className="streaming-price mt-1">{service.price ? formatCurrency(service.price) + '/md.' : 'Vælg'}</div>;
+                })()}
               </div>
             </motion.button>
           );

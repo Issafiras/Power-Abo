@@ -7,10 +7,30 @@ export const streamingServices = [
   {
     id: 'netflix',
     name: 'Netflix',
-    price: 129, // Standard plan
+    price: 129, // Default/fallback price
     logo: 'https://issafiras.github.io/Power-Abo/logos/Netflix.png',
-    bgColor: '#000000', // Netflix sort
-    category: 'streaming'
+    bgColor: '#000000',
+    category: 'streaming',
+    variants: [
+      {
+        id: 'netflix-basis',
+        name: 'Netflix Basis',
+        price: 89,
+        description: '1 enhed, HD'
+      },
+      {
+        id: 'netflix-standard',
+        name: 'Netflix Standard',
+        price: 129,
+        description: '2 enheder, HD'
+      },
+      {
+        id: 'netflix-premium',
+        name: 'Netflix Premium',
+        price: 169,
+        description: '4 enheder, Ultra HD'
+      }
+    ]
   },
   {
     id: 'viaplay',
@@ -118,9 +138,20 @@ export const streamingServices = [
 export function getStreamingTotal(selectedIds) {
   if (!selectedIds || selectedIds.length === 0) return 0;
 
-  return streamingServices
-    .filter(service => selectedIds.includes(service.id))
-    .reduce((total, service) => total + service.price, 0);
+  return selectedIds.reduce((total, id) => {
+    // Check if it's a main service
+    const service = streamingServices.find(s => s.id === id);
+    if (service) return total + service.price;
+
+    // Check if it's a variant (nested)
+    for (const s of streamingServices) {
+      if (s.variants) {
+        const variant = s.variants.find(v => v.id === id);
+        if (variant) return total + variant.price;
+      }
+    }
+    return total;
+  }, 0);
 }
 
 /**
@@ -129,7 +160,27 @@ export function getStreamingTotal(selectedIds) {
  * @returns {Object|null} Tjeneste-objekt eller null
  */
 export function getServiceById(id) {
-  return streamingServices.find(service => service.id === id) || null;
+  const mainService = streamingServices.find(service => service.id === id);
+  if (mainService) return mainService;
+
+  // Search in variants
+  for (const service of streamingServices) {
+    if (service.variants) {
+      const variant = service.variants.find(v => v.id === id);
+      if (variant) {
+        // Return variant but with parent metadata mixed in if needed, 
+        // or just the variant with enough info.
+        // Let's attach the parent logo/color for UI consistency
+        return {
+          ...variant,
+          logo: service.logo, // Inherit logo
+          bgColor: service.bgColor, // Inherit color
+          parentId: service.id
+        };
+      }
+    }
+  }
+  return null;
 }
 
 /**

@@ -102,8 +102,6 @@ body {
     background-color var(--transition-theme),
     color var(--transition-fast),
     border-color var(--transition-fast);
-  /* GPU acceleration for smooth scrolling */
-  transform: translateZ(0);
 }
 
 
