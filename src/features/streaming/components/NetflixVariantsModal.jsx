@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../../../components/common/Icon';
 import { formatCurrency } from '../../../utils/calculations';
@@ -10,7 +11,15 @@ export default function NetflixVariantsModal({
   selectedStreaming = [],
   onSelectVariant
 }) {
-  return (
+  useEffect(() => {
+    if (open) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [open]);
+
+  const modalContent = (
     <AnimatePresence>
       {open && (
         <motion.div
@@ -22,7 +31,6 @@ export default function NetflixVariantsModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onMouseDown={(e) => {
-            // klik udenfor modal lukker
             if (e.target === e.currentTarget) onClose?.();
           }}
         >
@@ -91,4 +99,6 @@ export default function NetflixVariantsModal({
       )}
     </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 }
