@@ -55,10 +55,21 @@ function ComparisonPanel({
     [cartItems, selectedStreaming]
   );
 
-  const notIncludedStreamingCost = useMemo(() =>
-    getStreamingTotal(streamingCoverage.notIncluded),
-    [streamingCoverage.notIncluded]
-  );
+  const notIncludedStreamingCost = useMemo(() => {
+    // 1. Fuld pris for tjenester der slet ikke er dækket
+    const baseCost = getStreamingTotal(streamingCoverage.notIncluded);
+    
+    // 2. Merpris for tjenester der er dækket af slots, men koster mere end dækningen (fx Viaplay opgraderinger)
+    const excessCost = streamingCoverage.included.reduce((total, id) => {
+      const service = getServiceById(id);
+      if (service && service.coveredValue != null && service.price > service.coveredValue) {
+        return total + (service.price - service.coveredValue);
+      }
+      return total;
+    }, 0);
+
+    return baseCost + excessCost;
+  }, [streamingCoverage.notIncluded, streamingCoverage.included]);
 
   // Check CBB MIX kompatibilitet - memoized
   const cbbMixCompatibility = useMemo(() =>

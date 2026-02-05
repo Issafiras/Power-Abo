@@ -54,6 +54,7 @@ export const streamingServices = [
     variants: [
       'viaplay-film-serier',
       'viaplay-dansk-fodbold',
+      'viaplay-champions-league',
       'viaplay-premium'
     ]
   },
@@ -62,6 +63,7 @@ export const streamingServices = [
     parentId: 'viaplay',
     name: 'Viaplay Film & Serier',
     price: 149,
+    coveredValue: 149,
     description: 'De nyeste film og serier',
     hidden: true,
     category: 'streaming'
@@ -70,8 +72,19 @@ export const streamingServices = [
     id: 'viaplay-dansk-fodbold',
     parentId: 'viaplay',
     name: 'Viaplay Dansk Fodbold',
-    price: 369,
-    description: 'Superliga, 1. Division og Film & Serier',
+    price: 299,
+    coveredValue: 149,
+    description: '3F Superligaen, Oddset Pokalen og Bundesliga',
+    hidden: true,
+    category: 'streaming'
+  },
+  {
+    id: 'viaplay-champions-league',
+    parentId: 'viaplay',
+    name: 'Viaplay Champions League',
+    price: 299,
+    coveredValue: 149,
+    description: 'UEFA Champions League og Bundesliga',
     hidden: true,
     category: 'streaming'
   },
@@ -79,8 +92,9 @@ export const streamingServices = [
     id: 'viaplay-premium',
     parentId: 'viaplay',
     name: 'Viaplay Premium',
-    price: 449,
-    description: 'Champions League, Premier League og Film & Serier',
+    price: 499,
+    coveredValue: 149,
+    description: 'Alt Sport, Premier League og Formel 1',
     hidden: true,
     category: 'streaming'
   },
@@ -197,17 +211,27 @@ export function getServiceById(id) {
   const mainService = streamingServices.find(service => service.id === id);
   if (mainService) return mainService;
 
-  // Search in variants (if variants are objects - support both old and new data structure for safety)
+  // Search in variants
   for (const service of streamingServices) {
     if (service.variants && Array.isArray(service.variants)) {
-      const variant = service.variants.find(v => v.id === id || v === id);
-      if (typeof variant === 'object' && variant !== null) {
-        return {
-          ...variant,
-          logo: service.logo,
-          bgColor: service.bgColor,
-          parentId: service.id
-        };
+      // Check if variant is an ID string or an object
+      const variant = service.variants.find(v => (typeof v === 'string' ? v === id : v.id === id));
+      
+      if (variant) {
+        // If variant is an ID string, find the full object in streamingServices
+        const variantObj = typeof variant === 'string' 
+          ? streamingServices.find(s => s.id === variant) 
+          : variant;
+
+        if (variantObj) {
+          return {
+            ...variantObj,
+            logo: service.logo,
+            bgColor: service.bgColor,
+            parentId: service.id,
+            coveredValue: variantObj.coveredValue
+          };
+        }
       }
     }
   }

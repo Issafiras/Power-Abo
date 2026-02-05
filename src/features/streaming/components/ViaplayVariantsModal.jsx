@@ -123,14 +123,20 @@ export default function ViaplayVariantsModal({
                       {v.name.replace('Viaplay', '').trim() || v.name}
                     </div>
 
-                    <div className="variant-option-price">
+                    <div className="variant-option-price" style={{ marginBottom: '12px' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--color-primary)', fontWeight: 'bold', marginBottom: '2px' }}>TELMORE PRIS</div>
                       {formatCurrency(v.price)}
                       <span style={{ fontSize: '0.5em', fontWeight: 'normal', opacity: 0.7, marginLeft: '2px' }}>/md.</span>
                     </div>
 
                     {v.description && (
-                      <div className="variant-option-description" style={{ fontSize: '0.85rem', minHeight: '2.8em', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {v.description}
+                      <div className="variant-option-description" style={{ fontSize: '0.8rem', minHeight: '5.5em', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        {v.description.split(/, | og /).map((feature, i) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Icon name="check" size={10} color="var(--color-primary)" />
+                            {feature}
+                          </div>
+                        ))}
                       </div>
                     )}
 

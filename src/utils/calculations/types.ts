@@ -51,6 +51,7 @@ export interface StreamingService {
   id: string;
   name: string;
   price: number;
+  coveredValue?: number;
   logo?: string;
   logoText?: string;
   color?: string;
