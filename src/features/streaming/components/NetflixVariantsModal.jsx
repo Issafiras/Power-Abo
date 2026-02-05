@@ -11,6 +11,7 @@ export default function NetflixVariantsModal({
   selectedStreaming = [],
   onSelectVariant
 }) {
+  // Lock body scroll when modal is open
   useEffect(() => {
     if (open) {
       const prev = document.body.style.overflow;
@@ -19,80 +20,125 @@ export default function NetflixVariantsModal({
     }
   }, [open]);
 
+  // Find parent service info (Netflix) for styling
+  const parentService = variants.length > 0 ? {
+    name: 'Netflix',
+    logo: variants[0].logo,
+    bgColor: variants[0].bgColor || '#000000'
+  } : { name: 'Netflix', bgColor: '#000000' };
+
   const modalContent = (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="scanner-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Netflix varianter"
+          className="variant-modal-backdrop"
+          onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) onClose?.();
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(12px)'
           }}
         >
           <motion.div
-            className="scanner-modal"
-            initial={{ y: 20, scale: 0.98, opacity: 0 }}
-            animate={{ y: 0, scale: 1, opacity: 1 }}
-            exit={{ y: 20, scale: 0.98, opacity: 0 }}
+            className="variant-modal"
+            onClick={e => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
           >
-            <div className="scanner-header">
-              <span className="icon-with-text">
-                <Icon name="tv" size={20} className="icon-inline icon-spacing-xs" />
-                Netflix – vælg variant
-              </span>
-              <div className="flex gap-sm">
-                <button className="btn" onClick={onClose}>Luk</button>
+            <button className="variant-modal-close" onClick={onClose} aria-label="Luk">
+              <Icon name="x" size={24} />
+            </button>
+
+            <div className="variant-modal-header">
+              <div style={{
+                display: 'inline-flex',
+                padding: '16px',
+                borderRadius: '24px',
+                background: parentService.bgColor,
+                marginBottom: '20px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+              }}>
+                <img
+                  src="https://issafiras.github.io/Power-Abo/logos/Netflix.png"
+                  alt="Netflix"
+                  style={{ height: '48px', display: 'block' }}
+                />
               </div>
+              <h3 className="variant-modal-title">Vælg dit Netflix abonnement</h3>
+              <p className="text-secondary" style={{ maxWidth: '400px', margin: '0 auto' }}>
+                Få den fulde oplevelse med det abonnement der passer dig bedst.
+              </p>
             </div>
 
-            <div style={{ padding: 'var(--spacing-md)' }}>
-              <div className="grid" style={{ display: 'grid', gap: 'var(--spacing-sm)' }}>
-                {variants.map(v => {
-                  const selected = selectedStreaming.includes(v.id);
-                  return (
-                    <button
-                      key={v.id}
-                      className={`streaming-card-premium ${selected ? 'selected' : ''}`}
-                      onClick={() => onSelectVariant?.(v.id)}
-                      aria-pressed={selected}
-                      style={{
-                        width: '100%',
-                        justifyContent: 'space-between',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: 'var(--spacing-md)'
-                      }}
-                      type="button"
-                    >
-                      <div style={{ textAlign: 'left' }}>
-                        <div className="streaming-name">{v.name}</div>
-                        {v.description && (
-                          <div style={{ opacity: 0.85, fontSize: '0.9rem', marginTop: 4 }}>
-                            {v.description}
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                        <div className="streaming-price">{formatCurrency(v.price)}/md.</div>
-                        {selected && (
-                          <span className="checkmark-badge" style={{ position: 'static' }}>
-                            <Icon name="check" size={12} color="white" />
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+            <div className="variant-options-grid">
+              {variants.map(v => {
+                const isSelected = selectedStreaming.includes(v.id);
+                // "Premium" check - based on name or price
+                const isPremium = v.name.toLowerCase().includes('premium') || v.price >= 169;
 
-              <div className="scanner-footer" style={{ marginTop: 'var(--spacing-md)' }}>
-                <button className="btn" onClick={onClose} type="button">Annullér</button>
-              </div>
+                return (
+                  <motion.div
+                    key={v.id}
+                    className={`variant-option-card ${isSelected ? 'selected' : ''} ${isPremium ? 'premium-tier' : ''}`}
+                    onClick={() => onSelectVariant?.(v.id)}
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {isPremium && (
+                      <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg uppercase tracking-wider">
+                        Anbefalet
+                      </div>
+                    )}
+
+                    <div className="variant-option-name">
+                      {v.name.replace('Netflix', '').trim() || v.name}
+                    </div>
+
+                    <div className="variant-option-price">
+                      {formatCurrency(v.price)}
+                      <span style={{ fontSize: '0.5em', fontWeight: 'normal', opacity: 0.7 }}>/md.</span>
+                    </div>
+
+                    {v.description && (
+                      <div className="variant-option-description">
+                        {v.description}
+                      </div>
+                    )}
+
+                    {isSelected && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute top-3 right-3 bg-green-500 text-white rounded-full p-1 shadow-lg"
+                      >
+                        <Icon name="check" size={14} />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <button
+                className="btn btn-ghost text-red-500 hover:bg-red-500/10 transition-colors"
+                onClick={onClose}
+              >
+                Annullér
+              </button>
             </div>
           </motion.div>
         </motion.div>
