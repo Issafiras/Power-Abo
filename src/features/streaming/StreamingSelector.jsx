@@ -5,6 +5,7 @@
 
 import { streamingServices as staticStreaming, getServiceById, getStreamingTotal } from '../../data/streamingServices';
 import NetflixVariantsModal from './components/NetflixVariantsModal';
+import ViaplayVariantsModal from './components/ViaplayVariantsModal';
 import { plans } from '../../data/plans';
 import { formatCurrency } from '../../utils/calculations';
 import { searchProductsWithPrices, validateEAN } from '../../utils/powerApi';
@@ -85,6 +86,24 @@ function StreamingSelector({
     setNetflixModalOpen(false);
   };
 
+  const [viaplayModalOpen, setViaplayModalOpen] = useState(false);
+  const viaplay = useMemo(() => getServiceById('viaplay'), []);
+  const viaplayVariants = useMemo(() => {
+    const ids = viaplay?.variants || [];
+    return ids.map(id => getServiceById(id)).filter(Boolean);
+  }, [viaplay]);
+
+  const closeViaplayModal = () => setViaplayModalOpen(false);
+
+  const selectViaplayVariant = (variantId) => {
+    // Viaplay skal fungere som "radio"
+    const toClear = viaplayVariants.map(v => v.id).filter(id => selectedStreaming.includes(id));
+    toClear.forEach(id => onStreamingToggle(id));
+
+    onStreamingToggle(variantId);
+    setViaplayModalOpen(false);
+  };
+
   // Wrapper funktion der håndterer CBB MIX aktivering/deaktivering
   const handleStreamingToggle = (serviceId) => {
     const service = getServiceById(serviceId);
@@ -93,6 +112,12 @@ function StreamingSelector({
     // Netflix er en container: åbner modal med varianter i stedet for at toggle direkte
     if (serviceId === 'netflix') {
       setNetflixModalOpen(true);
+      return;
+    }
+
+    // Viaplay er nu også en container
+    if (serviceId === 'viaplay') {
+      setViaplayModalOpen(true);
       return;
     }
 
@@ -850,6 +875,14 @@ function StreamingSelector({
         variants={netflixVariants}
         selectedStreaming={selectedStreaming}
         onSelectVariant={selectNetflixVariant}
+      />
+
+      <ViaplayVariantsModal
+        open={viaplayModalOpen}
+        onClose={closeViaplayModal}
+        variants={viaplayVariants}
+        selectedStreaming={selectedStreaming}
+        onSelectVariant={selectViaplayVariant}
       />
 
       <div className="divider"></div>

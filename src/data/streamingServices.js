@@ -48,9 +48,40 @@ export const streamingServices = [
   {
     id: 'viaplay',
     name: 'Viaplay',
-    price: 149, // Standard plan
     logo: 'https://issafiras.github.io/Power-Abo/logos/Viaplay.png',
     bgColor: '#1F2833', // Viaplay mørk
+    category: 'streaming',
+    variants: [
+      'viaplay-film-serier',
+      'viaplay-dansk-fodbold',
+      'viaplay-premium'
+    ]
+  },
+  {
+    id: 'viaplay-film-serier',
+    parentId: 'viaplay',
+    name: 'Viaplay Film & Serier',
+    price: 149,
+    description: 'De nyeste film og serier',
+    hidden: true,
+    category: 'streaming'
+  },
+  {
+    id: 'viaplay-dansk-fodbold',
+    parentId: 'viaplay',
+    name: 'Viaplay Dansk Fodbold',
+    price: 369,
+    description: 'Superliga, 1. Division og Film & Serier',
+    hidden: true,
+    category: 'streaming'
+  },
+  {
+    id: 'viaplay-premium',
+    parentId: 'viaplay',
+    name: 'Viaplay Premium',
+    price: 449,
+    description: 'Champions League, Premier League og Film & Serier',
+    hidden: true,
     category: 'streaming'
   },
   {
