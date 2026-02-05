@@ -57,6 +57,12 @@ export default defineConfig({
           }
           // Alt fra node_modules ryger i én vendor chunk for at undgå init-problemer
           if (id.includes('node_modules')) {
+            if (id.includes('framer-motion')) {
+              return 'vendor-framer';
+            }
+            if (id.includes('react') || id.includes('scheduler')) {
+              return 'vendor-react';
+            }
             return 'vendor';
           }
         },
