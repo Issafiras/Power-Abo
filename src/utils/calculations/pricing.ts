@@ -147,12 +147,19 @@ export function calculateTelenorFamilyDiscount(cartItems: CartItem[] | null | un
 export function calculateTotalEarnings(cartItems: CartItem[] | null | undefined): number {
     if (!cartItems || cartItems.length === 0) return 0;
 
-    // Tjek om vi stadig er inden for kampagneperioden
+    // Tjek om vi stadig er inden for CBB kampagneperioden
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const campaignEndDate = new Date(CAMPAIGN.END_DATE);
     campaignEndDate.setHours(23, 59, 59, 999);
     const isWithinCampaignPeriod = today <= campaignEndDate;
+
+    // Tjek MFTM kampagne (6-8 feb 2026)
+    const mftmStartDate = new Date(CAMPAIGN.MFTM_START_DATE);
+    mftmStartDate.setHours(0, 0, 0, 0);
+    const mftmEndDate = new Date(CAMPAIGN.MFTM_END_DATE);
+    mftmEndDate.setHours(23, 59, 59, 999);
+    const isMFTMActive = today >= mftmStartDate && today <= mftmEndDate;
 
     return cartItems.reduce((total, item) => {
         // Telenor 170 kr plan har forskellig indtjening for første vs. efterfølgende abonnementer
@@ -166,6 +173,13 @@ export function calculateTotalEarnings(cartItems: CartItem[] | null | undefined)
 
         // Standard beregning for alle andre planer
         let earnings = (item.plan.earnings || 0) * item.quantity;
+
+        // Telmore MFTM kampagne
+        if (item.plan.provider === 'telmore' && isMFTMActive) {
+            if (item.plan.price >= CAMPAIGN.MFTM_THRESHOLD) {
+                earnings += CAMPAIGN.MFTM_AMOUNT * item.quantity;
+            }
+        }
 
         // Alle CBB planer giver 100 kr ekstra indtjening pr. linje
         if (item.plan.provider === 'cbb') {

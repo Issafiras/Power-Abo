@@ -9,6 +9,12 @@ export const CAMPAIGN = {
     END_DATE: '2025-11-27',
     CBB_EXTRA_EARNINGS_THRESHOLD: 129,
     CBB_EXTRA_EARNINGS_AMOUNT: 0, // Opdateret efter bruger-ønske (0 kr)
+    
+    // MFTM Kampagne (6-8 feb 2026)
+    MFTM_START_DATE: '2026-02-06',
+    MFTM_END_DATE: '2026-02-08',
+    MFTM_THRESHOLD: 149,
+    MFTM_AMOUNT: 250
 };
 
 export const PRICING = {
