@@ -56,12 +56,14 @@ function ComparisonPanel({
   );
 
   const notIncludedStreamingCost = useMemo(() => {
-    // 1. Fuld pris for tjenester der slet ikke er dækket
+    // 1. Fuld pris for tjenester der slet ikke er dækket af Telmore/CBB slots
     const baseCost = getStreamingTotal(streamingCoverage.notIncluded);
     
-    // 2. Merpris for tjenester der er dækket af slots, men koster mere end dækningen (fx Viaplay opgraderinger)
+    // 2. Add-on merpris for tjenester der koster mere end dækningen (fx Viaplay opgraderinger)
+    // Selv hvis tjenesten er "inkluderet" i en slot, skal merprisen (fx 350 kr for Premium) lægges oveni
     const excessCost = streamingCoverage.included.reduce((total, id) => {
       const service = getServiceById(id);
+      // Hvis prisen er højere end den værdi Telmore dækker (149 kr), beregn differencen
       if (service && service.coveredValue != null && service.price > service.coveredValue) {
         return total + (service.price - service.coveredValue);
       }
