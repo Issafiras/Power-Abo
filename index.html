@@ -3,33 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Mobilabonnement og streaming beregner - Sammenlign priser og besparelser" />
-  <!-- 
-    theme-color: Progressive enhancement - supported by Chrome, Safari, Edge.
-    Not supported by Firefox, Firefox for Android, Opera (intentional - graceful degradation).
-    This is a progressive enhancement and will gracefully degrade in unsupported browsers.
-    NOTE: Linter warning about browser support is expected and can be safely ignored.
-    This meta tag is intentionally included for browsers that support it.
-  -->
-  <meta name="theme-color" content="#ff6b1a" />
+  
+  <!-- SEO & Meta (SEO Performance Wizard) -->
+  <title>Power Abo Beregner — Find den bedste mobilpakke | POWER Danmark</title>
+  <meta name="description" content="Beregn dine besparelser på mobilabonnement og streaming. Sammenlign Telenor, Telmore og CBB priser med POWER's smarte beregner." />
+  <meta name="keywords" content="mobilabonnement, streaming, beregner, POWER, Telenor, Telmore, CBB, besparelse, MIX" />
+  <meta name="author" content="POWER Danmark" />
+  <meta name="robots" content="noindex, nofollow" />
+  
+  <!-- Open Graph / Social (SEO Performance Wizard) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Power Abo Beregner — Find den bedste mobilpakke" />
+  <meta property="og:description" content="Sammenlign mobilabonnementer og streaming. Beregn din besparelse med POWER's smarte værktøj." />
+  <meta property="og:site_name" content="Power Abo Beregner" />
+  <meta property="og:locale" content="da_DK" />
+  
+  <!-- Theme & PWA -->
+  <meta name="theme-color" content="#FF6D1F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="alternate icon" href="/favicon.ico" />
-  
-  <!-- Preconnect for performance -->
+  <link rel="icon" type="image/x-icon" href="/Power-Abo/favicon.ico" />
+
+  <!-- Preconnect for performance (SEO Performance Wizard) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://issafiras.github.io" crossorigin />
   <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
   <link rel="dns-prefetch" href="https://issafiras.github.io" />
   
-  <!-- Preload critical assets - removed power-logo-white.png preload as it's loaded eagerly in loading screen -->
-  
-  <title>Power Calculator - Mobilabonnement Beregner</title>
+  <!-- Font Loading (Performance + UI Aesthetic) — swap for no FOIT -->
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   
   <style>
-    /* Minimal Loading Screen - Ultra Fast */
+    /* ========================================
+       PREMIUM LOADING SCREEN (UI Aesthetic Premium)
+       Branded, animated, with aurora glow
+       ======================================== */
+    
+    *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
     #loading-screen {
       position: fixed;
       inset: 0;
@@ -39,69 +53,159 @@
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      transition: opacity 0.2s ease;
+      overflow: hidden;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     #loading-screen.fade-out {
       opacity: 0;
+      transform: scale(1.05);
       pointer-events: none;
     }
     
-    .loading-logo {
-      height: 60px;
-      width: auto;
-      margin-bottom: 1rem;
-      opacity: 1;
+    /* Aurora Background Glow */
+    .loading-aurora {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: 0.5;
     }
     
-    .loading-text {
-      font-size: 1rem;
-      font-weight: 500;
-      color: #ffffff;
-      margin-bottom: 0.5rem;
-    }
-    
-    .loading-spinner {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-    
-    .loading-spinner span {
-      width: 8px;
-      height: 8px;
+    .loading-aurora::before,
+    .loading-aurora::after {
+      content: '';
+      position: absolute;
       border-radius: 50%;
-      background: #FF6D1F;
+      filter: blur(80px);
+      animation: aurora-float 6s ease-in-out infinite alternate;
+    }
+    
+    .loading-aurora::before {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 109, 31, 0.4) 0%, transparent 70%);
+      top: 30%;
+      left: 20%;
+    }
+    
+    .loading-aurora::after {
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+      bottom: 20%;
+      right: 25%;
+      animation-delay: -3s;
+      animation-direction: alternate-reverse;
+    }
+    
+    @keyframes aurora-float {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, -20px) scale(1.15); }
+    }
+    
+    /* Logo with entrance animation */
+    .loading-logo-container {
+      position: relative;
+      z-index: 1;
+      animation: logo-entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+    
+    @keyframes logo-entrance {
+      0%   { opacity: 0; transform: translateY(20px) scale(0.9); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    .loading-logo {
+      height: 56px;
+      width: auto;
+      filter: drop-shadow(0 0 30px rgba(255, 109, 31, 0.4));
+    }
+    
+    /* Subtext */
+    .loading-text {
+      position: relative;
+      z-index: 1;
+      font-family: 'Outfit', -apple-system, sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 1.5rem;
+      animation: text-entrance 0.6s 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+    
+    @keyframes text-entrance {
+      0%   { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Premium Animated Progress Bar */
+    .loading-bar-track {
+      position: relative;
+      z-index: 1;
+      width: 160px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      margin-top: 2rem;
+      overflow: hidden;
+      animation: text-entrance 0.6s 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+    
+    .loading-bar-fill {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #FF6D1F, #FF9F7A, #FF6D1F);
+      background-size: 200% 100%;
+      border-radius: 4px;
+      animation: loading-shimmer 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes loading-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* Accessibility: Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .loading-aurora::before, .loading-aurora::after { animation: none; }
+      .loading-logo-container { animation: none; opacity: 1; }
+      .loading-text { animation: none; opacity: 1; }
+      .loading-bar-track { animation: none; opacity: 1; }
+      .loading-bar-fill { animation: none; background-position: 0 0; }
+      #loading-screen { transition: opacity 0.1s ease; }
     }
   </style>
 </head>
 <body>
-  <!-- Loading screen -->
-  <div id="loading-screen">
-    <img
-      src="/power-logo-white.png?v=1"
-      alt="Power Abonnement"
-      class="loading-logo"
-      loading="eager"
-      width="200"
-      height="60"
-      decoding="async"
-    />
-    <div class="loading-text">Power Calculator</div>
-    <div class="loading-spinner">
-      <span></span>
-      <span></span>
-      <span></span>
+  <!-- Premium Loading Screen -->
+  <div id="loading-screen" role="status" aria-label="Indlæser Power Abo Beregner">
+    <div class="loading-aurora" aria-hidden="true"></div>
+    <div class="loading-logo-container">
+      <img
+        src="/Power-Abo/power-logo-white.png"
+        alt="POWER Abonnement"
+        class="loading-logo"
+        loading="eager"
+        width="200"
+        height="56"
+        fetchpriority="high"
+      />
     </div>
+    <div class="loading-text">Abonnement Beregner</div>
+    <div class="loading-bar-track" aria-hidden="true">
+      <div class="loading-bar-fill"></div>
+    </div>
+    <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Appen indlæses, vent venligst...</span>
   </div>
   
-  <!-- React app root -->
+  <!-- React app root (Web Architecture Pro: semantic landmark) -->
   <div id="root"></div>
   
   <script type="module" src="/src/main.jsx"></script>
-  
 </body>
 </html>
-
