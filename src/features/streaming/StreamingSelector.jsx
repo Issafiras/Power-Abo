@@ -806,7 +806,7 @@ function StreamingSelector({
             <motion.button
               key={service.id}
               onClick={(e) => handleServiceClick(e, service)}
-              className={`streaming-card-premium ${isSelected || (service.variants && service.variants.some(v => selectedStreaming.includes(v.id))) ? 'selected' : ''}`}
+              className={`streaming-card-premium ${isSelected || (service.variants && service.variants.some(v => selectedStreaming.includes(v))) ? 'selected' : ''}`}
               style={{
                 '--brand-color': service.color || 'var(--color-orange)',
                 '--brand-bg': service.bgColor || 'var(--glass-bg)'
@@ -835,7 +835,7 @@ function StreamingSelector({
                 )}
 
                 <AnimatePresence>
-                  {(isSelected || (service.variants && service.variants.some(v => selectedStreaming.includes(v.id)))) && (
+                  {(isSelected || (service.variants && service.variants.some(v => selectedStreaming.includes(v)))) && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -852,7 +852,7 @@ function StreamingSelector({
                 <div className="streaming-name text-ellipsis">{service.name}</div>
                 {/* Show active variant price if selected */}
                 {(() => {
-                  const activeVariant = service.variants && service.variants.find(v => selectedStreaming.includes(v.id));
+                  const activeVariant = service.variants && service.variants.map(v => getServiceById(v)).find(v => v && selectedStreaming.includes(v.id));
                   if (activeVariant) {
                     return (
                       <>
