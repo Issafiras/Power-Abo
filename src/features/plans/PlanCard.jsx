@@ -9,6 +9,7 @@ import { formatCurrency, isCampaignActive, getCurrentPrice } from '../../utils/c
 import Icon from '../../components/common/Icon';
 import COPY from '../../constants/copy';
 import CBBMixSelector from '../streaming/CBBMixSelector';
+import { use3DTilt } from '../../hooks/use3DTilt';
 
 function PlanCard({
   plan,
@@ -22,6 +23,7 @@ function PlanCard({
   const brandColor = plan.color || 'var(--color-orange)';
   const campaignActive = isCampaignActive(plan);
   const currentPrice = getCurrentPrice(plan);
+  const { rotateX, rotateY, handleMouseMove, handleMouseLeave } = use3DTilt({ stiffness: 200, damping: 20 });
 
   return (
     <motion.div
@@ -30,12 +32,15 @@ function PlanCard({
       aria-label={`${plan.name} abonnement fra ${plan.provider}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02, y: -6, zIndex: 10 }}
+      whileHover={{ scale: 1.02, y: -6, zIndex: 10, boxShadow: "var(--shadow-floating)" }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Ens design for alle provider typer - baseret på bredbånd design */}
-      <div className="broadband-card-wrapper">
+      <div className="broadband-card-wrapper" style={{ transform: "translateZ(20px)" }}>
         {/* Header med logo og titel */}
         <div className="broadband-header">
           {plan.logo && (
@@ -172,7 +177,8 @@ function PlanCard({
         className="btn btn-premium plan-add-btn"
         style={{
           background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd)`,
-          boxShadow: `0 0 20px ${brandColor}40`
+          boxShadow: `0 0 20px ${brandColor}40`,
+          transform: "translateZ(30px)"
         }}
         aria-label={`Tilføj ${plan.name} til kurv`}
         whileHover={{ scale: 1.05 }}

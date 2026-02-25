@@ -7,6 +7,7 @@ import { useMemo, useCallback, lazy, Suspense, useEffect, useState } from 'react
 import { useAppState } from './hooks/useAppState';
 import { useAppActions } from './hooks/useAppActions';
 import { useAutoSelectSolution } from './hooks/useAutoSelectSolution';
+import { useConfetti } from './hooks/useConfetti';
 // Lazy load tunge komponenter for bedre initial load performance
 const Header = lazy(() => import('./components/layout/Header'));
 const StreamingSelector = lazy(() => import('./features/streaming/StreamingSelector'));
@@ -36,6 +37,7 @@ function App() {
   const [plansExpanded, setPlansExpanded] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
   const [showEarnings, setShowEarnings] = useState(false);
+  const { fireSuccess } = useConfetti();
 
   // Tjek for ny version ved mount
   useEffect(() => {
@@ -90,7 +92,8 @@ function App() {
       state.cbbMixEnabled[plan.id] || false,
       state.cbbMixCount[plan.id] || 2
     );
-  }, [actions, state.cbbMixEnabled, state.cbbMixCount]);
+    fireSuccess();
+  }, [actions, state.cbbMixEnabled, state.cbbMixCount, fireSuccess]);
 
   const handleRemoveFromCart = useCallback((planId) => {
     const item = state.cartItems.find(item => item.plan.id === planId);
@@ -291,8 +294,8 @@ function App() {
           <section id="plans-section" className="section">
             <div className="section-shell">
               <div className="plans-section">
-                <div 
-                  className="section-header clickable" 
+                <div
+                  className="section-header clickable"
                   onClick={() => setPlansExpanded(!plansExpanded)}
                   style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                 >
@@ -305,10 +308,10 @@ function App() {
                       {COPY.titles.selectPlansSubtitle}
                     </p>
                   </div>
-                  <Icon 
-                    name={plansExpanded ? "chevronUp" : "chevronDown"} 
-                    size={24} 
-                    className={`transition-transform ${plansExpanded ? 'rotate-180' : ''}`} 
+                  <Icon
+                    name={plansExpanded ? "chevronUp" : "chevronDown"}
+                    size={24}
+                    className={`transition-transform ${plansExpanded ? 'rotate-180' : ''}`}
                   />
                 </div>
 

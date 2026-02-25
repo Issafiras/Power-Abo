@@ -5885,3 +5885,42 @@
   border-radius: 12px;
   display: inline-block;
 }
+
+/* --- Dopamine & Micro-interactions --- */
+@keyframes shimmer-sweep-anim {
+  0% {
+    transform: translateX(-150%) skewX(-15deg);
+  }
+
+  50% {
+    transform: translateX(150%) skewX(-15deg);
+  }
+
+  100% {
+    transform: translateX(150%) skewX(-15deg);
+  }
+
+  /* Pause briefly */
+}
+
+.shimmer-sweep {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      transparent 100%);
+  animation: shimmer-sweep-anim 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: 10;
+}

@@ -903,13 +903,13 @@ function StreamingSelector({
         </div>
         <div className="total-row highlight">
           <span className="total-label font-bold">Total {COPY.help.perMonthShort}:</span>
-          <span className="total-value font-bold text-2xl">
+          <span className="total-value font-bold text-2xl shimmer-sweep">
             {formatCurrency(monthlyTotal)}
           </span>
         </div>
         <div className="total-row six-month">
           <span className="total-label">{COPY.help.sixMonthTotal}:</span>
-          <span className="total-value text-3xl font-extrabold text-gradient">
+          <span className="total-value text-3xl font-extrabold text-gradient shimmer-sweep" style={{ padding: '0 8px' }}>
             {formatCurrency(sixMonthTotal)}
           </span>
         </div>
